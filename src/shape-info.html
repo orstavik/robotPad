@@ -19,7 +19,7 @@
             }
         </style>
 
-        <div id="elementControls">
+        <div hidden={{!selected}} id="elementControls">
             <!--<input type="checkbox" id="names" checked on-click="hideNames"/>Show names-->
             <!--<br/>-->
             <input type="text" id="scale" value="{{scale}}"/>#
@@ -59,6 +59,10 @@
                     type: Number,
                     value: 0,
                     observer: "updateStyle"
+                },
+                selected: {
+                    type: Boolean,
+                    observer: "debug"
                 }
             },
             updatePropertyFields: function (e) {
@@ -69,8 +73,8 @@
                 var prevValue = this[prop];
                 this.set(e.detail.propName, prevValue + e.detail.propValue);
             },
-            updateElement: function () {
-//                console.log("todo");
+            debug: function () {
+                console.log(this.selected);
                 //its a circular problem here, not sure how to alert the children elements of new position based on this.
                 //how to send an event from top to bottom?
                 //first strategy would be to have a one way trip, update the style and values in the same object.

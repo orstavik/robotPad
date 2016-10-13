@@ -100,10 +100,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 selected: {
                     type: Boolean,
                     observer: "getElementInfo"
-                },
-                data: {
-                    type: Object,
-                    notify: true
                 }
             },
             parseInput: function () {
@@ -133,40 +129,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 hand: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDaHJ2OVBrVVZRalk=w1366-h599-k-iv1?v=1476266095410",
                 eye: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDNk5NQmFTbU5LUmc=w742-h583-k-iv1?v=1476266095410"
 
-            },
-//
-//            getElementInfo: function () {
-//                if (this.selected) {
-//                    elem = this.shadowRoot.querySelector("[data-shape]");
-//                    var sty = elem.style;
-//                    var x = parseInt(sty.left) || 0;
-//                    var y = parseInt(sty.top) || 0;
-//
-//                    var z = parseInt(sty.zIndex);
-//                    var color = sty.backgroundColor || sty.fill || "none";
-//
-//                    var trans = sty.transform;
-//                    var rot = parseInt(trans.match(/[\d.-]+deg/)) || 0;
-//                    var sc = trans.match(/([\d.-]+)[)]/);
-//                    var scale = sc ? sc[1] : 1;
-//                    this.set("data", {
-//                        x: x,
-//                        y: y,
-//                        z: z,
-//                        scale: scale,
-//                        rot: rot,
-//                        color: color
-//                    });
-//                }
-//            },
-//            updateElement: function () {
-//                    elem = this.shadowRoot.querySelector("[data-shape]");
-//                    elem.style.zIndex = this.data.z;
-//                    if (elem.tagName === "DIV")
-//                        elem.style.backgroundColor = this.data.color;
-//                    else if (elem.tagName === "svg")
-//                        elem.style.fill = this.data.color;
-//            }
+            }
         });
     </script>
 </dom-module>

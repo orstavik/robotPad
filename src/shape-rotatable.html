@@ -37,6 +37,7 @@
                 var rightAngle = angle * 180 / Math.PI + 90;
                 this.set("rotation", rightAngle);
                 this.style.transform = "rotate(" + this.rotation + "deg) ";
+                this.fire("propchange", {propName: "rotation", propValue: this.rotation});
             }
         });
     </script>

@@ -32,6 +32,7 @@
                 this.set("y", this.y + e.movementY);
                 this.style.left = this.x + "px";
                 this.style.top = this.y + "px";
+                this.fire("propchange", {propName: "position", propValue: {x: this.x, y: this.y}});
             }
         });
     </script>

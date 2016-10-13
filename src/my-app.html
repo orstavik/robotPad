@@ -14,6 +14,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shape-draggable.html">
 <link rel="import" href="shape-resizeable.html">
 <link rel="import" href="shape-rotatable.html">
+<link rel="import" href="shape-info.html">
 
 <dom-module id="my-app">
     <template>
@@ -79,16 +80,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 background-color: blue;
             }
 
-            #elementControls input {
-                width: 30px;
-            }
-
-            #elementControls {
-                position: absolute;
-                top: 0;
-                right: 0;
-            }
-
             .bottom {
                 position: absolute;
                 bottom: 0;
@@ -119,34 +110,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <textarea id="input">s:red t:blue bone c:green</textarea>
         <button id="button" on-click="initShapes">Apply</button>
 
-        <div id="elementControls">
-            <input type="checkbox" id="names" checked on-click="hideNames"/>Show names
-            <br/>
-            <input type="text" id="scale" value="1" on-change="updateElement"/>#
-            <br/>
-            <input type="text" id="rotate" value="0" on-change="updateElement"/>deg
-            <br/>
-            <input type="text" id="x" value="0" on-change="updateElement"/>x
-            <br/>
-            <input type="text" id="y" value="0" on-change="updateElement"/>y
-            <br/>
-            <input type="text" id="z" value="0" on-change="updateElement"/>z
-            <br/>
-            <input type="text" id="color" on-change="updateElement"/> <span id="colorTxt">color</span>
-        </div>
-
         <button id="output2" class="bottom" on-click="loadData">load</button>
         <textarea id="outputText" class="bottom">Output</textarea>
         <button id="output" class="bottom" on-click="saveData">save</button>
         <iron-selector selected="{{selected}}" selected-attribute="selected">
             <template is="dom-repeat" items="[[letters]]">
-                <shape-rotatable>
-                    <shape-resizeable>
-                        <shape-draggable>
-                            <letter-shape input$="[[item]]" counter="42" data="[[shapeData]]"></letter-shape>
-                        </shape-draggable>
-                    </shape-resizeable>
-                </shape-rotatable>
+                <shape-info>
+                    <shape-rotatable>
+                        <shape-resizeable>
+                            <shape-draggable>
+                                <letter-shape input$="[[item]]" counter="42" data="[[shapeData]]"></letter-shape>
+                            </shape-draggable>
+                        </shape-resizeable>
+                    </shape-rotatable>
+                </shape-info>
             </template>
         </iron-selector>
     </template>
@@ -174,30 +151,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 var text = textarea.value;
                 var array = text.split(" ");
                 this.set("letters", array);
-                /*
-                 for (var i = 0; i < array.length; i++) {
-                 var shape = this.createShape(array[i]);
-                 if (shape) {
-                 this.shadowRoot.appendChild(shape);
-                 this.addDraggable(shape);
-                 }
-                 }
-                 */
                 textarea.value = "";
-            },
-            addDraggable: function (elem) {
-                var its = this;
-                $(elem).draggable({
-                    start: function (event) {
-                        its.selectShape(event.target);
-                    },
-                    stop: function () {
-                        its.updateXY();
-                    }
-                });
-                elem.addEventListener("mousemove", function (e) {
-                    its.updateXY(e)
-                });
             },
             updateXYWithData: function () {
                 if (!this.selected)
@@ -310,8 +264,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 custI = 0;
 
                 var its = this;
-
-                //this.$.cross.draggable();
 
                 this.shadowRoot.addEventListener("keydown", function (e) {
                     its.addToControls(e);

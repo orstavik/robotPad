@@ -1,0 +1,66 @@
+<dom-module id="shape-info">
+    <template>
+        <style>
+            #elementControls input {
+                width: 30px;
+            }
+
+            #elementControls {
+                position: fixed;
+                top: 0;
+                right: 0;
+            }
+
+        </style>
+        <div id="elementControls">
+            <!--<input type="checkbox" id="names" checked on-click="hideNames"/>Show names-->
+            <!--<br/>-->
+            <input type="text" id="scale" value="{{scale}}" on-change="updateElement"/>#
+            <br/>
+            <input type="text" id="rotate" value="{{rotation}}" on-change="updateElement"/>deg
+            <br/>
+            <input type="text" id="x" value="{{position.x}}" />x
+            <br/>
+            <input type="text" id="y" value="{{position.y}}" />y
+            <!--<br/>-->
+            <!--<input type="text" id="z" value="0" on-change="updateElement"/>z-->
+            <!--<br/>-->
+            <!--<input type="text" id="color" on-change="updateElement"/> <span id="colorTxt">color</span>-->
+        </div>
+        <content on-propchange="propertyChanged"></content>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'shape-info',
+
+            properties: {
+                position: {
+                    type: Array,
+                    value: function(){
+                        return [];
+                    },
+                    observer: "updateElement"
+                },
+                scale: {
+                    type: Number,
+                    value: 1,
+                    observer: "updateElement"
+                },
+                rotation: {
+                    type: Number,
+                    value: 0,
+                    observer: "updateElement"
+                }
+            },
+            propertyChanged: function (e) {
+                this.set(e.detail.propName, e.detail.propValue);
+            },
+            updateElement: function(){
+//                console.log("todo");
+                //its a circular problem here, not sure how to alert the children elements of new position based on this.
+                //how to send an event from top to bottom?
+            }
+        });
+    </script>
+</dom-module>

@@ -27,6 +27,7 @@
                     return;
                 this.set("scale", this.scale - (e.movementY * 0.01));
                 this.style.transform = "scale(" + this.scale + ")";
+                this.fire("propchange", {propName: "scale", propValue: this.scale});
             }
         });
     </script>

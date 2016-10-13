@@ -26,9 +26,9 @@
             <br/>
             <input type="text" id="rotate" value="{{rotation}}"/>deg
             <br/>
-            <input type="text" id="x" value="{{position.x}}"/>x
+            <input type="text" id="x" value="{{position.x::input}}"/>x
             <br/>
-            <input type="text" id="y" value="{{position.y}}"/>y
+            <input type="text" id="y" value="{{position.y::input}}"/>y
             <!--<br/>-->
             <!--<input type="text" id="z" value="0" on-change="updateElement"/>z-->
             <!--<br/>-->
@@ -46,9 +46,8 @@
                 position: {
                     type: Array,
                     value: function () {
-                        return [];
-                    },
-                    observer: "updateStyle"
+                        return [0,0];
+                    }
                 },
                 scale: {
                     type: Number,
@@ -61,10 +60,13 @@
                     observer: "updateStyle"
                 },
                 selected: {
-                    type: Boolean,
-                    observer: "debug"
+                    type: Boolean
                 }
             },
+            observers: [
+                'xChange(position.x)',
+                'yChange(position.y)'
+            ],
             updatePropertyFields: function (e) {
                 this.set(e.detail.propName, e.detail.propValue);
             },
@@ -73,32 +75,17 @@
                 var prevValue = this[prop];
                 this.set(e.detail.propName, prevValue + e.detail.propValue);
             },
-            debug: function () {
-                console.log(this.selected);
-                //its a circular problem here, not sure how to alert the children elements of new position based on this.
-                //how to send an event from top to bottom?
-                //first strategy would be to have a one way trip, update the style and values in the same object.
+            xChange: function (x) {
+                this.style.left = x + "px";
+            },
+            yChange: function (y) {
+                this.style.top = y + "px";
             },
             updateStyle: function () {
-                this.style.left = this.position.x + "px";
-                this.style.top = this.position.y + "px";
                 this.style.transform =
                         "rotate(" + this.rotation + "deg) " +
                         "scale(" + this.scale + ")";
-//
-//
-//                selected.style.left = xEl.value + "px";
-//                selected.style.top = yEl.value + "px";
-//                selected.style.transform =
-//                        "rotate(" + rotEl.value + "deg) " +
-//                        "scale(" + scaleEl.value + ")";
-//                selected.style.zIndex = zEl.value;
-//                if (selected.tagName === "DIV")
-//                    selected.style.backgroundColor = colorEl.value;
-//                else if (selected.tagName === "svg")
-//                    selected.style.fill = colorEl.value;
             }
-
         });
     </script>
 </dom-module>

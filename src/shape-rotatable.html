@@ -1,0 +1,43 @@
+<dom-module id="shape-rotatable">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+        <content on-mousemove="rotate" on-contextmenu="extra"></content>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'shape-rotatable',
+
+            properties: {
+                rotation: {
+                    type: Number,
+                    value: 0
+                }
+            },
+            extra : function(e){
+                e.preventDefault();
+            },
+            rotate: function (e) {
+                if (e.which != 3)
+                    return;
+                var rect = this.getBoundingClientRect();
+                var center = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+                var distance = {
+                    x: e.x - center.x,
+                    y: e.y - center.y
+                };
+                var angle = Math.atan2(distance.y, distance.x);
+                var rightAngle = angle * 180 / Math.PI + 90;
+                this.set("rotation", rightAngle);
+                this.style.transform = "rotate(" + this.rotation + "deg) ";
+            }
+        });
+    </script>
+</dom-module>

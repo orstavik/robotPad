@@ -1,0 +1,51 @@
+<dom-module id="shape-draggable">
+    <template>
+        <style>
+            :host {
+                display: block;
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+        </style>
+        <content on-mousedown="start" on-mousemove="move" on-mouseup="stop" ></content>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'shape-draggable',
+
+            properties: {
+                x: {
+                    type: Number,
+                    value: 0
+                },
+                y: {
+                    type: Number,
+                    value: 0
+                }
+            },
+            isMoving: false,
+            start: function () {
+                if (event.which !== 1)
+                    return;
+                this.isMoving = true;
+            },
+            stop: function () {
+                if (event.which !== 1)
+                    return;
+                this.isMoving = false;
+            },
+            move: function (e) {
+                if (!this.isMoving)
+                    return;
+                if (e.which == 1) {
+                    this.set("x", this.x + e.movementX);
+                    this.set("y", this.y + e.movementY);
+                    this.style.left = this.x +"px";
+                    this.style.top = this.y +"px";
+                }
+            }
+        });
+    </script>
+</dom-module>

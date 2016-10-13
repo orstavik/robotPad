@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="letter-shape.html">
+<link rel="import" href="shape-draggable.html">
 
 <dom-module id="my-app">
     <template>
@@ -137,7 +138,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <button id="output" class="bottom" on-click="saveData">save</button>
         <iron-selector selected="{{selected}}" selected-attribute="selected">
             <template is="dom-repeat" items="[[letters]]">
-                <letter-shape input$="[[item]]" counter="42" data="[[shapeData]]"></letter-shape>
+                <shape-draggable>
+                    <letter-shape input$="[[item]]" counter="42" data="[[shapeData]]"></letter-shape>
+                </shape-draggable>
             </template>
         </iron-selector>
     </template>
@@ -159,7 +162,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 shapeData: {
                     type: Object,
                     observer: "updateXYWithData"
-                },
+                }
             },
             initShapes: function () {
                 var text = textarea.value;
@@ -264,8 +267,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 for (var i = 0; i < results.length; i++)
                     textarea.value += results[i].type + " ";
                 button.click();
-                var shapes = this.shadowRoot.querySelectorAll(".shape");
-                for (var i = 0; i < results.length; i++) {
+                shapes = this.shadowRoot.querySelectorAll(".shape");
+                for (i = 0; i < results.length; i++) {
                     var data = results[i].args;
                     var shape = shapes[i];
                     this.selectShape(shape);

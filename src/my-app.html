@@ -63,8 +63,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <div id="cross">&nbsp;</div>
 
-        <textarea id="input">s:red t:blue bone c:green</textarea>
-        <button id="button" on-click="initShapes">Apply</button>
+        <textarea id="input" value="{{input}}"></textarea>
 
         <button id="output2" class="bottom" on-click="loadData">load</button>
         <textarea id="outputText" class="bottom">Output</textarea>
@@ -98,6 +97,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 },
                 selected: {
                     type: Number
+                },
+                input: {
+                    type: String,
+                    value: "yell s:red t:blue c:green",
+                    observer: "initShapes"
                 }
             },
             initShapes: function () {
@@ -129,27 +133,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 this.$.outputText.innerHTML = JSON.stringify(resArray);
             },
             loadData: function (e) {
-                sI = 0;
-                cI = 0;
-                tI = 0;
-                custI = 0;
-                var shapes = this.shadowRoot.querySelectorAll(".shape");
-                shapes.forEach(function (el) {
-                    el.remove();
-                });
-                textarea.value = "";
-                var results = JSON.parse(outputText.value);
+                var res = "";
+                var results = JSON.parse(this.$.outputText.value);
                 for (var i = 0; i < results.length; i++)
-                    textarea.value += results[i].type + " ";
-                button.click();
-                shapes = this.shadowRoot.querySelectorAll(".shape");
-                for (i = 0; i < results.length; i++) {
-                    var data = results[i].args;
-                    var shape = shapes[i];
-                    this.selectShape(shape);
-                    this.updateXYWithData(data);
-                    this.updateElement();
-                }
+                    res += results[i].letter + " ";
+                this.set("input", res);
+                var shapes2 = this.shadowRoot.querySelectorAll("shape-info");
+                for (var i = 0; i < results.length; i++)
+                    shapes2[i].updateAllProperties(results[i]);
             }
         });
     </script>

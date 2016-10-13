@@ -89,6 +89,11 @@
             },
             getElementInfo: function(){
                 return {letter: this.letter, position: this.position, scale: this.scale, rotation: this.rotation};
+            },
+            updateAllProperties: function(props){
+                this.set("position", props["position"]);
+                this.set("scale", props["scale"]);
+                this.set("rotation", props["rotation"]);
             }
         });
     </script>

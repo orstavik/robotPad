@@ -9,469 +9,350 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="letter-shape.html">
 
 <dom-module id="my-app">
-  <template>
-    <style>
-      :host {
-        display: block;
-      }
-      .circle {
-        border-radius: 50%;
-      }
-
-      div.shape.selected {
-        border: 3px solid black;
-      }
-
-      svg.shape.selected {
-        stroke: black;
-        stroke-width: 3px;
-      }
-
-      div.shape {
-        box-sizing: border-box;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        top: 100px;
-        left: 10px;
-        width: 100px;
-        height: 100px;
-      }
-
-      svg.shape,
-      img.shape {
-        position: absolute;
-        top: 100px;
-        left: 10px;
-      }
-
-      #cross {
-        position: absolute;
-        bottom: 20%;
-        left: 20%;
-        width: 60%;
-        height: 50%;
-        border: 1px dotted black;
-        border-right: none;
-        border-top: none;
-      }
-
-      #input {
-        width: 50%;
-        height: 50px;
-      }
-
-      div.shape.selected {
-        box-sizing: border-box;
-        border: 3px solid black;
-      }
-
-      div.shape {
-        position: absolute;
-        top: 100px;
-        left: 10px;
-        width: 100px;
-        height: 100px;
-        background-color: blue;
-      }
-
-      #elementControls input {
-        width: 30px;
-      }
-
-      #elementControls {
-        position: absolute;
-        top: 0;
-        right: 0;
-      }
-
-      .bottom {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        width: 50px;
-        height: 25px;
-      }
-
-      #output2 {
-        bottom: 25px;
-      }
-
-      #outputText {
-        position: absolute;
-        bottom: 0;
-        right: 50px;
-        width: 300px;
-        height: 50px;
-      }
-
-      .shapeName {
-        pointer-events: none;
-      }
-    </style>
-
-    <div id="cross">&nbsp;</div>
-
-    <textarea id="input">s:red t:blue bone c:green</textarea>
-    <button id="button" on-click="initShapes">Apply</button>
-
-    <div id="elementControls">
-      <input type="checkbox" id="names" checked on-click="hideNames"/>Show names
-      <br />
-      <input type="text" id="scale" value="1" on-change="updateElement"/>#
-      <br />
-      <input type="text" id="rotate" value="0" on-change="updateElement"/>deg
-      <br />
-      <input type="text" id="x" value="0" on-change="updateElement"/>x
-      <br />
-      <input type="text" id="y" value="0" on-change="updateElement"/>y
-      <br />
-      <input type="text" id="z" value="0" on-change="updateElement"/>z
-      <br />
-      <input type="text" id="color" on-change="updateElement"/> <span id="colorTxt">color</span>
-    </div>
-
-    <button id="output2" class="bottom" on-click="loadData">load</button>
-    <textarea id="outputText" class="bottom">Output</textarea>
-    <button id="output" class="bottom" on-click="saveData">save</button>
-    
-  </template>
-
-  <script>
-    Polymer({
-      is: 'my-app',
-      initShapes: function() {
-        var text = textarea.value;
-        var array = text.split(" ");
-        for (var i = 0; i < array.length; i++) {
-          var shape = this.createShape(array[i]);
-          if (shape) {
-            this.shadowRoot.appendChild(shape);
-            this.addDraggable(shape);
-          }
-        }
-        textarea.value = "";
-      },
-      createShape: function(shape) {
-        var letter = shape.split(":")[0];
-        var color = shape.split(":")[1] || "grey";
-        var custom = this.createCustom(letter, custI);
-        if (!custom) {
-          switch (letter) {
-            case "s":
-              return this.createSquare(letter, color, sI++);
-              break;
-            case "c":
-              return this.createCircle(letter, color, cI++);
-              break;
-            case "t":
-              return this.createTriangle(letter, color, tI++);
-              break;
-          }
-        } else {
-          return custom;
-        }
-      },
-      createSquare: function(letter, color, counter) {
-        var square = document.createElement("div");
-        square.classList.add("shape");
-        square.classList.add("square");
-        square.innerHTML = "<span class='shapeName'>Square" + counter + "</span>";
-        square.id = "Square" + counter;
-        square.style.backgroundColor = color;
-        square.style.zIndex = "0";
-        square.setAttribute("data-type", letter);
-        return square;
-      },
-      createCircle: function(letter, color, counter) {
-        var circle = document.createElement("div");
-        circle.classList.add("shape");
-        circle.classList.add("circle");
-        circle.innerHTML = "<span class='shapeName'>Circle" + counter + "</span>";
-        circle.id = "Circle" + counter;
-        circle.style.backgroundColor = color;
-        circle.style.zIndex = "0";
-        circle.setAttribute("data-type", letter);
-        return circle;
-      },
-      createTriangle: function(letter, color, counter) {
-        var triangle = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        triangle.id = "Triangle" + counter;
-        triangle.classList.add("shape");
-        triangle.classList.add("triangle");
-        triangle.setAttribute("width", "110");
-        triangle.setAttribute("height", "130");
-        triangle.style.fill = color;
-        triangle.style.zIndex = "0";
-        var polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-        polygon.setAttribute("points", "55,7 5,93 105,93");
-        polygon.style.pointerEvents = "none";
-        triangle.appendChild(polygon);
-        var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", "24");
-        text.setAttribute("y", "80");
-        text.setAttribute("stroke", "none");
-        text.setAttribute("fill", "black");
-        text.classList.add("shapeName");
-        text.innerHTML = "Triangle" + counter;
-        triangle.appendChild(text);
-        triangle.setAttribute("data-type", letter);
-        return triangle;
-      },
-      createCustom: function(letter, counter) {
-        var link = shapesObject[letter];
-        if (!link) return;
-        var img = document.createElement("img");
-        img.classList.add("shape");
-        img.classList.add("custom");
-        img.setAttribute("src", link);
-        img.setAttribute("width", "100");
-        img.id = "Custom" + counter;
-        img.style.zIndex = "0";
-        img.setAttribute("data-type", letter);
-        custI++;
-        return img;
-      },
-      addDraggable: function(elem) {
-        var its = this;
-        $(elem).draggable({
-          start: function(event) {
-            its.selectShape(event.target);
-          },
-          stop: function() {
-            its.updateXY();
-          }
-        });
-        elem.addEventListener("mousemove", function(e) {
-          its.updateXY(e)
-        });
-      },
-      selectShape: function(target) {
-        if (selected)
-          selected.classList.remove("selected");
-        selected = target;
-        selected.classList.add("selected");
-        if (target.tagName === "IMG") {
-          colorEl.style.display = "none";
-          colorTxt.style.display = "none";
-        } else {
-          colorEl.style.display = "initial";
-          colorTxt.style.display = "initial";
-        }
-        this.updateXY();
-      },
-      updateXY: function() {
-        if (!selected)
-          return;
-        var data = this.getElementInfo(selected);
-        this.updateXYWithData(data);
-      },
-      updateXYWithData: function(data) {
-        xEl.value = data.x;
-        yEl.value = data.y;
-        zEl.value = data.z;
-        scaleEl.value = data.scale;
-        rotEl.value = data.rot;
-        colorEl.value = data.color;
-      },
-      getElementInfo: function(el) {
-        var sty = el.style;
-        var x = parseInt(sty.left) || 0;
-        var y = parseInt(sty.top) || 0;
-
-        var z = parseInt(sty.zIndex);
-        if (el.tagName !== "IMG")
-          var color = sty.backgroundColor || sty.fill;
-
-        var trans = sty.transform;
-        var rot = parseInt(trans.match(/[\d.-]+deg/)) || 0;
-        var sc = trans.match(/([\d.-]+)[)]/);
-        var scale = sc ? sc[1] : 1;
-        if (el.tagName !== "IMG")
-          return {
-            x: x,
-            y: y,
-            z: z,
-            scale: scale,
-            rot: rot,
-            color: color
-          };
-        else
-          return {
-            x: x,
-            y: y,
-            z: z,
-            scale: scale,
-            rot: rot
-          };
-      },
-      hideNames: function() {
-        var names = this.shadowRoot.querySelectorAll(".shapeName");
-          names.forEach(function(el) {
-            if (checkbox.checked)
-              el.style.display = "initial";
-            else {
-              el.style.display = "none";
+    <template>
+        <style>
+            :host {
+                display: block;
             }
-          });
-      },
-      addToControls: function(event) {
-        if (event.code === "ArrowDown")
-          scaleEl.value = Number(scaleEl.value) - 0.01;
-        if (event.code === "ArrowUp")
-          scaleEl.value = Number(scaleEl.value) + 0.01;
-        if (event.code === "ArrowLeft")
-          rotEl.value = Number(rotEl.value) - 1;
-        if (event.code === "ArrowRight")
-          rotEl.value = Number(rotEl.value) + 1;
-        this.updateElement();
-      },
-      updateElement: function() {
-        if (!selected) return;
-        selected.style.left = xEl.value + "px";
-        selected.style.top = yEl.value + "px";
-        selected.style.transform =
-          "rotate(" + rotEl.value + "deg) " +
-          "scale(" + scaleEl.value + ")";
-        selected.style.zIndex = zEl.value;
-        if (selected.tagName === "DIV")
-          selected.style.backgroundColor = colorEl.value;
-        else if (selected.tagName === "svg")
-          selected.style.fill = colorEl.value;
-      },
-      scaleIt: function(elem) {
-        var its = this;
-        window.addEventListener("mousemove", function(e) {
-          if (e.which == 2) {
-            scaleEl.value = Number(scaleEl.value) - e.movementY * 0.01;
-            its.updateElement();
-          }
-        });
-      },
-      rotateIt: function(elem) {
-        var its = this;
-        window.addEventListener("mousemove", function(e) {
-          if (e.which == 3) {
-            var rect = elem.getBoundingClientRect();
-            var center = {
-              x: rect.left + rect.width/2,
-              y: rect.top + rect.height/2
-            };
-            var distance = {
-              x: e.x - center.x,
-              y: e.y - center.y
-            };
-            var angle = Math.atan2(distance.y,distance.x);
-            var rightAngle = angle*180/Math.PI + 90;
-            rotEl.value = rightAngle;
-            its.updateElement();
-          }
-        });
-      },
-      saveData: function(e) {
-        var its = this;
-        var shapes = this.shadowRoot.querySelectorAll(".shape");
-        var resArray = [];
-        shapes.forEach(function(element, index) {
-          var data = its.getElementInfo(element);
-          var type = element.getAttribute("data-type");
-          resArray[index] = {
-            type: type,
-            args: data
-          };
-        });
-        outputText.innerHTML = JSON.stringify(resArray);
-      },
-      loadData: function(e) {
-        sI = 0;
-        cI = 0;
-        tI = 0;
-        custI = 0;
-        var shapes = this.shadowRoot.querySelectorAll(".shape");
-        shapes.forEach(function(el) {
-          el.remove();
-        });
-        textarea.value = "";
-        var results = JSON.parse(outputText.value);
-        for (var i = 0; i < results.length; i++)
-          textarea.value += results[i].type + " ";
-        button.click();
-        var shapes = this.shadowRoot.querySelectorAll(".shape");
-        for (var i = 0; i < results.length; i++) {
-          var data = results[i].args;
-          var shape = shapes[i];
-          this.selectShape(shape);
-          this.updateXYWithData(data);
-          this.updateElement();
-        }
-      },
-      createDescription: function(cross, element) {
-        var zero = cross.getBoundingClientRect();
-        var pos = element.getBoundingClientRect();
-        var x = pos.left - zero.left;
-        var y = pos.bottom - zero.bottom;
-        return element.innerHTML;
-      },
-      attached: function() {
-        shapesObject = {
-          bone: "https://raw.githubusercontent.com/jcome/synfig_ui/master/icons/png/layer_other_skeleton_icon.png",
-          yell: "https://raw.githubusercontent.com/jcome/synfig_ui/master/icons/png/interpolation_type_linear_icon.png",
-          hand: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDaHJ2OVBrVVZRalk=w1366-h599-k-iv1?v=1476266095410",
-          eye: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDNk5NQmFTbU5LUmc=w742-h583-k-iv1?v=1476266095410"
-        }
 
-        scaleEl = this.shadowRoot.querySelector("#scale");
-        rotEl = this.shadowRoot.querySelector("#rotate");
-        xEl = this.shadowRoot.querySelector("#x");
-        yEl = this.shadowRoot.querySelector("#y");
-        zEl = this.shadowRoot.querySelector("#z");
-        colorEl = this.shadowRoot.querySelector("#color");
-        colorTxt = this.shadowRoot.querySelector("#colorTxt");
-        textarea = this.shadowRoot.querySelector("#input");
-        button = this.shadowRoot.querySelector("#button");
-        output = this.shadowRoot.querySelector("#output");
-        output2 = this.shadowRoot.querySelector("#output2");
-        outputText = this.shadowRoot.querySelector("#outputText");
-        checkbox = this.shadowRoot.querySelector("#names");
-        cross = this.shadowRoot.querySelector("#cross");
-        selected = this.shadowRoot.querySelector(".selected");
+            .circle {
+                border-radius: 50%;
+            }
 
-        sI = 0;
-        cI = 0;
-        tI = 0;
-        custI = 0;
+            div.shape.selected {
+                border: 3px solid black;
+            }
 
-        var its = this;
+            svg.shape.selected {
+                stroke: black;
+                stroke-width: 3px;
+            }
 
-        $("#cross").draggable();
+            div.shape {
+                box-sizing: border-box;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: absolute;
+                top: 100px;
+                left: 10px;
+                width: 100px;
+                height: 100px;
+            }
 
-        this.shadowRoot.addEventListener("keydown", function(e) {
-          its.addToControls(e);
+            svg.shape,
+            img.shape {
+                position: absolute;
+                top: 100px;
+                left: 10px;
+            }
+
+            #cross {
+                position: absolute;
+                bottom: 20%;
+                left: 20%;
+                width: 60%;
+                height: 50%;
+                border: 1px dotted black;
+                border-right: none;
+                border-top: none;
+            }
+
+            #input {
+                width: 50%;
+                height: 50px;
+            }
+
+            div.shape {
+                position: absolute;
+                top: 100px;
+                left: 10px;
+                width: 100px;
+                height: 100px;
+                background-color: blue;
+            }
+
+            #elementControls input {
+                width: 30px;
+            }
+
+            #elementControls {
+                position: absolute;
+                top: 0;
+                right: 0;
+            }
+
+            .bottom {
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                width: 50px;
+                height: 25px;
+            }
+
+            #output2 {
+                bottom: 25px;
+            }
+
+            #outputText {
+                position: absolute;
+                bottom: 0;
+                right: 50px;
+                width: 300px;
+                height: 50px;
+            }
+
+            .shapeName {
+                pointer-events: none;
+            }
+        </style>
+
+        <div id="cross">&nbsp;</div>
+
+        <textarea id="input">s:red t:blue bone c:green</textarea>
+        <button id="button" on-click="initShapes">Apply</button>
+
+        <div id="elementControls">
+            <input type="checkbox" id="names" checked on-click="hideNames"/>Show names
+            <br/>
+            <input type="text" id="scale" value="1" on-change="updateElement"/>#
+            <br/>
+            <input type="text" id="rotate" value="0" on-change="updateElement"/>deg
+            <br/>
+            <input type="text" id="x" value="0" on-change="updateElement"/>x
+            <br/>
+            <input type="text" id="y" value="0" on-change="updateElement"/>y
+            <br/>
+            <input type="text" id="z" value="0" on-change="updateElement"/>z
+            <br/>
+            <input type="text" id="color" on-change="updateElement"/> <span id="colorTxt">color</span>
+        </div>
+
+        <button id="output2" class="bottom" on-click="loadData">load</button>
+        <textarea id="outputText" class="bottom">Output</textarea>
+        <button id="output" class="bottom" on-click="saveData">save</button>
+        <iron-selector selected="{{selected}}" selected-class="selected">
+            <template is="dom-repeat" items="[[letters]]">
+                <letter-shape input$="[[item]]" counter="42"></letter-shape>
+            </template>
+        </iron-selector>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'my-app',
+            properties: {
+                letters: {
+                    type: Array,
+                    value: function () {
+                        return [];
+                    }
+                },
+                selected: {
+                    type: Object,
+                    observer: "selectShape"
+                }
+            },
+            initShapes: function () {
+                var text = textarea.value;
+                var array = text.split(" ");
+                this.set("letters", array);
+                /*
+                 for (var i = 0; i < array.length; i++) {
+                 var shape = this.createShape(array[i]);
+                 if (shape) {
+                 this.shadowRoot.appendChild(shape);
+                 this.addDraggable(shape);
+                 }
+                 }
+                 */
+                textarea.value = "";
+            },
+            addDraggable: function (elem) {
+                var its = this;
+                $(elem).draggable({
+                    start: function (event) {
+                        its.selectShape(event.target);
+                    },
+                    stop: function () {
+                        its.updateXY();
+                    }
+                });
+                elem.addEventListener("mousemove", function (e) {
+                    its.updateXY(e)
+                });
+            },
+            selectShape: function (target) {
+                if (!this.selected)
+                    return;
+                this.updateXY();
+            },
+            updateXY: function () {
+                var selected = this.shadowRoot.querySelector(".selected");
+                var data = selected.getElementInfo();
+                this.updateXYWithData(data);
+            },
+            updateXYWithData: function (data) {
+                xEl.value = data.x;
+                yEl.value = data.y;
+                zEl.value = data.z;
+                scaleEl.value = data.scale;
+                rotEl.value = data.rot;
+                colorEl.value = data.color;
+            },
+            hideNames: function () {
+                var names = this.shadowRoot.querySelectorAll(".shapeName");
+                names.forEach(function (el) {
+                    if (checkbox.checked)
+                        el.style.display = "initial";
+                    else {
+                        el.style.display = "none";
+                    }
+                });
+            },
+            addToControls: function (event) {
+                if (event.code === "ArrowDown")
+                    scaleEl.value = Number(scaleEl.value) - 0.01;
+                if (event.code === "ArrowUp")
+                    scaleEl.value = Number(scaleEl.value) + 0.01;
+                if (event.code === "ArrowLeft")
+                    rotEl.value = Number(rotEl.value) - 1;
+                if (event.code === "ArrowRight")
+                    rotEl.value = Number(rotEl.value) + 1;
+                this.updateElement();
+            },
+            updateElement: function () {
+                if (!selected) return;
+                selected.style.left = xEl.value + "px";
+                selected.style.top = yEl.value + "px";
+                selected.style.transform =
+                        "rotate(" + rotEl.value + "deg) " +
+                        "scale(" + scaleEl.value + ")";
+                selected.style.zIndex = zEl.value;
+                if (selected.tagName === "DIV")
+                    selected.style.backgroundColor = colorEl.value;
+                else if (selected.tagName === "svg")
+                    selected.style.fill = colorEl.value;
+            },
+            scaleIt: function (elem) {
+                var its = this;
+                window.addEventListener("mousemove", function (e) {
+                    if (e.which == 2) {
+                        scaleEl.value = Number(scaleEl.value) - e.movementY * 0.01;
+                        its.updateElement();
+                    }
+                });
+            },
+            rotateIt: function (elem) {
+                var its = this;
+                window.addEventListener("mousemove", function (e) {
+                    if (e.which == 3) {
+                        var rect = elem.getBoundingClientRect();
+                        var center = {
+                            x: rect.left + rect.width / 2,
+                            y: rect.top + rect.height / 2
+                        };
+                        var distance = {
+                            x: e.x - center.x,
+                            y: e.y - center.y
+                        };
+                        var angle = Math.atan2(distance.y, distance.x);
+                        var rightAngle = angle * 180 / Math.PI + 90;
+                        rotEl.value = rightAngle;
+                        its.updateElement();
+                    }
+                });
+            },
+            saveData: function (e) {
+                var its = this;
+                var shapes = this.shadowRoot.querySelectorAll(".shape");
+                var resArray = [];
+                shapes.forEach(function (element, index) {
+                    var data = its.getElementInfo(element);
+                    var type = element.getAttribute("data-type");
+                    resArray[index] = {
+                        type: type,
+                        args: data
+                    };
+                });
+                outputText.innerHTML = JSON.stringify(resArray);
+            },
+            loadData: function (e) {
+                sI = 0;
+                cI = 0;
+                tI = 0;
+                custI = 0;
+                var shapes = this.shadowRoot.querySelectorAll(".shape");
+                shapes.forEach(function (el) {
+                    el.remove();
+                });
+                textarea.value = "";
+                var results = JSON.parse(outputText.value);
+                for (var i = 0; i < results.length; i++)
+                    textarea.value += results[i].type + " ";
+                button.click();
+                var shapes = this.shadowRoot.querySelectorAll(".shape");
+                for (var i = 0; i < results.length; i++) {
+                    var data = results[i].args;
+                    var shape = shapes[i];
+                    this.selectShape(shape);
+                    this.updateXYWithData(data);
+                    this.updateElement();
+                }
+            },
+            createDescription: function (cross, element) {
+                var zero = cross.getBoundingClientRect();
+                var pos = element.getBoundingClientRect();
+                var x = pos.left - zero.left;
+                var y = pos.bottom - zero.bottom;
+                return element.innerHTML;
+            },
+            attached: function () {
+                scaleEl = this.shadowRoot.querySelector("#scale");
+                rotEl = this.shadowRoot.querySelector("#rotate");
+                xEl = this.shadowRoot.querySelector("#x");
+                yEl = this.shadowRoot.querySelector("#y");
+                zEl = this.shadowRoot.querySelector("#z");
+                colorEl = this.shadowRoot.querySelector("#color");
+                colorTxt = this.shadowRoot.querySelector("#colorTxt");
+                textarea = this.shadowRoot.querySelector("#input");
+                button = this.shadowRoot.querySelector("#button");
+                output = this.shadowRoot.querySelector("#output");
+                output2 = this.shadowRoot.querySelector("#output2");
+                outputText = this.shadowRoot.querySelector("#outputText");
+                checkbox = this.shadowRoot.querySelector("#names");
+
+                sI = 0;
+                cI = 0;
+                tI = 0;
+                custI = 0;
+
+                var its = this;
+
+                //this.$.cross.draggable();
+
+                this.shadowRoot.addEventListener("keydown", function (e) {
+                    its.addToControls(e);
+                });
+
+                this.shadowRoot.addEventListener("mousedown", function (event) {
+                    if (!event.target.classList.contains("shape"))
+                        return;
+                    if (event.which == 2) {
+                        its.scaleIt(event.target);
+                    }
+                    else if (event.which == 3) {
+                        its.shadowRoot.addEventListener("contextmenu", function (e) {
+                            e.preventDefault();
+                        });
+                        its.rotateIt(event.target);
+                    }
+                });
+            }
         });
-
-        this.shadowRoot.addEventListener("click", function(event) {
-          if (!event.target.classList.contains("shape"))
-            return;
-          its.selectShape(event.target);
-        });
-
-        this.shadowRoot.addEventListener("mousedown", function(event) {
-          if (!event.target.classList.contains("shape"))
-            return;
-          if (event.which == 2) {
-            its.scaleIt(event.target);
-          }
-          else if (event.which == 3) {
-            its.shadowRoot.addEventListener("contextmenu", function(e) {
-              e.preventDefault();
-            });
-            its.rotateIt(event.target);
-          }
-        });
-      }
-    });
-  </script>
+    </script>
 </dom-module>

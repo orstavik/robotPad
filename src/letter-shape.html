@@ -1,0 +1,154 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="letter-shape">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+
+            .circle {
+                border-radius: 50%;
+            }
+
+            :host.selected div.shape {
+                border: 3px solid black;
+            }
+
+            :host.selected svg.shape {
+                stroke: black;
+                stroke-width: 3px;
+            }
+
+            div.shape {
+                box-sizing: border-box;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: absolute;
+                top: 100px;
+                left: 10px;
+                width: 100px;
+                height: 100px;
+            }
+
+            svg.shape,
+            img.shape {
+                position: absolute;
+                top: 100px;
+                left: 10px;
+            }
+
+            div.shape {
+                position: absolute;
+                top: 100px;
+                left: 10px;
+                width: 100px;
+                height: 100px;
+                background-color: blue;
+            }
+
+            .shapeName {
+                pointer-events: none;
+            }
+        </style>
+
+        <template is="dom-if" if="{{isTriangle(letter)}}">
+            <svg data-shape class="shape triangle" width="110" height="130" style="fill: [[color]]; z-index: 0;"
+                 data-type="[[letter]]">
+                <polygon points="55,7 5,93 105,93" style="pointer-events: none"></polygon>
+                <text x="24" y="80" stroke="none" fill="black">triangle [[counter]]</text>
+            </svg>
+        </template>
+        <template is="dom-if" if="{{isCircle(letter)}}">
+            <div data-shape class="shape circle" style="background-color: [[color]]; z-index: 0;" data-type="[[letter]]">
+                <span class='shapeName'>circle[[counter]]</span>
+            </div>
+        </template>
+        <template is="dom-if" if="{{isSquare(letter)}}">
+            <div data-shape class="shape square" style="background-color: [[color]]; z-index: 0;" data-type="[[letter]]">
+                <span class='shapeName'>square[[counter]]</span>
+            </div>
+        </template>
+        <template is="dom-if" if="{{isCustom(letter)}}">
+            <img data-shape class="shape custom" src="[[link]]" width="100" style="z-index: 0" data-type="[[letter]]" alt="">
+        </template>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'letter-shape',
+            properties: {
+                input: {
+                    type: String,
+                    observer: "parseInput"
+                },
+                letter: String,
+                color: String,
+                link: String,
+                counter: Number
+            },
+            parseInput: function () {
+                if (!this.input)
+                    return;
+                var ar = this.input.split(":");
+                this.set("letter", ar[0]);
+                if (ar[1])
+                    this.set("color", ar[1]);
+                this.set("link", this.shapesObject[ar[0]]);
+            },
+            isTriangle: function (l) {
+                return l === "t";
+            },
+            isCircle: function (l) {
+                return l === "c";
+            },
+            isSquare: function (l) {
+                return l === "s";
+            },
+            isCustom: function (l) {
+                return !this.isTriangle(l) && !this.isSquare(l) && !this.isCircle(l);
+            },
+            shapesObject: {
+                bone: "https://raw.githubusercontent.com/jcome/synfig_ui/master/icons/png/layer_other_skeleton_icon.png",
+                yell: "https://raw.githubusercontent.com/jcome/synfig_ui/master/icons/png/interpolation_type_linear_icon.png",
+                hand: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDaHJ2OVBrVVZRalk=w1366-h599-k-iv1?v=1476266095410",
+                eye: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDNk5NQmFTbU5LUmc=w742-h583-k-iv1?v=1476266095410"
+
+            },
+            getElementInfo: function () {
+                var elem = this.shadowRoot.querySelector("[data-shape]");
+                debugger;
+                var sty = elem.style;
+                var x = parseInt(sty.left) || 0;
+                var y = parseInt(sty.top) || 0;
+
+                var z = parseInt(sty.zIndex);
+                var color = sty.backgroundColor || sty.fill || "none";
+
+                var trans = sty.transform;
+                var rot = parseInt(trans.match(/[\d.-]+deg/)) || 0;
+                var sc = trans.match(/([\d.-]+)[)]/);
+                var scale = sc ? sc[1] : 1;
+                return {
+                    x: x,
+                    y: y,
+                    z: z,
+                    scale: scale,
+                    rot: rot,
+                    color: color
+                };
+            }
+        });
+    </script>
+</dom-module>

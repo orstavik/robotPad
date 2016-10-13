@@ -1,14 +1,5 @@
 <dom-module id="shape-resizeable">
     <template>
-        <style>
-            :host {
-                display: block;
-                position: absolute;
-                left: 0;
-                top: 0;
-            }
-        </style>
-
         <content on-mousemove="resize"></content>
     </template>
 
@@ -26,7 +17,6 @@
                 if (e.which !== 2)
                     return;
                 this.set("scale", this.scale - (e.movementY * 0.01));
-                this.style.transform = "scale(" + this.scale + ")";
                 this.fire("propchange", {propName: "scale", propValue: this.scale});
             }
         });

@@ -1,13 +1,5 @@
 <dom-module id="shape-draggable">
     <template>
-        <style>
-            :host {
-                display: block;
-                position: absolute;
-                left: 0;
-                top: 0;
-            }
-        </style>
         <content on-mousemove="move"></content>
     </template>
 
@@ -30,8 +22,6 @@
                     return;
                 this.set("x", this.x + e.movementX);
                 this.set("y", this.y + e.movementY);
-                this.style.left = this.x + "px";
-                this.style.top = this.y + "px";
                 this.fire("propchange", {propName: "position", propValue: {x: this.x, y: this.y}});
             }
         });

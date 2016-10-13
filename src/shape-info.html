@@ -1,6 +1,13 @@
 <dom-module id="shape-info">
     <template>
         <style>
+            :host {
+                display: block;
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+
             #elementControls input {
                 width: 30px;
             }
@@ -10,24 +17,25 @@
                 top: 0;
                 right: 0;
             }
-
         </style>
+
         <div id="elementControls">
             <!--<input type="checkbox" id="names" checked on-click="hideNames"/>Show names-->
             <!--<br/>-->
-            <input type="text" id="scale" value="{{scale}}" on-change="updateElement"/>#
+            <input type="text" id="scale" value="{{scale}}"/>#
             <br/>
-            <input type="text" id="rotate" value="{{rotation}}" on-change="updateElement"/>deg
+            <input type="text" id="rotate" value="{{rotation}}"/>deg
             <br/>
-            <input type="text" id="x" value="{{position.x}}" />x
+            <input type="text" id="x" value="{{position.x}}"/>x
             <br/>
-            <input type="text" id="y" value="{{position.y}}" />y
+            <input type="text" id="y" value="{{position.y}}"/>y
             <!--<br/>-->
             <!--<input type="text" id="z" value="0" on-change="updateElement"/>z-->
             <!--<br/>-->
             <!--<input type="text" id="color" on-change="updateElement"/> <span id="colorTxt">color</span>-->
         </div>
-        <content on-propchange="propertyChanged"></content>
+
+        <content on-propchange="updatePropertyFields"></content>
     </template>
 
     <script>
@@ -37,30 +45,56 @@
             properties: {
                 position: {
                     type: Array,
-                    value: function(){
+                    value: function () {
                         return [];
                     },
-                    observer: "updateElement"
+                    observer: "updateStyle"
                 },
                 scale: {
                     type: Number,
                     value: 1,
-                    observer: "updateElement"
+                    observer: "updateStyle"
                 },
                 rotation: {
                     type: Number,
                     value: 0,
-                    observer: "updateElement"
+                    observer: "updateStyle"
                 }
             },
-            propertyChanged: function (e) {
+            updatePropertyFields: function (e) {
                 this.set(e.detail.propName, e.detail.propValue);
             },
-            updateElement: function(){
+            updatePropertyFieldsRelative: function (e) {
+                var prop = e.detail.propName;
+                var prevValue = this[prop];
+                this.set(e.detail.propName, prevValue + e.detail.propValue);
+            },
+            updateElement: function () {
 //                console.log("todo");
                 //its a circular problem here, not sure how to alert the children elements of new position based on this.
                 //how to send an event from top to bottom?
+                //first strategy would be to have a one way trip, update the style and values in the same object.
+            },
+            updateStyle: function () {
+                this.style.left = this.position.x + "px";
+                this.style.top = this.position.y + "px";
+                this.style.transform =
+                        "rotate(" + this.rotation + "deg) " +
+                        "scale(" + this.scale + ")";
+//
+//
+//                selected.style.left = xEl.value + "px";
+//                selected.style.top = yEl.value + "px";
+//                selected.style.transform =
+//                        "rotate(" + rotEl.value + "deg) " +
+//                        "scale(" + scaleEl.value + ")";
+//                selected.style.zIndex = zEl.value;
+//                if (selected.tagName === "DIV")
+//                    selected.style.backgroundColor = colorEl.value;
+//                else if (selected.tagName === "svg")
+//                    selected.style.fill = colorEl.value;
             }
+
         });
     </script>
 </dom-module>

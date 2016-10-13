@@ -143,34 +143,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 selected: {
                     type: Number,
                     //observer: "updateXYWithData"
-                },
-//                data="[[shapeData]]"
-//                shapeData: {
-//                    type: Object,
-//                    observer: "updateXYWithData"
-//                }
+                }
             },
             initShapes: function () {
                 var text = this.$.input.value;
-                var array = text.split(" ");
-                this.set("letters", array);
-                this.$.input.value = "";
+                this.set("letters", text.split(" "));
             },
-            updateSelectedElementInfo: function (e, detail) {
-                console.log(detail);
-                //getSelectedShapeInfo and send it detail
-            },
-            updateXYWithData: function () {
-                if (!this.selected)
-                    return;
-                debugger;
-                data = this.data;
-                xEl.value = data.x;
-                yEl.value = data.y;
-                zEl.value = data.z;
-                scaleEl.value = data.scale;
-                rotEl.value = data.rot;
-                colorEl.value = data.color;
+            updateSelectedElementInfo: function (e) {
+                this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
             },
             hideNames: function () {
                 var names = this.shadowRoot.querySelectorAll(".shapeName");
@@ -181,19 +161,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         el.style.display = "none";
                     }
                 });
-            },
-            updateElement: function () {
-                if (!selected) return;
-                selected.style.left = xEl.value + "px";
-                selected.style.top = yEl.value + "px";
-                selected.style.transform =
-                        "rotate(" + rotEl.value + "deg) " +
-                        "scale(" + scaleEl.value + ")";
-                selected.style.zIndex = zEl.value;
-                if (selected.tagName === "DIV")
-                    selected.style.backgroundColor = colorEl.value;
-                else if (selected.tagName === "svg")
-                    selected.style.fill = colorEl.value;
             },
             saveData: function (e) {
                 var its = this;
@@ -231,7 +198,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     this.updateXYWithData(data);
                     this.updateElement();
                 }
-            },
+            }
         });
     </script>
 </dom-module>

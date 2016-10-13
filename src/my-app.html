@@ -15,6 +15,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shape-resizeable.html">
 <link rel="import" href="shape-rotatable.html">
 <link rel="import" href="shape-info.html">
+<link rel="import" href="shape-keyboard.html">
 
 <dom-module id="my-app">
     <template>
@@ -119,13 +120,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <shape-rotatable>
                         <shape-resizeable>
                             <shape-draggable>
-                                <letter-shape input$="[[item]]" counter="42" data="[[shapeData]]"></letter-shape>
+                                <letter-shape input$="[[item]]" counter="42"></letter-shape>
                             </shape-draggable>
                         </shape-resizeable>
                     </shape-rotatable>
                 </shape-info>
             </template>
         </iron-selector>
+        <shape-keyboard on-changeprop="updateSelectedElementInfo"></shape-keyboard>
     </template>
 
     <script>
@@ -142,16 +144,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     type: Number,
                     //observer: "updateXYWithData"
                 },
-                shapeData: {
-                    type: Object,
-                    observer: "updateXYWithData"
-                }
+//                data="[[shapeData]]"
+//                shapeData: {
+//                    type: Object,
+//                    observer: "updateXYWithData"
+//                }
             },
             initShapes: function () {
-                var text = textarea.value;
+                var text = this.$.input.value;
                 var array = text.split(" ");
                 this.set("letters", array);
-                textarea.value = "";
+                this.$.input.value = "";
+            },
+            updateSelectedElementInfo: function (e, detail) {
+                console.log(detail);
+                //getSelectedShapeInfo and send it detail
             },
             updateXYWithData: function () {
                 if (!this.selected)
@@ -174,17 +181,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         el.style.display = "none";
                     }
                 });
-            },
-            addToControls: function (event) {
-                if (event.code === "ArrowDown")
-                    scaleEl.value = Number(scaleEl.value) - 0.01;
-                if (event.code === "ArrowUp")
-                    scaleEl.value = Number(scaleEl.value) + 0.01;
-                if (event.code === "ArrowLeft")
-                    rotEl.value = Number(rotEl.value) - 1;
-                if (event.code === "ArrowRight")
-                    rotEl.value = Number(rotEl.value) + 1;
-                this.updateElement();
             },
             updateElement: function () {
                 if (!selected) return;
@@ -236,39 +232,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     this.updateElement();
                 }
             },
-            createDescription: function (cross, element) {
-                var zero = cross.getBoundingClientRect();
-                var pos = element.getBoundingClientRect();
-                var x = pos.left - zero.left;
-                var y = pos.bottom - zero.bottom;
-                return element.innerHTML;
-            },
-            attached: function () {
-                scaleEl = this.shadowRoot.querySelector("#scale");
-                rotEl = this.shadowRoot.querySelector("#rotate");
-                xEl = this.shadowRoot.querySelector("#x");
-                yEl = this.shadowRoot.querySelector("#y");
-                zEl = this.shadowRoot.querySelector("#z");
-                colorEl = this.shadowRoot.querySelector("#color");
-                colorTxt = this.shadowRoot.querySelector("#colorTxt");
-                textarea = this.shadowRoot.querySelector("#input");
-                button = this.shadowRoot.querySelector("#button");
-                output = this.shadowRoot.querySelector("#output");
-                output2 = this.shadowRoot.querySelector("#output2");
-                outputText = this.shadowRoot.querySelector("#outputText");
-                checkbox = this.shadowRoot.querySelector("#names");
-
-                sI = 0;
-                cI = 0;
-                tI = 0;
-                custI = 0;
-
-                var its = this;
-
-                this.shadowRoot.addEventListener("keydown", function (e) {
-                    its.addToControls(e);
-                });
-            }
         });
     </script>
 </dom-module>

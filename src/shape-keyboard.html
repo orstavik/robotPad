@@ -1,0 +1,21 @@
+<dom-module id="shape-keyboard">
+    <script>
+        Polymer({
+            is: 'shape-keyboard',
+
+            attached: function () {
+                var self = this;
+                document.addEventListener("keydown", function (event) {
+                    if (event.code === "ArrowDown")
+                        self.fire("changeprop", {propName: "scale", propValue: - 0.01});
+                    if (event.code === "ArrowUp")
+                        self.fire("changeprop", {propName: "scale", propValue: + 0.01});
+                    if (event.code === "ArrowLeft")
+                        self.fire("changeprop", {propName: "rotation", propValue: -1});
+                    if (event.code === "ArrowRight")
+                        self.fire("changeprop", {propName: "rotation", propValue: 1});
+                });
+            }
+        });
+    </script>
+</dom-module>

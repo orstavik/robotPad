@@ -69,9 +69,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <button id="output2" class="bottom" on-click="loadData">load</button>
         <textarea id="outputText" class="bottom">Output</textarea>
         <button id="output" class="bottom" on-click="saveData">save</button>
+
         <iron-selector selected="{{selected}}" selected-attribute="selected">
             <template is="dom-repeat" items="[[letters]]">
-                <shape-info on-propchange="setAsSelectedAlso">
+                <shape-info on-propchange="setAsSelectedAlso" letter="[[item]]">
                     <shape-rotatable>
                         <shape-resizeable>
                             <shape-draggable>
@@ -120,18 +121,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 });
             },
             saveData: function (e) {
-                var its = this;
-                var shapes = this.shadowRoot.querySelectorAll(".shape");
+                var shapes = this.shadowRoot.querySelectorAll("shape-info");
                 var resArray = [];
-                shapes.forEach(function (element, index) {
-                    var data = its.getElementInfo(element);
-                    var type = element.getAttribute("data-type");
-                    resArray[index] = {
-                        type: type,
-                        args: data
-                    };
+                shapes.forEach(function (element) {
+                    resArray.push(element.getElementInfo());
                 });
-                outputText.innerHTML = JSON.stringify(resArray);
+                this.$.outputText.innerHTML = JSON.stringify(resArray);
             },
             loadData: function (e) {
                 sI = 0;

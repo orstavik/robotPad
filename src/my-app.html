@@ -12,6 +12,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="letter-shape.html">
 <link rel="import" href="shape-draggable.html">
+<link rel="import" href="shape-resizeable.html">
 
 <dom-module id="my-app">
     <template>
@@ -138,9 +139,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <button id="output" class="bottom" on-click="saveData">save</button>
         <iron-selector selected="{{selected}}" selected-attribute="selected">
             <template is="dom-repeat" items="[[letters]]">
-                <shape-draggable>
-                    <letter-shape input$="[[item]]" counter="42" data="[[shapeData]]"></letter-shape>
-                </shape-draggable>
+                <shape-resizeable>
+                    <shape-draggable>
+                        <letter-shape input$="[[item]]" counter="42" data="[[shapeData]]"></letter-shape>
+                    </shape-draggable>
+                </shape-resizeable>
             </template>
         </iron-selector>
     </template>

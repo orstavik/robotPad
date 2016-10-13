@@ -21,11 +21,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 border-radius: 50%;
             }
 
-            :host.selected div.shape {
+            :host([selected]) div.shape {
                 border: 3px solid black;
             }
 
-            :host.selected svg.shape {
+            :host([selected]) svg.shape {
                 stroke: black;
                 stroke-width: 3px;
             }
@@ -96,7 +96,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 letter: String,
                 color: String,
                 link: String,
-                counter: Number
+                counter: Number,
+                selected: {
+                    type: Boolean,
+                    observer: "getElementInfo"
+                },
+                data: {
+                    type: Object,
+                    notify: true
+                }
             },
             parseInput: function () {
                 if (!this.input)
@@ -127,27 +135,100 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             },
             getElementInfo: function () {
-                var elem = this.shadowRoot.querySelector("[data-shape]");
-                debugger;
-                var sty = elem.style;
-                var x = parseInt(sty.left) || 0;
-                var y = parseInt(sty.top) || 0;
+                if (this.selected) {
+                    elem = this.shadowRoot.querySelector("[data-shape]");
+                    var sty = elem.style;
+                    var x = parseInt(sty.left) || 0;
+                    var y = parseInt(sty.top) || 0;
 
-                var z = parseInt(sty.zIndex);
-                var color = sty.backgroundColor || sty.fill || "none";
+                    var z = parseInt(sty.zIndex);
+                    var color = sty.backgroundColor || sty.fill || "none";
 
-                var trans = sty.transform;
-                var rot = parseInt(trans.match(/[\d.-]+deg/)) || 0;
-                var sc = trans.match(/([\d.-]+)[)]/);
-                var scale = sc ? sc[1] : 1;
-                return {
-                    x: x,
-                    y: y,
-                    z: z,
-                    scale: scale,
-                    rot: rot,
-                    color: color
-                };
+                    var trans = sty.transform;
+                    var rot = parseInt(trans.match(/[\d.-]+deg/)) || 0;
+                    var sc = trans.match(/([\d.-]+)[)]/);
+                    var scale = sc ? sc[1] : 1;
+                    this.data = {
+                        x: x,
+                        y: y,
+                        z: z,
+                        scale: scale,
+                        rot: rot,
+                        color: color
+                    };
+                }
+            },
+            moveIt: function (elem) {
+                var its = this;
+                window.addEventListener("mousemove", function (e) {
+                    if (e.which == 1) {
+                        its.data.x = Number(its.data.x) + e.movementX;
+                        its.data.y = Number(its.data.y) + e.movementY;
+                        its.updateElement();
+                    }
+                });
+            },
+            scaleIt: function (elem) {
+                var its = this;
+                window.addEventListener("mousemove", function (e) {
+                    if (e.which == 2) {
+                        its.data.scale = Number(its.data.scale) - e.movementY * 0.01;
+                        its.updateElement();
+                    }
+                });
+            },
+            rotateIt: function (elem) {
+                var its = this;
+                window.addEventListener("mousemove", function (e) {
+                    if (e.which == 3) {
+                        var rect = elem.getBoundingClientRect();
+                        var center = {
+                            x: rect.left + rect.width / 2,
+                            y: rect.top + rect.height / 2
+                        };
+                        var distance = {
+                            x: e.x - center.x,
+                            y: e.y - center.y
+                        };
+                        var angle = Math.atan2(distance.y, distance.x);
+                        var rightAngle = angle * 180 / Math.PI + 90;
+                        its.data.rot = rightAngle;
+                        its.updateElement();
+                    }
+                });
+            },
+            updateElement: function () {
+                    elem = this.shadowRoot.querySelector("[data-shape]");
+                    elem.style.transform =
+                            "rotate(" + this.data.rot + "deg) " +
+                            "scale(" + this.data.scale + ")" +
+                            "translate("+this.data.x+"px, "+this.data.y+"px) ";
+                    elem.style.zIndex = this.data.z;
+                    if (elem.tagName === "DIV")
+                        elem.style.backgroundColor = this.data.color;
+                    else if (elem.tagName === "svg")
+                        elem.style.fill = this.data.color;
+            },
+            attached: function() {
+                var its = this;
+                this.shadowRoot.addEventListener("mousedown", function (event) {
+                    if (its.selected) {
+                        if (!event.target.classList.contains("shape"))
+                            return;
+                        if (event.which == 1) {
+                            its.moveIt(event.target);
+                        }
+                        if (event.which == 2) {
+                            its.scaleIt(event.target);
+                        }
+                        else if (event.which == 3) {
+                            its.shadowRoot.addEventListener("contextmenu", function (e) {
+                                e.preventDefault();
+                            });
+                            its.rotateIt(event.target);
+                        }
+                    }
+                });
             }
         });
     </script>

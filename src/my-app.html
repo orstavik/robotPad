@@ -135,9 +135,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <button id="output2" class="bottom" on-click="loadData">load</button>
         <textarea id="outputText" class="bottom">Output</textarea>
         <button id="output" class="bottom" on-click="saveData">save</button>
-        <iron-selector selected="{{selected}}" selected-class="selected">
+        <iron-selector selected="{{selected}}" selected-attribute="selected">
             <template is="dom-repeat" items="[[letters]]">
-                <letter-shape input$="[[item]]" counter="42"></letter-shape>
+                <letter-shape input$="[[item]]" counter="42" data="[[shapeData]]"></letter-shape>
             </template>
         </iron-selector>
     </template>
@@ -153,9 +153,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     }
                 },
                 selected: {
+                    type: Number,
+                    //observer: "updateXYWithData"
+                },
+                shapeData: {
                     type: Object,
-                    observer: "selectShape"
-                }
+                    observer: "updateXYWithData"
+                },
             },
             initShapes: function () {
                 var text = textarea.value;
@@ -186,17 +190,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     its.updateXY(e)
                 });
             },
-            selectShape: function (target) {
+            updateXYWithData: function () {
                 if (!this.selected)
                     return;
-                this.updateXY();
-            },
-            updateXY: function () {
-                var selected = this.shadowRoot.querySelector(".selected");
-                var data = selected.getElementInfo();
-                this.updateXYWithData(data);
-            },
-            updateXYWithData: function (data) {
+                debugger;
+                data = this.data;
                 xEl.value = data.x;
                 yEl.value = data.y;
                 zEl.value = data.z;
@@ -237,35 +235,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     selected.style.backgroundColor = colorEl.value;
                 else if (selected.tagName === "svg")
                     selected.style.fill = colorEl.value;
-            },
-            scaleIt: function (elem) {
-                var its = this;
-                window.addEventListener("mousemove", function (e) {
-                    if (e.which == 2) {
-                        scaleEl.value = Number(scaleEl.value) - e.movementY * 0.01;
-                        its.updateElement();
-                    }
-                });
-            },
-            rotateIt: function (elem) {
-                var its = this;
-                window.addEventListener("mousemove", function (e) {
-                    if (e.which == 3) {
-                        var rect = elem.getBoundingClientRect();
-                        var center = {
-                            x: rect.left + rect.width / 2,
-                            y: rect.top + rect.height / 2
-                        };
-                        var distance = {
-                            x: e.x - center.x,
-                            y: e.y - center.y
-                        };
-                        var angle = Math.atan2(distance.y, distance.x);
-                        var rightAngle = angle * 180 / Math.PI + 90;
-                        rotEl.value = rightAngle;
-                        its.updateElement();
-                    }
-                });
             },
             saveData: function (e) {
                 var its = this;
@@ -337,20 +306,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                 this.shadowRoot.addEventListener("keydown", function (e) {
                     its.addToControls(e);
-                });
-
-                this.shadowRoot.addEventListener("mousedown", function (event) {
-                    if (!event.target.classList.contains("shape"))
-                        return;
-                    if (event.which == 2) {
-                        its.scaleIt(event.target);
-                    }
-                    else if (event.which == 3) {
-                        its.shadowRoot.addEventListener("contextmenu", function (e) {
-                            e.preventDefault();
-                        });
-                        its.rotateIt(event.target);
-                    }
                 });
             }
         });

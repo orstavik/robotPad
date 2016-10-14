@@ -57,9 +57,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 height: 100px;
                 background-color: blue;
             }
+
             .shapeName {
                 pointer-events: none;
             }
+
         </style>
 
         <template is="dom-if" if="{{isTriangle(letter)}}">
@@ -70,17 +72,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </svg>
         </template>
         <template is="dom-if" if="{{isCircle(letter)}}">
-            <div data-shape class="shape circle" style="background-color: [[color]]; z-index: 0;" data-type="[[letter]]">
+            <div data-shape class="shape circle" style="background-color: [[color]]; z-index: 0;"
+                 data-type="[[letter]]">
                 <span class='shapeName'>circle[[counter]]</span>
             </div>
         </template>
         <template is="dom-if" if="{{isSquare(letter)}}">
-            <div data-shape class="shape square" style="background-color: [[color]]; z-index: 0;" data-type="[[letter]]">
+            <div data-shape class="shape square" style="background-color: [[color]]; z-index: 0;"
+                 data-type="[[letter]]">
                 <span class='shapeName'>square[[counter]]</span>
             </div>
         </template>
         <template is="dom-if" if="{{isCustom(letter)}}">
-            <img data-shape class="shape custom" src="[[link]]" width="100" style="z-index: 0" data-type="[[letter]]" alt="">
+            <img data-shape class="shape custom" src="[[link]]" width="100" style="z-index: 0" data-type="[[letter]]"
+                 alt="" on-mousemove="preventDef">
         </template>
     </template>
 
@@ -122,9 +127,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             isCustom: function (l) {
                 return !this.isTriangle(l) && !this.isSquare(l) && !this.isCircle(l);
             },
+            preventDef: function (e) {
+                return e.preventDefault();
+            },
             shapesObject: {
-                bone: "https://raw.githubusercontent.com/jcome/synfig_ui/master/icons/png/layer_other_skeleton_icon.png",
-                yell: "https://raw.githubusercontent.com/jcome/synfig_ui/master/icons/png/interpolation_type_linear_icon.png",
+                bone: "http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046",
+                yell: "http://worldartsme.com/images/yellow-triangle-clipart-1.jpg",
                 hand: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDaHJ2OVBrVVZRalk=w1366-h599-k-iv1?v=1476266095410",
                 eye: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDNk5NQmFTbU5LUmc=w742-h583-k-iv1?v=1476266095410"
 

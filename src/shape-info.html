@@ -54,17 +54,13 @@
 
             properties: {
                 input: Object,
-                selected: {
-                    type: Boolean
-                }
-            },
-            getElementInfo: function () {
-                return JSON.parse(JSON.stringify(this.input));
+                selected: Boolean
             },
             updatePropertyFieldsRelative: function (e) {
                 var prop = e.detail.propName;
-                var prevValue = this[prop];
-                this.set(e.detail.propName, prevValue + e.detail.propValue);
+                var prevValue = prop === "scale" ? this.input[prop] || 1 : this.input[prop] || 0;
+                var value = prevValue + e.detail.propValue;
+                this.set("input."+ prop, value);
             }
         });
     </script>

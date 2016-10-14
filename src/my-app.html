@@ -82,7 +82,7 @@
                 }
             },
             updateSelectedElementInfo: function (e) {
-                //this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
+                this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
                 this.saveData(e);
             },
             setAsSelectedAlso: function (e) {
@@ -99,13 +99,12 @@
                 var shapes = this.shadowRoot.querySelectorAll("shape-info");
                 var resArray = [];
                 shapes.forEach(function (element) {
-                    resArray.push(element.getElementInfo());
+                    resArray.push(element.input);
                 });
                 this.set("outputTxt", JSON.stringify(resArray));
             },
             loadData: function () {
-                var results = JSON.parse(this.$.outputText.value);
-                this.set("letters", results);
+                this.set("letters", JSON.parse(this.outputTxt));
             }
         });
     </script>

@@ -11,7 +11,6 @@
             :host {
                 display: block;
             }
-
             #cross {
                 position: absolute;
                 bottom: 20%;
@@ -45,7 +44,7 @@
                 bottom: 0;
                 right: 50px;
                 width: 300px;
-                height: 50px;
+                height: 500px;
             }
         </style>
 
@@ -53,15 +52,11 @@
 
         <shape-links id="links"></shape-links>
 
-        <textarea id="input" value="{{input::input}}"></textarea>
-
-        <button id="output2" class="bottom" on-click="loadData">load</button>
-        <textarea id="outputText" class="bottom">Output</textarea>
-        <button id="output" class="bottom" on-click="saveData">save</button>
+        <textarea id="outputText" value="{{outputTxt}}" class="bottom" on-input="loadData"></textarea>
 
         <iron-selector selected="{{selected}}" selected-attribute="selected">
             <template is="dom-repeat" items="[[letters]]">
-                <shape-info on-propchange="setAsSelectedAlso" letter="[[item]]">
+                <shape-info on-propchange="setAsSelectedAlso" input$="[[item]]">
                     <letter-shape input$="[[item]]" counter="42"></letter-shape>
                 </shape-info>
             </template>
@@ -75,30 +70,24 @@
             properties: {
                 letters: Array,
                 selected: Number,
-                input: {
+                outputTxt: {
                     type: String,
-                    value: "yell s:red t:blue c:green",
-                    observer: "initShapes"
+                    value: '[{"letter":"yell","color":"crimson","link":' +
+                    '"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046",' +
+                    '"position":{"x":211,"y":244}},' +
+                    '{"letter":"s","color":"red","position":{"x":429,"y":212}},' +
+                    '{"letter":"t","color":"blue","position":{"x":111,"y":414},"scale":1.8400000000000007,"rotation":62.17591364049903},' +
+                    '{"letter":"c","color":"green","position":{"x":478,"y":420},"rotation":119.57783868126133}]',
+                    observer: "loadData"
                 }
-            },
-            initShapes: function () {
-                var text = this.$.input.value;
-                var split = text.split(" ");
-                for (var i = 0; i < split.length; i++) {
-                    var ar = split[i].split(":");
-                    split[i] = {
-                        letter: ar[0],
-                        color: ar[1] ?ar[1] : "crimson",
-                        link: this.$.links.getLink(ar[0])
-                    };
-                }
-                this.set("letters", split);
             },
             updateSelectedElementInfo: function (e) {
-                this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
+                //this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
+                this.saveData(e);
             },
             setAsSelectedAlso: function (e) {
                 e.target.click();
+                this.saveData(e);
             },
             hideNames: function () {
                 var names = this.shadowRoot.querySelectorAll(".shapeName");
@@ -112,17 +101,11 @@
                 shapes.forEach(function (element) {
                     resArray.push(element.getElementInfo());
                 });
-                this.$.outputText.innerHTML = JSON.stringify(resArray);
+                this.set("outputTxt", JSON.stringify(resArray));
             },
-            loadData: function (e) {
-                var res = "";
+            loadData: function () {
                 var results = JSON.parse(this.$.outputText.value);
-                for (var i = 0; i < results.length; i++)
-                    res += results[i].letter + " ";
-                this.set("input", res);
-                var shapes2 = this.shadowRoot.querySelectorAll("shape-info");
-                for (var i = 0; i < results.length; i++)
-                    shapes2[i].updateAllProperties(results[i]);
+                this.set("letters", results);
             }
         });
     </script>

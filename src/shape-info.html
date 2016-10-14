@@ -26,21 +26,21 @@
         <div hidden={{!selected}} id="elementControls">
             <!--<input type="checkbox" id="names" checked on-click="hideNames"/>Show names-->
             <!--<br/>-->
-            <input type="text" id="scale" value="{{scale::input}}"/>#
+            <input type="text" id="scale" value="{{input.scale::input}}"/>#
             <br/>
-            <input type="text" id="rotate" value="{{rotation::input}}"/>deg
+            <input type="text" id="rotate" value="{{input.rotation::input}}"/>deg
             <br/>
-            <input type="text" id="x" value="{{position.x::input}}"/>x
+            <input type="text" id="x" value="{{input.position.x::input}}"/>x
             <br/>
-            <input type="text" id="y" value="{{position.y::input}}"/>y
+            <input type="text" id="y" value="{{input.position.y::input}}"/>y
             <!--<br/>-->
             <!--<input type="text" id="z" value="0" on-change="updateElement"/>z-->
             <!--<br/>-->
             <!--<input type="text" id="color" on-change="updateElement"/> <span id="colorTxt">color</span>-->
         </div>
-        <shape-draggable id="drag" position="{{position}}">
-            <shape-resizeable  id="resize" scale="{{scale}}">
-                <shape-rotatable id="rot" rotation="{{rotation}}">
+        <shape-draggable id="drag" position="{{input.position}}">
+            <shape-resizeable id="resize" scale="{{input.scale}}">
+                <shape-rotatable id="rot" rotation="{{input.rotation}}">
                     <content on-propchange="updatePropInfo"></content>
                 </shape-rotatable>
             </shape-resizeable>
@@ -53,37 +53,18 @@
             is: 'shape-info',
 
             properties: {
-                position: {
-                    type: Array,
-                    value: function () {
-                        return {x: 0, y: 0};
-                    }
-                },
-                scale: {
-                    type: Number,
-                    value: 1
-                },
-                letter: String,
-                rotation: {
-                    type: Number,
-                    value: 0
-                },
+                input: Object,
                 selected: {
                     type: Boolean
                 }
             },
-            getElementInfo: function(){
-                return {letter: this.letter, position: this.position, scale: this.scale, rotation: this.rotation};
+            getElementInfo: function () {
+                return JSON.parse(JSON.stringify(this.input));
             },
             updatePropertyFieldsRelative: function (e) {
                 var prop = e.detail.propName;
                 var prevValue = this[prop];
                 this.set(e.detail.propName, prevValue + e.detail.propValue);
-            },
-            updateAllProperties: function(props){
-                this.set("position", props["position"]);
-                this.set("scale", props["scale"]);
-                this.set("rotation", props["rotation"]);
             }
         });
     </script>

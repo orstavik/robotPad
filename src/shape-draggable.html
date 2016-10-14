@@ -20,7 +20,8 @@
                     value: function () {
                         return {x: 0, y: 0};
                     },
-                    notify: true
+                    notify: true,
+                    observer: "setStyle"
                 }
             },
             observers: [
@@ -37,10 +38,10 @@
                 e.preventDefault();
                 if (e.which != 1)
                     return;
-                this.position = {
-                    x: this.position.x + e.movementX,
-                    y: this.position.y + e.movementY
-                };
+                if (!this.position)
+                    this.position = {x: 0, y: 0};
+                this.set("position.x", this.position.x  + e.movementX);
+                this.set("position.y", this.position.y + e.movementY);
                 this.setStyle(this.position);
                 this.fire("propchange", {propName: "moved", propValue: this.position});
             }

@@ -27,7 +27,7 @@
             resize: function (e) {
                 if (e.which !== 2)
                     return;
-                this.set("scale", this.scale - (e.movementY * 0.01));
+                this.set("scale", (this.scale||1) - (e.movementY * 0.03));
                 this.setStyle();
                 this.fire("propchange", {propName: "scale", propValue: this.scale});
             }

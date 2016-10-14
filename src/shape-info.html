@@ -18,15 +18,15 @@
 
             #elementControls {
                 position: fixed;
-                top: 0;
-                right: 0;
+                bottom: 0;
+                left: 0;
             }
         </style>
 
         <div hidden={{!selected}} id="elementControls">
             <!--<input type="checkbox" id="names" checked on-click="hideNames"/>Show names-->
             <!--<br/>-->
-            <input type="text" id="scale" value="{{scale::input}}"/>#[[scale]]
+            <input type="text" id="scale" value="{{scale::input}}"/>#
             <br/>
             <input type="text" id="rotate" value="{{rotation::input}}"/>deg
             <br/>

@@ -1,4 +1,4 @@
-<link rel="import" href="../bower_components/polymer/polymer.html"
+<link rel="import" href="../bower_components/polymer/polymer.html" />
 <dom-module id="letter-shape">
     <template>
         <style>
@@ -10,39 +10,13 @@
                 border-radius: 50%;
             }
 
-            :host([selected]) div.shape {
-                border: 3px solid black;
-            }
-
-            :host([selected]) svg.shape {
-                stroke: black;
-                stroke-width: 3px;
-            }
-
             div.shape {
                 box-sizing: border-box;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                position: absolute;
-                top: 100px;
-                left: 10px;
                 width: 100px;
                 height: 100px;
-            }
-
-            svg.shape,
-            img.shape {
-                top: 100px;
-                left: 10px;
-            }
-
-            div.shape {
-                top: 100px;
-                left: 10px;
-                width: 100px;
-                height: 100px;
-                background-color: blue;
             }
 
             .shapeName {

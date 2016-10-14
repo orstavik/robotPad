@@ -1,0 +1,69 @@
+<dom-module id="shape-links">
+    <template>
+        <style>
+            :host {
+                display: block;
+                position: fixed;
+                right: 0;
+                top: 0;
+            }
+            img, input {
+                width: 14px;
+                height: 14px;
+            }
+            input.name {
+                width: 50px;
+            }
+            input.link {
+                width: 400px;
+            }
+        </style>
+
+        <template is="dom-repeat" items="[[links]]">
+            <img src$="[[item.link]]" alt="image">
+            <input class="name" type="text" value$="[[item.name]]"/>:
+            <input class="link" type="text" value$="[[item.link]]"/> <br/>
+        </template>
+        <button on-click="addRow">Add row</button>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'shape-links',
+
+            properties: {
+                links: {
+                    type: Array,
+                    value: function () {
+                        return [
+                            {
+                                name: "bone",
+                                link: "http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046"
+                            },
+                            {
+                                name: "yell",
+                                link: "http://worldartsme.com/images/yellow-triangle-clipart-1.jpg"
+                            },
+                            {
+                                name: "hand",
+                                link: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDaHJ2OVBrVVZRalk=w1366-h599-k-iv1?v=1476266095410"
+                            },
+                            {
+                                name: "eye",
+                                link: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDNk5NQmFTbU5LUmc=w742-h583-k-iv1?v=1476266095410"
+                            }
+                        ]
+                    }
+                }
+            },
+            addRow: function () {
+                this.push("links",
+                        {
+                            name: "shortname",
+                            link: "https://www.polymer-project.org/images/logos/p-logo.png"
+                        }
+                )
+            }
+        });
+    </script>
+</dom-module>

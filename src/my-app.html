@@ -85,8 +85,7 @@
                 var text = this.$.input.value;
                 var split = text.split(" ");
                 for (var i = 0; i < split.length; i++) {
-                    var word = split[i];
-                    var ar = word.split(":");
+                    var ar = split[i].split(":");
                     split[i] = {
                         letter: ar[0],
                         color: ar[1] ?ar[1] : "pink",
@@ -104,11 +103,7 @@
             hideNames: function () {
                 var names = this.shadowRoot.querySelectorAll(".shapeName");
                 names.forEach(function (el) {
-                    if (checkbox.checked)
-                        el.style.display = "initial";
-                    else {
-                        el.style.display = "none";
-                    }
+                    el.style.display = checkbox.checked ? "initial": "none";
                 });
             },
             saveData: function (e) {

@@ -71,6 +71,8 @@
                 return l === "s";
             },
             isCustom: function (l) {
+                if (!l)
+                    return false;
                 return !this.isTriangle(l) && !this.isSquare(l) && !this.isCircle(l);
             }
         });

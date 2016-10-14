@@ -53,7 +53,7 @@
 
         <shape-links id="links"></shape-links>
 
-        <textarea id="input" value="{{input}}"></textarea>
+        <textarea id="input" value="{{input::input}}"></textarea>
 
         <button id="output2" class="bottom" on-click="loadData">load</button>
         <textarea id="outputText" class="bottom">Output</textarea>
@@ -73,15 +73,8 @@
         Polymer({
             is: 'my-app',
             properties: {
-                letters: {
-                    type: Array,
-                    value: function () {
-                        return [];
-                    }
-                },
-                selected: {
-                    type: Number
-                },
+                letters: Array,
+                selected: Number,
                 input: {
                     type: String,
                     value: "yell s:red t:blue c:green",

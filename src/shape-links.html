@@ -38,11 +38,11 @@
                         return [
                             {
                                 name: "bone",
-                                link: "http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046"
+                                link: "http://worldartsme.com/images/yellow-triangle-clipart-1.jpg"
                             },
                             {
                                 name: "yell",
-                                link: "http://worldartsme.com/images/yellow-triangle-clipart-1.jpg"
+                                link: "http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046"
                             },
                             {
                                 name: "hand",
@@ -63,6 +63,12 @@
                             link: "https://www.polymer-project.org/images/logos/p-logo.png"
                         }
                 )
+            },
+            getLink: function(key){
+                for (var i = 0; i < this.links.length; i++) {
+                    if (this.links[i].name === key)
+                        return this.links[i].link;
+                }
             }
         });
     </script>

@@ -1,15 +1,4 @@
-<!--
-@license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
-
-<link rel="import" href="../bower_components/polymer/polymer.html">
-
+<link rel="import" href="../bower_components/polymer/polymer.html"
 <dom-module id="letter-shape">
     <template>
         <style>
@@ -62,27 +51,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         </style>
 
-        <template is="dom-if" if="{{isTriangle(letter)}}">
-            <svg data-shape class="shape triangle" width="110" height="130" style="fill: [[color]]; z-index: 0;"
-                 data-type="[[letter]]">
+        <template is="dom-if" if="{{isTriangle(input.letter)}}">
+            <svg data-shape class="shape triangle" width="110" height="130" style="fill: [[input.color]]; z-index: 0;"
+                 data-type="[[input.letter]]">
                 <polygon points="55,7 5,93 105,93" style="pointer-events: none"></polygon>
                 <text x="24" y="80" stroke="none" fill="black">triangle [[counter]]</text>
             </svg>
         </template>
-        <template is="dom-if" if="{{isCircle(letter)}}">
-            <div data-shape class="shape circle" style="background-color: [[color]]; z-index: 0;"
-                 data-type="[[letter]]">
+        <template is="dom-if" if="{{isCircle(input.letter)}}">
+            <div data-shape class="shape circle" style="background-color: [[input.color]]; z-index: 0;"
+                 data-type="[[input.letter]]">
                 <span class='shapeName'>circle[[counter]]</span>
             </div>
         </template>
-        <template is="dom-if" if="{{isSquare(letter)}}">
-            <div data-shape class="shape square" style="background-color: [[color]]; z-index: 0;"
-                 data-type="[[letter]]">
+        <template is="dom-if" if="{{isSquare(input.letter)}}">
+            <div data-shape class="shape square" style="background-color: [[input.color]]; z-index: 0;"
+                 data-type="[[input.letter]]">
                 <span class='shapeName'>square[[counter]]</span>
             </div>
         </template>
-        <template is="dom-if" if="{{isCustom(letter)}}">
-            <img data-shape class="shape custom" src="[[link]]" width="100" style="z-index: 0"
+        <template is="dom-if" if="{{isCustom(input.letter)}}">
+            <img data-shape class="shape custom" src="[[input.link]]" width="100" style="z-index: 0"
                  alt="">
         </template>
     </template>
@@ -91,27 +80,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         Polymer({
             is: 'letter-shape',
             properties: {
-                input: {
-                    type: String,
-                    observer: "parseInput"
-                },
-                letter: String,
-                color: String,
-                link: String,
+                input: Object,
                 counter: Number,
                 selected: {
                     type: Boolean,
                     observer: "getElementInfo"
                 }
-            },
-            parseInput: function () {
-                if (!this.input)
-                    return;
-                var ar = this.input.split(":");
-                this.set("letter", ar[0]);
-                if (ar[1])
-                    this.set("color", ar[1]);
-                this.set("link", this.shapesObject[ar[0]]);
             },
             isTriangle: function (l) {
                 return l === "t";
@@ -124,12 +98,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
             isCustom: function (l) {
                 return !this.isTriangle(l) && !this.isSquare(l) && !this.isCircle(l);
-            },
-            shapesObject: {
-                bone: "http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046",
-                yell: "http://worldartsme.com/images/yellow-triangle-clipart-1.jpg",
-                hand: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDaHJ2OVBrVVZRalk=w1366-h599-k-iv1?v=1476266095410",
-                eye: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDNk5NQmFTbU5LUmc=w742-h583-k-iv1?v=1476266095410"
             }
         });
     </script>

@@ -84,8 +84,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
         </template>
         <template is="dom-if" if="{{isCustom(letter)}}">
-            <img data-shape class="shape custom" src="[[link]]" width="100" style="z-index: 0" data-type="[[letter]]"
-                 alt="" on-mousemove="preventDef">
+            <img data-shape class="shape custom" src="[[link]]" width="100" style="z-index: 0"
+                 alt="">
         </template>
     </template>
 
@@ -126,9 +126,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
             isCustom: function (l) {
                 return !this.isTriangle(l) && !this.isSquare(l) && !this.isCircle(l);
-            },
-            preventDef: function (e) {
-                return e.preventDefault();
             },
             shapesObject: {
                 bone: "http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046",

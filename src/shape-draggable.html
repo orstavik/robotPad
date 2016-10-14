@@ -18,6 +18,7 @@
                 }
             },
             move: function (e) {
+                e.preventDefault();
                 if (e.which != 1)
                     return;
                 this.set("x", this.x + e.movementX);

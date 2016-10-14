@@ -6,13 +6,6 @@
     <script>
         Polymer({
             is: 'shape-rotatable',
-
-            properties: {
-                rotation: {
-                    type: Number,
-                    value: 0
-                }
-            },
             extra : function(e){
                 e.preventDefault();
             },
@@ -30,8 +23,7 @@
                 };
                 var angle = Math.atan2(distance.y, distance.x);
                 var rightAngle = angle * 180 / Math.PI + 90;
-                this.set("rotation", rightAngle);
-                this.fire("propchange", {propName: "rotation", propValue: this.rotation});
+                this.fire("propchange", {propName: "rotation", propValue: rightAngle});
             }
         });
     </script>

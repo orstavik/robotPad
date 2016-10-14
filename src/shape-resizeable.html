@@ -7,17 +7,18 @@
         Polymer({
             is: 'shape-resizeable',
 
-            properties: {
-                scale: {
-                    type: Number,
-                    value: 1
-                }
-            },
+//            properties: {
+//                scale: {
+//                    type: Number,
+//                    value: 1
+//                }
+//            },
             resize: function (e) {
                 if (e.which !== 2)
                     return;
-                this.set("scale", this.scale - (e.movementY * 0.01));
-                this.fire("propchange", {propName: "scale", propValue: this.scale});
+//                this.set("scale", this.scale - (e.movementY * 0.01));
+//                this.fire("propchange", {propName: "scale", propValue: this.scale});
+                this.fire("propchange", {propName: "scale", propValue: e.movementY * -0.01});
             }
         });
     </script>

@@ -1,3 +1,7 @@
+<link rel="import" href="shape-draggable.html">
+<link rel="import" href="shape-resizeable.html">
+<link rel="import" href="shape-rotatable.html">
+
 <dom-module id="shape-info">
     <template>
         <style>
@@ -22,9 +26,9 @@
         <div hidden={{!selected}} id="elementControls">
             <!--<input type="checkbox" id="names" checked on-click="hideNames"/>Show names-->
             <!--<br/>-->
-            <input type="text" id="scale" value="{{scale}}"/>#
+            <input type="text" id="scale" value="{{scale::input}}"/>#[[scale]]
             <br/>
-            <input type="text" id="rotate" value="{{rotation}}"/>deg
+            <input type="text" id="rotate" value="{{rotation::input}}"/>deg
             <br/>
             <input type="text" id="x" value="{{position.x::input}}"/>x
             <br/>
@@ -34,8 +38,14 @@
             <!--<br/>-->
             <!--<input type="text" id="color" on-change="updateElement"/> <span id="colorTxt">color</span>-->
         </div>
+        <shape-draggable id="drag" position="{{position}}">
+            <shape-resizeable  id="resize" scale="{{scale}}">
+                <shape-rotatable id="rot" rotation="{{rotation}}">
+                    <content on-propchange="updatePropInfo"></content>
+                </shape-rotatable>
+            </shape-resizeable>
+        </shape-draggable>
 
-        <content on-propchange="updatePropertyFields"></content>
     </template>
 
     <script>
@@ -51,57 +61,33 @@
                 },
                 scale: {
                     type: Number,
-                    value: 1,
-                    observer: "updateStyle"
+                    value: 1
                 },
                 letter: String,
                 rotation: {
                     type: Number,
-                    value: 0,
-                    observer: "updateStyle"
+                    value: 0
                 },
                 selected: {
                     type: Boolean
                 }
             },
-            observers: [
-                'xChange(position.x)',
-                'yChange(position.y)'
-            ],
-            updatePropertyFields: function (e) {
-                if (e.detail.propName === "position"){
-                    e.detail.propValue.x += this.position.x;
-                    e.detail.propValue.y += this.position.y;
-                }
-                if (e.detail.propName === "scale"){
-                    e.detail.propValue += this.scale;
-                }
-                if (e.detail.propName === "rotation"){
-                    e.detail.propValue += this.rotation;
-                }
-                this.set(e.detail.propName, e.detail.propValue);
+//            posChange: function (x) {
+//                this.$.drag.setPosition(this.position);
+//            },
+//            rotChange: function () {
+//                this.$.rot.setRotation(this.rotation);
+//            },
+//            resizeChange: function () {
+//                this.$.resize.setScale(this.scale);
+//            },
+            getElementInfo: function(){
+                return {letter: this.letter, position: this.position, scale: this.scale, rotation: this.rotation};
             },
             updatePropertyFieldsRelative: function (e) {
                 var prop = e.detail.propName;
                 var prevValue = this[prop];
                 this.set(e.detail.propName, prevValue + e.detail.propValue);
-            },
-            getLetterShape: function(){
-                return this.querySelector("letter-shape");
-            },
-            xChange: function (x) {
-                this.getLetterShape().style.left = x + "px";
-            },
-            yChange: function (y) {
-                this.getLetterShape().style.top = y + "px";
-            },
-            updateStyle: function () {
-                this.getLetterShape().style.transform =
-                        "rotate(" + this.rotation + "deg) " +
-                        "scale(" + this.scale + ")";
-            },
-            getElementInfo: function(){
-                return {letter: this.letter, position: this.position, scale: this.scale, rotation: this.rotation};
             },
             updateAllProperties: function(props){
                 this.set("position", props["position"]);

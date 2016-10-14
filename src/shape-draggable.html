@@ -1,4 +1,12 @@
 <dom-module id="shape-draggable">
+    <style>
+        :host {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
     <template>
         <content on-mousemove="move"></content>
     </template>
@@ -6,11 +14,36 @@
     <script>
         Polymer({
             is: 'shape-draggable',
+            properties: {
+                position: {
+                    type: Object,
+                    value: function () {
+                        return {x: 0, y: 0};
+                    },
+                    notify: true
+                }
+            },
+            observers: [
+                'posChange(position.x)',
+                'posChange(position.y)'
+            ],
+            posChange: function (x) {
+                this.setStyle(this.position);
+            },
+            setStyle: function (pos) {
+                this.style.left = pos.x + "px";
+                this.style.top = pos.y + "px";
+            },
             move: function (e) {
                 e.preventDefault();
                 if (e.which != 1)
                     return;
-                this.fire("propchange", {propName: "position", propValue: {x: e.movementX, y: e.movementY}});
+                this.position = {
+                    x: this.position.x + e.movementX,
+                    y: this.position.y + e.movementY
+                };
+                this.setStyle(this.position);
+                this.fire("propchange", {propName: "moved", propValue: this.position});
             }
         });
     </script>

@@ -1,8 +1,18 @@
 <dom-module id="shape-json">
     <template>
         <style>
+            :host {
+                position: absolute;
+                bottom: 0;
+                right: 0;
+            }
+            #textbox {
+                width: 300px;
+                height: 500px;
+            }
+
         </style>
-        <textarea id="textbox" value="{{txtInArea::input}}" class="bottom"></textarea>
+        <textarea id="textbox" value="{{txtInArea::input}}"></textarea>
     </template>
 
     <script>
@@ -10,7 +20,18 @@
             is: 'shape-json',
 
             properties: {
-                txt: {
+                obj: {
+                    type: Object,
+                    observer: "updateObjToText", //this does not work because the changes are not deep enough.
+                    //and it is not possible to put in a deep listener here, because the object is an array, and it might be changes on its children
+                    //this is a limitation of the shallow observer method in Polymer
+                    //this is the path into Redux. Where you want all rendering to be redone for changes in such a deep changes in a big "state object"
+                    //the Redux idea is that you solve this problem of checking for updates in many deep objects, by just assuming everything has changed and
+                    //then do the work all the time, instead of checking to see if you need to do the job first.
+                    //because the act of checking is assumed so costly and the act of actually implementing changes assumed so small.
+                    notify: true
+                },
+                txtInArea: {
                     type: String,
                     value: '[{"letter":"yell","color":"crimson","link":' +
                     '"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046",' +
@@ -18,25 +39,16 @@
                     '{"letter":"s","color":"red","position":{"x":429,"y":212}},' +
                     '{"letter":"t","color":"blue","position":{"x":111,"y":414},"scale":1.8400000000000007,"rotation":62.17591364049903},' +
                     '{"letter":"c","color":"green","position":{"x":478,"y":420},"rotation":119.57783868126133}]',
-                    notify: true,
-                    observer: "textComingIn"
-                },
-                txtInArea: {
-                    type: String,
-                    value: "",
-                    observer: "updateText"
+                    observer: "updateTextToObj"
                 }
 
             },
-            textComingIn: function () {
-                console.log("txt coming in");
-                this.set("txtInArea", this.txt);
+            updateObjToText: function () {
+                this.set("txtInArea", JSON.stringify(this.obj));
             },
-            updateText: function () {
-                console.log("txt going out");
-                this.set("txt", this.txtInArea);
+            updateTextToObj: function () {
+                this.set("obj", JSON.parse(this.txtInArea));
             }
-
         });
     </script>
 </dom-module>

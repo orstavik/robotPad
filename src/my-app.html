@@ -22,28 +22,13 @@
                 border-right: none;
                 border-top: none;
             }
-
-            .bottom {
-                position: absolute;
-                bottom: 0;
-                right: 0;
-                width: 50px;
-                height: 25px;
-            }
-
-            #outputText {
-                position: absolute;
-                bottom: 0;
-                right: 50px;
-                width: 300px;
-                height: 500px;
-            }
         </style>
 
         <div id="cross">&nbsp;</div>
 
         <shape-links id="links"></shape-links>
-        <shape-json txt="{{outputTxt}}"></shape-json>
+
+        <shape-json id="jsonish" obj="{{letters}}"></shape-json>
 
         <iron-selector selected="{{selected}}" selected-attribute="selected">
             <template is="dom-repeat" items="[[letters]]">
@@ -61,13 +46,12 @@
             properties: {
                 letters: {
                     type: Array,
-                    observer: "saveData"
+//                    observer: "saveData"
+//                               here i also want a deep observer on both the array object and its children
+//                               if i had that, then i could avoid listening for the events when data changes and
+//                               only get called when the observer is triggered.
                 },
-                selected: Number,
-                outputTxt: {
-                    type: String,
-                    observer: "loadData"
-                }
+                selected: Number
             },
             updateSelectedElementInfo: function (e) {
                 this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
@@ -84,16 +68,9 @@
                 });
             },
             saveData: function () {
-//                var shapes = this.shadowRoot.querySelectorAll("shape-info");
-//                var resArray = [];
-//                shapes.forEach(function (element) {
-//                    resArray.push(element.input);
-//                });
-//                this.set("outputTxt", JSON.stringify(resArray));
-                this.set("outputTxt", JSON.stringify(this.letters));
-            },
-            loadData: function () {
-                this.set("letters", JSON.parse(this.outputTxt));
+                // this.notifyPath("letters[*].*.*"); is what i want to do on only the jsonish..
+                // In order to do that, i instead call this function
+                this.$.jsonish.updateObjToText();
             }
         });
     </script>

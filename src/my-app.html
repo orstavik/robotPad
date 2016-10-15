@@ -4,6 +4,7 @@
 <link rel="import" href="shape-info.html">
 <link rel="import" href="shape-keyboard.html">
 <link rel="import" href="shape-links.html">
+<link rel="import" href="shape-json.html">
 
 <dom-module id="my-app">
     <template>
@@ -42,13 +43,12 @@
         <div id="cross">&nbsp;</div>
 
         <shape-links id="links"></shape-links>
-
-        <textarea id="outputText" value="{{outputTxt::input}}" class="bottom"></textarea>
+        <shape-json txt="{{outputTxt}}"></shape-json>
 
         <iron-selector selected="{{selected}}" selected-attribute="selected">
             <template is="dom-repeat" items="[[letters]]">
-                <shape-info on-propchange="setAsSelectedAlso" input$="[[item]]">
-                    <letter-shape input$="[[item]]" counter="42"></letter-shape>
+                <shape-info on-propchange="setAsSelectedAlso" input="[[item]]">
+                    <letter-shape input="[[item]]" counter="42"></letter-shape>
                 </shape-info>
             </template>
         </iron-selector>
@@ -59,26 +59,23 @@
         Polymer({
             is: 'my-app',
             properties: {
-                letters: Array,
+                letters: {
+                    type: Array,
+                    observer: "saveData"
+                },
                 selected: Number,
                 outputTxt: {
                     type: String,
-                    value: '[{"letter":"yell","color":"crimson","link":' +
-                    '"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046",' +
-                    '"position":{"x":211,"y":244}},' +
-                    '{"letter":"s","color":"red","position":{"x":429,"y":212}},' +
-                    '{"letter":"t","color":"blue","position":{"x":111,"y":414},"scale":1.8400000000000007,"rotation":62.17591364049903},' +
-                    '{"letter":"c","color":"green","position":{"x":478,"y":420},"rotation":119.57783868126133}]',
                     observer: "loadData"
                 }
             },
             updateSelectedElementInfo: function (e) {
                 this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
-                this.saveData(e);
+                this.saveData();
             },
             setAsSelectedAlso: function (e) {
                 e.target.click();
-                this.saveData(e);
+                this.saveData();
             },
             hideNames: function () {
                 var names = this.shadowRoot.querySelectorAll(".shapeName");
@@ -86,13 +83,14 @@
                     el.style.display = checkbox.checked ? "initial": "none";
                 });
             },
-            saveData: function (e) {
-                var shapes = this.shadowRoot.querySelectorAll("shape-info");
-                var resArray = [];
-                shapes.forEach(function (element) {
-                    resArray.push(element.input);
-                });
-                this.set("outputTxt", JSON.stringify(resArray));
+            saveData: function () {
+//                var shapes = this.shadowRoot.querySelectorAll("shape-info");
+//                var resArray = [];
+//                shapes.forEach(function (element) {
+//                    resArray.push(element.input);
+//                });
+//                this.set("outputTxt", JSON.stringify(resArray));
+                this.set("outputTxt", JSON.stringify(this.letters));
             },
             loadData: function () {
                 this.set("letters", JSON.parse(this.outputTxt));

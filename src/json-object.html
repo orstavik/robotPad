@@ -16,7 +16,7 @@
                     </template>
                     <span>
                         <span class="key">[[item.name]] :</span>
-                        <json-object obj="{{item.value}}" level="[[nextLevel(level)]]"></json-object>
+                        <json-object key="[[item.name]]" obj="{{item.value}}" level="[[nextLevel(level)]]" on-edited="childsEdited"></json-object>
                     </span>
                 </template>
             </div>
@@ -32,7 +32,7 @@
         </template>
 
         <template is="dom-if" if="[[isPrimitive(obj)]]">
-            <span id="editable" class$="[[getType()]]" contenteditable on-input="transferEditInDomToPolymerObj">[[obj]]</span>
+            <span id="editable" class$="[[getType()]]" contenteditable on-blur="transferEditInDomToPolymerObj">[[obj]]</span>
         </template>
         </span>
     </template>
@@ -42,6 +42,7 @@
             is: 'json-object',
 
             properties: {
+                key: String,
                 obj: {
                     type: Object,
                     notify: true
@@ -85,7 +86,12 @@
                     this.set("obj", Boolean(txt));
                 else
                     this.set("obj", txt);
-                this.fire("edited", this);
+                this.fire("edited", [this.key, this.obj]);
+            },
+            childsEdited: function(e){
+                this.obj[e.detail[0]] = e.detail[1];
+                e.detail = [this.key, this.obj];
+//                console.log(e);
             }
         });
     </script>

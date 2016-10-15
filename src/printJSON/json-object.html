@@ -16,7 +16,7 @@
                     </template>
                     <span>
                         <span class="key">[[item.name]] :</span>
-                        <json-object obj="{{item.value}}" level="[[nextLevel()]]"></json-object>
+                        <json-object obj="{{item.value}}" level="[[nextLevel(level)]]"></json-object>
                     </span>
                 </template>
             </div>
@@ -26,7 +26,7 @@
         <template is="dom-if" if="[[isArray(obj)]]">
             [
             <template is="dom-repeat" items="[[obj]]">
-                <json-object obj="{{item}}" level="[[nextLevel()]]"></json-object>,
+                <json-object obj="{{item}}" level="[[nextLevel(level)]]"></json-object>,
             </template>
             ]
         </template>
@@ -46,7 +46,10 @@
                     type: Object,
                     notify: true
                 },
-                level: Number
+                level: {
+                    type :Number,
+                    value: 0
+                }
             },
             _toArray: function(obj) {
                 return Object.keys(obj).map(function(key) {
@@ -62,8 +65,8 @@
             isZero: function (index) {
                 return index === 0;
             },
-            nextLevel: function () {
-                return this.level+1;
+            nextLevel: function (level) {
+                return level+1;
             },
             isArray: function (obj) {
                 return Array.isArray(obj);

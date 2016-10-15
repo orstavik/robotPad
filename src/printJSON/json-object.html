@@ -1,13 +1,11 @@
 <dom-module id="json-object">
     <template>
         <style>
-            span.key {
-                color: blue;
-                clear: left;
-            }
-            div.jsonObject {
-
-            }
+            .string { color: green; }
+            .number { color: blue; }
+            .boolean { color: red; }
+            .null { color: magenta; }
+            .key { color: darkorange; }
         </style>
         <template is="dom-if" if="[[isObject]]">
             {<br/>
@@ -61,14 +59,8 @@
                 nextLevel: Number
             },
             getType: function () {
-                return this.isPrimitive ? "prim" : "obj";
+                return typeof this.obj;
             },
-//            getABreak: function (level) {
-//                var res = "";
-//                while(level--)
-//                    res+= "&nbsp;";
-//                return res;
-//            },
             isZero: function (index) {
                 return index === 0;
             },

@@ -44,22 +44,16 @@
         Polymer({
             is: 'my-app',
             properties: {
-                letters: {
-                    type: Array,
-//                    observer: "notifyDeepChangeOnLetters"
-//                               here i also want a deep observer on both the array object and its children
-//                               if i had that, then i could avoid listening for the events when data changes and
-//                               only get called when the observer is triggered.
-                },
+                letters: Array,
                 selected: Number
             },
             updateSelectedElementInfo: function (e) {
                 this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
-                this.notifyDeepChangeOnLetters();
+                this.deepNotify("letters");
             },
             setAsSelectedAlso: function (e) {
                 e.target.click();
-                this.notifyDeepChangeOnLetters();
+                this.deepNotify("letters");
             },
             hideNames: function () {
                 var names = this.shadowRoot.querySelectorAll(".shapeName");
@@ -67,10 +61,10 @@
                     el.style.display = checkbox.checked ? "initial": "none";
                 });
             },
-            notifyDeepChangeOnLetters: function () {
-                // this.notifyPath("letters[*].*.*"); is what i want to do on only the jsonish..
-                // In order to do that, i instead call this function
-                this.$.jsonish.updateObjToText();
+            deepNotify: function (key) {
+                var tmp = this[key];
+                this.set(key, []);
+                this.set(key, tmp);
             }
         });
     </script>

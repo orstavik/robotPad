@@ -20,11 +20,10 @@
                 left: 0;
             }
         </style>
+
         <textarea id="textbox" value="{{txtInArea::input}}"></textarea>
         <json-object obj="{{obj}}"></json-object>
-        <!--<div contenteditable="true" on-input="updateTextToObj">-->
-        <!--{{txtInArea}}-->
-        <!--</div>-->
+
     </template>
 
     <script>
@@ -34,7 +33,8 @@
             properties: {
                 obj: {
                     type: Object,
-                    observer: "updateObjToText", //this does not work because the changes are not deep enough.
+                    observer: "updateObjToText",
+                    //this does not work because the changes are not deep enough.
                     //and it is not possible to put in a deep listener here, because the object is an array, and it might be changes on its children
                     //this is a limitation of the shallow observer method in Polymer
                     //this is the path into Redux. Where you want all rendering to be redone for changes in such a deep changes in a big "state object"
@@ -68,19 +68,6 @@
 //                console.log(this.obj);
                 return JSON.stringify(this.obj);
 //                return this.syntaxHighlight(JSON.stringify(this.obj));
-            },
-            syntaxHighlight: function (json) {
-                json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-                    var cls = 'number';
-                    if (/^"/.test(match))
-                        cls = /:$/.test(match) ? 'key' : 'string';
-                    else if (/true|false/.test(match))
-                        cls = 'boolean';
-                    else if (/null/.test(match))
-                        cls = 'null';
-                    return '<span class="' + cls + '">' + match + '</span>';
-                });
             },
             stripTextFromHTML: function (html) {
                 var tmp = document.createElement("DIV");

@@ -7,34 +7,32 @@
             .null { color: magenta; }
             .key { color: darkorange; }
         </style>
-        <template is="dom-if" if="[[isObject]]">
+        <template is="dom-if" if="[[isObject(obj)]]">
             {<br/>
             <div class="jsonObject" style$="padding-left: [[level]]em">
-                <template is="dom-repeat" items="[[keyValuesAsArray]]">
+                <template is="dom-repeat" items="{{_toArray(obj)}}">
                     <template is="dom-if" if="[[!isZero(index)]]">
                         <span>,</span><br />
                     </template>
                     <span>
-                        <span class="key">[[item.0]] :</span>
-                        <json-object obj="[[item.1]]" level="[[nextLevel]]"></json-object>
+                        <span class="key">[[item.name]] :</span>
+                        <json-object obj="{{item.value}}" level="[[nextLevel()]]"></json-object>
                     </span>
                 </template>
             </div>
             }
         </template>
 
-        <template is="dom-if" if="[[isArray]]">
+        <template is="dom-if" if="[[isArray(obj)]]">
             [
             <template is="dom-repeat" items="[[obj]]">
-                <span>
-                        <json-object obj="{{item}}" level="[[nextLevel]]"></json-object>,
-                </span>
+                <json-object obj="{{item}}" level="[[nextLevel()]]"></json-object>,
             </template>
             ]
         </template>
 
-        <template is="dom-if" if="[[isPrimitive]]">
-            <span class$="[[getType()]]">[[obj]]</span>
+        <template is="dom-if" if="[[isPrimitive(obj)]]">
+            <span id="editable" class$="[[getType()]]" contenteditable on-input="transferEditInDomToPolymerObj">[[obj]]</span>
         </template>
         </span>
     </template>
@@ -44,19 +42,19 @@
             is: 'json-object',
 
             properties: {
-                keyValuesAsArray: Object,
                 obj: {
                     type: Object,
-                    observer: "initiate"
+                    notify: true
                 },
-                isArray: Boolean,
-                isObject: Boolean,
-                isPrimitive: Boolean,
-                level: {
-                    type: Number,
-                    value: 0
-                },
-                nextLevel: Number
+                level: Number
+            },
+            _toArray: function(obj) {
+                return Object.keys(obj).map(function(key) {
+                    return {
+                        name: key,
+                        value: obj[key]
+                    };
+                });
             },
             getType: function () {
                 return typeof this.obj;
@@ -64,20 +62,27 @@
             isZero: function (index) {
                 return index === 0;
             },
-            initiate: function () {
-                if (!this.obj)
-                    return;
-                this.set("nextLevel", this.level + 1);
-                this.set("isArray", Array.isArray(this.obj));
-                this.set("isObject", !Array.isArray(this.obj) && typeof this.obj === "object");
-                this.set("isPrimitive", typeof this.obj !== "object");
-
-                if (this.isObject) {
-                    var res = [];
-                    for (var key in this.obj)
-                        res.push([key, this.obj[key]]);
-                    this.set("keyValuesAsArray", res);
-                }
+            nextLevel: function () {
+                return this.level+1;
+            },
+            isArray: function (obj) {
+                return Array.isArray(obj);
+            },
+            isObject: function (obj) {
+                return !Array.isArray(obj) && typeof obj === "object";
+            },
+            isPrimitive: function (obj) {
+                return typeof obj !== "object";
+            },
+            transferEditInDomToPolymerObj: function(e){
+                var txt = this.$$("#editable").innerText;
+                if (this.getType() === "number")
+                    this.set("obj", Number(txt));
+                else if (this.getType() === "boolean")
+                    this.set("obj", Boolean(txt));
+                else
+                    this.set("obj", txt);
+                this.fire("edited", this);
             }
         });
     </script>

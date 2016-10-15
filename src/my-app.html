@@ -28,7 +28,7 @@
 
         <shape-links id="links"></shape-links>
 
-        <shape-json id="jsonish" obj="{{letters}}"></shape-json>
+        <shape-json id="jsonish" obj="{{letters}}" on-edited="updateLetters"></shape-json>
 
         <iron-selector selected="{{selected}}" selected-attribute="selected">
             <template is="dom-repeat" items="[[letters]]">
@@ -53,6 +53,9 @@
             },
             setAsSelectedAlso: function (e) {
                 e.target.click();
+                this.deepNotify("letters");
+            },
+            updateLetters: function(){
                 this.deepNotify("letters");
             },
             hideNames: function () {

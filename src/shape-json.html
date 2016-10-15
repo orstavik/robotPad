@@ -1,3 +1,5 @@
+<link rel="import" href="printJSON/json-object.html">
+
 <dom-module id="shape-json">
     <template>
         <style>
@@ -6,13 +8,23 @@
                 bottom: 0;
                 right: 0;
             }
+
             #textbox {
                 width: 300px;
-                height: 500px;
+                height: 200px;
+                clear: both;
             }
-
+            json-object {
+                position: fixed;
+                top: 0;
+                left: 0;
+            }
         </style>
         <textarea id="textbox" value="{{txtInArea::input}}"></textarea>
+        <json-object obj="{{obj}}"></json-object>
+        <!--<div contenteditable="true" on-input="updateTextToObj">-->
+        <!--{{txtInArea}}-->
+        <!--</div>-->
     </template>
 
     <script>
@@ -44,10 +56,36 @@
 
             },
             updateObjToText: function () {
-                this.set("txtInArea", JSON.stringify(this.obj));
+                this.set("txtInArea", this.prepText());
             },
-            updateTextToObj: function () {
+            updateTextToObj: function (e) {
+//                var txt = this.stripTextFromHTML(e);
+//                console.log(txt);
+//                this.set("obj", JSON.parse(txt));
                 this.set("obj", JSON.parse(this.txtInArea));
+            },
+            prepText: function () {
+//                console.log(this.obj);
+                return JSON.stringify(this.obj);
+//                return this.syntaxHighlight(JSON.stringify(this.obj));
+            },
+            syntaxHighlight: function (json) {
+                json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                    var cls = 'number';
+                    if (/^"/.test(match))
+                        cls = /:$/.test(match) ? 'key' : 'string';
+                    else if (/true|false/.test(match))
+                        cls = 'boolean';
+                    else if (/null/.test(match))
+                        cls = 'null';
+                    return '<span class="' + cls + '">' + match + '</span>';
+                });
+            },
+            stripTextFromHTML: function (html) {
+                var tmp = document.createElement("DIV");
+                tmp.innerHTML = html;
+                return tmp.textContent || tmp.innerText;
             }
         });
     </script>

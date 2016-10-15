@@ -1,0 +1,92 @@
+<dom-module id="json-object">
+    <template>
+        <style>
+            span.key {
+                color: blue;
+                clear: left;
+            }
+            div.jsonObject {
+
+            }
+        </style>
+        <template is="dom-if" if="[[isObject]]">
+            {<br/>
+            <div class="jsonObject" style$="padding-left: [[level]]em">
+                <template is="dom-repeat" items="[[keyValuesAsArray]]">
+                    <template is="dom-if" if="[[!isZero(index)]]">
+                        <span>,</span><br />
+                    </template>
+                    <span>
+                        <span class="key">[[item.0]] :</span>
+                        <json-object obj="[[item.1]]" level="[[nextLevel]]"></json-object>
+                    </span>
+                </template>
+            </div>
+            }
+        </template>
+
+        <template is="dom-if" if="[[isArray]]">
+            [
+            <template is="dom-repeat" items="[[obj]]">
+                <span>
+                        <json-object obj="{{item}}" level="[[nextLevel]]"></json-object>,
+                </span>
+            </template>
+            ]
+        </template>
+
+        <template is="dom-if" if="[[isPrimitive]]">
+            <span class$="[[getType()]]">[[obj]]</span>
+        </template>
+        </span>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'json-object',
+
+            properties: {
+                keyValuesAsArray: Object,
+                obj: {
+                    type: Object,
+                    observer: "initiate"
+                },
+                isArray: Boolean,
+                isObject: Boolean,
+                isPrimitive: Boolean,
+                level: {
+                    type: Number,
+                    value: 0
+                },
+                nextLevel: Number
+            },
+            getType: function () {
+                return this.isPrimitive ? "prim" : "obj";
+            },
+//            getABreak: function (level) {
+//                var res = "";
+//                while(level--)
+//                    res+= "&nbsp;";
+//                return res;
+//            },
+            isZero: function (index) {
+                return index === 0;
+            },
+            initiate: function () {
+                if (!this.obj)
+                    return;
+                this.set("nextLevel", this.level + 1);
+                this.set("isArray", Array.isArray(this.obj));
+                this.set("isObject", !Array.isArray(this.obj) && typeof this.obj === "object");
+                this.set("isPrimitive", typeof this.obj !== "object");
+
+                if (this.isObject) {
+                    var res = [];
+                    for (var key in this.obj)
+                        res.push([key, this.obj[key]]);
+                    this.set("keyValuesAsArray", res);
+                }
+            }
+        });
+    </script>
+</dom-module>

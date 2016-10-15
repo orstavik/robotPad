@@ -46,7 +46,7 @@
             properties: {
                 letters: {
                     type: Array,
-//                    observer: "saveData"
+//                    observer: "notifyDeepChangeOnLetters"
 //                               here i also want a deep observer on both the array object and its children
 //                               if i had that, then i could avoid listening for the events when data changes and
 //                               only get called when the observer is triggered.
@@ -55,11 +55,11 @@
             },
             updateSelectedElementInfo: function (e) {
                 this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
-                this.saveData();
+                this.notifyDeepChangeOnLetters();
             },
             setAsSelectedAlso: function (e) {
                 e.target.click();
-                this.saveData();
+                this.notifyDeepChangeOnLetters();
             },
             hideNames: function () {
                 var names = this.shadowRoot.querySelectorAll(".shapeName");
@@ -67,7 +67,7 @@
                     el.style.display = checkbox.checked ? "initial": "none";
                 });
             },
-            saveData: function () {
+            notifyDeepChangeOnLetters: function () {
                 // this.notifyPath("letters[*].*.*"); is what i want to do on only the jsonish..
                 // In order to do that, i instead call this function
                 this.$.jsonish.updateObjToText();

@@ -22,21 +22,12 @@
                 border-top: none;
             }
 
-            #input {
-                width: 50%;
-                height: 50px;
-            }
-
             .bottom {
                 position: absolute;
                 bottom: 0;
                 right: 0;
                 width: 50px;
                 height: 25px;
-            }
-
-            #output2 {
-                bottom: 25px;
             }
 
             #outputText {
@@ -52,7 +43,7 @@
 
         <shape-links id="links"></shape-links>
 
-        <textarea id="outputText" value="{{outputTxt}}" class="bottom" on-input="loadData"></textarea>
+        <textarea id="outputText" value="{{outputTxt::input}}" class="bottom"></textarea>
 
         <iron-selector selected="{{selected}}" selected-attribute="selected">
             <template is="dom-repeat" items="[[letters]]">

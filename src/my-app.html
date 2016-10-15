@@ -12,6 +12,7 @@
             :host {
                 display: block;
             }
+
             #cross {
                 position: absolute;
                 bottom: 20%;
@@ -24,19 +25,21 @@
             }
         </style>
 
-        <div id="cross">&nbsp;</div>
+        <div on-click="setSelect" selectable>
+            <div id="cross">&nbsp;</div>
 
-        <shape-links id="links"></shape-links>
+            <shape-links id="links"></shape-links>
 
-        <shape-json id="jsonish" obj="{{letters}}" on-edited="updateLetters"></shape-json>
+            <shape-json id="jsonish" obj="{{letters}}" on-edited="deepNotifyLetters"></shape-json>
 
-        <iron-selector selected="{{selected}}" selected-attribute="selected">
+            <!--<iron-selector selected="{{selected}}" selected-attribute="selected">-->
             <template is="dom-repeat" items="[[letters]]">
-                <shape-info on-propchange="setAsSelectedAlso" input="[[item]]">
+                <shape-info on-propchange="deepNotifyLetters" input="[[item]]" selectable>
                     <letter-shape input="[[item]]" counter="42"></letter-shape>
                 </shape-info>
             </template>
-        </iron-selector>
+        </div>
+        <!--</iron-selector>-->
         <shape-keyboard on-changeprop="updateSelectedElementInfo"></shape-keyboard>
     </template>
 
@@ -49,19 +52,25 @@
             },
             updateSelectedElementInfo: function (e) {
                 this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
+                this.deepNotifyLetters();
+            },
+            deepNotifyLetters: function () {
                 this.deepNotify("letters");
             },
-            setAsSelectedAlso: function (e) {
-                e.target.click();
-                this.deepNotify("letters");
-            },
-            updateLetters: function(){
-                this.deepNotify("letters");
+            setSelect: function (e) {
+                var old = this.$$("[selected]");
+                if(old)
+                    old.removeAttribute("selected");
+                var nevv = e.target;
+                while(!nevv.hasAttribute("selectable"))
+                    nevv = nevv.parentNode || nevv.host;
+                nevv.setAttribute("selected", true);
+                this.deepNotifyLetters();
             },
             hideNames: function () {
                 var names = this.shadowRoot.querySelectorAll(".shapeName");
                 names.forEach(function (el) {
-                    el.style.display = checkbox.checked ? "initial": "none";
+                    el.style.display = checkbox.checked ? "initial" : "none";
                 });
             },
             deepNotify: function (key) {

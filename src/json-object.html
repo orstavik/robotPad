@@ -1,6 +1,13 @@
 <dom-module id="json-object">
     <template>
         <style>
+            div {
+                font-size: 8px;
+            }
+            div.selected {
+                border-left: 10px solid red;
+                font-size: 14px;
+            }
             .string { color: green; }
             .number { color: blue; }
             .boolean { color: red; }
@@ -9,7 +16,7 @@
         </style>
         <template is="dom-if" if="[[isObject(obj)]]">
             {<br/>
-            <div class="jsonObject" style$="padding-left: [[level]]em">
+            <div class="jsonObject" style$="padding-left: [[level]]em" class$="[[isSelected(obj)]]">
                 <template is="dom-repeat" items="{{_toArray(obj)}}">
                     <template is="dom-if" if="[[!isZero(index)]]">
                         <span>,</span><br />
@@ -34,7 +41,6 @@
         <template is="dom-if" if="[[isPrimitive(obj)]]">
             <span id="editable" class$="[[getType()]]" contenteditable on-blur="transferEditInDomToPolymerObj">[[obj]]</span>
         </template>
-        </span>
     </template>
 
     <script>
@@ -71,6 +77,9 @@
             },
             isArray: function (obj) {
                 return Array.isArray(obj);
+            },
+            isSelected: function (obj) {
+                return !!obj.selected ? "selected" : "";
             },
             isObject: function (obj) {
                 return !Array.isArray(obj) && typeof obj === "object";

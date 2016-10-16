@@ -4,7 +4,7 @@
 <link rel="import" href="shape-info.html">
 <link rel="import" href="shape-keyboard.html">
 <link rel="import" href="shape-links.html">
-<link rel="import" href="shape-json.html">
+<link rel="import" href="json-object.html">
 
 <dom-module id="my-app">
     <template>
@@ -12,7 +12,11 @@
             :host {
                 display: block;
             }
-
+            json-object {
+                position: fixed;
+                top: 0;
+                left: 0;
+            }
             #cross {
                 position: absolute;
                 bottom: 20%;
@@ -30,16 +34,14 @@
 
             <shape-links id="links"></shape-links>
 
-            <shape-json id="jsonish" obj="{{letters}}" on-edited="deepNotifyLetters"></shape-json>
+            <json-object obj="{{letters}}" on-edited="deepNotifyLetters"></json-object>
 
-            <!--<iron-selector selected="{{selected}}" selected-attribute="selected">-->
             <template is="dom-repeat" items="[[letters]]">
                 <shape-info on-propchange="deepNotifyLetters" input="[[item]]" selectable>
                     <letter-shape input="[[item]]" counter="42"></letter-shape>
                 </shape-info>
             </template>
         </div>
-        <!--</iron-selector>-->
         <shape-keyboard on-changeprop="updateSelectedElementInfo"></shape-keyboard>
     </template>
 
@@ -49,6 +51,15 @@
             properties: {
                 letters: Array,
                 selected: Number
+            },
+            attached: function(){
+                var start= '[{"letter":"yell","color":"crimson","link":' +
+                '"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046",' +
+                '"position":{"x":211,"y":244}},' +
+                '{"letter":"s","color":"red","position":{"x":429,"y":212}},' +
+                '{"letter":"t","color":"blue","position":{"x":111,"y":414},"scale":1.8400000000000007,"rotation":62.17591364049903},' +
+                '{"letter":"c","color":"green","position":{"x":478,"y":420},"rotation":119.57783868126133}]';
+                this.set("letters", JSON.parse(start));
             },
             updateSelectedElementInfo: function (e) {
                 this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
@@ -74,9 +85,10 @@
                 });
             },
             deepNotify: function (key) {
-                var tmp = this[key];
-                this.set(key, []);
-                this.set(key, tmp);
+                this.set(key, JSON.parse(JSON.stringify(this[key])));
+//                var tmp = this[key];
+//                this.set(key, []);
+//                this.set(key, tmp);
             }
         });
     </script>

@@ -2,11 +2,11 @@
     <template>
         <style>
             div {
-                font-size: 8px;
+                font-weight: lighter;
             }
             div.selected {
                 border-left: 10px solid red;
-                font-size: 14px;
+                font-weight: bold;
             }
             .string { color: green; }
             .number { color: blue; }
@@ -89,9 +89,10 @@
             },
             transferEditInDomToPolymerObj: function(e){
                 var txt = this.$$("#editable").innerText;
-                if (this.getType() === "number")
+                var myType = this.getType();
+                if (myType === "number")
                     this.set("obj", Number(txt));
-                else if (this.getType() === "boolean")
+                else if (myType === "boolean")
                     this.set("obj", Boolean(txt));
                 else
                     this.set("obj", txt);
@@ -100,7 +101,6 @@
             childsEdited: function(e){
                 this.obj[e.detail[0]] = e.detail[1];
                 e.detail = [this.key, this.obj];
-//                console.log(e);
             }
         });
     </script>

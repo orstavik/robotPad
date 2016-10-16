@@ -5,7 +5,8 @@
 <dom-module id="shape-info">
     <template>
         <style>
-            :host([selected]) *{z-index: 1000; border: 2px solid black;}
+            :host([selected]) * {z-index: 1000}
+            :host([selected]) ::content * {border: 2px solid black;}
             :host { display: block; }
         </style>
         <shape-draggable id="drag" position="{{input.position}}">

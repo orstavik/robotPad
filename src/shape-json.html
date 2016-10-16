@@ -3,17 +3,6 @@
 <dom-module id="shape-json">
     <template>
         <style>
-            :host {
-                position: absolute;
-                bottom: 0;
-                right: 0;
-            }
-
-            #textbox {
-                width: 300px;
-                height: 200px;
-                clear: both;
-            }
             json-object {
                 position: fixed;
                 top: 0;
@@ -21,7 +10,6 @@
             }
         </style>
 
-        <textarea id="textbox" value="{{txtInArea::input}}"></textarea>
         <json-object obj="{{obj}}"></json-object>
 
     </template>
@@ -56,23 +44,10 @@
 
             },
             updateObjToText: function () {
-                this.set("txtInArea", this.prepText());
+                this.set("txtInArea", JSON.stringify(this.obj));
             },
             updateTextToObj: function (e) {
-//                var txt = this.stripTextFromHTML(e);
-//                console.log(txt);
-//                this.set("obj", JSON.parse(txt));
                 this.set("obj", JSON.parse(this.txtInArea));
-            },
-            prepText: function () {
-//                console.log(this.obj);
-                return JSON.stringify(this.obj);
-//                return this.syntaxHighlight(JSON.stringify(this.obj));
-            },
-            stripTextFromHTML: function (html) {
-                var tmp = document.createElement("DIV");
-                tmp.innerHTML = html;
-                return tmp.textContent || tmp.innerText;
             }
         });
     </script>

@@ -5,39 +5,8 @@
 <dom-module id="shape-info">
     <template>
         <style>
-            :host {
-                display: block;
-                position: absolute;
-                left: 0;
-                top: 0;
-            }
-
-            #elementControls input {
-                width: 30px;
-            }
-
-            #elementControls {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-            }
+            :host { display: block; }
         </style>
-
-        <div hidden={{!selected}} id="elementControls">
-            <!--<input type="checkbox" id="names" checked on-click="hideNames"/>Show names-->
-            <!--<br/>-->
-            <input type="text" id="scale" value="{{input.scale::input}}"/>#
-            <br/>
-            <input type="text" id="rotate" value="{{input.rotation::input}}"/>deg
-            <br/>
-            <input type="text" id="x" value="{{input.position.x::input}}"/>x
-            <br/>
-            <input type="text" id="y" value="{{input.position.y::input}}"/>y
-            <!--<br/>-->
-            <!--<input type="text" id="z" value="0" on-change="updateElement"/>z-->
-            <!--<br/>-->
-            <!--<input type="text" id="color" on-change="updateElement"/> <span id="colorTxt">color</span>-->
-        </div>
         <shape-draggable id="drag" position="{{input.position}}">
             <shape-resizeable id="resize" scale="{{input.scale}}">
                 <shape-rotatable id="rot" rotation="{{input.rotation}}">
@@ -45,9 +14,7 @@
                 </shape-rotatable>
             </shape-resizeable>
         </shape-draggable>
-
     </template>
-
     <script>
         Polymer({
             is: 'shape-info',

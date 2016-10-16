@@ -70,12 +70,15 @@
             },
             setSelect: function (e) {
                 var old = this.$$("[selected]");
-                if(old)
+                if(old){
+                    old.classList.remove("selected");
                     old.removeAttribute("selected");
+                }
                 var nevv = e.target;
                 while(!nevv.hasAttribute("selectable"))
                     nevv = nevv.parentNode || nevv.host;
                 nevv.setAttribute("selected", true);
+                nevv.classList.add("selected");
                 this.deepNotifyLetters();
             },
             hideNames: function () {

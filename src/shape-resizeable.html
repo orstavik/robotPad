@@ -27,7 +27,8 @@
             resize: function (e) {
                 if (e.which !== 2)
                     return;
-                this.set("scale", (this.scale||1) - (e.movementY * 0.03));
+                var number = (this.scale || 1) - (e.movementY * 0.03);
+                this.set("scale", Math.round(number * 100)/100);
                 this.setStyle();
                 this.fire("propchange", {propName: "scale", propValue: this.scale});
             }

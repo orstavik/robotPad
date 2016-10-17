@@ -42,6 +42,10 @@
             </template>
         </div>
         <shape-keyboard on-changeprop="updateSelectedElementInfo"></shape-keyboard>
+<div style="position:absolute; bottom: 0; right: 0">
+        <input id="hackletter" type="text" value="g" style="width: 14px; height: 14px"/>
+        <button on-click="addLetter">add letter</button>
+</div>
     </template>
 
     <script>
@@ -56,8 +60,8 @@
                 '"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046",' +
                 '"position":{"x":211,"y":244}},' +
                 '{"letter":"a","color":"red","link":"../images/keys/a.png","position":{"x":429,"y":212}},' +
-                '{"letter":"f","color":"blue","link":"../images/keys/f.png","position":{"x":111,"y":414},"scale":1.8400000000000007,"rotation":62.17591364049903},' +
-                '{"letter":"j","color":"green","link":"../images/keys/j.png","position":{"x":478,"y":420},"rotation":119.57783868126133}]';
+                '{"letter":"f","color":"blue","link":"../images/keys/f.png","position":{"x":111,"y":414},"scale":1.84,"rotation":62.17},' +
+                '{"letter":"j","color":"green","link":"../images/keys/j.png","position":{"x":478,"y":420},"rotation":119.57}]';
                 this.set("letters", JSON.parse(start));
             },
             updateSelectedElementInfo: function (e) {
@@ -91,6 +95,11 @@
 //                var tmp = this[key];
 //                this.set(key, []);
 //                this.set(key, tmp);
+            },
+            addLetter: function(){
+                var letter = JSON.parse('{"letter":"'+this.$.hackletter.value+'","color":"blue","link":"../images/keys/'+this.$.hackletter.value+'.png","position":{"x":200,"y":200},"scale":1.84,"rotation":62.17}');
+                this.push("letters", letter);
+                this.deepNotifyLetters();
             }
         });
     </script>

@@ -1,3 +1,5 @@
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+
 <dom-module id="shape-links">
     <template>
         <style>
@@ -19,10 +21,19 @@
             }
         </style>
 
-        <template is="dom-repeat" items="[[links]]">
-            <img src$="[[item.link]]" alt="image" on-dblclick="makeElement">
-            <input class="name" type="text" value$="[[item.name]]"/>:
-            <input class="link" type="text" value$="[[item.link]]"/> <br/>
+        <firebase-document
+                app-name="linksonfire"
+                id="firefire"
+                path="linksGoHere"
+                data="{{links}}">
+        </firebase-document>
+
+        <template is="dom-repeat" items="[[_toArray(links)]]">
+            <div class$="[[item.key]]">
+                <img src="[[item.value.link]]" alt="image" on-dblclick="makeElement">
+                <input class="name" type="text" value="[[item.value.name]]" on-input="madeChanges"/>:
+                <input class="link" type="text" value="[[item.value.link]]" on-input="madeChanges"/> <br/>
+            </div>
         </template>
         <button on-click="addRow">Add row</button>
     </template>
@@ -32,83 +43,31 @@
             is: 'shape-links',
 
             properties: {
-                links: {
-                    type: Array,
-                    value: function () {
-                        return [
-                            {
-                                name: "a",
-                                link: "../images/keys/a.png"
-                            },
-                            {
-                                name: "d",
-                                link: "../images/keys/d.png"
-                            },
-                            {
-                                name: "s",
-                                link: "../images/keys/s.png"
-                            },
-                            {
-                                name: "f",
-                                link: "../images/keys/f.png"
-                            },
-                            {
-                                name: "g",
-                                link: "../images/keys/g.png"
-                            },
-                            {
-                                name: "h",
-                                link: "../images/keys/h.png"
-                            },
-                            {
-                                name: "j",
-                                link: "../images/keys/j.png"
-                            },
-                            {
-                                name: "k",
-                                link: "../images/keys/k.png"
-                            },
-                            {
-                                name: "l",
-                                link: "../images/keys/l.png"
-                            },
-                            {
-                                name: "bone",
-                                link: "http://worldartsme.com/images/yellow-triangle-clipart-1.jpg"
-                            },
-                            {
-                                name: "yell",
-                                link: "http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046"
-                            },
-                            {
-                                name: "hand",
-                                link: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDaHJ2OVBrVVZRalk=w1366-h599-k-iv1?v=1476266095410"
-                            },
-                            {
-                                name: "eye",
-                                link: "https://lh3.google.com/u/0/d/0B5StfgsAnkuDNk5NQmFTbU5LUmc=w742-h583-k-iv1?v=1476266095410"
-                            }
-                        ]
-                    }
-                }
+                links: Object
             },
             addRow: function () {
-                this.push("links",
-                        {
-                            name: "shortname",
-                            link: "https://www.polymer-project.org/images/logos/p-logo.png"
-                        }
-                )
+                var offset = {
+                    name: "shortname",
+                    link: "https://www.polymer-project.org/images/logos/p-logo.png"
+                };
+                this.set("links.created" + new Date().getTime(), offset);
             },
-            getLink: function(key){
-                for (var i = 0; i < this.links.length; i++) {
-                    if (this.links[i].name === key)
-                        return this.links[i].link;
-                }
-            },
-            makeElement: function(e){
+            makeElement: function (e) {
                 var name = e.target.nextElementSibling.value;
-                this.fire("nevv", {link: e.target.src, letter: name, position: {x: 200, y:200}});
+                this.fire("nevv", {link: e.target.src, letter: name, position: {x: 200, y: 200}});
+            },
+            _toArray: function (arrayOrObject) {
+                var ar = [];
+                for (var key in arrayOrObject)
+                    ar.push({key: key, value: arrayOrObject[key]});
+                return ar;
+            },
+            madeChanges: function (e) {
+                var parent = e.target.parentNode;
+                var key = parent.classList.toString();
+                var name = parent.children[1].value;
+                var link = parent.children[2].value;
+                this.set("links."+ key, {name: name, link: link});
             }
         });
     </script>

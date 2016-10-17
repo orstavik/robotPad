@@ -96,6 +96,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!--<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.min.js"></script>-->
 
     <link rel="import" href="/src/my-app.html">
+    <link rel="import" href="bower_components/polymerfire/firebase-app.html">
 
     <style>
       body {
@@ -108,6 +109,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
   </head>
   <body>
+      <firebase-app auth-domain="robotpad-762de.firebaseapp.com"
+                    database-url="https://robotpad-762de.firebaseio.com/"
+                    api-key="AIzaSyAJ0HCTXnEXoG_aJ5AcN8d1VLbugeHF-Bo"
+                    name="linksonfire">
+      </firebase-app>
     <my-app></my-app>
   </body>
 </html>

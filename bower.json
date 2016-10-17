@@ -5,7 +5,8 @@
   ],
   "private": true,
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.6.0"
+    "polymer": "Polymer/polymer#^1.6.0",
+    "polymerfire": "firebase/polymerfire#^0.9.7"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"

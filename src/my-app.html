@@ -31,7 +31,7 @@
         <div on-mousedown="setSelect" selectable>
             <div id="cross">&nbsp;</div>
 
-            <shape-links id="links"></shape-links>
+            <shape-links id="links" on-nevv="addLetter"></shape-links>
 
             <json-object obj="{{letters}}" on-edited="deepNotifyLetters"></json-object>
 
@@ -42,10 +42,6 @@
             </template>
         </div>
         <shape-keyboard on-changeprop="updateSelectedElementInfo"></shape-keyboard>
-<div style="position:absolute; bottom: 0; right: 0">
-        <input id="hackletter" type="text" value="g" style="width: 14px; height: 14px"/>
-        <button on-click="addLetter">add letter</button>
-</div>
     </template>
 
     <script>
@@ -96,9 +92,8 @@
 //                this.set(key, []);
 //                this.set(key, tmp);
             },
-            addLetter: function(){
-                var letter = JSON.parse('{"letter":"'+this.$.hackletter.value+'","color":"blue","link":"../images/keys/'+this.$.hackletter.value+'.png","position":{"x":200,"y":200},"scale":1.84,"rotation":62.17}');
-                this.push("letters", letter);
+            addLetter: function(e){
+                this.push("letters", e.detail);
                 this.deepNotifyLetters();
             }
         });

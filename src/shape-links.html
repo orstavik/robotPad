@@ -20,7 +20,7 @@
         </style>
 
         <template is="dom-repeat" items="[[links]]">
-            <img src$="[[item.link]]" alt="image">
+            <img src$="[[item.link]]" alt="image" on-dblclick="makeElement">
             <input class="name" type="text" value$="[[item.name]]"/>:
             <input class="link" type="text" value$="[[item.link]]"/> <br/>
         </template>
@@ -105,6 +105,10 @@
                     if (this.links[i].name === key)
                         return this.links[i].link;
                 }
+            },
+            makeElement: function(e){
+                var name = e.target.nextElementSibling.value;
+                this.fire("nevv", {link: e.target.src, letter: name, position: {x: 200, y:200}});
             }
         });
     </script>

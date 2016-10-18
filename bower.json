@@ -1,14 +1,15 @@
 {
-  "name": "polymer-starter-kit",
+  "name": "testing 2.0",
   "authors": [
-    "The Polymer Authors"
+    "ivar and tom and oxana"
   ],
   "private": true,
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.6.0",
-    "polymerfire": "firebase/polymerfire#^0.9.7"
+    "polymer": "polymer/Polymer#2.0-preview",
+    "webcomponentsjs": "^0.7.22"
   },
-  "devDependencies": {
-    "web-component-tester": "^4.0.0"
+  "devDependencies": {},
+  "resolutions": {
+    "webcomponentsjs": "v1"
   }
 }

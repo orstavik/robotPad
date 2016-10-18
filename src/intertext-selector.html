@@ -1,14 +1,14 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<dom-module id="intertext-selectable">
+<dom-module id="intertext-selector">
     <template>
         <slot on-mousedown="setSelect"></slot>
     </template>
 
     <script>
-        class IntertextSelectable extends Polymer.Element {
+        class IntertextSelector extends Polymer.Element {
             static get is() {
-                return "intertext-selectable";
+                return "intertext-selector";
             }
 
             static get config() {
@@ -17,23 +17,31 @@
                         radioButton: {
                             type: Boolean,
                             value: false
+                        },
+                        selected: {
+                            type: Object
                         }
                     }
                 }
             }
 
             setSelect(e) {
-                var old = this.querySelector("[data-selected]");
                 var nevv = this._getDataSelectable(e.target);
+                this._deselect(nevv);
+                if (!nevv)
+                    return;
+                nevv.setAttribute("data-selected", true);
+                nevv.classList.add("data-selected");
+                this.selected = nevv;
+            }
 
-                if (old && (!this.radioButton || nevv )) {
-                    old.classList.remove("data-selected");
-                    old.removeAttribute("data-selected");
-                }
-                if (nevv) {
-                    nevv.setAttribute("data-selected", true);
-                    nevv.classList.add("data-selected");
-                }
+            _deselect(nevv) {
+                if (!this.selected)
+                    return;
+                if (this.radioButton && !nevv)
+                    return;
+                this.selected.classList.remove("data-selected");
+                this.selected.removeAttribute("data-selected");
             }
 
             _getDataSelectable(nevv) {
@@ -45,7 +53,7 @@
                 return nevv;
             }
         }
-        customElements.define(IntertextSelectable.is, IntertextSelectable);
+        customElements.define(IntertextSelector.is, IntertextSelector);
     </script>
 </dom-module>
 

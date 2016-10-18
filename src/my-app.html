@@ -4,7 +4,7 @@
 <link rel="import" href="shape-keyboard.html">
 <link rel="import" href="shape-links.html">
 <!--<link rel="import" href="json-object.html">-->
-<link rel="import" href="intertext-selectable.html">
+<link rel="import" href="intertext-selector.html">
 
 
 <!--<json-object obj="{{letters}}" on-edited="deepNotifyLetters"></json-object>-->
@@ -42,7 +42,7 @@
 
         <shape-links id="links" on-nevv="addLetter"></shape-links>
 
-        <intertext-selectable radio-button>
+        <intertext-selector radio-button>
 
             <div id="cross">&nbsp;</div>
 
@@ -58,7 +58,7 @@
                 <!--</shape-info>-->
             </template>
 
-        </intertext-selectable>
+        </intertext-selector>
 
         <shape-keyboard on-changeprop="updateSelectedElementInfo"></shape-keyboard>
 

@@ -3,12 +3,8 @@
 <link rel="import" href="shape-info.html">
 <link rel="import" href="shape-keyboard.html">
 <link rel="import" href="shape-links.html">
-<!--<link rel="import" href="json-object.html">-->
+<link rel="import" href="json-object.html">
 <link rel="import" href="intertext-selector.html">
-
-
-<!--<json-object obj="{{letters}}" on-edited="deepNotifyLetters"></json-object>-->
-
 
 <dom-module id="my-app">
     <template>
@@ -40,24 +36,17 @@
             }
         </style>
 
+        <json-object obj="{{letters}}" on-writeop="deepNotifyLetters"></json-object>
         <shape-links id="links" on-nevv="addLetter"></shape-links>
 
+        <div id="cross">&nbsp;</div>
+
         <intertext-selector radio-button>
-
-            <div id="cross">&nbsp;</div>
-
-            <div data-selectable>one ok</div>
-            <div data-selectable>two ok</div>
-            <div>three not!</div>
-            <div id="tom" data-selectable>four ok</div>
-            <input type="text" value="{{ivar::input}}">
-
             <template is="dom-repeat" items="[[letters]]">
                 <shape-info on-propchange="deepNotifyLetters" input="[[item]]" data-selectable>
                     <letter-shape input="[[item]]" counter="42"></letter-shape>
                 </shape-info>
             </template>
-
         </intertext-selector>
 
         <shape-keyboard on-changeprop="updateSelectedElementInfo"></shape-keyboard>
@@ -82,21 +71,22 @@
                 };
             }
 
+            updateSelectedElementInfo(e, detail) {
+                this.shadowRoot.querySelector("[data-selected]").updatePropertyFieldsRelative(e);
+                this.deepNotifyLetters(e);
+            }
+
             addLetter(e) {
                 console.log(e);
 //                this.push("letters", e.detail);
-//                this.deepNotifyLetters();
+//                this.deepNotifyLetters(e);
             }
 
-            deepNotifyLetters() {
-                this.deepNotify("letters");
+            deepNotifyLetters(e) {
+//                console.log(e);
+                this.notifyPath("letters");
             }
-            //            deepNotify: function (key) {
-            //                this.set(key, JSON.parse(JSON.stringify(this[key])));
-            ////                var tmp = this[key];
-            ////                this.set(key, []);
-            ////                this.set(key, tmp);
-            //            },
+
             connectedCallback() {
                 super.connectedCallback();
                 var start = '[{"letter":"yell","color":"crimson","link":' +
@@ -108,24 +98,14 @@
                 this.set("letters", JSON.parse(start));
             }
 
-            updateSelectedElementInfo(e, detail) {
-                console.log(detail);
-//                this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
-//                this.deepNotifyLetters();
-            }
-
         }
         customElements.define(MyApp.is, MyApp);
-
-
-        //        Polymer({
         //            hideNames: function () {
         //                var names = this.shadowRoot.querySelectorAll(".shapeName");
         //                names.forEach(function (el) {
         //                    el.style.display = checkbox.checked ? "initial" : "none";
         //                });
         //            },
-        //        });
 
     </script>
 </dom-module>

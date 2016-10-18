@@ -4,26 +4,43 @@
             div {
                 font-weight: lighter;
             }
+
             div.selected {
                 border-left: 10px solid red;
                 font-weight: bold;
             }
-            .string { color: green; }
-            .number { color: blue; }
-            .boolean { color: red; }
-            .null { color: magenta; }
-            .key { color: darkorange; }
+
+            .string {
+                color: green;
+            }
+
+            .number {
+                color: blue;
+            }
+
+            .boolean {
+                color: red;
+            }
+
+            .null {
+                color: magenta;
+            }
+
+            .key {
+                color: darkorange;
+            }
         </style>
         <template is="dom-if" if="[[isObject(obj)]]">
             {<br/>
             <div class="jsonObject" style$="padding-left: [[level]]em" class$="[[isSelected(obj)]]">
                 <template is="dom-repeat" items="{{_toArray(obj)}}">
                     <template is="dom-if" if="[[!isZero(index)]]">
-                        <span>,</span><br />
+                        <span>,</span><br/>
                     </template>
                     <span>
                         <span class="key">[[item.name]] :</span>
-                        <json-object key="[[item.name]]" obj="{{item.value}}" level="[[nextLevel(level)]]" on-edited="childsEdited"></json-object>
+                        <json-object key="[[item.name]]" obj="{{item.value}}" level="[[nextLevel(level)]]"
+                                     on-writeop="childsEdited"></json-object>
                     </span>
                 </template>
             </div>
@@ -33,62 +50,79 @@
         <template is="dom-if" if="[[isArray(obj)]]">
             [
             <template is="dom-repeat" items="[[obj]]">
-                <json-object obj="{{item}}" level="[[nextLevel(level)]]"></json-object>,
+                <json-object obj="{{item}}" level="[[nextLevel(level)]]" on-writeop="childsEdited"></json-object>
+                ,
             </template>
             ]
         </template>
 
         <template is="dom-if" if="[[isPrimitive(obj)]]">
-            <span id="editable" class$="[[getType()]]" contenteditable on-blur="transferEditInDomToPolymerObj">[[obj]]</span>
+            <span id="editable" class$="[[getType()]]" contenteditable
+                  on-blur="transferEditInDomToPolymerObj">[[obj]]</span>
         </template>
     </template>
 
     <script>
-        Polymer({
-            is: 'json-object',
+        class JSONObject extends Polymer.Element {
+            static get is() {
+                return "json-object";
+            }
 
-            properties: {
-                key: String,
-                obj: {
-                    type: Object,
-                    notify: true
-                },
-                level: {
-                    type :Number,
-                    value: 0
-                }
-            },
-            _toArray: function(obj) {
-                return Object.keys(obj).map(function(key) {
+            static get config() {
+                return {
+                    properties: {
+                        key: String,
+                        obj: {
+                            type: Object,
+                            notify: true
+                        },
+                        level: {
+                            type: Number,
+                            value: 0
+                        }
+                    }
+                };
+            }
+
+            _toArray(obj) {
+                return Object.keys(obj).map(function (key) {
                     return {
                         name: key,
                         value: obj[key]
                     };
                 });
-            },
-            getType: function () {
+            }
+
+            getType() {
                 return typeof this.obj;
-            },
-            isZero: function (index) {
+            }
+
+            isZero(index) {
                 return index === 0;
-            },
-            nextLevel: function (level) {
-                return level+1;
-            },
-            isArray: function (obj) {
+            }
+
+            nextLevel(level) {
+                return level + 1;
+            }
+
+            isArray(obj) {
                 return Array.isArray(obj);
-            },
-            isSelected: function (obj) {
+            }
+
+            isSelected(obj) {
                 return !!obj.selected ? "selected" : "";
-            },
-            isObject: function (obj) {
+            }
+
+            isObject(obj) {
                 return !Array.isArray(obj) && typeof obj === "object";
-            },
-            isPrimitive: function (obj) {
+            }
+
+            isPrimitive(obj) {
                 return typeof obj !== "object";
-            },
-            transferEditInDomToPolymerObj: function(e){
-                var txt = this.$$("#editable").innerText;
+            }
+
+            transferEditInDomToPolymerObj(e) {
+                var txt = this.shadowRoot.querySelector("#editable").innerText;
                 var myType = this.getType();
                 if (myType === "number")
                     this.set("obj", Number(txt));
@@ -96,12 +130,18 @@
                     this.set("obj", Boolean(txt));
                 else
                     this.set("obj", txt);
-                this.fire("edited", [this.key, this.obj]);
-            },
-            childsEdited: function(e){
-                this.obj[e.detail[0]] = e.detail[1];
-                e.detail = [this.key, this.obj];
+                var detail = {detail: [this.key, this.obj]};
+                var cE = new CustomEvent("writeop", detail);
+                this.dispatchEvent(cE);
             }
-        });
+
+            childsEdited(e) {
+                this.obj[e.detail[0]] = e.detail[1];
+//                e.stopPropagation();
+                var cE = new CustomEvent("writeop", {detail: [this.key, this.obj]});
+                this.dispatchEvent(cE);
+            }
+        }
+        customElements.define(JSONObject.is, JSONObject);
     </script>
 </dom-module>

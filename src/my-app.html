@@ -2,12 +2,10 @@
 <!--<link rel="import" href="letter-shape.html">-->
 <!--<link rel="import" href="shape-info.html">-->
 <!--<link rel="import" href="shape-keyboard.html">-->
-<!--<link rel="import" href="shape-links.html">-->
+<link rel="import" href="shape-links.html">
 <!--<link rel="import" href="json-object.html">-->
 <link rel="import" href="intertext-selectable.html">
 
-
-<!--<shape-links id="links" on-nevv="addLetter"></shape-links>-->
 
 <!--<json-object obj="{{letters}}" on-edited="deepNotifyLetters"></json-object>-->
 
@@ -25,6 +23,7 @@
             :host {
                 display: block;
             }
+
             [data-selected] {
                 border: 2px solid red;
             }
@@ -47,6 +46,8 @@
             }
         </style>
 
+        <shape-links id="links" on-nevv="addLetter"></shape-links>
+
         <intertext-selectable radio-button>
             <div id="cross">&nbsp;</div>
 
@@ -65,11 +66,6 @@
                 return "my-app";
             }
 
-            constructor() {
-                super();
-                console.log("hei, im created!");
-            }
-
             static get config() {
                 return {
                     properties: {
@@ -85,22 +81,11 @@
                 };
             }
 
-//            setSelect(e) {
-//                console.log(e.target);
-//                console.log(this.$.tom);
-//                var old = this.shadowRoot.querySelector("[data-selected]");
-//                if (old) {
-//                    old.classList.remove("data-selected");
-//                    old.removeAttribute("data-selected");
-//                }
-//                var nevv = e.target;
-//                while (!nevv.hasAttribute("data-selectable"))
-//                    nevv = nevv.parentNode || nevv.host;
-//                nevv.setAttribute("data-selected", true);
-//                nevv.classList.add("data-selected");
-////                this.deepNotifyLetters();
-//            }
-//
+            addLetter(e) {
+                console.log(e)
+//                this.push("letters", e.detail);
+//                this.deepNotifyLetters();
+            }
 
             doConsoleLog() {
                 console.log("ivar was here");

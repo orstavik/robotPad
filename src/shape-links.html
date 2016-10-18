@@ -1,4 +1,4 @@
-<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<!--<link rel="import" href="../bower_components/polymerfire/firebase-document.html">-->
 
 <dom-module id="shape-links">
     <template>
@@ -9,24 +9,27 @@
                 right: 0;
                 top: 0;
             }
+
             img, input {
                 width: 14px;
                 height: 14px;
             }
+
             input.name {
                 width: 50px;
             }
+
             input.link {
                 width: 400px;
             }
         </style>
 
-        <firebase-document
-                app-name="linksonfire"
-                id="firefire"
-                path="linksGoHere"
-                data="{{links}}">
-        </firebase-document>
+        <!--<firebase-document-->
+        <!--app-name="linksonfire"-->
+        <!--id="firefire"-->
+        <!--path="linksGoHere"-->
+        <!--data="{{links}}">-->
+        <!--</firebase-document>-->
 
         <template is="dom-repeat" items="[[_toArray(links)]]">
             <div class$="[[item.key]]">
@@ -39,36 +42,70 @@
     </template>
 
     <script>
-        Polymer({
-            is: 'shape-links',
 
-            properties: {
-                links: Object
-            },
-            addRow: function () {
+        class ShapeLinks extends Polymer.Element {
+            static get is() {
+                return "shape-links";
+            }
+
+            static get config() {
+                return {
+                    properties: {
+                        links: {
+                            type: Object,
+                            value: function () {
+                                return {
+                                    a: {
+                                        name: "a",
+                                        link: "../images/keys/a.png"
+                                    },
+                                    d: {
+                                        name: "d",
+                                        link: "../images/keys/d.png"
+                                    }
+                                };
+
+                            }
+
+                        }
+                    },
+
+                    observers: [
+                        "doConsoleLog2(ivar)"
+                    ]
+                };
+            }
+
+            addRow() {
                 var offset = {
                     name: "shortname",
                     link: "https://www.polymer-project.org/images/logos/p-logo.png"
                 };
                 this.set("links.created" + new Date().getTime(), offset);
-            },
-            makeElement: function (e) {
+            }
+
+            makeElement(e) {
                 var name = e.target.nextElementSibling.value;
-                this.fire("nevv", {link: e.target.src, letter: name, position: {x: 200, y: 200}});
-            },
-            _toArray: function (arrayOrObject) {
+                this.dispatchEvent(new CustomEvent("nevv", {link: e.target.src, letter: name, position: {x: 200, y: 200}}));
+            }
+
+            _toArray(arrayOrObject) {
                 var ar = [];
-                for (var key in arrayOrObject)
-                    ar.push({key: key, value: arrayOrObject[key]});
+                for (var k in arrayOrObject)
+                    ar.push({key: k, value: arrayOrObject[k]});
                 return ar;
-            },
-            madeChanges: function (e) {
+            }
+
+            madeChanges(e) {
                 var parent = e.target.parentNode;
                 var key = parent.classList.toString();
                 var name = parent.children[1].value;
                 var link = parent.children[2].value;
-                this.set("links."+ key, {name: name, link: link});
+                this.links[key] = {name: name, link: link};
+                console.log(this.links.a.name);
             }
-        });
+        }
+
+        customElements.define(ShapeLinks.is, ShapeLinks);
     </script>
 </dom-module>

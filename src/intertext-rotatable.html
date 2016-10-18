@@ -1,4 +1,4 @@
-<dom-module id="shape-rotatable">
+<dom-module id="intertext-rotatable">
     <template>
         <style>
             :host {
@@ -28,10 +28,7 @@
             }
 
             extra(e) {
-                console.log("boo");
-//                if (e.which === 3)
-                    e.preventDefault();
-                return false;
+                e.preventDefault();
             }
 
             setStyle() {
@@ -39,6 +36,7 @@
             }
 
             rotate(e) {
+                console.log("tom");
                 if (e.which !== 3)
                     return;
                 this.set("rotation", this.calcRotation(e));

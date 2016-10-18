@@ -1,6 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="letter-shape.html">
-<!--<link rel="import" href="shape-info.html">-->
+<link rel="import" href="shape-info.html">
 <link rel="import" href="shape-keyboard.html">
 <link rel="import" href="shape-links.html">
 <!--<link rel="import" href="json-object.html">-->
@@ -53,9 +53,10 @@
             <input type="text" value="{{ivar::input}}">
 
             <template is="dom-repeat" items="[[letters]]">
-                <!--<shape-info on-propchange="deepNotifyLetters" input="[[item]]" selectable>-->
+                <shape-info on-propchange="deepNotifyLetters" input="[[item]]" data-selectable>
+                    <!--<div>[[item]]" counter="42"></div>-->
                     <letter-shape input="[[item]]" counter="42"></letter-shape>
-                <!--</shape-info>-->
+                </shape-info>
             </template>
 
         </intertext-selector>
@@ -95,6 +96,15 @@
 //                this.deepNotifyLetters();
             }
 
+            deepNotifyLetters() {
+                this.deepNotify("letters");
+            }
+            //            deepNotify: function (key) {
+            //                this.set(key, JSON.parse(JSON.stringify(this[key])));
+            ////                var tmp = this[key];
+            ////                this.set(key, []);
+            ////                this.set(key, tmp);
+            //            },
             doConsoleLog() {
                 console.log("ivar was here");
             }
@@ -105,12 +115,12 @@
 
             connectedCallback() {
                 super.connectedCallback();
-                var start= '[{"letter":"yell","color":"crimson","link":' +
-                '"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046",' +
-                '"position":{"x":211,"y":244}},' +
-                '{"letter":"a","color":"red","link":"../images/keys/a.png","position":{"x":429,"y":212}},' +
-                '{"letter":"f","color":"blue","link":"../images/keys/f.png","position":{"x":111,"y":414},"scale":1.84,"rotation":62.17},' +
-                '{"letter":"j","color":"green","link":"../images/keys/j.png","position":{"x":478,"y":420},"rotation":119.57}]';
+                var start = '[{"letter":"yell","color":"crimson","link":' +
+                        '"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046",' +
+                        '"position":{"x":211,"y":244}},' +
+                        '{"letter":"a","color":"red","link":"../images/keys/a.png","position":{"x":429,"y":212}},' +
+                        '{"letter":"f","color":"blue","link":"../images/keys/f.png","position":{"x":111,"y":414},"scale":1.84,"rotation":62.17},' +
+                        '{"letter":"j","color":"green","link":"../images/keys/j.png","position":{"x":478,"y":420},"rotation":119.57}]';
                 this.set("letters", JSON.parse(start));
             }
 
@@ -125,20 +135,11 @@
 
 
         //        Polymer({
-        //            deepNotifyLetters: function () {
-        //                this.deepNotify("letters");
-        //            },
         //            hideNames: function () {
         //                var names = this.shadowRoot.querySelectorAll(".shapeName");
         //                names.forEach(function (el) {
         //                    el.style.display = checkbox.checked ? "initial" : "none";
         //                });
-        //            },
-        //            deepNotify: function (key) {
-        //                this.set(key, JSON.parse(JSON.stringify(this[key])));
-        ////                var tmp = this[key];
-        ////                this.set(key, []);
-        ////                this.set(key, tmp);
         //            },
         //        });
 

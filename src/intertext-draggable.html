@@ -1,0 +1,61 @@
+<dom-module id="intertext-draggable">
+    <template>
+        <style>
+            :host {
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+        </style>
+        <slot on-mousemove="move"></slot>
+    </template>
+
+    <script>
+        class IntertextDraggable extends Polymer.Element {
+            static get is() {
+                return "intertext-draggable";
+            }
+
+            static get config() {
+                return {
+                    properties: {
+                        position: {
+                            type: Object,
+                            value: function () {
+                                return {x: 0, y: 0};
+                            },
+                            notify: true,
+                            observer: "setStyle"
+                        }
+                    },
+                    observers: [
+                        'posChange(position.x)',
+                        'posChange(position.y)'
+                    ]
+                };
+            }
+
+            posChange(x) {
+                this.setStyle(this.position);
+            }
+
+            setStyle(pos) {
+                this.style.transform = "translate(" + pos.x + "px, " + pos.y + "px)";
+            }
+
+            move(e) {
+                e.preventDefault();
+                if (e.which != 1)
+                    return;
+//                if (!this.position)
+//                    this.position = {x: 0, y: 0};
+                this.set("position.x", this.position.x + e.movementX);
+                this.set("position.y", this.position.y + e.movementY);
+                this.setStyle(this.position);
+                this.dispatchEvent(new CustomEvent("moved", {detail: {propName: "moved", propValue: this.position}}));
+            }
+        }
+        customElements.define(IntertextDraggable.is, IntertextDraggable);
+    </script>
+</dom-module>

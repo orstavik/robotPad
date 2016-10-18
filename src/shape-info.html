@@ -1,42 +1,59 @@
-<link rel="import" href="shape-draggable.html">
-<link rel="import" href="shape-resizeable.html">
-<link rel="import" href="shape-rotatable.html">
+<link rel="import" href="intertext-draggable.html">
+<!--<link rel="import" href="shape-resizeable.html">-->
+<!--<link rel="import" href="shape-rotatable.html">-->
 
 <dom-module id="shape-info">
     <template>
         <style>
-            :host([selected]) * {z-index: 1000}
-            :host([selected]) ::content * {border: 2px solid black;}
-            :host { display: block; }
+            :host([selected]) * {
+                z-index: 1000
+            }
+
+            :host([selected]) ::content * {
+                border: 2px solid black;
+            }
+
+            :host {
+                display: block;
+            }
         </style>
-        <shape-draggable id="drag" position="{{input.position}}">
-            <shape-resizeable id="resize" scale="{{input.scale}}">
-                <shape-rotatable id="rot" rotation="{{input.rotation}}">
-                    <content on-propchange="updatePropInfo"></content>
-                </shape-rotatable>
-            </shape-resizeable>
-        </shape-draggable>
+        <intertext-draggable id="drag" position="{{input.position}}">
+            <!--<shape-resizeable id="resize" scale="{{input.scale}}">-->
+                <!--<shape-rotatable id="rot" rotation="{{input.rotation}}">-->
+                    <slot on-propchange="updatePropInfo"></slot>
+                <!--</shape-rotatable>-->
+            <!--</shape-resizeable>-->
+        </intertext-draggable>
     </template>
     <script>
-        Polymer({
-            is: 'shape-info',
+        class ShapeInfo extends Polymer.Element {
+            static get is() {
+                return "shape-info";
+            }
 
-            properties: {
-                input: Object,
-                selected: {
-                    type: Boolean,
-                    observer: "updateSelected"
-                }
-            },
-            updatePropertyFieldsRelative: function (e) {
+            static get config() {
+                return {
+                    properties: {
+                        input: Object,
+                        selected: {
+                            type: Boolean,
+                            observer: "updateSelected"
+                        }
+                    }
+                };
+            }
+
+            updatePropertyFieldsRelative(e) {
                 var prop = e.detail.propName;
                 var prevValue = prop === "scale" ? this.input[prop] || 1 : this.input[prop] || 0;
                 var value = prevValue + e.detail.propValue;
-                this.set("input."+ prop, value);
-            },
-            updateSelected: function(){
+                this.set("input." + prop, value);
+            }
+
+            updateSelected() {
                 this.set("input.selected", this.selected);
             }
-        });
+        }
+        customElements.define(ShapeInfo.is, ShapeInfo);
     </script>
 </dom-module>

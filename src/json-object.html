@@ -5,7 +5,7 @@
                 font-weight: lighter;
             }
 
-            div.selected {
+            :host(.data-selected) {
                 border-left: 10px solid red;
                 font-weight: bold;
             }
@@ -58,7 +58,7 @@
 
         <template is="dom-if" if="[[isPrimitive(obj)]]">
             <span id="editable" class$="[[getType()]]" contenteditable
-                  on-blur="transferEditInDomToPolymerObj">[[obj]]</span>
+                  on-blur="transferEditInDomToPolymerObj">{{obj}}</span>
         </template>
     </template>
 
@@ -110,7 +110,7 @@
             }
 
             isSelected(obj) {
-                return !!obj.selected ? "selected" : "";
+                return !!obj.selected ? "data-selected" : "";
             }
 
             isObject(obj) {

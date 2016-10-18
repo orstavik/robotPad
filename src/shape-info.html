@@ -17,9 +17,9 @@
                 display: block;
             }
         </style>
-        <intertext-draggable id="drag" position="{{input.position}}" on-move="hasChanged">
-            <intertext-resizeable id="resize" scale="{{input.scale}}" on-scale="hasChanged">
-                <intertext-rotatable id="rot" rotation="{{input.rotation}}" on-rotate="hasChanged">
+        <intertext-draggable id="drag" position="{{input.position}}" >
+            <intertext-resizeable id="resize" scale="{{input.scale}}" >
+                <intertext-rotatable id="rot" rotation="{{input.rotation}}">
                     <slot></slot>
                 </intertext-rotatable>
             </intertext-resizeable>
@@ -36,10 +36,10 @@
                     properties: {
                         input: {
                             type: Object,
-//                            notify: true   //this should work when the array iterator is in ship shape.
+                            notify: true   //this should work when the array iterator is in ship shape.
                         },
 
-                        selected: {
+                        dataSelected: {
                             type: Boolean,
                             observer: "updateSelected"
                         }
@@ -55,11 +55,11 @@
             }
 
             updateSelected() {
-                this.set("input.selected", this.selected);
+                this.set("input.selected", this.dataSelected);
             }
             hasChanged(e) {
-//                this.notifyPath("input"); //this should work when the array iterator is in ship shape.
-                this.dispatchEvent(new CustomEvent("changedshape", {detail: this.input}));
+                this.notifyPath("input"); //this should work when the array iterator is in ship shape.
+//                this.dispatchEvent(new CustomEvent("changedshape", {detail: this.input}));
             }
         }
         customElements.define(ShapeInfo.is, ShapeInfo);

@@ -45,15 +45,13 @@
             }
 
             move(e) {
-                e.preventDefault();
+                e.preventDefault(); //so images don't have the drag functionality.
                 if (e.which != 1)
                     return;
-//                if (!this.position)
-//                    this.position = {x: 0, y: 0};
                 this.set("position.x", this.position.x + e.movementX);
                 this.set("position.y", this.position.y + e.movementY);
                 this.setStyle(this.position);
-                this.dispatchEvent(new CustomEvent("moved", {detail: {propName: "moved", propValue: this.position}}));
+                this.dispatchEvent(new CustomEvent("move", {detail: this.position}));
             }
         }
         customElements.define(IntertextDraggable.is, IntertextDraggable);

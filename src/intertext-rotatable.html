@@ -40,7 +40,7 @@
                     return;
                 this.set("rotation", this.calcRotation(e));
                 this.setStyle();
-                this.dispatchEvent(new CustomEvent("propchange", {detail:{propName: "rotation", propValue: this.rotation}}));
+                this.dispatchEvent(new CustomEvent("rotate", {detail: this.rotation}));
             }
 
             calcRotation(e) {

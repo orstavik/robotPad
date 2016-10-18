@@ -37,7 +37,7 @@
                 var number = (this.scale || 1) - (e.movementY * 0.03);
                 this.set("scale", Math.round(number * 100) / 100);
                 this.setStyle();
-                this.dispatchEvent(new CustomEvent("propchange", {detail: {propName: "scale", propValue: this.scale}}));
+                this.dispatchEvent(new CustomEvent("scale", {detail: this.scale}));
             }
 
         }

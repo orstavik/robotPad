@@ -43,7 +43,7 @@
 
         <intertext-selector radio-button>
             <template is="dom-repeat" items="[[letters]]">
-                <shape-info on-propchange="deepNotifyLetters" input="[[item]]" data-selectable>
+                <shape-info on-changedshape="shapeChanged" input="{{item}}" data-selectable>
                     <letter-shape input="[[item]]" counter="42"></letter-shape>
                 </shape-info>
             </template>
@@ -73,17 +73,20 @@
 
             updateSelectedElementInfo(e, detail) {
                 this.shadowRoot.querySelector("[data-selected]").updatePropertyFieldsRelative(e);
-                this.deepNotifyLetters(e);
+                this.notifyPath("letters");
             }
 
             addLetter(e) {
-                console.log(e);
-//                this.push("letters", e.detail);
-//                this.deepNotifyLetters(e);
+//                console.log(e);
+                this.push("letters", e.detail);
+                this.notifyPath("letters");
+            }
+
+            shapeChanged(e){
+                this.notifyPath("letters");
             }
 
             deepNotifyLetters(e) {
-//                console.log(e);
                 this.notifyPath("letters");
             }
 

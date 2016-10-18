@@ -5,11 +5,11 @@
 <dom-module id="shape-info">
     <template>
         <style>
-            :host([selected]) * {
+            :host([data-selected]) #drag {
                 z-index: 1000
             }
 
-            :host([selected]) ::content * {
+            :host([data-selected]) #rot {
                 border: 2px solid black;
             }
 
@@ -17,10 +17,10 @@
                 display: block;
             }
         </style>
-        <intertext-draggable id="drag" position="{{input.position}}">
-            <intertext-resizeable id="resize" scale="{{input.scale}}">
-                <intertext-rotatable id="rot" rotation="{{input.rotation}}">
-                    <slot on-propchange="updatePropInfo"></slot>
+        <intertext-draggable id="drag" position="{{input.position}}" on-move="hasChanged">
+            <intertext-resizeable id="resize" scale="{{input.scale}}" on-scale="hasChanged">
+                <intertext-rotatable id="rot" rotation="{{input.rotation}}" on-rotate="hasChanged">
+                    <slot></slot>
                 </intertext-rotatable>
             </intertext-resizeable>
         </intertext-draggable>
@@ -34,7 +34,11 @@
             static get config() {
                 return {
                     properties: {
-                        input: Object,
+                        input: {
+                            type: Object,
+//                            notify: true   //this should work when the array iterator is in ship shape.
+                        },
+
                         selected: {
                             type: Boolean,
                             observer: "updateSelected"
@@ -52,6 +56,10 @@
 
             updateSelected() {
                 this.set("input.selected", this.selected);
+            }
+            hasChanged(e) {
+//                this.notifyPath("input"); //this should work when the array iterator is in ship shape.
+                this.dispatchEvent(new CustomEvent("changedshape", {detail: this.input}));
             }
         }
         customElements.define(ShapeInfo.is, ShapeInfo);

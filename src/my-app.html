@@ -1,7 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <!--<link rel="import" href="letter-shape.html">-->
 <!--<link rel="import" href="shape-info.html">-->
-<!--<link rel="import" href="shape-keyboard.html">-->
+<link rel="import" href="shape-keyboard.html">
 <link rel="import" href="shape-links.html">
 <!--<link rel="import" href="json-object.html">-->
 <link rel="import" href="intertext-selectable.html">
@@ -14,7 +14,6 @@
 <!--<letter-shape input="[[item]]" counter="42"></letter-shape>-->
 <!--</shape-info>-->
 <!--</template>-->
-<!--<shape-keyboard on-changeprop="updateSelectedElementInfo"></shape-keyboard>-->
 
 <dom-module id="my-app">
     <template>
@@ -57,6 +56,9 @@
             <div id="tom" data-selectable>four ok</div>
             <input type="text" value="{{ivar::input}}">
         </intertext-selectable>
+
+        <shape-keyboard on-changeprop="updateSelectedElementInfo"></shape-keyboard>
+
     </template>
 
     <script>
@@ -100,6 +102,12 @@
                 console.log("ivars connected");
             }
 
+            updateSelectedElementInfo(e, detail) {
+                console.log(detail);
+//                this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
+//                this.deepNotifyLetters();
+            }
+
         }
         customElements.define(MyApp.is, MyApp);
 
@@ -118,10 +126,6 @@
         //                '{"letter":"f","color":"blue","link":"../images/keys/f.png","position":{"x":111,"y":414},"scale":1.84,"rotation":62.17},' +
         //                '{"letter":"j","color":"green","link":"../images/keys/j.png","position":{"x":478,"y":420},"rotation":119.57}]';
         //                this.set("letters", JSON.parse(start));
-        //            },
-        //            updateSelectedElementInfo: function (e) {
-        //                this.shadowRoot.querySelector("[selected]").updatePropertyFieldsRelative(e);
-        //                this.deepNotifyLetters();
         //            },
         //            deepNotifyLetters: function () {
         //                this.deepNotify("letters");

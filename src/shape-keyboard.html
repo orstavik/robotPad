@@ -1,21 +1,27 @@
 <dom-module id="shape-keyboard">
     <script>
-        Polymer({
-            is: 'shape-keyboard',
+        class ShapeKeyboard extends Polymer.Element {
+            static get is() {
+                return "shape-keyboard";
+            }
 
-            attached: function () {
+            connectedCallback() {
                 var self = this;
                 document.addEventListener("keydown", function (event) {
+                    var change;
                     if (event.code === "ArrowDown")
-                        self.fire("changeprop", {propName: "scale", propValue: - 0.01});
+                        change = {propName: "scale", propValue: -0.01};
                     if (event.code === "ArrowUp")
-                        self.fire("changeprop", {propName: "scale", propValue: + 0.01});
+                        change = {propName: "scale", propValue: +0.01};
                     if (event.code === "ArrowLeft")
-                        self.fire("changeprop", {propName: "rotation", propValue: -1});
+                        change = {propName: "rotation", propValue: -1};
                     if (event.code === "ArrowRight")
-                        self.fire("changeprop", {propName: "rotation", propValue: 1});
+                        change = {propName: "rotation", propValue: 1};
+                    if (change)
+                        self.dispatchEvent(new CustomEvent("changeprop", {detail: change}));
                 });
             }
-        });
+        }
+        customElements.define(ShapeKeyboard.is, ShapeKeyboard);
     </script>
 </dom-module>

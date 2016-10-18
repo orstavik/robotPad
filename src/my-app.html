@@ -4,6 +4,7 @@
 <!--<link rel="import" href="shape-keyboard.html">-->
 <!--<link rel="import" href="shape-links.html">-->
 <!--<link rel="import" href="json-object.html">-->
+<link rel="import" href="intertext-selectable.html">
 
 
 <!--<shape-links id="links" on-nevv="addLetter"></shape-links>-->
@@ -24,6 +25,9 @@
             :host {
                 display: block;
             }
+            [data-selected] {
+                border: 2px solid red;
+            }
 
             /*json-object {*/
             /*position: fixed;*/
@@ -43,15 +47,15 @@
             }
         </style>
 
-        <div on-mousedown="setSelect" selectable>
+        <intertext-selectable radio-button>
             <div id="cross">&nbsp;</div>
 
             <div data-selectable>one ok</div>
             <div data-selectable>two ok</div>
-            <div data-selectable>three not!</div>
-            <div data-selectable>four ok</div>
+            <div>three not!</div>
+            <div id="tom" data-selectable>four ok</div>
             <input type="text" value="{{ivar::input}}">
-        </div>
+        </intertext-selectable>
     </template>
 
     <script>
@@ -63,6 +67,7 @@
 
             constructor() {
                 super();
+                console.log("hei, im created!");
             }
 
             static get config() {
@@ -80,21 +85,22 @@
                 };
             }
 
-            setSelect(e) {
-                console.log(e.target);
-                var old = this.querySelector("[data-selected]");
-                if (old) {
-                    old.classList.remove("data-selected");
-                    old.removeAttribute("data-selected");
-                }
-                var nevv = e.target;
-                while (!nevv.hasAttribute("data-selectable"))
-                    nevv = nevv.parentNode || nevv.host;
-                nevv.setAttribute("data-selected", true);
-                nevv.classList.add("data-selected");
-//                this.deepNotifyLetters();
-            }
-
+//            setSelect(e) {
+//                console.log(e.target);
+//                console.log(this.$.tom);
+//                var old = this.shadowRoot.querySelector("[data-selected]");
+//                if (old) {
+//                    old.classList.remove("data-selected");
+//                    old.removeAttribute("data-selected");
+//                }
+//                var nevv = e.target;
+//                while (!nevv.hasAttribute("data-selectable"))
+//                    nevv = nevv.parentNode || nevv.host;
+//                nevv.setAttribute("data-selected", true);
+//                nevv.classList.add("data-selected");
+////                this.deepNotifyLetters();
+//            }
+//
 
             doConsoleLog() {
                 console.log("ivar was here");

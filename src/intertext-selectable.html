@@ -1,0 +1,51 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="intertext-selectable">
+    <template>
+        <slot on-mousedown="setSelect"></slot>
+    </template>
+
+    <script>
+        class IntertextSelectable extends Polymer.Element {
+            static get is() {
+                return "intertext-selectable";
+            }
+
+            static get config() {
+                return {
+                    properties: {
+                        radioButton: {
+                            type: Boolean,
+                            value: false
+                        }
+                    }
+                }
+            }
+
+            setSelect(e) {
+                var old = this.querySelector("[data-selected]");
+                var nevv = this._getDataSelectable(e.target);
+
+                if (old && (!this.radioButton || nevv )) {
+                    old.classList.remove("data-selected");
+                    old.removeAttribute("data-selected");
+                }
+                if (nevv) {
+                    nevv.setAttribute("data-selected", true);
+                    nevv.classList.add("data-selected");
+                }
+            }
+
+            _getDataSelectable(nevv) {
+                while (!nevv.hasAttribute("data-selectable")) {
+                    nevv = nevv.parentNode || nevv.host;
+                    if (nevv === this)
+                        return null;
+                }
+                return nevv;
+            }
+        }
+        customElements.define(IntertextSelectable.is, IntertextSelectable);
+    </script>
+</dom-module>
+

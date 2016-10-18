@@ -1,6 +1,6 @@
 <link rel="import" href="intertext-draggable.html">
-<!--<link rel="import" href="shape-resizeable.html">-->
-<!--<link rel="import" href="shape-rotatable.html">-->
+<link rel="import" href="intertext-resizeable.html">
+<link rel="import" href="intertext-rotatable.html">
 
 <dom-module id="shape-info">
     <template>
@@ -18,11 +18,11 @@
             }
         </style>
         <intertext-draggable id="drag" position="{{input.position}}">
-            <!--<shape-resizeable id="resize" scale="{{input.scale}}">-->
-                <!--<shape-rotatable id="rot" rotation="{{input.rotation}}">-->
+            <intertext-resizeable id="resize" scale="{{input.scale}}">
+                <intertext-rotatable id="rot" rotation="{{input.rotation}}">
                     <slot on-propchange="updatePropInfo"></slot>
-                <!--</shape-rotatable>-->
-            <!--</shape-resizeable>-->
+                </intertext-rotatable>
+            </intertext-resizeable>
         </intertext-draggable>
     </template>
     <script>

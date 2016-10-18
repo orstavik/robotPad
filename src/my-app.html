@@ -54,7 +54,6 @@
 
             <template is="dom-repeat" items="[[letters]]">
                 <shape-info on-propchange="deepNotifyLetters" input="[[item]]" data-selectable>
-                    <!--<div>[[item]]" counter="42"></div>-->
                     <letter-shape input="[[item]]" counter="42"></letter-shape>
                 </shape-info>
             </template>
@@ -75,18 +74,11 @@
             static get config() {
                 return {
                     properties: {
-                        ivar: {
-                            type: String,
-                            value: "ivar",
-                            observer: "doConsoleLog"
-                        },
                         letters: {
                             type: Array
                         }
                     },
-                    observers: [
-                        "doConsoleLog2(ivar)"
-                    ]
+                    observers: []
                 };
             }
 
@@ -105,14 +97,6 @@
             ////                this.set(key, []);
             ////                this.set(key, tmp);
             //            },
-            doConsoleLog() {
-                console.log("ivar was here");
-            }
-
-            doConsoleLog2() {
-                console.log("ivar was here too");
-            }
-
             connectedCallback() {
                 super.connectedCallback();
                 var start = '[{"letter":"yell","color":"crimson","link":' +

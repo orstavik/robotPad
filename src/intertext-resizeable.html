@@ -1,0 +1,46 @@
+<dom-module id="intertext-resizeable">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+        <slot on-mousemove="resize"></slot>
+    </template>
+
+    <script>
+        class IntertextResizeable extends Polymer.Element {
+            static get is() {
+                return "intertext-resizeable";
+            }
+
+            static config() {
+                return {
+                    properties: {
+                        scale: {
+                            type: Number,
+                            value: 1,
+                            observer: "setStyle",
+                            notify: true
+                        }
+                    }
+                }
+            }
+
+            setStyle() {
+                this.style.transform = "scale(" + this.scale + ")";
+            }
+
+            resize(e) {
+                if (e.which !== 2)
+                    return;
+                var number = (this.scale || 1) - (e.movementY * 0.03);
+                this.set("scale", Math.round(number * 100) / 100);
+                this.setStyle();
+                this.dispatchEvent(new CustomEvent("propchange", {detail: {propName: "scale", propValue: this.scale}}));
+            }
+
+        }
+        customElements.define(IntertextResizeable.is, IntertextResizeable);
+    </script>
+</dom-module>

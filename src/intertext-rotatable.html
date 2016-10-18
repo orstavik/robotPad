@@ -1,0 +1,66 @@
+<dom-module id="shape-rotatable">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+        <slot on-mousemove="rotate" on-contextmenu="extra"></slot>
+    </template>
+
+    <script>
+        class IntertextRotatable extends Polymer.Element {
+            static get is() {
+                return "intertext-rotatable";
+            }
+
+            static get config() {
+                return {
+                    properties: {
+                        rotation: {
+                            type: Number,
+                            value: 0,
+                            observer: "setStyle",
+                            notify: true
+                        }
+                    }
+                };
+            }
+
+            extra(e) {
+                console.log("boo");
+//                if (e.which === 3)
+                    e.preventDefault();
+                return false;
+            }
+
+            setStyle() {
+                this.style.transform = "rotate(" + this.rotation + "deg)";
+            }
+
+            rotate(e) {
+                if (e.which !== 3)
+                    return;
+                this.set("rotation", this.calcRotation(e));
+                this.setStyle();
+                this.dispatchEvent(new CustomEvent("propchange", {detail:{propName: "rotation", propValue: this.rotation}}));
+            }
+
+            calcRotation(e) {
+                var rect = this.getBoundingClientRect();
+                var center = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+                var distance = {
+                    x: e.x - center.x,
+                    y: e.y - center.y
+                };
+                var angle = Math.atan2(distance.y, distance.x);
+                return Math.round((angle * 180 / Math.PI + 90) * 10) / 10;
+            }
+
+        }
+        customElements.define(IntertextRotatable.is, IntertextRotatable);
+    </script>
+</dom-module>

@@ -1,4 +1,4 @@
-<link rel="import" href="../bower_components/polymer/polymer.html" />
+<link rel="import" href="../bower_components/polymer/polymer.html"/>
 <dom-module id="letter-shape">
     <template>
         <style>
@@ -51,30 +51,38 @@
     </template>
 
     <script>
-        Polymer({
-            is: 'letter-shape',
-            properties: {
-                input: Object,
-                counter: Number,
-                selected: {
-                    type: Boolean,
-                    observer: "getElementInfo"
-                }
-            },
-            isTriangle: function (l) {
+        class LetterShape extends Polymer.Element {
+            static get is() {
+                return "letter-shape";
+            }
+
+            static get config() {
+                return {
+                    properties: {
+                        input: Object,
+                        counter: Number,
+                        selected: {
+                            type: Boolean,
+                            observer: "getElementInfo"
+                        }
+                    }
+                };
+            }
+            isTriangle(l) {
                 return l === "t";
-            },
-            isCircle: function (l) {
+            }
+            isCircle(l) {
                 return l === "c";
-            },
-            isSquare: function (l) {
+            }
+            isSquare(l) {
                 return l === "s";
-            },
-            isCustom: function (l) {
+            }
+            isCustom(l) {
                 if (!l)
                     return false;
                 return !this.isTriangle(l) && !this.isSquare(l) && !this.isCircle(l);
             }
-        });
+        }
+        customElements.define(LetterShape.is, LetterShape);
     </script>
 </dom-module>

@@ -14,9 +14,18 @@
                 display: block;
             }
 
-            [data-selected] {
-                border: 2px solid red;
-            }
+            /*[data-selected] {*/
+                /*z-index: 1000*/
+            /*}*/
+
+            /*[data-selected] #rot {*/
+                /*border: 2px solid black;*/
+            /*}*/
+
+
+            /*[data-selected] {*/
+                /*border: 2px solid red;*/
+            /*}*/
 
             /*json-object {*/
             /*position: fixed;*/
@@ -42,7 +51,7 @@
 
         <div id="cross"> </div>
 
-        <intertext-selector radio-button>
+        <intertext-selector radio-button on-select="somethingSelected">
             <template is="dom-repeat" items="[[letters]]">
                 <shape-info key="[[index]]" input="[[item]]" data-selectable on-newinfo="anInfoUpdated">
                     <letter-shape input="[[item]]" counter="42"></letter-shape>
@@ -50,7 +59,7 @@
             </template>
         </intertext-selector>
 
-        <shape-keyboard on-changeprop="updateSelectedElementInfo"></shape-keyboard>
+        <shape-keyboard on-changeprop="keyPressAction"></shape-keyboard>
 
     </template>
 
@@ -72,8 +81,19 @@
                 };
             }
 
-            updateSelectedElementInfo(e, detail) {
-                this.shadowRoot.querySelector("[data-selected]").updatePropertyFieldsRelative(e);
+            somethingSelected(e, detail) {
+                if (detail.before)
+                    this.letters[detail.before.key].selected = false;
+                this.letters[detail.now.key].selected = true;
+                this.notifyPath("letters");
+//
+//                console.log(detail.input);
+            }
+            keyPressAction(e, detail) {
+                var selected = this.shadowRoot.querySelector("[data-selected]");
+                if (!selected)
+                    return console.log("Can't use the keys when no shape is selected");
+                selected.updatePropertyFieldsRelative(e);
                 this.notifyPath("letters");
             }
 

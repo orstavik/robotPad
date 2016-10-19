@@ -19,7 +19,7 @@
         </style>
         <intertext-draggable id="drag" position="[[input.position]]" on-move="handleMove">
             <intertext-resizeable id="resize" scale="[[input.scale]]" on-scale="handleScale" >
-                <intertext-rotatable id="rot" rotation="{{input.rotation}}" on-rotate="handleRotate">
+                <intertext-rotatable id="rot" rotation="[[input.rotation]]" on-rotate="handleRotate">
                     <slot></slot>
                 </intertext-rotatable>
             </intertext-resizeable>
@@ -36,17 +36,10 @@
                     properties: {
                         input: {
                             type: Object,
-//                            notify: true   //this should work when the array iterator is in ship shape.
                         },
                         key: {
                             type: Object,
-//                            notify: true   //this should work when the array iterator is in ship shape.
                         },
-
-                        dataSelected: {
-                            type: Boolean,
-                            observer: "updateSelected"
-                        }
                     }
                 };
             }
@@ -56,10 +49,6 @@
                 var prevValue = prop === "scale" ? this.input[prop] || 1 : this.input[prop] || 0;
                 var value = prevValue + e.detail.propValue;
                 this.set("input." + prop, value);
-            }
-
-            updateSelected() {
-                this.set("input.selected", this.dataSelected);
             }
             notifyChange(){
                 this.notifyPath("input"); //this should work when the array iterator is in ship shape.

@@ -18,21 +18,20 @@
                             type: Boolean,
                             value: false
                         },
-                        selected: {
-                            type: Object
-                        }
+                        selected: Object
                     }
                 }
             }
 
             setSelect(e) {
                 var nevv = this._getDataSelectable(e.target);
-                this._deselect(nevv);
+                var old = this._deselect(nevv);
                 if (!nevv)
                     return;
                 nevv.setAttribute("data-selected", true);
                 nevv.classList.add("data-selected");
                 this.selected = nevv;
+                this.dispatchEvent(new CustomEvent("select", {detail: {now: this.selected, before: old}}));
             }
 
             _deselect(nevv) {
@@ -42,6 +41,7 @@
                     return;
                 this.selected.classList.remove("data-selected");
                 this.selected.removeAttribute("data-selected");
+                return this.selected;
             }
 
             _getDataSelectable(nevv) {
@@ -56,4 +56,3 @@
         customElements.define(IntertextSelector.is, IntertextSelector);
     </script>
 </dom-module>
-

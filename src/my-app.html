@@ -54,7 +54,7 @@
 
         <div id="cross"> </div>
 
-        <intertext-selector radio-button on-select="somethingSelected">
+        <intertext-selector id="shapeSelector" radio-button on-select="somethingSelected">
             <template is="dom-repeat" items="[[letters]]">
                 <shape-info key="[[index]]" input="[[item]]" data-selectable on-newinfo="anInfoUpdated">
                     <letter-shape input="[[item]]" counter="42"></letter-shape>
@@ -62,7 +62,7 @@
             </template>
         </intertext-selector>
 
-        <shape-keyboard on-changeprop="keyPressAction"></shape-keyboard>
+        <shape-keyboard on-scale="keyScale" on-rotate="keyRotate"></shape-keyboard>
 
     </template>
 
@@ -89,19 +89,24 @@
                     this.letters[detail.before.key].selected = false;
                 this.letters[detail.now.key].selected = true;
                 this.notifyPath("letters");
-//
-//                console.log(detail.input);
             }
-            keyPressAction(e, detail) {
-                var selected = this.shadowRoot.querySelector("[data-selected]");
+            keyScale(e, detail) {
+                var selected = this.$.shapeSelector.selected;
                 if (!selected)
                     return console.log("Can't use the keys when no shape is selected");
-                selected.updatePropertyFieldsRelative(e);
+                selected.scaleAlittle(detail);
+                this.notifyPath("letters");
+            }
+            keyRotate(e, detail) {
+                var selected = this.$.shapeSelector.selected;
+                if (!selected)
+                    return console.log("Can't use the keys when no shape is selected");
+                selected.rotateAlittle(detail);
                 this.notifyPath("letters");
             }
 
             anInfoUpdated(e, detail) {
-                this.letters[detail.key] = detail.value;
+//                this.letters[detail.key] = detail.value;
                 this.notifyPath("letters");
             }
 
@@ -111,7 +116,7 @@
             }
 
             writeInChanges(e, detail) {
-                this.letters = detail[1];
+//                this.letters = detail[1];
                 this.notifyPath("letters");
             }
 

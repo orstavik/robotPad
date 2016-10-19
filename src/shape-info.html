@@ -13,7 +13,7 @@
             }
         </style>
         <intertext-draggable id="drag" position="[[input.position]]" on-move="handleMove">
-            <intertext-resizeable id="resize" scale="[[input.scale]]" on-scale="handleScale" >
+            <intertext-resizeable id="resize" scale="[[input.scale]]" on-scale="handleScale">
                 <intertext-rotatable id="rot" rotation="[[input.rotation]]" on-rotate="handleRotate">
                     <slot></slot>
                 </intertext-rotatable>
@@ -39,24 +39,35 @@
                 };
             }
 
-            updatePropertyFieldsRelative(e) {
-                var prop = e.detail.propName;
-                var prevValue = prop === "scale" ? this.input[prop] || 1 : this.input[prop] || 0;
-                var value = prevValue + e.detail.propValue;
-                this.set("input." + prop, value);
+            scaleAlittle(value) {
+                if (!this.input.scale || this.input.scale < 0)
+                    this.input.scale = 1;
+                this.input.scale += value;
+                this.notifyChange();
             }
-            notifyChange(){
-                this.notifyPath("input"); //this should work when the array iterator is in ship shape.
+
+            rotateAlittle(value) {
+                if (!this.input.rotation)
+                    this.input.rotation = 0;
+                this.input.rotation += value;
+                this.notifyChange();
+            }
+
+            notifyChange() {
+//                this.notifyPath("input"); //needed to update the draggable, rotatable, resizeable.
                 this.dispatchEvent(new CustomEvent("newinfo", {detail: {key: this.key, value: this.input}}));
             }
+
             handleMove(e, detail) {
                 this.input.position = detail;
                 this.notifyChange();
             }
+
             handleScale(e, detail) {
                 this.input.scale = detail;
                 this.notifyChange();
             }
+
             handleRotate(e, detail) {
                 this.input.rotation = detail;
                 this.notifyChange();

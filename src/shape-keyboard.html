@@ -6,20 +6,16 @@
             }
 
             connectedCallback() {
-                var self = this;
                 document.addEventListener("keydown", function (event) {
-                    var change;
                     if (event.code === "ArrowDown")
-                        change = {propName: "scale", propValue: -0.01};
+                        this.dispatchEvent(new CustomEvent("scale", {detail: -0.03}));
                     if (event.code === "ArrowUp")
-                        change = {propName: "scale", propValue: +0.01};
+                        this.dispatchEvent(new CustomEvent("scale", {detail: 0.03}));
                     if (event.code === "ArrowLeft")
-                        change = {propName: "rotation", propValue: -1};
+                        this.dispatchEvent(new CustomEvent("rotate", {detail: -1}));
                     if (event.code === "ArrowRight")
-                        change = {propName: "rotation", propValue: 1};
-                    if (change)
-                        self.dispatchEvent(new CustomEvent("changeprop", {detail: change}));
-                });
+                        this.dispatchEvent(new CustomEvent("rotate", {detail: 1}));
+                }.bind(this));
             }
         }
         customElements.define(ShapeKeyboard.is, ShapeKeyboard);

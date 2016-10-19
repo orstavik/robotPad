@@ -36,14 +36,15 @@
             }
         </style>
 
-        <json-object obj="{{letters}}" on-writeop="deepNotifyLetters"></json-object>
+        <json-object obj="[[letters]]" on-writeop="deepNotifyLetters"></json-object>
+
         <shape-links id="links" on-nevv="addLetter"></shape-links>
 
-        <div id="cross">&nbsp;</div>
+        <div id="cross"> </div>
 
         <intertext-selector radio-button>
-            <template is="dom-repeat" items="{{letters}}">
-                <shape-info input="{{item}}" data-selectable>
+            <template is="dom-repeat" items="[[letters]]">
+                <shape-info key="[[index]]" input="[[item]]" data-selectable on-newinfo="anInfoUpdated">
                     <letter-shape input="[[item]]" counter="42"></letter-shape>
                 </shape-info>
             </template>
@@ -76,10 +77,15 @@
                 this.notifyPath("letters");
             }
 
-            addLetter(e) {
-//                console.log(e);
-                this.push("letters", e.detail);
+            anInfoUpdated(e, detail) {
+                this.letters[detail.key] = detail.value;
                 this.notifyPath("letters");
+            }
+
+            addLetter(e) {
+                this.letters.push(e.detail);
+                this.notifyPath("letters");
+//                this.push("letters", );
             }
 
             deepNotifyLetters(e) {
@@ -99,13 +105,6 @@
 
         }
         customElements.define(MyApp.is, MyApp);
-//        hideNames: function () {
-//            var names = this.shadowRoot.querySelectorAll(".shapeName");
-//            names.forEach(function (el) {
-//                el.style.display = checkbox.checked ? "initial" : "none";
-//            });
-//        },
-
     </script>
 </dom-module>
 

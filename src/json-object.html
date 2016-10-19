@@ -33,13 +33,13 @@
         <template is="dom-if" if="[[isObject(obj)]]">
             {<br/>
             <div class="jsonObject" style$="padding-left: [[level]]em" class$="[[isSelected(obj)]]">
-                <template is="dom-repeat" items="{{_toArray(obj)}}">
+                <template is="dom-repeat" items="[[_toArray(obj)]]">
                     <template is="dom-if" if="[[!isZero(index)]]">
                         <span>,</span><br/>
                     </template>
                     <span>
-                        <span class="key">[[item.name]] :</span>
-                        <json-object key="[[item.name]]" obj="{{item.value}}" level="[[nextLevel(level)]]"
+                        <span class="key">[[item.key]] :</span>
+                        <json-object key="[[item.key]]" obj="[[item.value]]" level="[[nextLevel(level)]]"
                                      on-writeop="childsEdited"></json-object>
                     </span>
                 </template>
@@ -50,15 +50,14 @@
         <template is="dom-if" if="[[isArray(obj)]]">
             [
             <template is="dom-repeat" items="[[obj]]">
-                <json-object obj="{{item}}" level="[[nextLevel(level)]]" on-writeop="childsEdited"></json-object>
+                <json-object key="[[index]]" obj="[[item]]" level="[[nextLevel(level)]]" on-writeop="childsEdited"></json-object>
                 ,
             </template>
             ]
         </template>
 
         <template is="dom-if" if="[[isPrimitive(obj)]]">
-            <span id="editable" class$="[[getType()]]" contenteditable
-                  on-blur="transferEditInDomToPolymerObj">{{obj}}</span>
+            <span id="editable" class$="[[getType()]]" contenteditable on-input="transferEditInDomToPolymerObj">[[obj]]</span>
         </template>
     </template>
 
@@ -74,7 +73,7 @@
                         key: String,
                         obj: {
                             type: Object,
-                            notify: true
+//                            notify: true
                         },
                         level: {
                             type: Number,
@@ -87,7 +86,7 @@
             _toArray(obj) {
                 return Object.keys(obj).map(function (key) {
                     return {
-                        name: key,
+                        key: key,
                         value: obj[key]
                     };
                 });

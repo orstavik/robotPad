@@ -17,9 +17,9 @@
                 display: block;
             }
         </style>
-        <intertext-draggable id="drag" position="{{input.position}}" >
-            <intertext-resizeable id="resize" scale="{{input.scale}}" >
-                <intertext-rotatable id="rot" rotation="{{input.rotation}}">
+        <intertext-draggable id="drag" position="[[input.position]]" on-move="handleMove">
+            <intertext-resizeable id="resize" scale="[[input.scale]]" on-scale="handleScale" >
+                <intertext-rotatable id="rot" rotation="{{input.rotation}}" on-rotate="handleRotate">
                     <slot></slot>
                 </intertext-rotatable>
             </intertext-resizeable>
@@ -36,7 +36,11 @@
                     properties: {
                         input: {
                             type: Object,
-                            notify: true   //this should work when the array iterator is in ship shape.
+//                            notify: true   //this should work when the array iterator is in ship shape.
+                        },
+                        key: {
+                            type: Object,
+//                            notify: true   //this should work when the array iterator is in ship shape.
                         },
 
                         dataSelected: {
@@ -57,9 +61,21 @@
             updateSelected() {
                 this.set("input.selected", this.dataSelected);
             }
-            hasChanged(e) {
+            notifyChange(){
                 this.notifyPath("input"); //this should work when the array iterator is in ship shape.
-//                this.dispatchEvent(new CustomEvent("changedshape", {detail: this.input}));
+                this.dispatchEvent(new CustomEvent("newinfo", {detail: {key: this.key, value: this.input}}));
+            }
+            handleMove(e, detail) {
+                this.input.position = detail;
+                this.notifyChange();
+            }
+            handleScale(e, detail) {
+                this.input.scale = detail;
+                this.notifyChange();
+            }
+            handleRotate(e, detail) {
+                this.input.rotation = detail;
+                this.notifyChange();
             }
         }
         customElements.define(ShapeInfo.is, ShapeInfo);

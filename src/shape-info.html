@@ -5,16 +5,11 @@
 <dom-module id="shape-info">
     <template>
         <style>
-            :host([data-selected]) #drag {
-                z-index: 1000
-            }
-
-            :host([data-selected]) #rot {
-                border: 2px solid black;
-            }
-
             :host {
                 display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
             }
         </style>
         <intertext-draggable id="drag" position="[[input.position]]" on-move="handleMove">

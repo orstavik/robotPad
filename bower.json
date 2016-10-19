@@ -6,10 +6,12 @@
   "private": true,
   "dependencies": {
     "polymer": "polymer/Polymer#2.0-preview",
-    "webcomponentsjs": "^0.7.22"
+    "webcomponentsjs": "^0.7.22",
+    "polymerfire": "^0.10.0"
   },
   "devDependencies": {},
   "resolutions": {
-    "webcomponentsjs": "v1"
+    "webcomponentsjs": "v1",
+    "polymer": "2.0-preview"
   }
 }

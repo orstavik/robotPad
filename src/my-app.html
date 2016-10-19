@@ -36,7 +36,7 @@
             }
         </style>
 
-        <json-object obj="[[letters]]" on-writeop="deepNotifyLetters"></json-object>
+        <json-object key="myLetters" obj="[[letters]]" on-writeop="writeInChanges"></json-object>
 
         <shape-links id="links" on-nevv="addLetter"></shape-links>
 
@@ -85,10 +85,10 @@
             addLetter(e) {
                 this.letters.push(e.detail);
                 this.notifyPath("letters");
-//                this.push("letters", );
             }
 
-            deepNotifyLetters(e) {
+            writeInChanges(e, detail) {
+                this.letters = detail[1];
                 this.notifyPath("letters");
             }
 

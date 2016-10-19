@@ -86,7 +86,7 @@
 
             makeElement(e) {
                 var name = e.target.nextElementSibling.value;
-                this.dispatchEvent(new CustomEvent("nevv", {link: e.target.src, letter: name, position: {x: 200, y: 200}}));
+                this.dispatchEvent(new CustomEvent("nevv", {detail:{link: e.target.src, letter: name, position: {x: 200, y: 200}}}));
             }
 
             _toArray(arrayOrObject) {

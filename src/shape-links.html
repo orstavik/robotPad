@@ -1,4 +1,4 @@
-<!--<link rel="import" href="../bower_components/polymerfire/firebase-document.html">-->
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 
 <dom-module id="shape-links">
     <template>
@@ -24,12 +24,11 @@
             }
         </style>
 
-        <!--<firebase-document-->
-        <!--app-name="linksonfire"-->
-        <!--id="firefire"-->
-        <!--path="linksGoHere"-->
-        <!--data="{{links}}">-->
-        <!--</firebase-document>-->
+        <firebase-document app-name="linksonfire"
+                           id="firefire"
+                           path="/linksGoHere"
+                           data="{{links}}">
+        </firebase-document>
 
         <template is="dom-repeat" items="[[_toArray(links)]]">
             <div class$="[[item.key]]">
@@ -38,7 +37,7 @@
                 <input class="link" type="text" value="[[item.value.link]]" on-input="madeChanges"/> <br/>
             </div>
         </template>
-        <button on-click="addRow">Add row</button>
+        <!--<button on-click="addRow">Add row</button>-->
     </template>
 
     <script>
@@ -53,20 +52,13 @@
                     properties: {
                         links: {
                             type: Object,
-                            value: function () {
-                                return {
-                                    a: {
-                                        name: "a",
-                                        link: "../images/keys/a.png"
-                                    },
-                                    d: {
-                                        name: "d",
-                                        link: "../images/keys/d.png"
-                                    }
-                                };
-
+                            observer: "runThrough"
+                        },
+                        localLinks: {
+                            type: Object,
+                            value: function() {
+                                return {}
                             }
-
                         }
                     },
 
@@ -74,6 +66,47 @@
                         "doConsoleLog2(ivar)"
                     ]
                 };
+            }
+
+            constructor() {
+                super();
+                this.ar = [];
+            }
+
+            runThrough() {
+                for (var key in this.links) {
+                    this.getImageUrl(key);
+                }
+            }
+
+            getImageUrl(name) {
+                var storageRef = firebase.storage().ref();
+                var image = storageRef.child("shapes/"+name+".png");
+                var self = this;
+
+                image.getDownloadURL()
+                    .then(function(url) {
+                        self.localLinks[name] = url;
+                    })
+                    .catch(function(error) {
+                        switch (error.code) {
+                            case 'storage/object_not_found':
+                                console.log("File doesn't exist");
+                            break;
+
+                            case 'storage/unauthorized':
+                                console.log("User doesn't have permission to access the object");
+                            break;
+
+                            case 'storage/canceled':
+                                console.log("User canceled the upload");
+                            break;
+
+                            case 'storage/unknown':
+                                console.log("Unknown error occurred, inspect the server response");
+                            break;
+                        }
+                    });
             }
 
             addRow() {
@@ -86,7 +119,8 @@
 
             makeElement(e) {
                 var name = e.target.nextElementSibling.value;
-                this.dispatchEvent(new CustomEvent("nevv", {detail:{link: e.target.src, letter: name, position: {x: 200, y: 200}}}));
+                var link = this.localLinks[name];
+                this.dispatchEvent(new CustomEvent("nevv", {detail:{link: link, letter: name, position: {x: 200, y: 200}}}));
             }
 
             _toArray(arrayOrObject) {

@@ -1,0 +1,115 @@
+<dom-module id="json-saver">
+    <template>
+        <style>
+            :host {
+                display: block;
+                position: fixed;
+                bottom: 0;
+                right: 0;
+            }
+            #jsonName {
+                width: 100px;
+            }
+            .jsonWrapper {
+                display: block;
+                text-align: right;
+            }
+        </style>
+
+        <firebase-document app-name="linksonfire"
+                           id="firedoc"
+                           path="[[jsonPath]]"
+                           data="[[jsonString]]">
+        </firebase-document>
+
+        <firebase-document app-name="linksonfire"
+                           id="firelist"
+                           path="/robots"
+                           data="{{jsonList}}">
+        </firebase-document>
+
+        <div class="jsonWrapper">
+            <template is="dom-repeat" items="[[_toArray(jsonCopy)]]" id="repeater">
+                <button class="jsonLoad" on-click="loadIt">[[item.name]]</button>
+            </template>
+        </div>
+
+        <input id="jsonName" value="{{jsonName::input}}"></input>
+        <button on-click="saveToFire">Save Sketch</button>
+
+    </template>
+
+    <script>
+
+        class JsonSaver extends Polymer.Element {
+            static get is() {
+                return "json-saver";
+            }
+
+            static get config() {
+                return {
+                    properties: {
+                        input: Array,
+                        jsonPath: String,
+                        jsonString: String,
+                        jsonList: {
+                            type: Object,
+                            value: function() {
+                                return {}
+                            },
+                            observer: "createCopy"
+                        },
+                        jsonCopy: Object,
+                        jsonArray: Array
+                    }
+                };
+            }
+
+            createCopy() {
+                var newJSON = JSON.stringify(this.jsonList);
+                var oldJSON = JSON.stringify(this.jsonCopy);
+                if (oldJSON === newJSON)
+                    return;
+                this.jsonCopy = JSON.parse(newJSON);
+            }
+
+            _toArray() {
+                var res = []; 
+                for (var key in this.jsonCopy) {
+                    res.push({
+                        name: key,
+                        json: this.jsonCopy[key]
+                    });
+                }
+                return res;
+            }
+
+            saveToFire() {
+                this.jsonPath = undefined;
+                this.jsonString = undefined;
+                this.$.firedoc.disabled = false;
+                if (!this.jsonName) {
+                    var timeStamp = new Date().getTime();
+                    this.jsonPath = "/robots/" + timeStamp;
+                } else 
+                    this.jsonPath = "/robots/" + this.jsonName;
+                this.jsonString = JSON.stringify(this.input);
+                this.$.firedoc.disabled = true;
+                this.$.jsonName.value = "";
+            }
+
+            loadIt(e) {
+                var key = e.target.innerText;
+                this.dispatchEvent(new CustomEvent("sketchload", 
+                    {
+                        detail: {
+                            json: this.jsonCopy[key]
+                        }
+                    }
+                ));
+            }
+        }
+
+        customElements.define(JsonSaver.is, JsonSaver);
+    </script>
+</dom-module>

@@ -4,6 +4,7 @@
 <link rel="import" href="shape-keyboard.html">
 <link rel="import" href="shape-links.html">
 <link rel="import" href="json-object.html">
+<link rel="import" href="json-saver.html">
 <link rel="import" href="intertext-selector.html">
 
 <dom-module id="my-app">
@@ -50,9 +51,11 @@
 
         <json-object key="myLetters" obj="[[letters]]" on-writeop="writeInChanges"></json-object>
 
+        <json-saver input="[[letters]]" on-sketchload="loadSketch"></json-saver>
+
         <shape-links id="links" on-nevv="addLetter"></shape-links>
 
-        <div id="cross"> </div>
+        <!--<div id="cross"> </div>-->
 
         <intertext-selector id="shapeSelector" radio-button on-select="somethingSelected">
             <template is="dom-repeat" items="[[letters]]">
@@ -82,6 +85,11 @@
                     },
                     observers: []
                 };
+            }
+
+            loadSketch(e) {
+                this.letters = JSON.parse(e.detail.json);
+                this.notifyPath("letters");
             }
 
             somethingSelected(e, detail) {

@@ -15,12 +15,9 @@
                 height: 14px;
             }
 
-            input.name {
-                width: 50px;
-            }
-
-            input.link {
-                width: 400px;
+            p.name {
+                display: inline-block;
+                margin: 0;
             }
         </style>
 
@@ -30,11 +27,18 @@
                            data="{{links}}">
         </firebase-document>
 
-        <template is="dom-repeat" items="[[_toArray(links)]]">
-            <div class$="[[item.key]]">
-                <img src="[[item.value.link]]" alt="image" on-dblclick="makeElement">
-                <input class="name" type="text" value="[[item.value.name]]" on-input="madeChanges"/>:
-                <input class="link" type="text" value="[[item.value.link]]" on-input="madeChanges"/> <br/>
+        <!--<firebase-storage app-name="linksonfire"
+                          id="firestor"
+                          path="[[storPath]]"
+                          data="{{links}}">
+        </firebase-storage>-->
+
+        <template is="dom-repeat" items="[[linksArray]]" id="repeater">
+            <div class="shapesWrapper" id$="[[item.name]]">
+                <img src="[[item.link]]" alt="image" on-dblclick="makeElement">
+                <p class="name">[[item.name]]</p>
+                <!--<input class="name" type="text" value="[[item.name]]" on-input="madeChanges"/>:-->
+                <!--<input class="link" type="text" value="[[item.link]]" on-input="madeChanges"/> <br/>-->
             </div>
         </template>
         <!--<button on-click="addRow">Add row</button>-->
@@ -52,7 +56,10 @@
                     properties: {
                         links: {
                             type: Object,
-                            observer: "runThrough"
+                            observer: "toArray"
+                        },
+                        linksArray: {
+                            type: Array
                         },
                         localLinks: {
                             type: Object,
@@ -70,7 +77,17 @@
 
             constructor() {
                 super();
-                this.ar = [];
+            }
+
+            toArray() {
+                if (this.linksArray || Object.isEmpty(this.links)) return;
+                this.linksArray = []; 
+                var i = 0;
+                for (var key in this.links) {
+                    this.getImageUrl(this.links[key], i);
+                    this.linksArray.push({name: key});
+                    i++;
+                }
             }
 
             runThrough() {
@@ -79,14 +96,15 @@
                 }
             }
 
-            getImageUrl(name) {
+            getImageUrl(name, i) {
                 var storageRef = firebase.storage().ref();
-                var image = storageRef.child("shapes/"+name+".png");
+                var image = storageRef.child(name.link);
                 var self = this;
 
                 image.getDownloadURL()
                     .then(function(url) {
-                        self.localLinks[name] = url;
+                        self.linksArray[i].link = url;
+                        self.$.repeater.render();
                     })
                     .catch(function(error) {
                         switch (error.code) {
@@ -118,16 +136,9 @@
             }
 
             makeElement(e) {
-                var name = e.target.nextElementSibling.value;
-                var link = this.localLinks[name];
+                var name = e.target.nextElementSibling.innerText;
+                var link = e.target.src;
                 this.dispatchEvent(new CustomEvent("nevv", {detail:{link: link, letter: name, position: {x: 200, y: 200}}}));
-            }
-
-            _toArray(arrayOrObject) {
-                var ar = [];
-                for (var k in arrayOrObject)
-                    ar.push({key: k, value: arrayOrObject[k]});
-                return ar;
             }
 
             madeChanges(e) {

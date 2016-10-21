@@ -15,6 +15,15 @@
                 display: block;
             }
 
+            json-object {
+                display: inline-block;
+                width: 250px;
+                font-size: 12px;
+                line-height: normal;
+                height: 80vh;
+                overflow-y: scroll;
+            }
+
             shape-info[data-selected] {
                 z-index: 1000;
             }
@@ -133,9 +142,9 @@
                 var start = '[{"letter":"yell","color":"crimson","link":' +
                         '"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046",' +
                         '"position":{"x":211,"y":244}},' +
-                        '{"letter":"a","color":"red","link":"../images/keys/a.png","position":{"x":429,"y":212}},' +
-                        '{"letter":"f","color":"blue","link":"../images/keys/f.png","position":{"x":111,"y":414},"scale":1.84,"rotation":62.17},' +
-                        '{"letter":"j","color":"green","link":"../images/keys/j.png","position":{"x":478,"y":420},"rotation":119.57}]';
+                        '{"letter":"a","color":"red","link":"../images/keys/a.png","position":{"x":406,"y":246}},' +
+                        '{"letter":"f","color":"blue","link":"../images/keys/f.png","position":{"x":240,"y":69},"scale":1.84,"rotation":62.17},' +
+                        '{"letter":"j","color":"green","link":"../images/keys/j.png","position":{"x":545,"y":74},"rotation":119.57}]';
                 this.set("letters", JSON.parse(start));
             }
 

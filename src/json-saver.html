@@ -5,14 +5,29 @@
                 display: block;
                 position: fixed;
                 bottom: 0;
-                right: 0;
+                left: 0;
+                width: 100%;
             }
             #jsonName {
                 width: 100px;
             }
             .jsonWrapper {
-                display: block;
-                text-align: right;
+                display: flex;
+                height: 24vh;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                align-items: flex-end;
+                overflow-x: scroll;
+            }
+            .monsterWrapper {
+                position: relative;
+                min-width: 200px;
+            }
+            shape-info {
+                pointer-events: none;
+                transform: scale(0.15);
+                top: -130px;
+                left: -30%;
             }
         </style>
 
@@ -28,14 +43,23 @@
                            data="{{jsonList}}">
         </firebase-document>
 
-        <div class="jsonWrapper">
-            <template is="dom-repeat" items="[[_toArray(jsonCopy)]]" id="repeater">
-                <button class="jsonLoad" on-click="loadIt">[[item.name]]</button>
-            </template>
+        <div id="saveWrapper" style="text-align: right">
+            <input id="jsonName" value="{{jsonName::input}}"></input>
+            <button on-click="saveToFire">Save Sketch</button>
         </div>
 
-        <input id="jsonName" value="{{jsonName::input}}"></input>
-        <button on-click="saveToFire">Save Sketch</button>
+        <div class="jsonWrapper">
+            <template is="dom-repeat" items="[[_toArray(jsonCopy)]]" id="repeater">
+                <div class="monsterWrapper">
+                    <template is="dom-repeat" items="[[_parseToArray(item.json)]]">
+                        <shape-info key="[[index]]" input="[[item]]" data-selectable on-newinfo="anInfoUpdated">
+                            <letter-shape input="[[item]]"></letter-shape>
+                        </shape-info>
+                    </template>
+                    <button class="jsonLoad" on-click="loadIt">[[item.name]]</button>
+                </div>
+            </template>
+        </div>
 
     </template>
 
@@ -73,14 +97,20 @@
                 this.jsonCopy = JSON.parse(newJSON);
             }
 
-            _toArray() {
+            _toArray(obj) {
                 var res = []; 
-                for (var key in this.jsonCopy) {
+                for (var key in obj) {
                     res.push({
                         name: key,
-                        json: this.jsonCopy[key]
+                        json: obj[key]
                     });
                 }
+                return res;
+            }
+
+            _parseToArray(str) {
+                //debugger;
+                var res = JSON.parse(str);
                 return res;
             }
 

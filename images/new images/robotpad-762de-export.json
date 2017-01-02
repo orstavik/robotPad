@@ -1,0 +1,176 @@
+{
+  "linksGoHere" : {
+    "a0" : {
+      "link" : "shapes/a.png"
+    },
+    "d0" : {
+      "link" : "shapes/d.png"
+    },
+    "f0" : {
+      "link" : "shapes/f.png"
+    },
+    "g0" : {
+      "link" : "shapes/g.png"
+    },
+    "h0" : {
+      "link" : "shapes/h.png"
+    },
+    "j0" : {
+      "link" : "shapes/j.png"
+    },
+    "k0" : {
+      "link" : "shapes/k.png"
+    },
+    "l0" : {
+      "link" : "shapes/l.png"
+    },
+    "q0" : {
+      "link" : "shapes/q.png"
+    },
+    "s0" : {
+      "link" : "shapes/s.png"
+    },
+    "A(1)" : {
+      "link" : "shapesNew/A(1).png"
+    },
+    "a" : {
+      "link" : "shapesNew/a.png"
+    },
+    "b" : {
+      "link" : "shapesNew/b.png"
+    },
+    "beetle" : {
+      "link" : "shapesNew/beetle.png"
+    },
+    "blue_hand" : {
+      "link" : "shapesNew/blue_hand.png"
+    },
+    "c" : {
+      "link" : "shapesNew/c.png"
+    },
+    "d (1)" : {
+      "link" : "shapesNew/d (1).png"
+    },
+    "d" : {
+      "link" : "shapesNew/d.png"
+    },
+    "e" : {
+      "link" : "shapesNew/e.png"
+    },
+    "ey" : {
+      "link" : "shapesNew/ey.png"
+    },
+    "eye" : {
+      "link" : "shapesNew/eye.png"
+    },
+    "eye_1" : {
+      "link" : "shapesNew/eye_1.png"
+    },
+    "eye_2" : {
+      "link" : "shapesNew/eye_2.png"
+    },
+    "eye_3" : {
+      "link" : "shapesNew/eye_3.png"
+    },
+    "f (1)" : {
+      "link" : "shapesNew/f (1).png"
+    },
+    "f" : {
+      "link" : "shapesNew/f.png"
+    },
+    "g" : {
+      "link" : "shapesNew/g.png"
+    },
+    "h" : {
+      "link" : "shapesNew/h.png"
+    },
+    "hand" : {
+      "link" : "shapesNew/hand.png"
+    },
+    "i" : {
+      "link" : "shapesNew/i.png"
+    },
+    "j (1)" : {
+      "link" : "shapesNew/j (1).png"
+    },
+    "j" : {
+      "link" : "shapesNew/j.png"
+    },
+    "k (1)" : {
+      "link" : "shapesNew/k (1).png"
+    },
+    "k" : {
+      "link" : "shapesNew/k.png"
+    },
+    "L(1)" : {
+      "link" : "shapesNew/L(1).png"
+    },
+    "l" : {
+      "link" : "shapesNew/l.png"
+    },
+    "m" : {
+      "link" : "shapesNew/m.png"
+    },
+    "n" : {
+      "link" : "shapesNew/n.png"
+    },
+    "o" : {
+      "link" : "shapesNew/o.png"
+    },
+    "p" : {
+      "link" : "shapesNew/p.png"
+    },
+    "pink_hand" : {
+      "link" : "shapesNew/pink_hand.png"
+    },
+    "q" : {
+      "link" : "shapesNew/q.png"
+    },
+    "r" : {
+      "link" : "shapesNew/r.png"
+    },
+    "s (1)" : {
+      "link" : "shapesNew/s (1).png"
+    },
+    "s" : {
+      "link" : "shapesNew/s.png"
+    },
+    "spring" : {
+      "link" : "shapesNew/spring.png"
+    },
+    "t" : {
+      "link" : "shapesNew/t.png"
+    },
+    "u" : {
+      "link" : "shapesNew/u.png"
+    },
+    "v" : {
+      "link" : "shapesNew/v.png"
+    },
+    "w" : {
+      "link" : "shapesNew/w.png"
+    },
+    "x" : {
+      "link" : "shapesNew/x.png"
+    },
+    "y" : {
+      "link" : "shapesNew/y.png"
+    },
+    "z" : {
+      "link" : "shapesNew/z.png"
+    }
+  },
+  "robots" : {
+    "1477050150178" : "[{\"letter\":\"yell\",\"color\":\"crimson\",\"link\":\"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046\",\"position\":{\"x\":166,\"y\":155},\"selected\":false},{\"letter\":\"a\",\"color\":\"red\",\"link\":\"../images/keys/a.png\",\"position\":{\"x\":248,\"y\":121},\"selected\":false},{\"letter\":\"f\",\"color\":\"blue\",\"link\":\"../images/keys/f.png\",\"position\":{\"x\":223,\"y\":274},\"scale\":1.84,\"rotation\":62.17,\"selected\":true},{\"letter\":\"j\",\"color\":\"green\",\"link\":\"../images/keys/j.png\",\"position\":{\"x\":335,\"y\":174},\"rotation\":119.57,\"selected\":false}]",
+    "1477050204240" : "[{\"letter\":\"yell\",\"color\":\"crimson\",\"link\":\"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046\",\"position\":{\"x\":211,\"y\":244}},{\"letter\":\"a\",\"color\":\"red\",\"link\":\"../images/keys/a.png\",\"position\":{\"x\":429,\"y\":212}},{\"letter\":\"f\",\"color\":\"blue\",\"link\":\"../images/keys/f.png\",\"position\":{\"x\":111,\"y\":414},\"scale\":1.84,\"rotation\":62.17},{\"letter\":\"j\",\"color\":\"green\",\"link\":\"../images/keys/j.png\",\"position\":{\"x\":478,\"y\":420},\"rotation\":119.57}]",
+    "1477050453440" : "[{\"letter\":\"yell\",\"color\":\"crimson\",\"link\":\"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046\",\"position\":{\"x\":210,\"y\":227},\"selected\":true},{\"letter\":\"a\",\"color\":\"red\",\"link\":\"../images/keys/a.png\",\"position\":{\"x\":494,\"y\":68},\"selected\":false},{\"letter\":\"f\",\"color\":\"blue\",\"link\":\"../images/keys/f.png\",\"position\":{\"x\":570,\"y\":348},\"scale\":1.84,\"rotation\":62.17,\"selected\":false},{\"letter\":\"j\",\"color\":\"green\",\"link\":\"../images/keys/j.png\",\"position\":{\"x\":770,\"y\":189},\"rotation\":119.57,\"selected\":false}]",
+    "1477050460112" : "[{\"letter\":\"yell\",\"color\":\"crimson\",\"link\":\"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046\",\"position\":{\"x\":411,\"y\":336},\"selected\":false},{\"letter\":\"a\",\"color\":\"red\",\"link\":\"../images/keys/a.png\",\"position\":{\"x\":467,\"y\":187},\"selected\":true},{\"letter\":\"f\",\"color\":\"blue\",\"link\":\"../images/keys/f.png\",\"position\":{\"x\":377,\"y\":43},\"scale\":1.84,\"rotation\":62.17,\"selected\":false},{\"letter\":\"j\",\"color\":\"green\",\"link\":\"../images/keys/j.png\",\"position\":{\"x\":578,\"y\":352},\"rotation\":119.57,\"selected\":false}]",
+    "1477050522110" : "[{\"letter\":\"yell\",\"color\":\"crimson\",\"link\":\"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046\",\"position\":{\"x\":190,\"y\":205},\"selected\":false},{\"letter\":\"a\",\"color\":\"red\",\"link\":\"../images/keys/a.png\",\"position\":{\"x\":339,\"y\":265},\"selected\":true},{\"letter\":\"f\",\"color\":\"blue\",\"link\":\"../images/keys/f.png\",\"position\":{\"x\":840,\"y\":-38},\"scale\":1.84,\"rotation\":62.17,\"selected\":false},{\"letter\":\"j\",\"color\":\"green\",\"link\":\"../images/keys/j.png\",\"position\":{\"x\":578,\"y\":352},\"rotation\":119.57,\"selected\":false}]",
+    "1477050525182" : "[{\"letter\":\"yell\",\"color\":\"crimson\",\"link\":\"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046\",\"position\":{\"x\":190,\"y\":205},\"selected\":false},{\"letter\":\"a\",\"color\":\"red\",\"link\":\"../images/keys/a.png\",\"position\":{\"x\":339,\"y\":265},\"selected\":false},{\"letter\":\"f\",\"color\":\"blue\",\"link\":\"../images/keys/f.png\",\"position\":{\"x\":667,\"y\":129},\"scale\":1.84,\"rotation\":62.17,\"selected\":true},{\"letter\":\"j\",\"color\":\"green\",\"link\":\"../images/keys/j.png\",\"position\":{\"x\":449,\"y\":39},\"rotation\":119.57,\"selected\":false}]",
+    "1477050535998" : "[{\"letter\":\"yell\",\"color\":\"crimson\",\"link\":\"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046\",\"position\":{\"x\":194,\"y\":214},\"selected\":false},{\"letter\":\"a\",\"color\":\"red\",\"link\":\"../images/keys/a.png\",\"position\":{\"x\":304,\"y\":121},\"selected\":false},{\"letter\":\"f\",\"color\":\"blue\",\"link\":\"../images/keys/f.png\",\"position\":{\"x\":667,\"y\":129},\"scale\":1.84,\"rotation\":62.17,\"selected\":false},{\"letter\":\"j\",\"color\":\"green\",\"link\":\"../images/keys/j.png\",\"position\":{\"x\":449,\"y\":39},\"rotation\":119.57,\"selected\":false},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fk.png?alt=media&token=b48c3722-a1a1-4d9c-a73c-9329b5d358b4\",\"letter\":\"k\",\"position\":{\"x\":111,\"y\":290},\"selected\":false},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fj.png?alt=media&token=a926ad14-1e98-4d78-9703-8ce2875e2535\",\"letter\":\"j\",\"position\":{\"x\":354,\"y\":177},\"selected\":true,\"scale\":5.17,\"rotation\":75}]",
+    "1477050546279" : "[{\"letter\":\"yell\",\"color\":\"crimson\",\"link\":\"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046\",\"position\":{\"x\":194,\"y\":214},\"selected\":false},{\"letter\":\"a\",\"color\":\"red\",\"link\":\"../images/keys/a.png\",\"position\":{\"x\":304,\"y\":121},\"selected\":false},{\"letter\":\"f\",\"color\":\"blue\",\"link\":\"../images/keys/f.png\",\"position\":{\"x\":846,\"y\":162},\"scale\":1.84,\"rotation\":62.17,\"selected\":true},{\"letter\":\"j\",\"color\":\"green\",\"link\":\"../images/keys/j.png\",\"position\":{\"x\":449,\"y\":39},\"rotation\":119.57,\"selected\":false},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fk.png?alt=media&token=b48c3722-a1a1-4d9c-a73c-9329b5d358b4\",\"letter\":\"k\",\"position\":{\"x\":111,\"y\":290},\"selected\":false},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fj.png?alt=media&token=a926ad14-1e98-4d78-9703-8ce2875e2535\",\"letter\":\"j\",\"position\":{\"x\":67,\"y\":50},\"selected\":false,\"scale\":2.41,\"rotation\":149},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fh.png?alt=media&token=d5460c58-3e46-457f-b014-27db3dc147b4\",\"letter\":\"h\",\"position\":{\"x\":406,\"y\":235},\"selected\":false,\"rotation\":213,\"scale\":0.67}]",
+    "1477050710734" : "[{\"letter\":\"yell\",\"color\":\"crimson\",\"link\":\"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046\",\"position\":{\"x\":194,\"y\":214},\"selected\":false},{\"letter\":\"a\",\"color\":\"red\",\"link\":\"../images/keys/a.png\",\"position\":{\"x\":304,\"y\":121},\"selected\":false},{\"letter\":\"f\",\"color\":\"blue\",\"link\":\"../images/keys/f.png\",\"position\":{\"x\":846,\"y\":162},\"scale\":1.84,\"rotation\":62.17,\"selected\":true},{\"letter\":\"j\",\"color\":\"green\",\"link\":\"../images/keys/j.png\",\"position\":{\"x\":449,\"y\":39},\"rotation\":119.57,\"selected\":false},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fk.png?alt=media&token=b48c3722-a1a1-4d9c-a73c-9329b5d358b4\",\"letter\":\"k\",\"position\":{\"x\":111,\"y\":290},\"selected\":false},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fj.png?alt=media&token=a926ad14-1e98-4d78-9703-8ce2875e2535\",\"letter\":\"j\",\"position\":{\"x\":67,\"y\":50},\"selected\":false,\"scale\":2.41,\"rotation\":149},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fh.png?alt=media&token=d5460c58-3e46-457f-b014-27db3dc147b4\",\"letter\":\"h\",\"position\":{\"x\":406,\"y\":235},\"selected\":false,\"rotation\":213,\"scale\":0.67}]",
+    "1477050717861" : "[{\"letter\":\"yell\",\"color\":\"crimson\",\"link\":\"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046\",\"position\":{\"x\":194,\"y\":214},\"selected\":false},{\"letter\":\"a\",\"color\":\"red\",\"link\":\"../images/keys/a.png\",\"position\":{\"x\":304,\"y\":121},\"selected\":false},{\"letter\":\"f\",\"color\":\"blue\",\"link\":\"../images/keys/f.png\",\"position\":{\"x\":846,\"y\":162},\"scale\":1.84,\"rotation\":62.17,\"selected\":false},{\"letter\":\"j\",\"color\":\"green\",\"link\":\"../images/keys/j.png\",\"position\":{\"x\":449,\"y\":39},\"rotation\":119.57,\"selected\":false},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fk.png?alt=media&token=b48c3722-a1a1-4d9c-a73c-9329b5d358b4\",\"letter\":\"k\",\"position\":{\"x\":111,\"y\":290},\"selected\":false},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fj.png?alt=media&token=a926ad14-1e98-4d78-9703-8ce2875e2535\",\"letter\":\"j\",\"position\":{\"x\":595,\"y\":187},\"selected\":true,\"scale\":2.41,\"rotation\":149},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fh.png?alt=media&token=d5460c58-3e46-457f-b014-27db3dc147b4\",\"letter\":\"h\",\"position\":{\"x\":406,\"y\":235},\"selected\":false,\"rotation\":213,\"scale\":0.67}]",
+    "ivarRobot" : "[{\"letter\":\"yell\",\"color\":\"crimson\",\"link\":\"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046\",\"position\":{\"x\":292,\"y\":290},\"selected\":false,\"scale\":0.22,\"rotation\":45},{\"letter\":\"a\",\"color\":\"red\",\"link\":\"../images/keys/a.png\",\"position\":{\"x\":354,\"y\":330},\"selected\":false,\"scale\":0.4,\"rotation\":40},{\"letter\":\"f\",\"color\":\"blue\",\"link\":\"../images/keys/f.png\",\"position\":{\"x\":291,\"y\":349},\"scale\":0.82,\"rotation\":0,\"selected\":false},{\"letter\":\"j\",\"color\":\"green\",\"link\":\"../images/keys/j.png\",\"position\":{\"x\":211,\"y\":319},\"rotation\":232,\"selected\":true,\"scale\":0.46},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fk.png?alt=media&token=b48c3722-a1a1-4d9c-a73c-9329b5d358b4\",\"letter\":\"k\",\"position\":{\"x\":325,\"y\":462},\"selected\":false,\"scale\":0.43},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fj.png?alt=media&token=a926ad14-1e98-4d78-9703-8ce2875e2535\",\"letter\":\"j\",\"position\":{\"x\":239,\"y\":310},\"selected\":false,\"scale\":0.28,\"rotation\":37},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fl.png?alt=media&token=c47de65b-ade5-4bf1-b592-94c454df4a24\",\"letter\":\"l\",\"position\":{\"x\":268,\"y\":412},\"selected\":false,\"scale\":0.43,\"rotation\":15},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fl.png?alt=media&token=c47de65b-ade5-4bf1-b592-94c454df4a24\",\"letter\":\"l\",\"position\":{\"x\":262,\"y\":456},\"selected\":false,\"rotation\":14,\"scale\":0.4},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fk.png?alt=media&token=b48c3722-a1a1-4d9c-a73c-9329b5d358b4\",\"letter\":\"k\",\"position\":{\"x\":317,\"y\":414},\"selected\":false,\"scale\":0.43,\"rotation\":-8},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fs.png?alt=media&token=d84d9580-f27a-45b8-856e-150dbaa4f61f\",\"letter\":\"s\",\"position\":{\"x\":406,\"y\":434},\"selected\":false},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fs.png?alt=media&token=d84d9580-f27a-45b8-856e-150dbaa4f61f\",\"letter\":\"s\",\"position\":{\"x\":396,\"y\":433},\"selected\":false},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fg.png?alt=media&token=0f78a480-388a-47dd-b5bc-95931e0b2f9f\",\"letter\":\"g\",\"position\":{\"x\":316,\"y\":257},\"selected\":false,\"rotation\":-57,\"scale\":0.55},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fj.png?alt=media&token=a926ad14-1e98-4d78-9703-8ce2875e2535\",\"letter\":\"j\",\"position\":{\"x\":342,\"y\":260},\"scale\":0.1,\"selected\":false},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Ff.png?alt=media&token=997a6d16-9a0e-4f9a-905b-21cd8b0edd69\",\"letter\":\"f\",\"position\":{\"x\":310,\"y\":262},\"scale\":0.19,\"selected\":false},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fd.png?alt=media&token=a1664c03-fcfa-4ca0-a512-ca20b95b8abe\",\"letter\":\"d\",\"position\":{\"x\":308,\"y\":224},\"scale\":0.07,\"selected\":false,\"rotation\":109},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fg.png?alt=media&token=0f78a480-388a-47dd-b5bc-95931e0b2f9f\",\"letter\":\"g\",\"position\":{\"x\":261,\"y\":325},\"scale\":0.07,\"selected\":false},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fh.png?alt=media&token=d5460c58-3e46-457f-b014-27db3dc147b4\",\"letter\":\"h\",\"position\":{\"x\":258,\"y\":335},\"selected\":false,\"scale\":0.1},{\"link\":\"https://firebasestorage.googleapis.com/v0/b/robotpad-762de.appspot.com/o/shapes%2Fa.png?alt=media&token=0a7d96f4-3219-4895-90fc-9f7c94ecf2ba\",\"letter\":\"a\",\"position\":{\"x\":342,\"y\":317},\"scale\":0.31,\"selected\":false}]"
+  }
+}

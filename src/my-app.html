@@ -1,11 +1,14 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="letter-shape.html">
+<link rel="import" href="drop-shape.html">
+<link rel="import" href="color-palette.html">
 <link rel="import" href="shape-info.html">
 <link rel="import" href="shape-keyboard.html">
 <link rel="import" href="shape-links.html">
 <link rel="import" href="json-object.html">
 <link rel="import" href="json-saver.html">
+<link rel="import" href="action-log.html">
 <link rel="import" href="intertext-selector.html">
+<link rel="import" href="keyboard-listener.html">
 
 <dom-module id="my-app">
     <template>
@@ -21,12 +24,13 @@
                 font-size: 12px;
                 line-height: normal;
                 height: 80vh;
+                position: relative;
                 overflow-y: scroll;
             }
 
-            shape-info[data-selected] {
+            /*shape-info[data-selected] {
                 z-index: 1000;
-            }
+            }*/
 
             shape-info[data-selected] letter-shape{
                 border: 2px solid black;
@@ -60,21 +64,27 @@
 
         <json-object key="myLetters" obj="[[letters]]" on-writeop="writeInChanges"></json-object>
 
-        <json-saver input="[[letters]]" on-sketchload="loadSketch"></json-saver>
+        <!--<json-saver input="[[letters]]" on-sketchload="loadSketch"></json-saver>-->
 
-        <shape-links id="links" on-nevv="addLetter"></shape-links>
+        <!--<shape-links id="links" on-nevv="addLetter"></shape-links>-->
 
         <!--<div id="cross"> </div>-->
 
-        <intertext-selector id="shapeSelector" radio-button on-select="somethingSelected">
+        <intertext-selector id="shapeSelector" radio-button on-select="somethingSelected" on-dblclick="addDropShape">
             <template is="dom-repeat" items="[[letters]]">
-                <shape-info key="[[index]]" input="[[item]]" data-selectable on-newinfo="anInfoUpdated">
-                    <letter-shape input="[[item]]" counter="42"></letter-shape>
+                <shape-info key="[[index]]" input="[[item]]" data-selectable on-newinfo="anInfoUpdated" style="z-index: [[item.zIndex]]">
+                    <drop-shape input="[[item]]"></drop-shape>
                 </shape-info>
             </template>
         </intertext-selector>
 
+        <color-palette></color-palette>
+
+        <action-log object="[[letters]]" id="log" on-undo="_undo"></action-log>
+
         <shape-keyboard on-scale="keyScale" on-rotate="keyRotate"></shape-keyboard>
+
+        <keyboard-listener on-key-down="_checkKey"></keyboard-listener>
 
     </template>
 
@@ -94,6 +104,66 @@
                     },
                     observers: []
                 };
+            }
+
+            addDropShape(e) {
+                var shape = {
+                    style: 0,
+                    position: {
+                        x: e.x,
+                        y: e.y
+                    }
+                }
+                this.letters.push(shape);
+                this.notifyPath("letters");
+            }
+
+            _undo(e) {
+                this.letters = e.detail.state;
+            }
+
+            _checkKey(e) {
+                if (e.key === "Delete" || e.key === "Backspace") 
+                    this._deleteElem();
+
+                if (e.code === "Equal" || e.code === "Minus") 
+                    this._changeZ(e.code);
+
+                // if (e.code === "KeyZ")
+                    // this.$.log.action();
+            }
+
+            _deleteElem() {
+                for (let i = 0; i < this.letters.length; i++) {
+                    if (this.letters[i].selected) {
+                        this.letters.splice(i,1);
+                    }
+                }
+                this.notifyPath("letters");
+            }
+
+            _changeZ(key) {
+                if (key === "Equal") {
+                    let node = this.$.shapeSelector.selected;
+                    node.style.zIndex = node.style.zIndex ? Number(node.style.zIndex)+1 : 1;
+                } else if (key === "Minus") {
+                    let node = this.$.shapeSelector.selected;
+                    if (node.style.zIndex < 1) {
+                        let nodes = this.$.shapeSelector.querySelectorAll("shape-info");
+                        for (let i = 0; i < nodes.length; i++) {
+                            nodes[i].style.zIndex = Number(nodes[i].style.zIndex)+1;
+                        }
+                        node.style.zIndex = Number(node.style.zIndex)-1;
+                    } else {
+                        node.style.zIndex = node.style.zIndex ? Number(node.style.zIndex)-1 : 0;
+                    }
+                }
+
+                let nodes = this.$.shapeSelector.querySelectorAll("shape-info");
+                for (let i = 0; i < this.letters.length; i++) {
+                    this.letters[i].zIndex = nodes[i].style.zIndex;
+                }
+                this.notifyPath("letters");
             }
 
             loadSketch(e) {
@@ -127,11 +197,6 @@
                 this.notifyPath("letters");
             }
 
-            addLetter(e) {
-                this.letters.push(e.detail);
-                this.notifyPath("letters");
-            }
-
             writeInChanges(e, detail) {
 //                this.letters = detail[1];
                 this.notifyPath("letters");
@@ -139,12 +204,7 @@
 
             connectedCallback() {
                 super.connectedCallback();
-                var start = '[{"letter":"yell","color":"crimson","link":' +
-                        '"http://vignette3.wikia.nocookie.net/thesimssocial/images/b/b3/Dog-Bone-(item).png/revision/latest?cb=20121122020046",' +
-                        '"position":{"x":211,"y":244}},' +
-                        '{"letter":"a","color":"red","link":"../images/keys/a.png","position":{"x":406,"y":246}},' +
-                        '{"letter":"f","color":"blue","link":"../images/keys/f.png","position":{"x":240,"y":69},"scale":1.84,"rotation":62.17},' +
-                        '{"letter":"j","color":"green","link":"../images/keys/j.png","position":{"x":545,"y":74},"rotation":119.57}]';
+                var start = '[]';
                 this.set("letters", JSON.parse(start));
             }
 

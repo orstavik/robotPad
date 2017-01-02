@@ -1,0 +1,134 @@
+<dom-module id="color-palette">
+    <template>
+        <style>
+            :host {
+                display: block;
+                position: absolute;
+                top: 0;
+                right: 0;
+            }
+            .color {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border: 1px solid black;
+            }
+        </style>
+
+        H <input type="range" min="0" max="360" value="0" id="h"/>
+        S <input type="range" min="-100" max="100" value="0" id="s" on-input="setS"/>
+        L <input type="range" min="-100" max="100" value="0" id="l" on-input="setL"/>
+
+        <template is="dom-repeat" items="[[computedColors]]">
+            <div class="color" style$="background: [[_computeHSL(item)]]"></div>
+        </template>
+
+    </template>
+
+    <script>
+        class ColorPalette extends Polymer.Element {
+            static get is() {
+                return "color-palette";
+            }
+
+            static get config() {
+                return {
+                    properties: {
+                        staticColors: {
+                            type: Array,
+                            value: function() {
+                                return [
+                                    [5,50,50],
+                                    [35,50,50],
+                                    [50,50,50],
+                                    [60,50,50],
+                                    [90,50,49],
+                                    [120,50,45],
+                                    [150,50,40],
+                                    [180,50,35],
+                                    [210,50,50],
+                                    [225,50,50],
+                                    [310,50,40],
+                                    [340,50,45]
+                                ]
+                            }
+                        },
+                        computedColors: {
+                            type: Array,
+                            computed: "makeComputed(staticColors,l,s)"
+                        },
+                        s: {
+                            type: Number,
+                            value: 0
+                        },
+                        l: {
+                            type: Number,
+                            value: 0
+                        }
+                    }
+                }
+            }
+
+            makeComputed(staticColors, l, s) {
+                return staticColors.map(function(item) {
+                    return [
+                        item[0],
+                        item[1]+(s >= 0 ? (100-item[1])*s : item[1]*s),
+                        item[2]+(l >= 0 ? (100-item[2])*l : item[2]*l)
+                    ];
+                });
+            }
+
+            _computeHSL(item) {
+                return "hsl("+item[0]+","+item[1]+"%,"+item[2]+"%)";
+            }
+
+            setS(e) {
+                this.s = Number(e.target.value)/100;
+            }
+            setL(e) {
+                this.l = Number(e.target.value)/100;
+            }
+
+            rgb2hsl(rgb) {
+                var rgbArr = rgb.substr(4,rgb.length-5).split(", ");
+                var r1 = rgbArr[0] / 255;
+                var g1 = rgbArr[1] / 255;
+                var b1 = rgbArr[2] / 255;
+            
+                var maxColor = Math.max(r1,g1,b1);
+                var minColor = Math.min(r1,g1,b1);
+                //Calculate L:
+                var L = (maxColor + minColor) / 2 ;
+                var S = 0;
+                var H = 0;
+                if(maxColor != minColor){
+                    //Calculate S:
+                    if(L < 0.5){
+                        S = (maxColor - minColor) / (maxColor + minColor);
+                    }else{
+                        S = (maxColor - minColor) / (2.0 - maxColor - minColor);
+                    }
+                    //Calculate H:
+                    if(r1 == maxColor){
+                        H = (g1-b1) / (maxColor - minColor);
+                    }else if(g1 == maxColor){
+                        H = 2.0 + (b1 - r1) / (maxColor - minColor);
+                    }else{
+                        H = 4.0 + (r1 - g1) / (maxColor - minColor);
+                    }
+                }
+            
+                L = Math.floor(L * 100);
+                S = Math.floor(S * 100);
+                H = Math.floor(H * 60);
+                if(H<0){
+                    H += 360;
+                }
+                var result = [H, S, L];
+                return result;
+            }
+        }
+        customElements.define(ColorPalette.is, ColorPalette);
+    </script>
+</dom-module>

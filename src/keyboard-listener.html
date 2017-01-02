@@ -1,0 +1,29 @@
+<dom-module id="keyboard-listener">
+    <template>
+        <style>
+            :host {
+                display: none;
+            }
+        </style>
+    </template>
+    <script>
+        class KeyboardListener extends Polymer.Element {
+            static get is() {
+                return "keyboard-listener";
+            }
+			constructor() {
+				super();
+
+				window.addEventListener("keydown", this._fireEvent.bind(this));
+            }
+            
+            _fireEvent(e) {
+                e.stopPropagation();
+                var name = e.type.substr(0,3)+"-"+e.type.slice(3);
+                var _event = new KeyboardEvent(name, e);
+                this.dispatchEvent(_event);
+            }
+        }
+        customElements.define(KeyboardListener.is, KeyboardListener);
+    </script>
+</dom-module>

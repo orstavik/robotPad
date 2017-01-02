@@ -5,9 +5,12 @@
         <style>
             :host {
                 display: block;
+                height: 70vh;
                 position: fixed;
+                z-index: 1;
                 right: 0;
                 top: 0;
+                overflow-y: scroll;
             }
 
             img, input {
@@ -138,7 +141,7 @@
             makeElement(e) {
                 var name = e.target.nextElementSibling.innerText;
                 var link = e.target.src;
-                this.dispatchEvent(new CustomEvent("nevv", {detail:{link: link, letter: name, position: {x: 200, y: 200}}}));
+                this.dispatchEvent(new CustomEvent("nevv", {detail:{link: link, letter: name, position: {x: 0, y: 0}}}));
             }
 
             madeChanges(e) {

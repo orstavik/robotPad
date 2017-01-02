@@ -1,0 +1,64 @@
+<dom-module id="action-log">
+    <template>
+        <style>
+            :host {
+                display: none;
+            }
+        </style>
+    </template>
+    <script>
+        class ActionLog extends Polymer.Element {
+            static get is() {
+                return "action-log";
+            }
+
+            static get config() {
+                return {
+                    properties: {
+                        object: {
+                            type: Array,
+                            observer: "_storeChange"
+                        },
+                        history: {
+                            type: Array,
+                            value: function() {
+                                return []
+                            }
+                        },
+                        timeStamp: {
+                            type: Number,
+                            value: 0
+                        },
+                        ignore: {
+                            type: Boolean,
+                            value: false
+                        }
+                    }
+                }
+            }
+
+            _storeChange() {
+                if (this._checkTiming()) {
+                    let obj = JSON.parse(JSON.stringify(this.object));
+                    this.history.push(obj);
+                    console.log(this.history);
+                }
+                // this.ignore = false;
+            }
+
+            _checkTiming() {
+                var timeStamp = new Date().getTime();
+                var diff = timeStamp - this.timeStamp;
+                this.timeStamp = timeStamp;
+
+                if (diff > 100) return true;
+            }
+
+            action(code) {
+                this.dispatchEvent(new CustomEvent("undo", {detail: {state: this.history.splice(this.history.length-1, 1)}}));
+                // this.ignore = true;
+            }
+        }
+        customElements.define(ActionLog.is, ActionLog);
+    </script>
+</dom-module>

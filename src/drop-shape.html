@@ -3,18 +3,24 @@
     <template>
         <style>
             :host {
-                display: inline-block;
+                display: flex;
                 width: 40px;
                 height: 40px;
+                border-radius: 50%;
             }
 
             #inner {
-                display: inline-block;
+                display: flex;
+                box-sizing: border-box;
                 width: 100%;
                 height: 100%;
-                background: white;
-                border: 1px solid;
-                border-radius: 0 50% 50% 50%;
+                background: lightgray;
+                border: 1px solid darkgray;
+                border-radius: 0 50% 50%;
+            }
+            
+            :host([centered]) #inner {
+                transform: rotate(45deg);
             }
             :host(.color1) #inner{
                 background: blue;
@@ -40,23 +46,22 @@
                         selected: {
                             type: Boolean,
                             observer: "getElementInfo"
+                        },
+                        centered: {
+                            type: Boolean,
+                            value: true,
+                            reflectToAttribute: true
                         }
                     }
                 };
             }
-            isTriangle(l) {
-                return l === "t";
-            }
-            isCircle(l) {
-                return l === "c";
-            }
-            isSquare(l) {
-                return l === "s";
-            }
-            isCustom(l) {
-                if (!l)
-                    return false;
-                return !this.isTriangle(l) && !this.isSquare(l) && !this.isCircle(l);
+
+            constructor() {
+                super();
+                window.addEventListener("keypress", function(e) {
+                    if (e.code === "KeyM")
+                        this.centered = !this.centered;
+                }.bind(this));
             }
         }
         customElements.define(DropShape.is, DropShape);

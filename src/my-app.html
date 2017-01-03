@@ -123,13 +123,17 @@
             }
 
             _checkKey(e) {
-                if (e.key === "Delete" || e.key === "Backspace") 
+                if (e.key === "Delete" || e.key === "Backspace")
                     this._deleteElem();
 
-                if (e.code === "Equal" || e.code === "Minus") 
+                if (e.code === "Equal" || e.code === "Minus")
                     this._changeZ(e.code);
 
-                // if (e.code === "KeyZ")
+                if (e.key === "1") {
+                  let node = this.$.shapeSelector.selected.querySelector("drop-shape");
+                  node.className = "color1"; //clear() on classList doesnt exist..
+                }
+              // if (e.code === "KeyZ")
                     // this.$.log.action();
             }
 

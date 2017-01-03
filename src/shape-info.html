@@ -6,19 +6,15 @@
     <template>
         <style>
             :host {
-                display: block;
+                display: flex;
                 position: absolute;
                 top: 0;
                 left: 0;
             }
         </style>
-        <intertext-draggable id="drag" position="[[input.position]]" on-move="handleMove">
-            <intertext-resizeable id="resize" scale="[[input.scale]]" on-scale="handleScale">
-                <intertext-rotatable id="rot" rotation="[[input.rotation]]" on-rotate="handleRotate">
-                    <slot></slot>
-                </intertext-rotatable>
-            </intertext-resizeable>
-        </intertext-draggable>
+
+        <slot></slot>
+
     </template>
     <script>
         class ShapeInfo extends Polymer.Element {
@@ -29,49 +25,99 @@
             static get config() {
                 return {
                     properties: {
-                        input: {
-                            type: Object
+                        mousedown: {
+                            type: Boolean,
+                            value: false,
                         },
-                        key: {
+                        counter: Number,
+                        matrix: {
                             type: Object,
-                        },
+                            observer: "setTransform"
+                        }
                     }
                 };
             }
 
-            scaleAlittle(value) {
-                if (!this.input.scale || this.input.scale < 0)
-                    this.input.scale = 1;
-                this.input.scale += value;
-                this.notifyChange();
+            constructor() {
+                super();
+                this.addEventListener("mousedown",
+                    function(e) {
+                        this.mousedown = true;
+                    }
+                );
+                this.addEventListener("mouseup", 
+                    function(e) {
+                        this.mousedown = false;
+                    }
+                );
+                window.addEventListener("mouseup", 
+                    function(e) {
+                        this.mousedown = false;
+                    }.bind(this)
+                );
+                window.addEventListener("mousemove", this.mouseMove.bind(this));
             }
 
-            rotateAlittle(value) {
-                if (!this.input.rotation)
-                    this.input.rotation = 0;
-                this.input.rotation += value;
-                this.notifyChange();
+            mouseMove(e) {
+                if (this.mousedown) {
+                    e.preventDefault();
+                    switch (e.which) {
+                        case 1:
+                            this.translateIt(e.movementX,e.movementY);
+                            break;
+                        case 2:
+                            this.scaleIt(e.movementX,e.movementY);
+                            break;
+                        case 3:
+                            this.rotateIt(e.x,e.y);
+                            break;
+                    }
+                }
             }
 
-            notifyChange() {
-//                this.notifyPath("input"); //needed to update the draggable, rotatable, resizeable.
-                this.dispatchEvent(new CustomEvent("newinfo", {detail: {key: this.key, value: this.input}}));
+            translateIt(x,y) {
+                this.matrix.position.x += x;
+                this.matrix.position.y += y;
+                this.setTransform();
+            }
+            
+            scaleIt(x,y) {
+                this.matrix.scale.x += x/20;
+                this.matrix.scale.y -= y/20;
+                this.setTransform();
             }
 
-            handleMove(e, detail) {
-                this.input.position = detail;
-                this.notifyChange();
+            rotateIt(x,y) {
+                var rect = this.querySelector("drop-shape").getBoundingClientRect();
+                var center = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+                var distance = {
+                    x: x - center.x,
+                    y: y - center.y
+                };
+                this.matrix.angle = Math.atan2(distance.y, distance.x) + Math.PI/2;
+                this.setTransform();
             }
 
-            handleScale(e, detail) {
-                this.input.scale = detail;
-                this.notifyChange();
+            setTransform() {
+                let m = this.matrix;
+                let matrix = [
+                    m.scale.x*Math.cos(m.angle),
+                    m.scale.x*Math.sin(m.angle),
+                    -m.scale.y*Math.sin(m.angle),
+                    m.scale.y*Math.cos(m.angle),
+                    m.position.x,
+                    m.position.y
+                ];
+                this.style.transform = "matrix("+matrix.join(',')+")";
+                // this.notifyChange();
             }
 
-            handleRotate(e, detail) {
-                this.input.rotation = detail;
-                this.notifyChange();
-            }
+            // notifyChange() {
+            //     this.dispatchEvent(new CustomEvent("newinfo", {detail: {counter: this.counter, matrix: this.matrix}}));
+            // }
         }
         customElements.define(ShapeInfo.is, ShapeInfo);
     </script>

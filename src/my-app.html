@@ -26,29 +26,12 @@
                 height: 80vh;
                 position: relative;
                 overflow-y: scroll;
+                z-index: 1;
             }
 
-            /*shape-info[data-selected] {
-                z-index: 1000;
-            }*/
-
-            shape-info[data-selected] letter-shape{
-                border: 2px solid black;
+            shape-info[data-selected] drop-shape {
+                box-shadow: 0 0 3px 1px green;
             }
-
-            /*[data-selected] #rot {*/
-            /*}*/
-
-
-            /*[data-selected] {*/
-                /*border: 2px solid red;*/
-            /*}*/
-
-            /*json-object {*/
-            /*position: fixed;*/
-            /*top: 0;*/
-            /*left: 0;*/
-            /*}*/
 
             #cross {
                 position: absolute;
@@ -72,7 +55,7 @@
 
         <intertext-selector id="shapeSelector" radio-button on-select="somethingSelected" on-dblclick="addDropShape">
             <template is="dom-repeat" items="[[letters]]">
-                <shape-info key="[[index]]" input="[[item]]" data-selectable on-newinfo="anInfoUpdated" style="z-index: [[item.zIndex]]">
+                <shape-info id="drop[[index]]" matrix="[[item.matrix]]" counter="[[index]]" data-selectable on-newinfo="anInfoUpdated" style="z-index: [[item.zIndex]]">
                     <drop-shape input="[[item]]"></drop-shape>
                 </shape-info>
             </template>
@@ -109,11 +92,18 @@
             addDropShape(e) {
                 var shape = {
                     style: 0,
-                    position: {
-                        x: e.x,
-                        y: e.y
+                    matrix: {
+                        position: {
+                            x: e.x,
+                            y: e.y
+                        },
+                        scale: {
+                            x: 1,
+                            y: 1
+                        },
+                        angle: 0
                     }
-                }
+                };
                 this.letters.push(shape);
                 this.notifyPath("letters");
             }
@@ -173,8 +163,8 @@
 
             somethingSelected(e, detail) {
                 if (detail.before)
-                    this.letters[detail.before.key].selected = false;
-                this.letters[detail.now.key].selected = true;
+                    this.letters[detail.before.counter].selected = false;
+                this.letters[detail.now.counter].selected = true;
                 this.notifyPath("letters");
             }
             keyScale(e, detail) {
@@ -193,8 +183,8 @@
             }
 
             anInfoUpdated(e, detail) {
-//                this.letters[detail.key] = detail.value;
-                this.notifyPath("letters");
+                this.letters[detail.counter].matrix = detail.matrix;
+                // this.notifyPath("letters");
             }
 
             writeInChanges(e, detail) {

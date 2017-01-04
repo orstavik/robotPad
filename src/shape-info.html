@@ -34,6 +34,14 @@
                         matrix: {
                             type: Object,
                             observer: "setTransform"
+                        },
+                        shift: {
+                            type: Boolean,
+                            value: false
+                        },
+                        ctrl: {
+                            type: Boolean,
+                            value: false
                         }
                     }
                 };
@@ -41,23 +49,40 @@
 
             constructor() {
                 super();
-                this.addEventListener("mousedown",
-                    function(e) {
-                        this.mousedown = true;
-                    }
-                );
-                this.addEventListener("mouseup", 
-                    function(e) {
-                        this.mousedown = false;
-                    }
-                );
-                window.addEventListener("contextmenu", function(e) {e.preventDefault()});
-                window.addEventListener("mouseup", 
-                    function(e) {
-                        this.mousedown = false;
-                    }.bind(this)
-                );
+                this.addEventListener("mousedown", function(e) {
+                    this.mousedown = true;
+                    window.addEventListener("keydown", this.registerKey.bind(this));
+                    window.addEventListener("keyup", this.registerKey.bind(this));
+                });
+                this.addEventListener("mouseup", function(e) {
+                    this.mousedown = false;
+                    window.removeEventListener("keydown", this.registerKey.bind(this));
+                    window.removeEventListener("keyup", this.registerKey.bind(this));
+                });
+                window.addEventListener("contextmenu", (e) => e.preventDefault());
                 window.addEventListener("mousemove", this.mouseMove.bind(this));
+            }
+
+            registerKey(e) {
+                if (e.type === "keydown") {
+                    switch (e.code) {
+                        case "ShiftLeft":
+                            this.shift = true;
+                            break;
+                        case "ControlLeft":
+                            this.ctrl = true;
+                            break;
+                    }
+                } else if (e.type === "keyup") {
+                    switch (e.code) {
+                        case "ShiftLeft":
+                            this.shift = false;
+                            break;
+                        case "ControlLeft":
+                            this.ctrl = false;
+                            break;
+                    }
+                }
             }
 
             mouseMove(e) {

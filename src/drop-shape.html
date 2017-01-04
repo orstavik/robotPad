@@ -56,7 +56,7 @@
             constructor() {
                 super();
                 window.addEventListener("keypress", function(e) {
-                    if (e.code === "KeyM")
+                    if (e.code === "KeyM" && this.parentElement.dataset.selected == "true")
                         this.centered = !this.centered;
                 }.bind(this));
             }

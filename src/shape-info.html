@@ -15,7 +15,7 @@
 
         <slot></slot>
 
-    </template>
+    </template>S
     <script>
         class ShapeInfo extends Polymer.Element {
             static get is() {
@@ -50,6 +50,7 @@
                         this.mousedown = false;
                     }
                 );
+                window.addEventListener("contextmenu", function(e) {e.preventDefault()});
                 window.addEventListener("mouseup", 
                     function(e) {
                         this.mousedown = false;
@@ -60,7 +61,6 @@
 
             mouseMove(e) {
                 if (this.mousedown) {
-                    e.preventDefault();
                     switch (e.which) {
                         case 1:
                             this.translateIt(e.movementX,e.movementY);
@@ -69,7 +69,7 @@
                             this.scaleIt(e.movementX,e.movementY);
                             break;
                         case 3:
-                            this.rotateIt(e.x,e.y);
+                            this.rotateIt(e.x,e.y,e.movementX,e.movementY);
                             break;
                     }
                 }
@@ -87,17 +87,23 @@
                 this.setTransform();
             }
 
-            rotateIt(x,y) {
+            rotateIt(x,y,dx,dy) {
                 var rect = this.querySelector("drop-shape").getBoundingClientRect();
                 var center = {
                     x: rect.left + rect.width / 2,
                     y: rect.top + rect.height / 2
                 };
-                var distance = {
+                var dist = {
                     x: x - center.x,
                     y: y - center.y
                 };
-                this.matrix.angle = Math.atan2(distance.y, distance.x) + Math.PI/2;
+                var distOld = {
+                    x: (x-dx) - center.x,
+                    y: (y-dy) - center.y
+                };
+                let angleDiff = (Math.atan2(dist.y, dist.x) - Math.atan2(distOld.y, distOld.x));
+                this.matrix.angle += angleDiff;
+                this.matrix.angle = (2*Math.PI+this.matrix.angle)%(2*Math.PI);
                 this.setTransform();
             }
 

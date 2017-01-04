@@ -10,12 +10,13 @@
                 position: absolute;
                 top: 0;
                 left: 0;
+                cursor: pointer;
             }
         </style>
 
         <slot></slot>
 
-    </template>S
+    </template>
     <script>
         class ShapeInfo extends Polymer.Element {
             static get is() {
@@ -82,8 +83,12 @@
             }
             
             scaleIt(x,y) {
-                this.matrix.scale.x += x/20;
-                this.matrix.scale.y -= y/20;
+                let cos = Math.cos(this.matrix.angle);
+                let sin = Math.sin(this.matrix.angle);
+                let nx = cos*x + sin*y;
+                let ny = cos*y - sin*x;
+                this.matrix.scale.x += nx/20;
+                this.matrix.scale.y -= ny/20;
                 this.setTransform();
             }
 

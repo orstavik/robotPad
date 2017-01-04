@@ -112,6 +112,16 @@
                 let sin = Math.sin(this.matrix.angle);
                 let nx = cos*x + sin*y;
                 let ny = cos*y - sin*x;
+                if (this.ctrl) {
+                    var max = (this.matrix.scale.x > this.matrix.scale.y) ? this.matrix.scale.x : this.matrix.scale.y;
+                    this.matrix.scale.x = max;
+                    this.matrix.scale.y = max;
+                    nx = -ny;
+                };
+                if (this.shift) {
+                    let divis = this.matrix.scale.x/this.matrix.scale.y;
+                    nx = -ny*divis;
+                }
                 this.matrix.scale.x += nx/20;
                 this.matrix.scale.y -= ny/20;
                 this.setTransform();

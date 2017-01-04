@@ -43,6 +43,20 @@
                 border-right: none;
                 border-top: none;
             }
+            :host {
+                --tone-color-0: blue;
+                --tone-color-1: red;
+                --tone-color-2: yellow;
+                --tone-color-3: grey;
+                --tone-color-4: orange;
+                --tone-color-5: green;
+                --tone-color-6: purple;
+                --tone-color-7: darkgreen;
+                --tone-color-8: brown;
+                --tone-color-9: pink;
+                --tone-color-10: teal;
+                --tone-color-11: magenta;
+            }
         </style>
 
         <json-object key="myLetters" obj="[[letters]]" on-writeop="writeInChanges"></json-object>
@@ -61,7 +75,7 @@
             </template>
         </intertext-selector>
 
-        <color-palette></color-palette>
+        <color-palette id="palette" on-color-palette="newPalette" on-color-selected="colorSelected"></color-palette>
 
         <action-log object="[[letters]]" id="log" on-undo="_undo"></action-log>
 
@@ -113,13 +127,15 @@
             }
 
             _checkKey(e) {
-                if (e.key === "Delete" || e.key === "Backspace") 
+                if (e.key === "Delete" || e.key === "Backspace")
                     this._deleteElem();
+                //todo if (e.key === "Esc")
+                    //todo this._deSelect();
 
-                if (e.code === "Equal" || e.code === "Minus") 
+                if (e.code === "Equal" || e.code === "Minus")
                     this._changeZ(e.code);
 
-                // if (e.code === "KeyZ")
+              // if (e.code === "KeyZ")
                     // this.$.log.action();
             }
 
@@ -131,6 +147,15 @@
                 }
                 this.notifyPath("letters");
             }
+          colorSelected(e){
+            let node = this.$.shapeSelector.selected.querySelector("drop-shape");
+            node.className = e.detail.color;
+          }
+
+          newPalette(e){
+            for (let i = 0, p = e.detail.palette; i < p.length; i++)
+              this.style.setProperty('--tone-color-'+i, this.$.palette._computeHSL(p[i]));
+          }
 
             _changeZ(key) {
                 if (key === "Equal") {

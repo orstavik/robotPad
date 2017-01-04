@@ -94,7 +94,7 @@
 
         <div id="guide">
             - Double click left mouse button on the canvas to create shape. <br>
-            - Choose the shape by pressing left mouse button on it. <br>
+            - Choose the shape by pressing left mouse button on it (Esc deselects the elements). <br>
             - Delete the shape by chosing the shape and pressing Del on the keyboard. <br>
             - Change the shape color by chosing the shape and chosing the color on the top palette. <br>
             - Change the shape move by chosing the shape and pressing "M" on the keyboard. <br> 
@@ -152,8 +152,8 @@
             _checkKey(e) {
                 if (e.key === "Delete" || e.key === "Backspace")
                     this._deleteElem();
-                //todo if (e.key === "Esc")
-                    //todo this._deSelect();
+                if (e.key === "Escape")
+                  this.$.shapeSelector._deselect(this.$.shapeSelector.selected);
 
               if (e.code === "KeyM"){
                 let drop = this.$.shapeSelector.selected.querySelector("drop-shape");

@@ -143,6 +143,7 @@
                 };
                 this.letters.push(shape);
                 this.notifyPath("letters");
+                //todo how to make it selected when you create it??
             }
 
             _undo(e) {
@@ -175,8 +176,9 @@
                 this.notifyPath("letters");
             }
           colorSelected(e){
-            let node = this.$.shapeSelector.selected.querySelector("drop-shape");
-            node.className = e.detail.color;
+            let node = this.$.shapeSelector.selected;
+            this.letters[node.counter].style = e.detail.color.substring(5);
+            this.notifyPath("letters");
           }
 
           newPalette(e){

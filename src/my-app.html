@@ -155,6 +155,10 @@
                 //todo if (e.key === "Esc")
                     //todo this._deSelect();
 
+              if (e.code === "KeyM"){
+                let drop = this.$.shapeSelector.selected.querySelector("drop-shape");
+                drop.centered = !drop.centered;
+              }
                 if (e.code === "Equal" || e.code === "Minus")
                     this._changeZ(e.code);
 

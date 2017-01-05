@@ -56,7 +56,8 @@
             },
             computedColors: {
               type: Array,
-              computed: "makeComputed(staticColors,l,s, sunset)"
+              computed: "makeComputed(staticColors,l,s, sunset)",
+              notify: true
             },
             s: {
               type: Number,
@@ -86,11 +87,9 @@
       }
 
       makeComputed(staticColors, l, s, sunset) {
-        let palette = staticColors.map(function (item) {
+        return staticColors.map(function (item) {
           return this.calculateRGB(ColorPalette.calculateHSL(item, s, l), sunset / 100);
         }.bind(this));
-        this.dispatchEvent(new CustomEvent("color-palette", {detail: {palette: palette}}));
-        return palette;
       }
 
       calculateRGB(hsl, degreeSunset) {
@@ -114,7 +113,7 @@
       }
 
       _computeHSL(item) {
-        return "hsl(" + item[0] + "," + item[1] + "%," + item[2] + "%)";
+        return "hsl(" + Math.round(item[0]) + "," + Math.round(item[1]) + "%," + Math.round(item[2]) + "%)";
       }
 
       setS(e) {

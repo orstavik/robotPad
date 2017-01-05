@@ -9,6 +9,8 @@
 <link rel="import" href="action-log.html">
 <link rel="import" href="intertext-selector.html">
 <link rel="import" href="keyboard-listener.html">
+<link rel="import" href="music-clef.html">
+<link rel="import" href="key-flower.html">
 
 <dom-module id="my-app">
     <template>
@@ -56,6 +58,14 @@
                 --tone-color-9: pink;
                 --tone-color-10: teal;
                 --tone-color-11: magenta;
+
+                --tone-tone-0: blue;
+                --tone-tone-1: red;
+                --tone-tone-2: yellow;
+                --tone-tone-3: grey;
+                --tone-tone-4: orange;
+                --tone-tone-5: green;
+                --tone-tone-6: purple;
             }
 
             #guide {
@@ -92,7 +102,10 @@
             </template>
         </intertext-selector>
 
-        <color-palette id="palette" on-color-palette="newPalette" on-color-selected="colorSelected"></color-palette>
+        <key-flower scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}" on-tone-selected="_toneSelected" ></key-flower>
+        <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
+
+        <color-palette id="palette" computed-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
         <div id="tone0" on-click="_toneClicked">0</div>
 
         <action-log object="[[letters]]" id="log" on-undo="_undo"></action-log>
@@ -127,9 +140,17 @@
             static get config() {
                 return {
                     properties: {
+                        colors: {
+                          type:Array,
+                          observer: "colorsChanged"
+                        },
                         letters: {
                             type: Array
-                        }
+                        },
+                      coloredScale:{
+                          type: Array,
+                        observer: "colorScaleChanged"
+                      }
                     },
                     observers: []
                 };
@@ -196,13 +217,27 @@
             this.letters[node.counter].style = e.detail.color;
             this.notifyPath("letters");
           }
-
-          newPalette(e){
-            for (let i = 0, p = e.detail.palette; i < p.length; i++)
-              this.style.setProperty('--tone-color-'+i, this.$.palette._computeHSL(p[i]));
+          _toneSelected(e){
+            let node = this.$.shapeSelector.selected;
+            this.letters[node.counter].style = e.detail.tone;
+            this.notifyPath("letters");
           }
 
-            _changeZ(key) {
+          colorScaleChanged(){
+            for (let i = 0; i < this.coloredScale.length; i++){
+//                debugger;
+              this.style.setProperty('--tone-tone-'+i, this.coloredScale[i].color);
+            }
+          }
+
+          colorsChanged(){
+            for (let i = 0; i < this.colors.length; i++){
+//                debugger;
+              this.style.setProperty('--tone-color-'+i, this.$.palette._computeHSL(this.colors[i]));
+            }
+          }
+
+          _changeZ(key) {
                 if (key === "Equal") {
                     let node = this.$.shapeSelector.selected;
                     node.style.zIndex = node.style.zIndex ? Number(node.style.zIndex)+1 : 1;

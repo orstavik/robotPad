@@ -42,6 +42,10 @@
                         ctrl: {
                             type: Boolean,
                             value: false
+                        },
+                        alt: {
+                            type: Boolean,
+                            value: false
                         }
                     }
                 };
@@ -72,6 +76,9 @@
                         case "ControlLeft":
                             this.ctrl = true;
                             break;
+                        case "AltLeft":
+                            this.alt = true;
+                            break;
                     }
                 } else if (e.type === "keyup") {
                     switch (e.code) {
@@ -81,6 +88,9 @@
                         case "ControlLeft":
                             this.ctrl = false;
                             break;
+                        case "AltLeft":
+                            this.alt = false;
+                            break;
                     }
                 }
             }
@@ -89,7 +99,10 @@
                 if (this.mousedown) {
                     switch (e.which) {
                         case 1:
-                            this.translateIt(e.movementX,e.movementY);
+                            if (this.alt)
+                                this.scaleIt(e.movementX,e.movementY);
+                            else
+                                this.translateIt(e.movementX,e.movementY);
                             break;
                         case 2:
                             this.scaleIt(e.movementX,e.movementY);
@@ -149,11 +162,14 @@
 
             setTransform() {
                 let m = this.matrix;
+                let angle = m.angle;
+                if (this.shift)
+                    angle = Math.round(m.angle*(6/Math.PI))/(6/Math.PI);
                 let matrix = [
-                    m.scale.x*Math.cos(m.angle),
-                    m.scale.x*Math.sin(m.angle),
-                    -m.scale.y*Math.sin(m.angle),
-                    m.scale.y*Math.cos(m.angle),
+                    m.scale.x*Math.cos(angle),
+                    m.scale.x*Math.sin(angle),
+                    -m.scale.y*Math.sin(angle),
+                    m.scale.y*Math.cos(angle),
                     m.position.x,
                     m.position.y
                 ];

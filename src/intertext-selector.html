@@ -25,43 +25,34 @@
             static get config() {
                 return {
                     properties: {
-                        radioButton: {
-                            type: Boolean,
-                            value: false
-                        },
                         selected: Object
                     }
                 }
             }
 
             setSelect(e) {
-                var nevv = this._getDataSelectable(e.target);
-                var old = this._deselect(nevv);
-                if (!nevv)
+                var nev = this._getDataSelectable(e.path);
+                var old = this._deselect(nev);
+                if (!nev)
                     return;
-                nevv.setAttribute("data-selected", true);
-                nevv.classList.add("data-selected");
-                this.selected = nevv;
+                nev.setAttribute("data-selected", true);
+                this.selected = nev;
                 this.dispatchEvent(new CustomEvent("select", {detail: {now: this.selected, before: old}}));
             }
 
-            _deselect(nevv) {
+            _deselect(nev) {
                 if (!this.selected)
                     return;
-                if (this.radioButton && !nevv)
-                    return;
-                this.selected.classList.remove("data-selected");
                 this.selected.removeAttribute("data-selected");
                 return this.selected;
             }
 
-            _getDataSelectable(nevv) {
-                while (!nevv.hasAttribute("data-selectable")) {
-                    nevv = nevv.parentNode || nevv.host;
-                    if (nevv === this)
-                        return null;
-                }
-                return nevv;
+            _getDataSelectable(coll) {
+                return coll.find(function(item) {
+                    if (item.dataset)
+                        if (item.dataset.selectable == "")
+                            return item;
+                });
             }
         }
         customElements.define(IntertextSelector.is, IntertextSelector);

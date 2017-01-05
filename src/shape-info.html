@@ -1,7 +1,3 @@
-<link rel="import" href="intertext-draggable.html">
-<link rel="import" href="intertext-resizeable.html">
-<link rel="import" href="intertext-rotatable.html">
-
 <dom-module id="shape-info">
     <template>
         <style>
@@ -57,12 +53,12 @@
                     this.mousedown = true;
                     window.addEventListener("keydown", this.registerKey.bind(this));
                     window.addEventListener("keyup", this.registerKey.bind(this));
-                });
-                this.addEventListener("mouseup", function(e) {
+                }.bind(this));
+                window.addEventListener("mouseup", function(e) {
                     this.mousedown = false;
                     window.removeEventListener("keydown", this.registerKey.bind(this));
                     window.removeEventListener("keyup", this.registerKey.bind(this));
-                });
+                }.bind(this));
                 window.addEventListener("contextmenu", (e) => e.preventDefault());
                 window.addEventListener("mousemove", this.mouseMove.bind(this));
             }

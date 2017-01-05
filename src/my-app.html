@@ -1,4 +1,5 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="drop-shape.html">
 <link rel="import" href="color-palette.html">
 <link rel="import" href="shape-info.html">
@@ -23,7 +24,7 @@
                 width: 250px;
                 font-size: 12px;
                 line-height: normal;
-                height: 80vh;
+                height: 100vh;
                 position: relative;
                 overflow-y: scroll;
                 z-index: 1;
@@ -68,23 +69,39 @@
             }
         </style>
 
-        <json-object key="myLetters" obj="[[letters]]" on-writeop="writeInChanges"></json-object>
-
         <!--<json-saver input="[[letters]]" on-sketchload="loadSketch"></json-saver>-->
 
         <!--<shape-links id="links" on-nevv="addLetter"></shape-links>-->
 
         <!--<div id="cross"> </div>-->
 
-        <intertext-selector id="shapeSelector" radio-button on-select="somethingSelected" on-dblclick="addDropShape">
+        <intertext-selector id="shapeSelector" on-select="somethingSelected" on-dblclick="addDropShape">
             <template is="dom-repeat" items="[[letters]]">
                 <shape-info id="drop[[index]]" matrix="[[item.matrix]]" counter="[[index]]" data-selectable on-newinfo="anInfoUpdated" style="z-index: [[item.zIndex]]">
                     <drop-shape input="[[item]]"></drop-shape>
                 </shape-info>
             </template>
         </intertext-selector>
+ашку
+        <iron-selector>
+            <json-object key="myLetters" obj="[[letters]]" on-writeop="writeInChanges"></json-object>
+            <color-palette id="palette" on-color-palette="newPalette" on-color-selected="colorSelected"></color-palette>
+            <div id="guide">
+                - To <b>create</b> shape double click LEFTMOUSE button on the canvas. <br>
+                - To <b>choose</b> the shape press LEFTMOUSE button on it. <br>
+                - To <b>delete</b> the shape choose the shape and press DELETE on the keyboard. <br>
+                - To <b>change</b> the shape's <b>color</b> choose the shape and click on the color from the top palette. <br>
+                - To <b>change</b> the shape <b>mode</b> choose the shape and press M on the keyboard. <br> 
+                - To <b>move</b> the shape one <b>layer above/below</b> pressing -/+ on the keyboard. <br>
+                - To <b>move</b> the shape press LEFTMOUSE button and move the mouse. <br>
+                - To <b>rotate</b> the shape press RIGHTMOUSE button and move the mouse. <br>
+                - To <b>snap</b> rotation to <b>12 clock</b> positions hold SHIFT while rotating. <br>
+                - To <b>resize</b> the shape press MIGGLEMOUSE button or LEFTMOUSE+ALT and move the mouse. <br>
+                - To <b>normalize</b> shape hold CTRL while resizing. <br>
+                - To <b>preserve</b> shape <b>proportions</b> hold SHIFT while resizing.
+            <div>
+        </iron-selector>
 
-        <color-palette id="palette" on-color-palette="newPalette" on-color-selected="colorSelected"></color-palette>
 
         <action-log object="[[letters]]" id="log" on-undo="_undo"></action-log>
 
@@ -92,19 +109,6 @@
 
         <keyboard-listener on-key-down="_checkKey"></keyboard-listener>
 
-        <div id="guide">
-            - To <b>create</b> shape double click LEFTMOUSE button on the canvas. <br>
-            - To <b>choose</b> the shape press LEFTMOUSE button on it. <br>
-            - To <b>delete</b> the shape choose the shape and press DELETE on the keyboard. <br>
-            - To <b>change</b> the shape's <b>color</b> choose the shape and click on the color from the top palette. <br>
-            - To <b>change</b> the shape <b>mode</b> choose the shape and press M on the keyboard. <br> 
-            - To <b>move</b> the shape one <b>layer above/below</b> pressing -/+ on the keyboard. <br>
-            - To <b>move</b> the shape press LEFTMOUSE button and move the mouse. <br>
-            - To <b>rotate</b> the shape press RIGHTMOUSE button and move the mouse. <br>
-            - To <b>resize</b> the shape press MIGGLEMOUSE button or LEFTMOUSE+ALT and move the mouse. <br>
-            - To <b>normalize</b> shape press CTRL when resizing. <br>
-            - To <b>preserve</b> shape <b>proportions</b> press SHIFT when resizing.
-        <div>
 
     </template>
 

@@ -32,7 +32,7 @@
             }
 
             shape-info[data-selected] drop-shape {
-                box-shadow: 0 0 3px 0px gold;
+                box-shadow: 0 0 3px 0px black;
             }
 
             #cross {
@@ -66,6 +66,14 @@
                 --tone-tone-4: orange;
                 --tone-tone-5: green;
                 --tone-tone-6: purple;
+
+                --tone-rotation-0: rotate(0deg);
+                --tone-rotation-1: rotate(0deg);
+                --tone-rotation-2: rotate(0deg);
+                --tone-rotation-3: rotate(0deg);
+                --tone-rotation-4: rotate(0deg);
+                --tone-rotation-5: rotate(0deg);
+                --tone-rotation-6: rotate(0deg);
             }
 
             #guide {
@@ -105,7 +113,7 @@
                 <div id="guide">
                     - Double click left mouse button on the canvas to create shape. <br>
                     - Choose the shape by pressing left mouse button on it (Esc deselects the elements). <br>
-                    - Delete the shape by chosing the shape and pressing Del on the keyboard. <br>
+                    - Delete the shape by chosing the shape and pressing "D" on the keyboard. <br>
                     - Change the shape color by chosing the shape and chosing the color on the top palette. <br>
                     - Change the shape move by chosing the shape and pressing "M" on the keyboard. <br> 
                     - To move the shape one layer above/below pressing "-"/"+" on the keyboard. <br>
@@ -114,15 +122,13 @@
                     - Resize the shape by pressing middle mouse button and moving the mouse. <br>
                     - To normalize shape press "Ctrl" when resizing. <br>
                     - To preserve shape proportions press "Shift" when resizing.
-                <div>
+                </div>
+            </tab-wrapper>
+            <tab-wrapper title="Flower" select="3">
+                <key-flower scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}" on-tone-selected="_toneSelected" ></key-flower>
+                <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
             </tab-wrapper>
         </iron-selector>
-
-        <!--<key-flower scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}" on-tone-selected="_toneSelected" ></key-flower>-->
-
-        <!--<music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>-->
-
-        <div id="tone0" on-click="_toneClicked">0</div>
 
         <action-log object="[[letters]]" id="log" on-undo="_undo"></action-log>
 
@@ -147,10 +153,10 @@
                         letters: {
                             type: Array
                         },
-                      coloredScale:{
-                          type: Array,
-                        observer: "colorScaleChanged"
-                      }
+                        coloredScale:{
+                            type: Array,
+                            observer: "colorScaleChanged"
+                        }
                     },
                     observers: []
                 };
@@ -176,32 +182,34 @@
                 //todo how to make it selected when you create it??
             }
 
-          _toneClicked(e){
-              let toneClass = e.target.id;
-            let node = this.$.shapeSelector.selected;
-            this.letters[node.counter].style = toneClass;
-            this.notifyPath("letters");
-          }
-
             _undo(e) {
                 this.letters = e.detail.state;
             }
 
             _checkKey(e) {
-                if (e.key === "Delete" || e.key === "Backspace")
+                e.preventDefault();
+                if (e.key === "KeyD")
                     this._deleteElem();
                 if (e.key === "Escape")
-                  this.$.shapeSelector._deselect(this.$.shapeSelector.selected);
+                    this.$.shapeSelector._deselect(this.$.shapeSelector.selected);
 
-              if (e.code === "KeyM"){
-                let drop = this.$.shapeSelector.selected.querySelector("drop-shape");
-                drop.centered = !drop.centered;
-              }
+                if (e.code === "KeyM"){
+                    let drop = this.$.shapeSelector.selected.querySelector("drop-shape");
+                    drop.centered = !drop.centered;
+                }
+
                 if (e.code === "Equal" || e.code === "Minus")
                     this._changeZ(e.code);
+                
+                if (e.code === "Enter")
+                    this.$.clef.turnKeyRight();
+                if (e.code === "Tab")
+                    this.$.clef.turnKeyLeft();
+                if (e.code === "Backspace")
+                    this.$.clef.turnModusRight();
+                if (e.code === "Backquote")
+                    this.$.clef.turnModusLeft();
 
-              // if (e.code === "KeyZ")
-                    // this.$.log.action();
             }
 
             _deleteElem() {
@@ -220,13 +228,24 @@
           _toneSelected(e){
             let node = this.$.shapeSelector.selected;
             this.letters[node.counter].style = e.detail.tone;
+            this.letters[node.counter].matrix.angle = this.coloredScale[e.detail.tone.substr(-1)].rotation/180*Math.PI;
             this.notifyPath("letters");
           }
 
           colorScaleChanged(){
             for (let i = 0; i < this.coloredScale.length; i++){
-//                debugger;
-              this.style.setProperty('--tone-tone-'+i, this.coloredScale[i].color);
+//              debugger;
+                this.style.setProperty('--tone-tone-'+i, this.coloredScale[i].color);
+            };
+            if (this.letters) {
+                this.letters = this.letters.map(function(item) {
+                    if (item.style.substr(0,5) !== "color") {
+                        let i = Number(item.style.replace("tone", ""));
+                        item.matrix.angle = this.coloredScale[i].rotation/180*Math.PI;
+                    }
+                    return item;
+                }.bind(this));
+                this.notifyPath("letters");
             }
           }
 

@@ -6,7 +6,7 @@
 <link rel="import" href="json-object.html">
 <link rel="import" href="json-saver.html">
 <link rel="import" href="action-log.html">
-<link rel="import" href="intertext-selector.html">
+<link rel="import" href="droppad-canvas.html">
 <link rel="import" href="keyboard-listener.html">
 <link rel="import" href="music-clef.html">
 <link rel="import" href="key-flower.html">
@@ -92,15 +92,14 @@
             }
         </style>
 
-        <json-saver input="[[letters]]" on-sketchload="loadSketch"></json-saver>
 
-        <intertext-selector id="shapeSelector" on-select="somethingSelected" on-dblclick="addDropShape">
+        <droppad-canvas id="shapeSelector" on-select="somethingSelected" on-dblclick="addDropShape">
             <template is="dom-repeat" items="[[letters]]">
                 <shape-info id="drop[[index]]" matrix="[[item.matrix]]" counter="[[index]]" data-selectable on-newinfo="anInfoUpdated" style="z-index: [[item.zIndex]]">
                     <drop-shape input="[[item]]"></drop-shape>
                 </shape-info>
             </template>
-        </intertext-selector>
+        </droppad-canvas>
 
         <iron-selector attr-for-selected="select" multi>
             <tab-wrapper title="JSON" select="0">
@@ -109,7 +108,14 @@
             <tab-wrapper title="Palette" select="1">
                 <color-palette id="palette" computed-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
             </tab-wrapper>
-            <tab-wrapper title="Help" select="2">
+            <tab-wrapper title="Flower" select="2">
+                <key-flower scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}" on-tone-selected="_toneSelected" ></key-flower>
+                <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
+            </tab-wrapper>
+            <tab-wrapper title="Save/Load" select="3">
+                <json-saver input="[[letters]]" on-sketchload="loadSketch"></json-saver>    
+            </tab-wrapper>
+            <tab-wrapper title="Help" select="4">
                 <div id="guide">
                     - Double click left mouse button on the canvas to create shape. <br>
                     - Choose the shape by pressing left mouse button on it (Esc deselects the elements). <br>
@@ -123,10 +129,6 @@
                     - To normalize shape press "Ctrl" when resizing. <br>
                     - To preserve shape proportions press "Shift" when resizing.
                 </div>
-            </tab-wrapper>
-            <tab-wrapper title="Flower" select="3">
-                <key-flower scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}" on-tone-selected="_toneSelected" ></key-flower>
-                <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
             </tab-wrapper>
         </iron-selector>
 

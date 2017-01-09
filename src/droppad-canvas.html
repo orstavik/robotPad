@@ -1,25 +1,27 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
-<dom-module id="intertext-selector">
+<dom-module id="droppad-canvas">
     <template>
         <style>
             :host {
                 display: flex;
+                box-sizing: border-box;
                 align-items: center;
                 justify-content: center;
                 position: absolute;
                 top: 0;
                 width: 100vw;
-                height: 70vh;
+                height: 43.0279vw;
+                border: 1px solid black;
             }
         </style>
         <slot on-mousedown="setSelect"></slot>
     </template>
 
     <script>
-        class IntertextSelector extends Polymer.Element {
+        class DropPad extends Polymer.Element {
             static get is() {
-                return "intertext-selector";
+                return "droppad-canvas";
             }
 
             static get config() {
@@ -55,6 +57,6 @@
                 });
             }
         }
-        customElements.define(IntertextSelector.is, IntertextSelector);
+        customElements.define(DropPad.is, DropPad);
     </script>
 </dom-module>

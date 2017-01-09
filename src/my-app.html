@@ -3,8 +3,6 @@
 <link rel="import" href="drop-shape.html">
 <link rel="import" href="color-palette.html">
 <link rel="import" href="shape-info.html">
-<link rel="import" href="shape-keyboard.html">
-<link rel="import" href="shape-links.html">
 <link rel="import" href="json-object.html">
 <link rel="import" href="json-saver.html">
 <link rel="import" href="action-log.html">
@@ -12,6 +10,7 @@
 <link rel="import" href="keyboard-listener.html">
 <link rel="import" href="music-clef.html">
 <link rel="import" href="key-flower.html">
+<link rel="import" href="tab-wrapper.html">
 
 <dom-module id="my-app">
     <template>
@@ -71,9 +70,7 @@
 
             #guide {
                 display: inline-block;
-                position: absolute;
-                bottom: 0;
-                right: 0;
+                padding: 10px;
                 font-size: 12px;
                 color: grey;
             }
@@ -89,10 +86,6 @@
 
         <!--<json-saver input="[[letters]]" on-sketchload="loadSketch"></json-saver>-->
 
-        <!--<shape-links id="links" on-nevv="addLetter"></shape-links>-->
-
-        <!--<div id="cross"> </div>-->
-
         <intertext-selector id="shapeSelector" on-select="somethingSelected" on-dblclick="addDropShape">
             <template is="dom-repeat" items="[[letters]]">
                 <shape-info id="drop[[index]]" matrix="[[item.matrix]]" counter="[[index]]" data-selectable on-newinfo="anInfoUpdated" style="z-index: [[item.zIndex]]">
@@ -100,34 +93,40 @@
                 </shape-info>
             </template>
         </intertext-selector>
-        <json-object key="myLetters" obj="[[letters]]" on-writeop="writeInChanges"></json-object>
 
-        <key-flower scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}" on-tone-selected="_toneSelected" ></key-flower>
+        <iron-selector attr-for-selected="select" multi>
+            <tab-wrapper title="JSON" select="0">
+                <json-object key="myLetters" obj="[[letters]]" on-writeop="writeInChanges"></json-object>
+            </tab-wrapper>
+            <tab-wrapper title="Palette" select="1">
+                <color-palette id="palette" computed-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
+            </tab-wrapper>
+            <tab-wrapper title="Help" select="2">
+                <div id="guide">
+                    - Double click left mouse button on the canvas to create shape. <br>
+                    - Choose the shape by pressing left mouse button on it (Esc deselects the elements). <br>
+                    - Delete the shape by chosing the shape and pressing Del on the keyboard. <br>
+                    - Change the shape color by chosing the shape and chosing the color on the top palette. <br>
+                    - Change the shape move by chosing the shape and pressing "M" on the keyboard. <br> 
+                    - To move the shape one layer above/below pressing "-"/"+" on the keyboard. <br>
+                    - Move the shape by pressing left mouse button and moving the mouse. <br>
+                    - Rotate the shape by pressing right mouse button and moving the mouse. <br>
+                    - Resize the shape by pressing middle mouse button and moving the mouse. <br>
+                    - To normalize shape press "Ctrl" when resizing. <br>
+                    - To preserve shape proportions press "Shift" when resizing.
+                <div>
+            </tab-wrapper>
+        </iron-selector>
 
-        <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
+        <!--<key-flower scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}" on-tone-selected="_toneSelected" ></key-flower>-->
 
-        <color-palette id="palette" computed-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
+        <!--<music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>-->
+
         <div id="tone0" on-click="_toneClicked">0</div>
 
         <action-log object="[[letters]]" id="log" on-undo="_undo"></action-log>
 
-        <shape-keyboard on-scale="keyScale" on-rotate="keyRotate"></shape-keyboard>
-
         <keyboard-listener on-key-down="_checkKey"></keyboard-listener>
-
-        <div id="guide">
-            - Double click left mouse button on the canvas to create shape. <br>
-            - Choose the shape by pressing left mouse button on it (Esc deselects the elements). <br>
-            - Delete the shape by chosing the shape and pressing Del on the keyboard. <br>
-            - Change the shape color by chosing the shape and chosing the color on the top palette. <br>
-            - Change the shape move by chosing the shape and pressing "M" on the keyboard. <br> 
-            - To move the shape one layer above/below pressing "-"/"+" on the keyboard. <br>
-            - Move the shape by pressing left mouse button and moving the mouse. <br>
-            - Rotate the shape by pressing right mouse button and moving the mouse. <br>
-            - Resize the shape by pressing middle mouse button and moving the mouse. <br>
-            - To normalize shape press "Ctrl" when resizing. <br>
-            - To preserve shape proportions press "Shift" when resizing.
-        <div>
 
     </template>
 

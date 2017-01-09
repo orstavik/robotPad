@@ -158,14 +158,11 @@
 
             setTransform() {
                 let m = this.matrix;
-                let angle = m.angle;
-                if (this.shift)
-                    angle = Math.round(m.angle*(6/Math.PI))/(6/Math.PI);
                 let matrix = [
-                    m.scale.x*Math.cos(angle),
-                    m.scale.x*Math.sin(angle),
-                    -m.scale.y*Math.sin(angle),
-                    m.scale.y*Math.cos(angle),
+                    m.scale.x*Math.cos(m.angle),
+                    m.scale.x*Math.sin(m.angle),
+                    -m.scale.y*Math.sin(m.angle),
+                    m.scale.y*Math.cos(m.angle),
                     m.position.x,
                     m.position.y
                 ];

@@ -1,3 +1,5 @@
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+
 <dom-module id="json-saver">
     <template>
         <style>
@@ -35,15 +37,15 @@
             }
         </style>
 
-        <firebase-document app-name="linksonfire"
+        <firebase-document app-name="droppad"
                            id="firedoc"
                            path="[[jsonPath]]"
                            data="[[jsonString]]">
         </firebase-document>
 
-        <firebase-document app-name="linksonfire"
+        <firebase-document app-name="droppad"
                            id="firelist"
-                           path="/robots"
+                           path="/drop-images"
                            data="{{jsonList}}">
         </firebase-document>
 
@@ -113,7 +115,6 @@
             }
 
             _parseToArray(str) {
-                //debugger;
                 var res = JSON.parse(str);
                 return res;
             }
@@ -124,9 +125,9 @@
                 this.$.firedoc.disabled = false;
                 if (!this.jsonName) {
                     var timeStamp = new Date().getTime();
-                    this.jsonPath = "/robots/" + timeStamp;
+                    this.jsonPath = "/drop-images/" + timeStamp;
                 } else 
-                    this.jsonPath = "/robots/" + this.jsonName;
+                    this.jsonPath = "/drop-images/" + this.jsonName;
                 this.jsonString = JSON.stringify(this.input);
                 this.$.firedoc.disabled = true;
                 this.$.jsonName.value = "";

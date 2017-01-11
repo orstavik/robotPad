@@ -39,17 +39,18 @@
 
       connectedCallback() {
         super.connectedCallback();
-        this.addEventListener("click", this.setPosition.bind(this));
+        this.addEventListener("click", this._setPosition.bind(this));
       }
 
-      setPosition(e) {
+      _setPosition(e) {
         this.position = [e.x, e.y];
         this.notifyPath("position");
       }
 
-
       setSelect(e) {
         var nev = this._getDataSelectable(e.path);
+        if (Boolean(nev.dataset.selected))
+          return;
         var old = this._deselect(nev);
         if (!nev)
           return;

@@ -46,25 +46,39 @@
                       dataSelected: {
                           type: Boolean,
                         observer: "changeSelected"
+                      },
+                      active: {         //we have to have this man in the middle, because changeSelected is called many times even though the value before and after is true many times.
+                          type: Boolean,
+                        value: false
                       }
                     }
                 };
             }
 
+            connectedCallback(){
+              //tom: remind me to explain this to you.
+              // the concept is that you remove the listener function object,
+              // so that when we bind a function to this, it is a new objecct,
+              // and so to unlisten that one we need to save a ref to it.
+              this.downListener = this.registerKeyDown.bind(this);
+              this.moveListener = this.mouseMove.bind(this);
+              this.upListener = this.registerKeyUp.bind(this);
+            }
+
           changeSelected(){
-              if (this.dataSelected)
+              if (this.active == this.dataSelected)
+                return;
+            this.active = this.dataSelected;
+              if (this.active)
                 this.select();
               else
                 this.deselect()
           }
 
             select(){
-              window.addEventListener("keydown", this.registerKeyDown.bind(this));
-              window.addEventListener("keyup", this.registerKeyUp.bind(this));
-//              this.addEventListener("mousedown", this.mouseDown.bind(this));
-//              this.addEventListener("mouseup", this.mouseUp.bind(this));
-              this.addEventListener("mousemove", this.mouseMove.bind(this));
-              this.mousedown = false;
+              window.addEventListener("keydown", this.downListener);
+              window.addEventListener("keyup", this.upListener);
+              window.addEventListener("mousemove", this.moveListener);
               this.shift = false;
               this.ctrl = false;
               this.alt = false;
@@ -75,29 +89,13 @@
         // but on keyboard we need to addd it to the window.
 
             deselect(){
-              window.removeEventListener("keydown", this.registerKeyDown);
-              window.removeEventListener("keyup", this.registerKeyUp);
-//              this.removeEventListener("mousedown", this.mouseDown);
-//              this.removeEventListener("mouseup", this.mouseUp);
-              this.removeEventListener("mousemove", this.mouseMove);
-              this.mousedown = false;
+              window.removeEventListener("keydown", this.downListener);
+              window.removeEventListener("keyup", this.upListener);
+              window.removeEventListener("mousemove", this.moveListener);
               this.shift = false;
               this.ctrl = false;
               this.alt = false;
             }
-
-//            mouseDown(e){
-//              this.mousedown = true;
-//              e.preventDefault();
-//              e.stopPropagation();
-//              return false;
-//            }
-//            mouseUp(e){
-//              this.mousedown = false;
-//              e.preventDefault();
-//              e.stopPropagation();
-//              return false;
-//            }
 
             registerKeyDown(e) {
                 switch (e.code) {
@@ -118,7 +116,7 @@
             registerKeyUp(e) {
                 switch (e.code) {
                     case "ShiftLeft":
-                        this.shift = false;
+                      this.shift = false;
                       break;
                     case "ControlLeft":
                         this.ctrl = false;
@@ -130,7 +128,7 @@
             }
 
             mouseMove(e) {
-              if (e.which != 1 || !this.dataSelected)
+              if (e.which != 1 || !this.active)
                 return;
 
               if (this.ctrl && this.alt)
@@ -142,7 +140,7 @@
               else if (this.shift)
                 this.rotateIt(e.x,e.y,e.movementX,e.movementY);
               else
-                this.translateIt(e.movementX,e.movementY);
+                this.translateIt(e.movementX,e.movementY);          //todo we have to use the e.x and e.y here, and to do that we have to have the position of the cursor in the middle of the shape. getBoundingClientRect?
             }
 
             translateIt(x,y) {

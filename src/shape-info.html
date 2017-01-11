@@ -60,9 +60,8 @@
               // the concept is that you remove the listener function object,
               // so that when we bind a function to this, it is a new objecct,
               // and so to unlisten that one we need to save a ref to it.
-              this.downListener = this.registerKeyDown.bind(this);
+              this.keyListener = this.registerKey.bind(this);
               this.moveListener = this.mouseMove.bind(this);
-              this.upListener = this.registerKeyUp.bind(this);
             }
 
           changeSelected(){
@@ -76,8 +75,8 @@
           }
 
             select(){
-              window.addEventListener("keydown", this.downListener);
-              window.addEventListener("keyup", this.upListener);
+              window.addEventListener("keydown", this.keyListener);
+              window.addEventListener("keyup", this.keyListener);
               window.addEventListener("mousemove", this.moveListener);
               this.shift = false;
               this.ctrl = false;
@@ -89,40 +88,25 @@
         // but on keyboard we need to addd it to the window.
 
             deselect(){
-              window.removeEventListener("keydown", this.downListener);
-              window.removeEventListener("keyup", this.upListener);
+              window.removeEventListener("keydown", this.keyListener);
+              window.removeEventListener("keyup", this.keyListener);
               window.removeEventListener("mousemove", this.moveListener);
               this.shift = false;
               this.ctrl = false;
               this.alt = false;
             }
 
-            registerKeyDown(e) {
-                switch (e.code) {
-//                    case "ShiftRight":
-                    case "KeyR":
-                        this.shift = true;
-                      break;
-//                    case "ControlRight":
-                    case "KeyE":
-                        this.ctrl = true;
-                      break;
-                    case "KeyW":
-                        this.alt = true;
-                      break;
-                }
-            }
-
-            registerKeyUp(e) {
+            registerKey(e) {
+                let value = e.type == "keydown";
                 switch (e.code) {
                     case "KeyR":
-                      this.shift = false;
+                      this.shift = value ;
                       break;
                     case "KeyE":
-                        this.ctrl = false;
+                        this.ctrl = value ;
                       break;
                     case "KeyW":
-                        this.alt = false;
+                        this.alt = value ;
                       break;
                 }
             }
@@ -140,7 +124,9 @@
               else if (this.shift)
                 this.rotateIt(e.x,e.y,e.movementX,e.movementY);
               else
-                this.translateIt(e.movementX,e.movementY);          //todo we have to use the e.x and e.y here, and to do that we have to have the position of the cursor in the middle of the shape. getBoundingClientRect?
+               this.translateIt(e.movementX,e.movementY);
+              //todo we have to use the e.x and e.y here, and to do that we have to have the position of the cursor in
+              //todo the middle of the shape. getBoundingClientRect?
             }
 
             translateIt(x,y) {
@@ -200,12 +186,7 @@
                     m.position.y
                 ];
                 this.style.transform = "matrix("+matrix.join(',')+")";
-                // this.notifyChange();
             }
-
-            // notifyChange() {
-            //     this.dispatchEvent(new CustomEvent("newinfo", {detail: {counter: this.counter, matrix: this.matrix}}));
-            // }
         }
         customElements.define(ShapeInfo.is, ShapeInfo);
     </script>

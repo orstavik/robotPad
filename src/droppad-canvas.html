@@ -1,62 +1,78 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
 <dom-module id="droppad-canvas">
-    <template>
-        <style>
-            :host {
-                display: flex;
-                box-sizing: border-box;
-                align-items: center;
-                justify-content: center;
-                position: absolute;
-                top: 0;
-                width: 100vw;
-                height: 43.0279vw;
-                border: 1px solid black;
-            }
-        </style>
-        <slot on-mousedown="setSelect"></slot>
-    </template>
+  <template>
+    <style>
+      :host {
+        display: flex;
+        box-sizing: border-box;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 0;
+        width: 100vw;
+        height: 43.0279vw;
+        border: 1px solid black;
+      }
+    </style>
+    <slot on-mousedown="setSelect"></slot>
+  </template>
 
-    <script>
-        class DroppadCanvas extends Polymer.Element {
-            static get is() {
-                return "droppad-canvas";
-            }
+  <script>
+    class DroppadCanvas extends Polymer.Element {
+      static get is() {
+        return "droppad-canvas";
+      }
 
-            static get config() {
-                return {
-                    properties: {
-                        selected: Object
-                    }
-                }
+      static get config() {
+        return {
+          properties: {
+            selected: Object,
+            position: {
+              type: Array,
+              value: [0, 0],
+              notify: true
             }
-
-            setSelect(e) {
-                var nev = this._getDataSelectable(e.path);
-                var old = this._deselect(nev);
-                if (!nev)
-                    return;
-                nev.setAttribute("data-selected", true);
-                this.selected = nev;
-                this.dispatchEvent(new CustomEvent("select", {detail: {now: this.selected, before: old}}));
-            }
-
-            _deselect(nev) {
-                if (!this.selected)
-                    return;
-                this.selected.removeAttribute("data-selected");
-                return this.selected;
-            }
-
-            _getDataSelectable(coll) {
-                return coll.find(function(item) {
-                    if (item.dataset)
-                        if (item.dataset.selectable == "")
-                            return item;
-                });
-            }
+          }
         }
-        customElements.define(DroppadCanvas.is, DroppadCanvas);
-    </script>
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this.addEventListener("click", this.setPosition.bind(this));
+      }
+
+      setPosition(e) {
+        this.position = [e.x, e.y];
+        this.notifyPath("position");
+      }
+
+
+      setSelect(e) {
+        var nev = this._getDataSelectable(e.path);
+        var old = this._deselect(nev);
+        if (!nev)
+          return;
+        nev.setAttribute("data-selected", true);
+        this.selected = nev;
+        this.dispatchEvent(new CustomEvent("select", {detail: {now: this.selected, before: old}}));
+      }
+
+      _deselect(nev) {
+        if (!this.selected)
+          return;
+        this.selected.removeAttribute("data-selected");
+        return this.selected;
+      }
+
+      _getDataSelectable(coll) {
+        return coll.find(function (item) {
+          if (item.dataset)
+            if (item.dataset.selectable == "")
+              return item;
+        });
+      }
+    }
+    customElements.define(DroppadCanvas.is, DroppadCanvas);
+  </script>
 </dom-module>

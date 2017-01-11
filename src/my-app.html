@@ -93,7 +93,7 @@
         </style>
 
 
-        <droppad-canvas id="shapeSelector" on-select="somethingSelected" on-dblclick="addDropShape">
+        <droppad-canvas id="shapeSelector" on-select="somethingSelected" on-dblclick="addDropShape" position="{{lastClickPos}}">
             <template is="dom-repeat" items="[[letters]]">
                 <shape-info id="drop[[index]]" matrix="[[item.matrix]]" counter="[[index]]" data-selectable on-newinfo="anInfoUpdated" style="z-index: [[item.zIndex]]">
                     <drop-shape input="[[item]]"></drop-shape>
@@ -158,7 +158,8 @@
                         coloredScale:{
                             type: Array,
                             observer: "colorScaleChanged"
-                        }
+                        },
+                      lastClickPos: Array
                     },
                     observers: []
                 };
@@ -168,7 +169,6 @@
             super.connectedCallback();
             var start = '[]';
             this.set("letters", JSON.parse(start));
-            window.addEventListener("mousemove", this.trackMouse.bind(this));
           }
 
 
@@ -198,10 +198,6 @@
 
           _undo(e) {
             this.letters = e.detail.state;
-            }
-
-            trackMouse(e) {
-              this.lastMousePos = [e.x, e.y];
             }
 
             _checkKey(e) {
@@ -234,8 +230,8 @@
                 }
                 if (e.code === "KeyV" && e.ctrlKey){
                   this.makeShape(
-                    this.lastMousePos[0],
-                    this.lastMousePos[1],
+                    this.lastClickPos[0],
+                    this.lastClickPos[1],
                     this.copiedShapeInfo.style,
                     this.copiedShapeInfo.matrix.scale.x,
                     this.copiedShapeInfo.matrix.scale.x,

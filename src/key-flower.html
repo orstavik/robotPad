@@ -111,11 +111,12 @@
             chordType == "maj" ? "0.75, 1" :
               chordType == "min" ? "0.6375, 0.85" :
                 chordType == "maj" ? "0.525, 0.7" : "0,0";
+          let colorNumber = scale.posInCircleOf5[i];
           arr.push({
             number: tonePosition,
             name: scale.getToneName(i),
             type: chordType,
-            color: "hsl(" + Math.round(palette[tonePosition][0]) + ", " + Math.round(palette[tonePosition][1]) + "%, " + Math.round(palette[tonePosition][2]) + "%)",
+            color: "hsl(" + Math.round(palette[colorNumber][0]) + ", " + Math.round(palette[colorNumber][1]) + "%, " + Math.round(palette[colorNumber][2]) + "%)",
             scale: transScale,
             rotation: 30 * tonePosition
           });

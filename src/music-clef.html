@@ -20,6 +20,9 @@
         this.keyNumber = MusicScale.twelveNotes.indexOf(key);
         this.scale = MusicScale.getModeScale(mode);
         this.octave = octave;
+        this.posInCircleOf5 = [];
+        for (let i=0; i<7; i++)
+          this.posInCircleOf5.push(this.getToneColor(i));
       }
 
       getChord(zeroToSix) {

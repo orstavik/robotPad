@@ -113,7 +113,7 @@
         <color-palette id="palette" computed-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
       </tab-wrapper>
       <tab-wrapper title="Flower" select="2">
-        <key-flower scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"
+        <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"
                     on-tone-selected="_toneSelected"></key-flower>
         <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
       </tab-wrapper>
@@ -133,6 +133,7 @@
           - Resize ("escalate") the shape: hold "e" + drag it. <br>
           - Resize the shape (while preserving proportions): hold "e"+"r" + drag it. <br>
           - Resize the shape (normalized): hold "e"+"w" + drag it. <br>
+          - Mirror the shape: press "j", maybe in the future we can add different mirror modes. <br>
         </div>
       </tab-wrapper>
     </iron-selector>

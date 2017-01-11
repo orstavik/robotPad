@@ -108,8 +108,16 @@
           case "KeyW":
             this.alt = value;
             break;
+          case "KeyJ":
+            this.mirror();
+            break;
         }
       }
+
+      mirror() {
+        this.matrix.angle += 180;// (2 * Math.PI + 180) % (2 * Math.PI);
+        this.setTransform();
+      };
 
       mouseMove(e) {
         if (e.which != 1 || !this.active)
@@ -141,12 +149,11 @@
         let nx = cos * x + sin * y;
         let ny = cos * y - sin * x;
         if (constraints == 1) {
-          var max = (this.matrix.scale.x > this.matrix.scale.y) ? this.matrix.scale.x : this.matrix.scale.y;
+          const max = (this.matrix.scale.x > this.matrix.scale.y) ? this.matrix.scale.x : this.matrix.scale.y;
           this.matrix.scale.x = max;
           this.matrix.scale.y = max;
           nx = -ny;
         }
-        ;
         if (constraints == 2) {
           let divis = this.matrix.scale.x / this.matrix.scale.y;
           nx = -ny * divis;
@@ -157,16 +164,16 @@
       }
 
       rotateIt(x, y, dx, dy) {
-        var rect = this.querySelector("drop-shape").getBoundingClientRect();
-        var center = {
+        let rect = this.querySelector("drop-shape").getBoundingClientRect();
+        let center = {
           x: rect.left + rect.width / 2,
           y: rect.top + rect.height / 2
         };
-        var dist = {
+        let dist = {
           x: x - center.x,
           y: y - center.y
         };
-        var distOld = {
+        let distOld = {
           x: (x - dx) - center.x,
           y: (y - dy) - center.y
         };
@@ -177,7 +184,7 @@
       }
 
       setTransform() {
-        let m = this.matrix;
+        const m = this.matrix;
         let matrix = [
           m.scale.x * Math.cos(m.angle),
           m.scale.x * Math.sin(m.angle),

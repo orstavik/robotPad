@@ -178,7 +178,7 @@
 
           //todo how to make it selected when you create it??
           makeShape(x,y, style, scaleX, scaleY, angle) {
-            var shape = {
+              let shape = {
               style: style,
               matrix: {
                 position: {
@@ -224,11 +224,11 @@
                 if (e.code === "Backquote")
                     this.$.clef.turnModusLeft();
 
-                if (e.code === "KeyC" && e.ctrlKey){
+                if (e.code === "KeyC"){
                   this.lastMousePos = [100,100];
                   this.copiedShapeInfo = this.$.shapeSelector.selected.querySelector("drop-shape").input;
                 }
-                if (e.code === "KeyV" && e.ctrlKey){
+                if (e.code === "KeyV"){
                   this.makeShape(
                     this.lastClickPos[0],
                     this.lastClickPos[1],

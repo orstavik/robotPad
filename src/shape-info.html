@@ -1,193 +1,194 @@
 <dom-module id="shape-info">
-    <template>
-        <style>
-            :host {
-                display: flex;
-                position: absolute;
-                top: 0;
-                left: 0;
-                cursor: pointer;
+  <template>
+    <style>
+      :host {
+        display: flex;
+        position: absolute;
+        top: 0;
+        left: 0;
+        cursor: pointer;
+      }
+    </style>
+
+    <slot></slot>
+
+  </template>
+  <script>
+    class ShapeInfo extends Polymer.Element {
+      static get is() {
+        return "shape-info";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            mousedown: {
+              type: Boolean,
+              value: false,
+            },
+            counter: Number,
+            matrix: {
+              type: Object,
+              observer: "setTransform"
+            },
+            shift: {
+              type: Boolean,
+              value: false
+            },
+            ctrl: {
+              type: Boolean,
+              value: false
+            },
+            alt: {
+              type: Boolean,
+              value: false
+            },
+            dataSelected: {
+              type: Boolean,
+              observer: "changeSelected"
+            },
+            active: {         //we have to have this man in the middle, because changeSelected is called many times even though the value before and after is true many times.
+              type: Boolean,
+              value: false
             }
-        </style>
-
-        <slot></slot>
-
-    </template>
-    <script>
-        class ShapeInfo extends Polymer.Element {
-            static get is() {
-                return "shape-info";
-            }
-
-            static get config() {
-                return {
-                    properties: {
-                        mousedown: {
-                            type: Boolean,
-                            value: false,
-                        },
-                        counter: Number,
-                        matrix: {
-                            type: Object,
-                            observer: "setTransform"
-                        },
-                        shift: {
-                            type: Boolean,
-                            value: false
-                        },
-                        ctrl: {
-                            type: Boolean,
-                            value: false
-                        },
-                        alt: {
-                            type: Boolean,
-                            value: false
-                        },
-                      dataSelected: {
-                          type: Boolean,
-                        observer: "changeSelected"
-                      },
-                      active: {         //we have to have this man in the middle, because changeSelected is called many times even though the value before and after is true many times.
-                          type: Boolean,
-                        value: false
-                      }
-                    }
-                };
-            }
-
-            connectedCallback(){
-              //tom: remind me to explain this to you.
-              // the concept is that you remove the listener function object,
-              // so that when we bind a function to this, it is a new objecct,
-              // and so to unlisten that one we need to save a ref to it.
-              this.keyListener = this.registerKey.bind(this);
-              this.moveListener = this.mouseMove.bind(this);
-            }
-
-          changeSelected(){
-              if (this.active == this.dataSelected)
-                return;
-            this.active = this.dataSelected;
-              if (this.active)
-                this.select();
-              else
-                this.deselect()
           }
+        };
+      }
 
-            select(){
-              window.addEventListener("keydown", this.keyListener);
-              window.addEventListener("keyup", this.keyListener);
-              window.addEventListener("mousemove", this.moveListener);
-              this.shift = false;
-              this.ctrl = false;
-              this.alt = false;
-            }
+      connectedCallback() {
+        //tom: remind me to explain this to you.
+        // the concept is that you remove the listener function object,
+        // so that when we bind a function to this, it is a new objecct,
+        // and so to unlisten that one we need to save a ref to it.
+        this.keyListener = this.registerKey.bind(this);
+        this.moveListener = this.mouseMove.bind(this);
+      }
 
-        //to tom:: be careful where we set the listener,
-        // if we set it on the window, the other listeners are read before us on mouse.
-        // but on keyboard we need to addd it to the window.
+      changeSelected() {
+        if (this.active == this.dataSelected)
+          return;
+        this.active = this.dataSelected;
+        if (this.active)
+          this.select();
+        else
+          this.deselect()
+      }
 
-            deselect(){
-              window.removeEventListener("keydown", this.keyListener);
-              window.removeEventListener("keyup", this.keyListener);
-              window.removeEventListener("mousemove", this.moveListener);
-              this.shift = false;
-              this.ctrl = false;
-              this.alt = false;
-            }
+      select() {
+        window.addEventListener("keydown", this.keyListener);
+        window.addEventListener("keyup", this.keyListener);
+        window.addEventListener("mousemove", this.moveListener);
+        this.shift = false;
+        this.ctrl = false;
+        this.alt = false;
+      }
 
-            registerKey(e) {
-                let value = e.type == "keydown";
-                switch (e.code) {
-                    case "KeyR":
-                      this.shift = value ;
-                      break;
-                    case "KeyE":
-                        this.ctrl = value ;
-                      break;
-                    case "KeyW":
-                        this.alt = value ;
-                      break;
-                }
-            }
+      //to tom:: be careful where we set the listener,
+      // if we set it on the window, the other listeners are read before us on mouse.
+      // but on keyboard we need to addd it to the window.
 
-            mouseMove(e) {
-              if (e.which != 1 || !this.active)
-                return;
+      deselect() {
+        window.removeEventListener("keydown", this.keyListener);
+        window.removeEventListener("keyup", this.keyListener);
+        window.removeEventListener("mousemove", this.moveListener);
+        this.shift = false;
+        this.ctrl = false;
+        this.alt = false;
+      }
 
-              if (this.ctrl && this.alt)
-                this.scaleIt(e.movementX,e.movementY, 1);
-              else if (this.ctrl && this.shift)
-                this.scaleIt(e.movementX,e.movementY, 2);
-              else if (this.ctrl)
-                this.scaleIt(e.movementX,e.movementY, 0);
-              else if (this.shift)
-                this.rotateIt(e.x,e.y,e.movementX,e.movementY);
-              else
-               this.translateIt(e.movementX,e.movementY);
-              //todo we have to use the e.x and e.y here, and to do that we have to have the position of the cursor in
-              //todo the middle of the shape. getBoundingClientRect?
-            }
-
-            translateIt(x,y) {
-                this.matrix.position.x += x;
-                this.matrix.position.y += y;
-                this.setTransform();
-            }
-            
-            scaleIt(x,y, constraints) {
-                let cos = Math.cos(this.matrix.angle);
-                let sin = Math.sin(this.matrix.angle);
-                let nx = cos*x + sin*y;
-                let ny = cos*y - sin*x;
-                if (constraints == 1) {
-                    var max = (this.matrix.scale.x > this.matrix.scale.y) ? this.matrix.scale.x : this.matrix.scale.y;
-                    this.matrix.scale.x = max;
-                    this.matrix.scale.y = max;
-                    nx = -ny;
-                };
-                if (constraints == 2) {
-                    let divis = this.matrix.scale.x/this.matrix.scale.y;
-                    nx = -ny*divis;
-                }
-                this.matrix.scale.x += nx/20;
-                this.matrix.scale.y -= ny/20;
-                this.setTransform();
-            }
-
-            rotateIt(x,y,dx,dy) {
-                var rect = this.querySelector("drop-shape").getBoundingClientRect();
-                var center = {
-                    x: rect.left + rect.width / 2,
-                    y: rect.top + rect.height / 2
-                };
-                var dist = {
-                    x: x - center.x,
-                    y: y - center.y
-                };
-                var distOld = {
-                    x: (x-dx) - center.x,
-                    y: (y-dy) - center.y
-                };
-                let angleDiff = (Math.atan2(dist.y, dist.x) - Math.atan2(distOld.y, distOld.x));
-                this.matrix.angle += angleDiff;
-                this.matrix.angle = (2*Math.PI+this.matrix.angle)%(2*Math.PI);
-                this.setTransform();
-            }
-
-            setTransform() {
-                let m = this.matrix;
-                let matrix = [
-                    m.scale.x*Math.cos(m.angle),
-                    m.scale.x*Math.sin(m.angle),
-                    -m.scale.y*Math.sin(m.angle),
-                    m.scale.y*Math.cos(m.angle),
-                    m.position.x,
-                    m.position.y
-                ];
-                this.style.transform = "matrix("+matrix.join(',')+")";
-            }
+      registerKey(e) {
+        let value = e.type == "keydown";
+        switch (e.code) {
+          case "KeyR":
+            this.shift = value;
+            break;
+          case "KeyE":
+            this.ctrl = value;
+            break;
+          case "KeyW":
+            this.alt = value;
+            break;
         }
-        customElements.define(ShapeInfo.is, ShapeInfo);
-    </script>
+      }
+
+      mouseMove(e) {
+        if (e.which != 1 || !this.active)
+          return;
+
+        if (this.ctrl && this.alt)
+          this.scaleIt(e.movementX, e.movementY, 1);
+        else if (this.ctrl && this.shift)
+          this.scaleIt(e.movementX, e.movementY, 2);
+        else if (this.ctrl)
+          this.scaleIt(e.movementX, e.movementY, 0);
+        else if (this.shift)
+          this.rotateIt(e.x, e.y, e.movementX, e.movementY);
+        else
+          this.translateIt(e.movementX, e.movementY);
+        //todo we have to use the e.x and e.y here, and to do that we have to have the position of the cursor in
+        //todo the middle of the shape. getBoundingClientRect?
+      }
+
+      translateIt(x, y) {
+        this.matrix.position.x += x;
+        this.matrix.position.y += y;
+        this.setTransform();
+      }
+
+      scaleIt(x, y, constraints) {
+        let cos = Math.cos(this.matrix.angle);
+        let sin = Math.sin(this.matrix.angle);
+        let nx = cos * x + sin * y;
+        let ny = cos * y - sin * x;
+        if (constraints == 1) {
+          var max = (this.matrix.scale.x > this.matrix.scale.y) ? this.matrix.scale.x : this.matrix.scale.y;
+          this.matrix.scale.x = max;
+          this.matrix.scale.y = max;
+          nx = -ny;
+        }
+        ;
+        if (constraints == 2) {
+          let divis = this.matrix.scale.x / this.matrix.scale.y;
+          nx = -ny * divis;
+        }
+        this.matrix.scale.x += nx / 20;
+        this.matrix.scale.y -= ny / 20;
+        this.setTransform();
+      }
+
+      rotateIt(x, y, dx, dy) {
+        var rect = this.querySelector("drop-shape").getBoundingClientRect();
+        var center = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        };
+        var dist = {
+          x: x - center.x,
+          y: y - center.y
+        };
+        var distOld = {
+          x: (x - dx) - center.x,
+          y: (y - dy) - center.y
+        };
+        let angleDiff = (Math.atan2(dist.y, dist.x) - Math.atan2(distOld.y, distOld.x));
+        this.matrix.angle += angleDiff;
+        this.matrix.angle = (2 * Math.PI + this.matrix.angle) % (2 * Math.PI);
+        this.setTransform();
+      }
+
+      setTransform() {
+        let m = this.matrix;
+        let matrix = [
+          m.scale.x * Math.cos(m.angle),
+          m.scale.x * Math.sin(m.angle),
+          -m.scale.y * Math.sin(m.angle),
+          m.scale.y * Math.cos(m.angle),
+          m.position.x,
+          m.position.y
+        ];
+        this.style.transform = "matrix(" + matrix.join(',') + ")";
+      }
+    }
+    customElements.define(ShapeInfo.is, ShapeInfo);
+  </script>
 </dom-module>

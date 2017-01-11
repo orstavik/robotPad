@@ -1,8 +1,8 @@
-Object.isEmpty = function(obj) {
-    for(var prop in obj) {
-        if(obj.hasOwnProperty(prop))
-            return false;
-    }
+Object.isEmpty = function (obj) {
+  for (var prop in obj) {
+    if (obj.hasOwnProperty(prop))
+      return false;
+  }
 
-    return true && JSON.stringify(obj) === JSON.stringify({});
+  return true && JSON.stringify(obj) === JSON.stringify({});
 }

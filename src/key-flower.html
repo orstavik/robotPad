@@ -11,6 +11,7 @@
         top: 15%;
         left: 25%;
       }
+
       .leaf {
         display: inline-block;
         box-sizing: border-box;
@@ -21,7 +22,8 @@
         transform-origin: bottom;
         transition-duration: 0.5s;
       }
-      .innerLeaf{
+
+      .innerLeaf {
         display: inline-block;
         width: 100%;
         height: 100%;
@@ -35,6 +37,7 @@
         font-size: 12px;
         color: black;
       }
+
       #flowerCenter {
         display: flex;
         align-items: center;
@@ -50,6 +53,7 @@
         font-size: 2vh;
         z-index: 1;
       }
+
       .note {
         position: absolute;
         left: 50%;
@@ -105,24 +109,24 @@
           let chordType = scale.getChordType(i);
           let transScale =
             chordType == "maj" ? "0.75, 1" :
-            chordType == "min" ? "0.6375, 0.85" :
-            chordType == "maj" ? "0.525, 0.7" : "0,0";
+              chordType == "min" ? "0.6375, 0.85" :
+                chordType == "maj" ? "0.525, 0.7" : "0,0";
           arr.push({
             number: tonePosition,
             name: scale.getToneName(i),
             type: chordType,
-            color: "hsl(" + Math.round(palette[tonePosition][0]) + ", "+Math.round(palette[tonePosition][1]) + "%, "+Math.round(palette[tonePosition][2]) + "%)",
+            color: "hsl(" + Math.round(palette[tonePosition][0]) + ", " + Math.round(palette[tonePosition][1]) + "%, " + Math.round(palette[tonePosition][2]) + "%)",
             scale: transScale,
-            rotation: 30* tonePosition
+            rotation: 30 * tonePosition
           });
-          arr.sort(function(a,b){
+          arr.sort(function (a, b) {
             return a.number - b.number;
           });
         }
         return arr;
       }
 
-      _toneClicked(e){
+      _toneClicked(e) {
         this.dispatchEvent(new CustomEvent("tone-selected", {detail: {tone: e.target.id}}));
       }
     }

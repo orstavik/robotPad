@@ -14,7 +14,7 @@
   <script>
 
     class MusicScaleObject {
-      constructor(key, mode, octave){
+      constructor(key, mode, octave) {
         this.key = key;
         this.mode = mode;
         this.keyNumber = MusicScale.twelveNotes.indexOf(key);
@@ -22,40 +22,48 @@
         this.octave = octave;
       }
 
-      getChord(zeroToSix){
+      getChord(zeroToSix) {
         return [
           this.scale[zeroToSix],
-          this.scale[(zeroToSix+2)%7],
-          this.scale[(zeroToSix+4)%7]
+          this.scale[(zeroToSix + 2) % 7],
+          this.scale[(zeroToSix + 4) % 7]
         ];
       }
 
       getToneNumber(zeroToSix, oct) {
-        oct = oct + this.octave + Math.floor(zeroToSix/7);
-        return oct * 12 + this.keyNumber + this.scale[zeroToSix%7];
+        oct = oct + this.octave + Math.floor(zeroToSix / 7);
+        return oct * 12 + this.keyNumber + this.scale[zeroToSix % 7];
       }
-      getChordType(zeroToSix){
+
+      getChordType(zeroToSix) {
         return MusicScaleObject.calculateChordType(this.getChord(zeroToSix));
       }
-      getOctave(base){
-        return Number(base)+this.octave;
+
+      getOctave(base) {
+        return Number(base) + this.octave;
       }
-      getTonePosition(zeroToSix){
+
+      getTonePosition(zeroToSix) {
         return (this.keyNumber + this.scale[zeroToSix]) % 12;
       }
-      getToneName(zeroToSix){
+
+      getToneName(zeroToSix) {
         return MusicScale.twelveNotes[this.getTonePosition(zeroToSix)];
       }
-      getTonePositionRelativeToKey(zeroToSix){
+
+      getTonePositionRelativeToKey(zeroToSix) {
         return this.scale[zeroToSix];
       }
-      getToneColor(zeroToSix){
+
+      getToneColor(zeroToSix) {
         return MusicScale.getWheelOf5Number(this.getTonePosition(zeroToSix));
       }
-      getToneHarmonicSeventh(zeroToSix){
-        let plusMinus86 = this.zeroToSix * 12/7 - this.getTonePositionRelativeToKey(zeroToSix);
-        return (plusMinus86+1)/2;
+
+      getToneHarmonicSeventh(zeroToSix) {
+        let plusMinus86 = this.zeroToSix * 12 / 7 - this.getTonePositionRelativeToKey(zeroToSix);
+        return (plusMinus86 + 1) / 2;
       }
+
       static calculateChordType(chordAsArrayOfThreeNumbers) {
         let distanceA = chordAsArrayOfThreeNumbers[1] - chordAsArrayOfThreeNumbers[0];
         let distanceB = chordAsArrayOfThreeNumbers[2] - chordAsArrayOfThreeNumbers[1];
@@ -83,7 +91,7 @@
           properties: {
             mode: String,
             key: String,
-            octave:Number,
+            octave: Number,
             scale: {
               type: MusicScaleObject,
               notify: true,

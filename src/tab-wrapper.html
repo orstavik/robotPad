@@ -1,73 +1,76 @@
 <dom-module id="tab-wrapper">
-    <template>
-        <style>
-            :host {
-                display: flex;
-                flex-direction: row;
-                height: 100vh;
-                position: absolute;
-                z-index: 10;
-                transform: translateX(-251px);
-                transition-duration: 0.5s;
-                pointer-events: none;
-            }
-            :host(.iron-selected) {
-                transform: translateX(0px);
-                z-index: 11;
-            }
-            .container {
-                width: 250px;
-                background: white;
-                border-right: 1px solid black;
-                pointer-events: auto;
-            }
-            #tabTitle {
-                width: 80px;
-                height: 30px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                background: lightblue;
-                cursor: pointer;
-                pointer-events: auto;
-            }
-        </style>
+  <template>
+    <style>
+      :host {
+        display: flex;
+        flex-direction: row;
+        height: 100vh;
+        position: absolute;
+        z-index: 10;
+        transform: translateX(-251px);
+        transition-duration: 0.5s;
+        pointer-events: none;
+      }
 
-        <div class="container" on-tap="stopPropagate">
-            <slot></slot>
-        </div>
-        <div id="tabTitle">
-            <span>[[title]]</span>
-        </div>
+      :host(.iron-selected) {
+        transform: translateX(0px);
+        z-index: 11;
+      }
 
-    </template>
-    <script>
-        class TabWrapper extends Polymer.Element {
-            static get is() {
-                return "tab-wrapper";
-            }
+      .container {
+        width: 250px;
+        background: white;
+        border-right: 1px solid black;
+        pointer-events: auto;
+      }
 
-            static get config() {
-                return {
-                    properties: {
-                        title: String,
-                        select: {
-                            type: Number,
-                            observer: "positionTitle"
-                        }
-                    }
-                };
-            }
+      #tabTitle {
+        width: 80px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        background: lightblue;
+        cursor: pointer;
+        pointer-events: auto;
+      }
+    </style>
 
-            positionTitle(select) {
-                 this.$.tabTitle.style.top = (select*30)+"px";
-            }
+    <div class="container" on-tap="stopPropagate">
+      <slot></slot>
+    </div>
+    <div id="tabTitle">
+      <span>[[title]]</span>
+    </div>
 
-            stopPropagate(e) {
-                e.stopPropagation();
+  </template>
+  <script>
+    class TabWrapper extends Polymer.Element {
+      static get is() {
+        return "tab-wrapper";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            title: String,
+            select: {
+              type: Number,
+              observer: "positionTitle"
             }
-        }
-        customElements.define(TabWrapper.is, TabWrapper);
-    </script>
+          }
+        };
+      }
+
+      positionTitle(select) {
+        this.$.tabTitle.style.top = (select * 30) + "px";
+      }
+
+      stopPropagate(e) {
+        e.stopPropagation();
+      }
+    }
+    customElements.define(TabWrapper.is, TabWrapper);
+  </script>
 </dom-module>

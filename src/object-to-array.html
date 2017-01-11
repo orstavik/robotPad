@@ -1,36 +1,36 @@
 <dom-module id="object-to-array">
-    <script>
-        Polymer({
-            is: 'object-to-array',
+  <script>
+    Polymer({
+      is: 'object-to-array',
 
-            properties: {
-                obj: {
-                    type: Object,
-                    observer: "objChanged",
-                    notify: true
-                },
-                ar: {
-                    type: Array,
-                    observer: "arChanged",
-                    notify: true
-                }
-            },
-            arChanged: function () {
-                var obj = {};
-                for (var i = 0; i < this.ar.length; i++) {
-                    var item = this.ar[i];
-                    obj[item.key] = item.value;
-                }
-                this.set("obj", obj);
-            },
-            objChanged: function () {
-                var ar = [];
-                if (this.obj){
-                    for (var k in this.obj)
-                        ar.push({key: k, value: this.obj[k]});
-                }
-                this.set("ar", ar);
-            }
-        });
-    </script>
+      properties: {
+        obj: {
+          type: Object,
+          observer: "objChanged",
+          notify: true
+        },
+        ar: {
+          type: Array,
+          observer: "arChanged",
+          notify: true
+        }
+      },
+      arChanged: function () {
+        var obj = {};
+        for (var i = 0; i < this.ar.length; i++) {
+          var item = this.ar[i];
+          obj[item.key] = item.value;
+        }
+        this.set("obj", obj);
+      },
+      objChanged: function () {
+        var ar = [];
+        if (this.obj) {
+          for (var k in this.obj)
+            ar.push({key: k, value: this.obj[k]});
+        }
+        this.set("ar", ar);
+      }
+    });
+  </script>
 </dom-module>

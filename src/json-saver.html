@@ -1,147 +1,152 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 
 <dom-module id="json-saver">
-    <template>
-        <style>
-            :host {
-                display: flex;
-                height: 100%;
-                flex-direction: column;
-            }
-            #jsonName {
-                width: 100px;
-            }
-            #saveWrapper {
-                text-align: left;
-                margin-bottom: 20px;
-            }
-            .jsonWrapper {
-                flex-grow: 1;
-                overflow-y: scroll;
-            }
-            .monsterWrapper {
-                display: flex;
-                justify-content: center;
-                align-items: flex-end;
-                position: relative;
-                height: 100%;
-            }
-            shape-info {
-                pointer-events: none;
-                transform: scale(0.2);
-                bottom: initial;
-                left: initial;
-            }
-        </style>
+  <template>
+    <style>
+      :host {
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+      }
 
-        <firebase-document app-name="droppad"
-                           id="firedoc"
-                           path="[[jsonPath]]"
-                           data="[[jsonString]]">
-        </firebase-document>
+      #jsonName {
+        width: 100px;
+      }
 
-        <firebase-document app-name="droppad"
-                           id="firelist"
-                           path="/drop-images"
-                           data="{{jsonList}}">
-        </firebase-document>
+      #saveWrapper {
+        text-align: left;
+        margin-bottom: 20px;
+      }
 
-        <div id="saveWrapper">
-            <input id="jsonName" value="{{jsonName::input}}"></input>
-            <button on-click="saveToFire">Save Sketch</button>
+      .jsonWrapper {
+        flex-grow: 1;
+        overflow-y: scroll;
+      }
+
+      .monsterWrapper {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        position: relative;
+        height: 100%;
+      }
+
+      shape-info {
+        pointer-events: none;
+        transform: scale(0.2);
+        bottom: initial;
+        left: initial;
+      }
+    </style>
+
+    <firebase-document app-name="droppad"
+                       id="firedoc"
+                       path="[[jsonPath]]"
+                       data="[[jsonString]]">
+    </firebase-document>
+
+    <firebase-document app-name="droppad"
+                       id="firelist"
+                       path="/drop-images"
+                       data="{{jsonList}}">
+    </firebase-document>
+
+    <div id="saveWrapper">
+      <input id="jsonName" value="{{jsonName::input}}"></input>
+      <button on-click="saveToFire">Save Sketch</button>
+    </div>
+
+    <div class="jsonWrapper">
+      <template is="dom-repeat" items="[[_toArray(jsonCopy)]]" id="repeater">
+        <div class="monsterWrapper">
+          <template is="dom-repeat" items="[[_parseToArray(item.json)]]">
+            <shape-info key="[[index]]" input="[[item]]" data-selectable on-newinfo="anInfoUpdated">
+              <letter-shape input="[[item]]"></letter-shape>
+            </shape-info>
+          </template>
+          <button class="jsonLoad" on-click="loadIt">[[item.name]]</button>
         </div>
+      </template>
+    </div>
 
-        <div class="jsonWrapper">
-            <template is="dom-repeat" items="[[_toArray(jsonCopy)]]" id="repeater">
-                <div class="monsterWrapper">
-                    <template is="dom-repeat" items="[[_parseToArray(item.json)]]">
-                        <shape-info key="[[index]]" input="[[item]]" data-selectable on-newinfo="anInfoUpdated">
-                            <letter-shape input="[[item]]"></letter-shape>
-                        </shape-info>
-                    </template>
-                    <button class="jsonLoad" on-click="loadIt">[[item.name]]</button>
-                </div>
-            </template>
-        </div>
+  </template>
 
-    </template>
+  <script>
 
-    <script>
+    class JsonSaver extends Polymer.Element {
+      static get is() {
+        return "json-saver";
+      }
 
-        class JsonSaver extends Polymer.Element {
-            static get is() {
-                return "json-saver";
-            }
+      static get config() {
+        return {
+          properties: {
+            input: Array,
+            jsonPath: String,
+            jsonString: String,
+            jsonList: {
+              type: Object,
+              value: function () {
+                return {}
+              },
+              observer: "createCopy"
+            },
+            jsonCopy: Object,
+            jsonArray: Array
+          }
+        };
+      }
 
-            static get config() {
-                return {
-                    properties: {
-                        input: Array,
-                        jsonPath: String,
-                        jsonString: String,
-                        jsonList: {
-                            type: Object,
-                            value: function() {
-                                return {}
-                            },
-                            observer: "createCopy"
-                        },
-                        jsonCopy: Object,
-                        jsonArray: Array
-                    }
-                };
-            }
+      createCopy() {
+        var newJSON = JSON.stringify(this.jsonList);
+        var oldJSON = JSON.stringify(this.jsonCopy);
+        if (oldJSON === newJSON)
+          return;
+        this.jsonCopy = JSON.parse(newJSON);
+      }
 
-            createCopy() {
-                var newJSON = JSON.stringify(this.jsonList);
-                var oldJSON = JSON.stringify(this.jsonCopy);
-                if (oldJSON === newJSON)
-                    return;
-                this.jsonCopy = JSON.parse(newJSON);
-            }
-
-            _toArray(obj) {
-                var res = []; 
-                for (var key in obj) {
-                    res.push({
-                        name: key,
-                        json: obj[key]
-                    });
-                }
-                return res;
-            }
-
-            _parseToArray(str) {
-                var res = JSON.parse(str);
-                return res;
-            }
-
-            saveToFire() {
-                this.jsonPath = undefined;
-                this.jsonString = undefined;
-                this.$.firedoc.disabled = false;
-                if (!this.jsonName) {
-                    var timeStamp = new Date().getTime();
-                    this.jsonPath = "/drop-images/" + timeStamp;
-                } else 
-                    this.jsonPath = "/drop-images/" + this.jsonName;
-                this.jsonString = JSON.stringify(this.input);
-                this.$.firedoc.disabled = true;
-                this.$.jsonName.value = "";
-            }
-
-            loadIt(e) {
-                var key = e.target.innerText;
-                this.dispatchEvent(new CustomEvent("sketchload", 
-                    {
-                        detail: {
-                            json: this.jsonCopy[key]
-                        }
-                    }
-                ));
-            }
+      _toArray(obj) {
+        var res = [];
+        for (var key in obj) {
+          res.push({
+            name: key,
+            json: obj[key]
+          });
         }
+        return res;
+      }
 
-        customElements.define(JsonSaver.is, JsonSaver);
-    </script>
+      _parseToArray(str) {
+        var res = JSON.parse(str);
+        return res;
+      }
+
+      saveToFire() {
+        this.jsonPath = undefined;
+        this.jsonString = undefined;
+        this.$.firedoc.disabled = false;
+        if (!this.jsonName) {
+          var timeStamp = new Date().getTime();
+          this.jsonPath = "/drop-images/" + timeStamp;
+        } else
+          this.jsonPath = "/drop-images/" + this.jsonName;
+        this.jsonString = JSON.stringify(this.input);
+        this.$.firedoc.disabled = true;
+        this.$.jsonName.value = "";
+      }
+
+      loadIt(e) {
+        var key = e.target.innerText;
+        this.dispatchEvent(new CustomEvent("sketchload",
+          {
+            detail: {
+              json: this.jsonCopy[key]
+            }
+          }
+        ));
+      }
+    }
+
+    customElements.define(JsonSaver.is, JsonSaver);
+  </script>
 </dom-module>

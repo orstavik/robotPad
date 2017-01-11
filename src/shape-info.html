@@ -100,14 +100,14 @@
             registerKeyDown(e) {
                 switch (e.code) {
 //                    case "ShiftRight":
-                    case "ShiftLeft":
+                    case "KeyR":
                         this.shift = true;
                       break;
 //                    case "ControlRight":
-                    case "ControlLeft":
+                    case "KeyE":
                         this.ctrl = true;
                       break;
-                    case "AltLeft":
+                    case "KeyW":
                         this.alt = true;
                       break;
                 }
@@ -115,13 +115,13 @@
 
             registerKeyUp(e) {
                 switch (e.code) {
-                    case "ShiftLeft":
+                    case "KeyR":
                       this.shift = false;
                       break;
-                    case "ControlLeft":
+                    case "KeyE":
                         this.ctrl = false;
                       break;
-                    case "AltLeft":
+                    case "KeyW":
                         this.alt = false;
                       break;
                 }

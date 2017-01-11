@@ -164,35 +164,51 @@
                 };
             }
 
-            addDropShape(e) {
-                var shape = {
-                    style: 0,
-                    matrix: {
-                        position: {
-                            x: e.x,
-                            y: e.y
-                        },
-                        scale: {
-                            x: 1,
-                            y: 1
-                        },
-                        angle: 0
-                    }
-                };
-                this.letters.push(shape);
-                this.notifyPath("letters");
-                //todo how to make it selected when you create it??
+          connectedCallback() {
+            super.connectedCallback();
+            var start = '[]';
+            this.set("letters", JSON.parse(start));
+            window.addEventListener("mousemove", this.trackMouse.bind(this));
+          }
+
+
+          addDropShape(e) {
+              this.makeShape(e.x,e.y, 0, 1,1,0);
             }
 
-            _undo(e) {
-                this.letters = e.detail.state;
+          //todo how to make it selected when you create it??
+          makeShape(x,y, style, scaleX, scaleY, angle) {
+            var shape = {
+              style: style,
+              matrix: {
+                position: {
+                  x: x,
+                  y: y
+                },
+                scale: {
+                  x: scaleX,
+                  y: scaleY
+                },
+                angle: angle
+              }
+            };
+            this.letters.push(shape);
+            this.notifyPath("letters");
+          }
+
+          _undo(e) {
+            this.letters = e.detail.state;
+            }
+
+            trackMouse(e) {
+              this.lastMousePos = [e.x, e.y];
             }
 
             _checkKey(e) {
                 e.preventDefault();
-                if (e.key === "KeyD")
+                if (e.code === "KeyD")
                     this._deleteElem();
-                if (e.key === "Escape")
+                if (e.code === "Escape")
                     this.$.shapeSelector._deselect(this.$.shapeSelector.selected);
 
                 if (e.code === "KeyM"){
@@ -211,6 +227,21 @@
                     this.$.clef.turnModusRight();
                 if (e.code === "Backquote")
                     this.$.clef.turnModusLeft();
+
+                if (e.code === "KeyC" && e.ctrlKey){
+                  this.lastMousePos = [100,100];
+                  this.copiedShapeInfo = this.$.shapeSelector.selected.querySelector("drop-shape").input;
+                }
+                if (e.code === "KeyV" && e.ctrlKey){
+                  this.makeShape(
+                    this.lastMousePos[0],
+                    this.lastMousePos[1],
+                    this.copiedShapeInfo.style,
+                    this.copiedShapeInfo.matrix.scale.x,
+                    this.copiedShapeInfo.matrix.scale.x,
+                    this.copiedShapeInfo.matrix.angle
+                  );
+                }
 
             }
 
@@ -317,13 +348,6 @@
 //                this.letters = detail[1];
                 this.notifyPath("letters");
             }
-
-            connectedCallback() {
-                super.connectedCallback();
-                var start = '[]';
-                this.set("letters", JSON.parse(start));
-            }
-
         }
         customElements.define(MyApp.is, MyApp);
     </script>

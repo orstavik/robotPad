@@ -61,9 +61,13 @@
             select(){
               window.addEventListener("keydown", this.registerKeyDown.bind(this));
               window.addEventListener("keyup", this.registerKeyUp.bind(this));
-              this.addEventListener("mousedown", this.mouseDown.bind(this));
-              this.addEventListener("mouseup", this.mouseUp.bind(this));
+//              this.addEventListener("mousedown", this.mouseDown.bind(this));
+//              this.addEventListener("mouseup", this.mouseUp.bind(this));
               this.addEventListener("mousemove", this.mouseMove.bind(this));
+              this.mousedown = false;
+              this.shift = false;
+              this.ctrl = false;
+              this.alt = false;
             }
 
         //to tom:: be careful where we set the listener,
@@ -71,65 +75,68 @@
         // but on keyboard we need to addd it to the window.
 
             deselect(){
-              window.removeEventListener("keydown", this.registerKeyDown.bind(this));
-              window.removeEventListener("keyup", this.registerKeyUp.bind(this));
-              this.removeEventListener("mousedown", this.mouseDown.bind(this));
-              this.removeEventListener("mouseup", this.mouseUp.bind(this));
-              this.removeEventListener("mousemove", this.mouseMove.bind(this));
+              window.removeEventListener("keydown", this.registerKeyDown);
+              window.removeEventListener("keyup", this.registerKeyUp);
+//              this.removeEventListener("mousedown", this.mouseDown);
+//              this.removeEventListener("mouseup", this.mouseUp);
+              this.removeEventListener("mousemove", this.mouseMove);
+              this.mousedown = false;
+              this.shift = false;
+              this.ctrl = false;
+              this.alt = false;
             }
 
-            mouseDown(e){
-              this.mousedown = true;
-              e.preventDefault();
-              e.stopPropagation();
-              return false;
-            }
-            mouseUp(e){
-              this.mousedown = false;
-              e.preventDefault();
-              e.stopPropagation();
-              return false;
-            }
+//            mouseDown(e){
+//              this.mousedown = true;
+//              e.preventDefault();
+//              e.stopPropagation();
+//              return false;
+//            }
+//            mouseUp(e){
+//              this.mousedown = false;
+//              e.preventDefault();
+//              e.stopPropagation();
+//              return false;
+//            }
 
             registerKeyDown(e) {
                 switch (e.code) {
 //                    case "ShiftRight":
                     case "ShiftLeft":
                         this.shift = true;
-                      return false;
+                      break;
 //                    case "ControlRight":
                     case "ControlLeft":
                         this.ctrl = true;
-                      return false;
+                      break;
                     case "AltLeft":
                         this.alt = true;
-                      return false;
+                      break;
                 }
-                return false;
             }
 
             registerKeyUp(e) {
                 switch (e.code) {
                     case "ShiftLeft":
                         this.shift = false;
-                      return false;
+                      break;
                     case "ControlLeft":
                         this.ctrl = false;
-                      return false;
+                      break;
                     case "AltLeft":
                         this.alt = false;
-                      return false;
+                      break;
                 }
             }
 
             mouseMove(e) {
-              if (!this.mousedown)
+              if (e.which != 1 || !this.dataSelected)
                 return;
 
               if (this.ctrl && this.alt)
-                this.scaleIt(e.movementX,e.movementY, 2);
-              else if (this.ctrl && this.shift)
                 this.scaleIt(e.movementX,e.movementY, 1);
+              else if (this.ctrl && this.shift)
+                this.scaleIt(e.movementX,e.movementY, 2);
               else if (this.ctrl)
                 this.scaleIt(e.movementX,e.movementY, 0);
               else if (this.shift)

@@ -30,7 +30,9 @@
             selected: Object,
             position: {
               type: Array,
-              value: [0, 0],
+              value: function() {
+                return [0, 0];
+              },
               notify: true
             }
           }
@@ -38,7 +40,6 @@
       }
 
       connectedCallback() {
-        super.connectedCallback();
         this.addEventListener("click", this._setPosition.bind(this));
       }
 

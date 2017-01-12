@@ -98,9 +98,9 @@
     <droppad-canvas id="shapeSelector" on-select="somethingSelected" on-dblclick="addDropShape"
                     position="{{lastClickPos}}">
       <template is="dom-repeat" items="[[letters]]">
-        <shape-info id="drop[[index]]" matrix="[[item.matrix]]" counter="[[index]]" data-selectable
-                    on-newinfo="anInfoUpdated" style="z-index: [[item.zIndex]]">
-          <drop-shape input="[[item]]"></drop-shape>
+        <shape-info id="drop[[index]]" info="{{item}}" counter="[[index]]" data-selectable
+                    on-info-updated="anInfoUpdated" style="z-index: [[item.zIndex]]">
+          <drop-shape input="[[item]]" centered$="[[item.centered]]"></drop-shape>
         </shape-info>
       </template>
     </droppad-canvas>
@@ -177,6 +177,9 @@
         this.set("letters", JSON.parse(start));
       }
 
+      anInfoUpdated(e) {
+        this.notifyPath("letters");
+      }
 
       addDropShape(e) {
         this.makeShape(e.x, e.y, 0, 1, 1, 0);
@@ -196,7 +199,9 @@
               y: scaleY
             },
             angle: angle
-          }
+          },
+          centered: true,
+          selected: true
         };
         this.letters.push(shape);
         this.notifyPath("letters");
@@ -213,10 +218,6 @@
         if (e.code === "Escape")
           this.$.shapeSelector._deselect(this.$.shapeSelector.selected);
 
-        if (e.code === "KeyM") {
-          let drop = this.$.shapeSelector.selected.querySelector("drop-shape");
-          drop.centered = !drop.centered;
-        }
 
         if (e.code === "Equal" || e.code === "Minus")
           this._changeZ(e.code);
@@ -344,11 +345,6 @@
           return console.log("Can't use the keys when no shape is selected");
         selected.rotateAlittle(detail);
         this.notifyPath("letters");
-      }
-
-      anInfoUpdated(e, detail) {
-        this.letters[detail.counter].matrix = detail.matrix;
-        // this.notifyPath("letters");
       }
 
       writeInChanges(e, detail) {

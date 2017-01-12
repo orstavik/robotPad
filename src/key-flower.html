@@ -105,12 +105,12 @@
           return undefined;
         let arr = [];
         for (let i = 0; i < 7; i++) {
-          let tonePosition = scale.getTonePosition(i);
+          let tonePosition = scale.getTonePositionRelativeToKey(i);
           let chordType = scale.getChordType(i);
           let transScale =
             chordType == "maj" ? "0.75, 1" :
               chordType == "min" ? "0.6375, 0.85" :
-                chordType == "maj" ? "0.525, 0.7" : "0,0";
+                chordType == "dim" ? "0.525, 0.7" : "0,0";
           let colorNumber = scale.getToneColor(i);
           arr.push({
             number: tonePosition,

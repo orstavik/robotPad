@@ -61,22 +61,53 @@
                 return [0, 0];
               },
               notify: true
+            },
+            center: {
+              type: Object,
+              value: function(){
+                return {};
+              },
+              notify: true
             }
           }
         }
       }
 
       connectedCallback() {
+        this.calcCenter();
         this.addEventListener("click", this._setPosition.bind(this));
+        this.addEventListener("dblclick", this.addDrop.bind(this));
+        window.addEventListener("keydown", this.registerKey.bind(this));
+        window.addEventListener("resize", this.calcCenter.bind(this));
+      }
+
+      registerKey(e) {
+//        let value = (e.type == "keydown");
+//        switch (e.code) {
+//          case "KeyR":
+//            this.shift = value;
+//            return;
+//          case "KeyE":
+//            this.ctrl = value;
+//            return;
+//          case "KeyW":
+//            this.alt = value;
+//            return;
+//        }
+//        if (!value && e.code == "KeyM")
+//          this.mirror();
+//        else if (!value && e.code == "KeyT")
+//          this.info.centered = !this.info.centered;
+//        this.notifyInfo();
       }
 
       _setPosition(e) {
-        this.position = [e.x, e.y];
+        this.position = [e.x - this.center.x, e.y - this.center.y];
         this.notifyPath("position");
       }
 
       setSelect(e) {
-        var nev = this._getDataSelectable(e.path);
+        var nev = DroppadCanvas._getDataSelectable(e.path);
         if (Boolean(nev.dataset.selected))
           return;
         var old = this._deselect(nev);
@@ -94,12 +125,21 @@
         return this.selected;
       }
 
-      _getDataSelectable(coll) {
+      static _getDataSelectable(coll) {
         return coll.find(function (item) {
           if (item.dataset)
             if (item.dataset.selectable == "")
               return item;
         });
+      }
+      addDrop(e){
+        this.dispatchEvent(new CustomEvent("new-drop", {detail: {x: e.x-this.center.x, y: e.y-this.center.y }}));
+      }
+      calcCenter(){
+        this.center = {
+          x: window.innerWidth/2,
+          y: window.innerHeight/2
+        }
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

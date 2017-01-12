@@ -95,10 +95,10 @@
     </style>
 
 
-    <droppad-canvas id="shapeSelector" on-select="somethingSelected" on-dblclick="addDropShape"
-                    position="{{lastClickPos}}">
+    <droppad-canvas id="shapeSelector" on-select="somethingSelected" on-new-drop="addDropShape"
+                    position="{{lastClickPos}}" center="{{center}}">
       <template is="dom-repeat" items="[[letters]]">
-        <shape-info id="drop[[index]]" info="{{item}}" counter="[[index]]" data-selectable
+        <shape-info id="drop[[index]]" info="{{item}}" counter="[[index]]" center="[[center]]" data-selectable
                     on-info-updated="anInfoUpdated" style="z-index: [[item.zIndex]]">
           <drop-shape input="[[item]]" centered$="[[item.centered]]"></drop-shape>
         </shape-info>
@@ -182,7 +182,7 @@
       }
 
       addDropShape(e) {
-        this.makeShape(e.x, e.y, 0, 1, 1, 0);
+        this.makeShape(e.detail.x, e.detail.y, 0, 1, 1, 0);
       }
 
       //todo how to make it selected when you create it??

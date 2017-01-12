@@ -164,24 +164,9 @@
         matrix.scale.y -= ny / 20;
       }
 
+      //2*PI = 360gr
       rotateIt(x, y, dx, dy) {
-        const matrix = this.info.matrix;
-        let rect = this.querySelector("drop-shape").getBoundingClientRect();
-        let center = {
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2
-        };
-        let dist = {
-          x: x - center.x,
-          y: y - center.y
-        };
-        let distOld = {
-          x: (x - dx) - center.x,
-          y: (y - dy) - center.y
-        };
-        let angleDiff = (Math.atan2(dist.y, dist.x) - Math.atan2(distOld.y, distOld.x));
-        matrix.angle += angleDiff;
-        matrix.angle = (2 * Math.PI + matrix.angle) % (2 * Math.PI);
+        this.info.matrix.angle = (2 * Math.PI + (this.info.matrix.angle+dy/50)) % (2 * Math.PI);
       }
 
       calcMatrix(angle, posX, posY, scX, scY) {

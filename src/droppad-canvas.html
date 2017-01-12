@@ -5,17 +5,35 @@
     <style>
       :host {
         display: flex;
-        box-sizing: border-box;
         align-items: center;
         justify-content: center;
         position: absolute;
         top: 0;
         width: 100vw;
-        height: 43.0279vw;
-        border: 1px solid black;
+        height: 100vh;
+      }
+      #crossX, #crossY {
+        display: block;
+        box-sizing: border-box;
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      #crossX {
+        height: 50%;
+        width: 100%;
+        border-bottom: 1px dashed lightgray;
+      }
+      #crossY {
+        width: 50%;
+        height: 100%;
+        border-right: 1px dashed lightgray;
       }
     </style>
     <slot on-mousedown="setSelect"></slot>
+    <div id="crossX"></div>
+    <div id="crossY"></div>
   </template>
 
   <script>

@@ -12,7 +12,7 @@
         width: 100vw;
         height: 100vh;
       }
-      #crossX, #crossY {
+      #crossX, #crossY, #pastePosition {
         display: block;
         box-sizing: border-box;
         position: absolute;
@@ -30,10 +30,19 @@
         height: 100%;
         border-right: 1px dashed lightgray;
       }
+
+      #pastePosition {
+        width: 7px;
+        height: 7px;
+        border-right: 2px dotted red;
+        border-bottom: 2px dotted red;
+      }
+
     </style>
     <slot on-mousedown="setSelect"></slot>
     <div id="crossX"></div>
     <div id="crossY"></div>
+    <div id="pastePosition" style$="top: [[position.1]]px; left: [[position.0]]px"></div>
   </template>
 
   <script>

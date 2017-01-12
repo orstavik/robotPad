@@ -95,9 +95,8 @@
     </style>
 
 
-    <droppad-canvas id="shapeSelector" selected="[[selected]]" on-new-drop="addDropShape"
-                    position="{{lastClickPos}}" center="{{center}}">
-      <iron-selector id="dropSelector" selectable="shape-info" selected-attribute="data-selected" selected-items="{{selected}}" multi>
+    <droppad-canvas id="shapeSelector" selected="[[selectedDrops]]" on-new-drop="addDropShape" center="{{center}}">
+      <iron-selector id="dropSelector" selectable="shape-info" selected-attribute="data-selected" selected-items="{{selectedDrops}}" multi>
         <template is="dom-repeat" items="[[letters]]">
           <shape-info id="drop[[index]]" info="{{item}}" counter="[[index]]" center="[[center]]"
                       on-info-updated="anInfoUpdated" style="z-index: [[item.zIndex]]">
@@ -167,7 +166,7 @@
               type: Array,
               observer: "colorScaleChanged"
             },
-            lastClickPos: Array
+            selectedDrops: Array
           },
           observers: []
         };
@@ -214,33 +213,33 @@
       }
 
       _deleteElem() {
-        for (let i = 0; i < this.letters.length; i++) {
-          if (this.letters[i].selected) {
-            this.letters.splice(i, 1);
+        this.letters = this.letters.filter(function(item){
+          return !item.selected;
+        });
+        this.notifyPath("letters");
+      }
+
+      colorSelected(e) {
+        for (let letter of this.letters) {
+          if (letter.selected)
+            letter.style = e.detail.color;
+        }
+        this.notifyPath("letters");
+      }
+
+      _toneSelected(e) {
+        for (let letter of this.letters) {
+          if (letter.selected) {
+            letter.style = e.detail.tone;
+            letter.matrix.angle = this.coloredScale[e.detail.tone.substr(-1)].rotation / 180 * Math.PI;
           }
         }
         this.notifyPath("letters");
       }
 
-      colorSelected(e) {
-        let node = this.$.shapeSelector.selected;
-        this.letters[node.counter].style = e.detail.color;
-        this.notifyPath("letters");
-      }
-
-      _toneSelected(e) {
-        let node = this.$.shapeSelector.selected;
-        this.letters[node.counter].style = e.detail.tone;
-        this.letters[node.counter].matrix.angle = this.coloredScale[e.detail.tone.substr(-1)].rotation / 180 * Math.PI;
-        this.notifyPath("letters");
-      }
-
       colorScaleChanged() {
-        for (let i = 0; i < this.coloredScale.length; i++) {
-//              debugger;
+        for (let i = 0; i < this.coloredScale.length; i++)
           this.style.setProperty('--tone-tone-' + i, this.coloredScale[i].color);
-        }
-        ;
         if (this.letters) {
           this.letters = this.letters.map(function (item) {
             if (item.style.substr(0, 5) !== "color") {
@@ -254,12 +253,11 @@
       }
 
       colorsChanged() {
-        for (let i = 0; i < this.colors.length; i++) {
-//                debugger;
+        for (let i = 0; i < this.colors.length; i++)
           this.style.setProperty('--tone-color-' + i, this.$.palette._computeHSL(this.colors[i]));
-        }
       }
 
+      //todo move this to the droppad canvas
       _changeZ(key) {
         if (key === "Equal") {
           let node = this.$.shapeSelector.selected;
@@ -289,21 +287,21 @@
         this.notifyPath("letters");
       }
 
-      keyScale(e, detail) {
-        var selected = this.$.shapeSelector.selected;
-        if (!selected)
-          return console.log("Can't use the keys when no shape is selected");
-        selected.scaleAlittle(detail);
-        this.notifyPath("letters");
-      }
-
-      keyRotate(e, detail) {
-        var selected = this.$.shapeSelector.selected;
-        if (!selected)
-          return console.log("Can't use the keys when no shape is selected");
-        selected.rotateAlittle(detail);
-        this.notifyPath("letters");
-      }
+//      keyScale(e, detail) {
+//        var selected = this.$.shapeSelector.selected;
+//        if (!selected)
+//          return console.log("Can't use the keys when no shape is selected");
+//        selected.scaleAlittle(detail);
+//        this.notifyPath("letters");
+//      }
+//
+//      keyRotate(e, detail) {
+//        var selected = this.$.shapeSelector.selected;
+//        if (!selected)
+//          return console.log("Can't use the keys when no shape is selected");
+//        selected.rotateAlittle(detail);
+//        this.notifyPath("letters");
+//      }
 
       writeInChanges(e, detail) {
 //                this.letters = detail[1];

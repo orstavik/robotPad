@@ -53,10 +53,10 @@
       static get config() {
         return {
           properties: {
-            mousedown: {
-              type: Boolean,
-              value: false,
-            },
+//            mousedown: {
+//              type: Boolean,
+//              value: false,
+//            },
             counter: Number,
             info: {
               type: Object
@@ -99,10 +99,12 @@
         if (this.active == this.dataSelected)
           return;
         this.active = this.dataSelected;
+        this.info.selected = this.active;
         if (this.active)
           this.select();
         else
-          this.deselect()
+          this.deselect();
+        this.notifyInfo();
       }
 
       select() {

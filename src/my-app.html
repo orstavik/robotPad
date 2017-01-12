@@ -97,12 +97,14 @@
 
     <droppad-canvas id="shapeSelector" on-select="somethingSelected" on-new-drop="addDropShape"
                     position="{{lastClickPos}}" center="{{center}}">
-      <template is="dom-repeat" items="[[letters]]">
-        <shape-info id="drop[[index]]" info="{{item}}" counter="[[index]]" center="[[center]]" data-selectable
-                    on-info-updated="anInfoUpdated" style="z-index: [[item.zIndex]]">
-          <drop-shape input="[[item]]" centered$="[[item.centered]]"></drop-shape>
-        </shape-info>
-      </template>
+      <iron-selector id="dropSelector" selectable="shape-info" selected-attribute="data-selected" multi>
+        <template is="dom-repeat" items="[[letters]]">
+          <shape-info id="drop[[index]]" info="{{item}}" counter="[[index]]" center="[[center]]"
+                      on-info-updated="anInfoUpdated" style="z-index: [[item.zIndex]]">
+            <drop-shape input="[[item]]" centered$="[[item.centered]]"></drop-shape>
+          </shape-info>
+        </template>
+      </iron-selector>
     </droppad-canvas>
 
     <iron-selector attr-for-selected="select" multi>
@@ -324,12 +326,12 @@
         this.notifyPath("letters");
       }
 
-      somethingSelected(e, detail) {
-        if (detail.before)
-          this.letters[detail.before.counter].selected = false;
-        this.letters[detail.now.counter].selected = true;
-        this.notifyPath("letters");
-      }
+//      somethingSelected(e, detail) {
+//        if (detail.before)
+//          this.letters[detail.before.counter].selected = false;
+//        this.letters[detail.now.counter].selected = true;
+//        this.notifyPath("letters");
+//      }
 
       keyScale(e, detail) {
         var selected = this.$.shapeSelector.selected;

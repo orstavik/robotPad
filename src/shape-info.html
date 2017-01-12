@@ -14,6 +14,37 @@
 
   </template>
   <script>
+    class ShapeInfoObject {
+      constructor(x, y) {
+        this.style = 0;
+        this.matrix = {
+          position: {
+            x: x,
+            y: y
+          },
+          scale: {
+            x: 1,
+            y: 1
+          },
+          angle: 0
+        };
+        this.centered = true;
+        this.selected = false;
+      }
+
+      makeCopy(x, y) {
+        let c = new ShapeInfoObject(x, y);
+        c.style = this.style;
+        c.centered = this.centered;
+        c.selected = this.selected;
+        c.matrix.scale.x = this.matrix.scale.x;
+        c.matrix.scale.y = this.matrix.scale.y;
+        c.matrix.position.x += this.matrix.position.x;
+        c.matrix.position.y += this.matrix.position.y;
+        return c;
+      }
+    }
+
     class ShapeInfo extends Polymer.Element {
       static get is() {
         return "shape-info";
@@ -166,7 +197,7 @@
 
       //2*PI = 360gr
       rotateIt(x, y, dx, dy) {
-        this.info.matrix.angle = (2 * Math.PI + (this.info.matrix.angle+dy/50)) % (2 * Math.PI);
+        this.info.matrix.angle = (2 * Math.PI + (this.info.matrix.angle + dy / 50)) % (2 * Math.PI);
       }
 
       calcMatrix(angle, posX, posY, scX, scY) {

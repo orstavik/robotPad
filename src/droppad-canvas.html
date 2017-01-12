@@ -12,6 +12,7 @@
         width: 100vw;
         height: 100vh;
       }
+
       #crossX, #crossY, #pastePosition {
         display: block;
         position: absolute;
@@ -19,11 +20,13 @@
         left: 0;
         pointer-events: none;
       }
+
       #crossX {
         height: 50%;
         width: 100%;
         border-bottom: 1px dashed lightgray;
       }
+
       #crossY {
         width: 50%;
         height: 100%;
@@ -31,6 +34,8 @@
       }
 
       #pastePosition {
+        margin-top: 50vh;
+        margin-left: 50vw;
         width: 7px;
         height: 7px;
         border-right: 2px dotted red;
@@ -54,16 +59,9 @@
         return {
           properties: {
             selected: Object,
-            position: {
-              type: Array,
-              value: function() {
-                return [0, 0];
-              },
-              notify: true
-            },
             center: {
               type: Object,
-              value: function(){
+              value: function () {
                 return {};
               },
               notify: true
@@ -73,46 +71,44 @@
       }
 
       connectedCallback() {
-        this.calcCenter();
-        this.addEventListener("click", this._setPosition.bind(this));
-        this.addEventListener("dblclick", this.addDrop.bind(this));
-        window.addEventListener("keydown", this.registerKey.bind(this));
-        window.addEventListener("resize", this.calcCenter.bind(this));
+        this._calcCenter();
+        this.addEventListener("click", this._singleClick.bind(this));
+        this.addEventListener("dblclick", this._doubleClick.bind(this));
+        window.addEventListener("keydown", this._registerKey.bind(this));
+        window.addEventListener("resize", this._calcCenter.bind(this));
       }
 
-      registerKey(e) {
-//        let value = (e.type == "keydown");
-//        switch (e.code) {
-//          case "KeyR":
-//            this.shift = value;
-//            return;
-//          case "KeyE":
-//            this.ctrl = value;
-//            return;
-//          case "KeyW":
-//            this.alt = value;
-//            return;
-//        }
-//        if (!value && e.code == "KeyM")
-//          this.mirror();
-//        else if (!value && e.code == "KeyT")
-//          this.info.centered = !this.info.centered;
-//        this.notifyInfo();
+      _registerKey(e) {
+        if (e.code === "KeyC") {
+          this.copiedShapes = this.selected.slice();
+        }
+        if (e.code === "KeyV") {
+          for (var i = 0; i < this.copiedShapes.length; i++)
+            this._addShape(this.copiedShapes[i].info);
+        }
       }
 
-      _setPosition(e) {
+      _addShape(info) {
+        this._makeShape(info.makeCopy(this.position[0], this.position[1]));
+      };
+
+      //single click is called for both double and single clicks
+      _singleClick(e) {
         this.position = [e.x - this.center.x, e.y - this.center.y];
-        this.notifyPath("position");
       }
 
-      addDrop(e){
-        this.dispatchEvent(new CustomEvent("new-drop", {detail: {x: e.x-this.center.x, y: e.y-this.center.y }}));
+      _doubleClick(e) {
+        this._makeShape(new ShapeInfoObject(this.position[0], this.position[1]));
       }
 
-      calcCenter(){
+      _makeShape(shapeInfoObj){
+        this.dispatchEvent(new CustomEvent("new-drop", {detail: shapeInfoObj}));
+      }
+
+      _calcCenter() {
         this.center = {
-          x: window.innerWidth/2,
-          y: window.innerHeight/2
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2
         }
       }
     }

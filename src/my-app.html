@@ -95,9 +95,9 @@
     </style>
 
 
-    <droppad-canvas id="shapeSelector" on-select="somethingSelected" on-new-drop="addDropShape"
+    <droppad-canvas id="shapeSelector" selected="[[selected]]" on-new-drop="addDropShape"
                     position="{{lastClickPos}}" center="{{center}}">
-      <iron-selector id="dropSelector" selectable="shape-info" selected-attribute="data-selected" multi>
+      <iron-selector id="dropSelector" selectable="shape-info" selected-attribute="data-selected" selected-items="{{selected}}" multi>
         <template is="dom-repeat" items="[[letters]]">
           <shape-info id="drop[[index]]" info="{{item}}" counter="[[index]]" center="[[center]]"
                       on-info-updated="anInfoUpdated" style="z-index: [[item.zIndex]]">
@@ -183,29 +183,9 @@
         this.notifyPath("letters");
       }
 
-      addDropShape(e) {
-        this.makeShape(e.detail.x, e.detail.y, 0, 1, 1, 0);
-      }
-
       //todo how to make it selected when you create it??
-      makeShape(x, y, style, scaleX, scaleY, angle) {
-        let shape = {
-          style: style,
-          matrix: {
-            position: {
-              x: x,
-              y: y
-            },
-            scale: {
-              x: scaleX,
-              y: scaleY
-            },
-            angle: angle
-          },
-          centered: true,
-          selected: true
-        };
-        this.letters.push(shape);
+      addDropShape(e) {
+        this.letters.push(e.detail);
         this.notifyPath("letters");
       }
 
@@ -220,7 +200,6 @@
         if (e.code === "Escape")
           this.$.shapeSelector._deselect(this.$.shapeSelector.selected);
 
-
         if (e.code === "Equal" || e.code === "Minus")
           this._changeZ(e.code);
 
@@ -232,22 +211,6 @@
           this.$.clef.turnModusRight();
         if (e.code === "Backquote")
           this.$.clef.turnModusLeft();
-
-        if (e.code === "KeyC") {
-          this.lastMousePos = [100, 100];
-          this.copiedShapeInfo = this.$.shapeSelector.selected.querySelector("drop-shape").input;
-        }
-        if (e.code === "KeyV") {
-          this.makeShape(
-            this.lastClickPos[0],
-            this.lastClickPos[1],
-            this.copiedShapeInfo.style,
-            this.copiedShapeInfo.matrix.scale.x,
-            this.copiedShapeInfo.matrix.scale.y,
-            this.copiedShapeInfo.matrix.angle
-          );
-        }
-
       }
 
       _deleteElem() {
@@ -325,13 +288,6 @@
         this.letters = JSON.parse(e.detail.json);
         this.notifyPath("letters");
       }
-
-//      somethingSelected(e, detail) {
-//        if (detail.before)
-//          this.letters[detail.before.counter].selected = false;
-//        this.letters[detail.now.counter].selected = true;
-//        this.notifyPath("letters");
-//      }
 
       keyScale(e, detail) {
         var selected = this.$.shapeSelector.selected;

@@ -25,17 +25,17 @@
 
       .monsterWrapper {
         display: flex;
-        justify-content: center;
-        align-items: flex-end;
+        flex-direction: column;
+        align-items: center;
         position: relative;
         height: 100%;
       }
 
-      shape-info {
-        pointer-events: none;
+      .dropPreview {
+        width: 230px;
+        height: 150px;
         transform: scale(0.2);
-        bottom: initial;
-        left: initial;
+        pointer-events: none;
       }
     </style>
 
@@ -59,11 +59,14 @@
     <div class="jsonWrapper">
       <template is="dom-repeat" items="[[_toArray(jsonCopy)]]" id="repeater">
         <div class="monsterWrapper">
-          <template is="dom-repeat" items="[[_parseToArray(item.json)]]">
-            <shape-info key="[[index]]" input="[[item]]" data-selectable on-newinfo="anInfoUpdated">
-              <letter-shape input="[[item]]"></letter-shape>
-            </shape-info>
-          </template>
+          <div class="dropPreview">
+            <template is="dom-repeat" items="[[_parseToArray(item.json)]]">
+              <shape-info id="drop[[index]]" info="{{item}}" counter="[[index]]" center="[[center]]" data-selectable
+                          on-info-updated="anInfoUpdated" style="z-index: [[item.zIndex]]">
+                <drop-shape input="[[item]]" centered$="[[item.centered]]"></drop-shape>
+              </shape-info>
+            </template>
+          </div>
           <button class="jsonLoad" on-click="loadIt">[[item.name]]</button>
         </div>
       </template>

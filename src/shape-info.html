@@ -53,10 +53,6 @@
       static get config() {
         return {
           properties: {
-//            mousedown: {
-//              type: Boolean,
-//              value: false,
-//            },
             counter: Number,
             info: {
               type: Object
@@ -81,10 +77,6 @@
             dataSelected: {
               type: Boolean,
               observer: "changeSelected"
-            },
-            active: {         //we have to have this man in the middle, because changeSelected is called many times even though the value before and after is true many times.
-              type: Boolean,
-              value: false
             }
           }
         };
@@ -96,11 +88,10 @@
       }
 
       changeSelected() {
-        if (this.active == this.dataSelected)
+        if (this.info.selected == this.dataSelected)
           return;
-        this.active = this.dataSelected;
-        this.info.selected = this.active;
-        if (this.active)
+        this.info.selected = this.dataSelected;
+        if (this.info.selected)
           this.select();
         else
           this.deselect();
@@ -155,7 +146,7 @@
       };
 
       mouseMove(e) {
-        if (e.which != 1 || !this.active)
+        if (e.which != 1 || !this.info.selected)
           return;
 
         if (this.ctrl && this.alt)

@@ -157,7 +157,10 @@
               type: Array,
               observer: "colorScaleChanged"
             },
-            selectedDrops: Array
+            selectedDrops: {
+              type: Array,
+              observer: "changedSelection"
+            }
           },
           observers: []
         };
@@ -171,6 +174,10 @@
 
       anInfoUpdated(e) {
         this.notifyPath("letters");
+      }
+
+      changedSelection(selected){
+        //run through the letters and set the value of these letters to be selected, and the others as not.
       }
 
       addDropShape(e) {

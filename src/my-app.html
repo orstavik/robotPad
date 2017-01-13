@@ -95,6 +95,7 @@
         border-radius: 4px;
         margin: 2px;
         font-size: 11px;
+        line-height: 12px;
       }
 
       .spacer{
@@ -142,7 +143,8 @@
         </div>
       </template>
       <div class="button spacer"></div>
-      <div class="button" title="Double click left mouse button on the canvas to create new shape.">New</div>
+      <div class="button" title="New sketch." on-click="newSketch">New page</div>
+      <div class="button" title="Double click left mouse button on the canvas to create new shape.">New drop</div>
       <div class="button" title="Esc deselects the elements.">Esc</div>
       <div class="button" title="Delete the shape by choosing the shape and pressing 'd'."> d</div>
       <div class="button" title="Move the shape one layer above/below pressing '-'/'+'.">+ / -</div>
@@ -232,6 +234,12 @@
           this.$.clef.turnModusRight();
         if (e.code === "Backquote")
           this.$.clef.turnModusLeft();
+      }
+
+      newSketch(e){
+        //todo tom: reset name for the json-saver
+        this.letters = [];
+        this.notifyLetters();
       }
 
       _delDrops(e, detail) {

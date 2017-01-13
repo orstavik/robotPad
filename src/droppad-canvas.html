@@ -83,7 +83,7 @@
           this.copiedShapes = this.selected.slice();
         }
         if (e.code === "KeyV") {
-          for (var i = 0; i < this.copiedShapes.length; i++)
+          for (let i = 0; i < this.copiedShapes.length; i++)
             this._addShape(this.copiedShapes[i].info);
         }
       }
@@ -92,7 +92,6 @@
         this._makeShape(info.makeCopy(this.position[0], this.position[1]));
       };
 
-      //single click is called for both double and single clicks
       _singleClick(e) {
         this.position = [e.x - this.center.x, e.y - this.center.y];
       }

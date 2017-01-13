@@ -17,7 +17,7 @@
     S <input type="range" min="-100" max="100" value="0" id="s" on-input="setS"/> <br>
     L <input type="range" min="-100" max="100" value="0" id="l" on-input="setL"/> <br>
     <template is="dom-repeat" items="[[cssColors]]">
-      <div id="color[[index]]" class="color" style$="background: [[item]]" on-click="_colorClicked"></div>
+      <div id="color[[index]]" class="color" style$="background: [[item]]"></div>
     </template>
 
   </template>
@@ -81,10 +81,6 @@
         this.blueDistance = -60;
         this.redDistance = 60;
         this.greenDistance = 39;
-      }
-
-      _colorClicked(e) {
-        this.dispatchEvent(new CustomEvent("color-selected", {detail: {color: e.target.id}}));
       }
 
       makeComputed(staticColors, l, s, sunset) {

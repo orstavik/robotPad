@@ -116,6 +116,8 @@
           return;
         this.deSelect();
         //somehow this is enough, the iron selector looks to wait till last until it updates its selectedVALUES (not items)
+        //todo here we need to check if it is a single element that is selected and that we are clicking and deselecting
+        //todo here we can add the deselection of all when we are clicking on the background
       }
 
       deSelect() {

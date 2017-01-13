@@ -71,7 +71,7 @@
     </div>
     <template is="dom-repeat" items="[[coloredScale]]">
       <div class="leaf" style$="transform: rotate([[item.rotation]]deg) scale([[item.scale]]) translateY(-7vh);">
-        <div id="tone[[index]]" class="innerLeaf" style$="background: [[item.color]]" on-click="_toneClicked"></div>
+        <div id="tone[[index]]" class="innerLeaf" style$="background: [[item.color]]"></div>
         <span class="note">
           [[item.name]]
         </span>
@@ -127,9 +127,9 @@
         return arr;
       }
 
-      _toneClicked(e) {
-        this.dispatchEvent(new CustomEvent("tone-selected", {detail: {tone: e.target.id}}));
-      }
+//      _toneClicked(e) {
+//        this.dispatchEvent(new CustomEvent("tone-selected", {detail: {tone: e.target.id}}));
+//      }
     }
     customElements.define(KeyFlower.is, KeyFlower);
   </script>

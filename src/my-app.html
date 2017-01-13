@@ -64,6 +64,19 @@
         --tone-rotation-4: rotate(0deg);
         --tone-rotation-5: rotate(0deg);
         --tone-rotation-6: rotate(0deg);
+
+        --tone-grey-0: hsl(0,0%,0%);
+        --tone-grey-1: hsl(0,0%,9%);
+        --tone-grey-2: hsl(0,0%,18%);
+        --tone-grey-3: hsl(0,0%,27%);
+        --tone-grey-4: hsl(0,0%,36%);
+        --tone-grey-5: hsl(0,0%,45%);
+        --tone-grey-6: hsl(0,0%,54%);
+        --tone-grey-7: hsl(0,0%,63%);
+        --tone-grey-8: hsl(0,0%,72%);
+        --tone-grey-9: hsl(0,0%,81%);
+        --tone-grey-10: hsl(0,0%,90%);
+        --tone-grey-11: hsl(0,0%,100%);
       }
 
       #guide {
@@ -71,6 +84,19 @@
         padding: 10px;
         font-size: 12px;
         color: grey;
+      }
+      .button {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        border: 1px solid grey;
+        border-radius: 4px;
+        margin: 2px;
+      }
+      #toolbar {
+        margin-left: 100px;
+        position: relative;
+        z-index: 1;
       }
     </style>
 
@@ -83,6 +109,35 @@
           </shape-info>
         </template>
     </droppad-canvas>
+
+    <div id="toolbar">
+      <div class="button" title="Double click left mouse button on the canvas to create new shape.">New</div>
+      <div class="button" title="Esc deselects the elements.">Esc</div>
+      <div class="button" title="Delete the shape by choosing the shape and pressing 'd'."> d </div>
+      <div class="button" title="Move the shape one layer above/below pressing '-'/'+'.">+ / -</div>
+      <div class="button" title="Rotate the shape: hold 'r' + drag it."> r </div>
+      <div class="button" title="Resize the shape: hold 'e' + drag it."> e </div>
+      <div class="button" title="Resize the shape (while preserving proportions): hold 'e'+'r' + drag it."> e+r </div>
+      <div class="button" title="Resize the shape (normalized): hold 'e'+'w' + drag it."> e+w </div>
+      <div class="button" title="Mirror the shape: press 'm', maybe in the future we can add different mirror modes."> m </div>
+      <div class="button" title="Skew the shape: press 'n'"> n </div>
+      <div class="button" title="space" style="border: none;">  </div>
+      <template is="dom-repeat" items="[[colors]]">
+        <div id="color[[index]]" class="button" style$="background: [[item]];" on-click="colorSelected">[[index]]</div>
+      </template>
+      <div class="button" title="space" style="border: none;">  </div>
+      <template is="dom-repeat" items="[0,1,2,3,4,5,6,7,8,9,10,11]">
+        <div id="grey[[index]]" class="button" style$="background: var(--tone-grey-[[index]]);" on-click="colorSelected">[[index]]</div>
+      </template>
+      <div class="button" title="space" style="border: none;">  </div>
+      <template is="dom-repeat" items="[[coloredScale]]">
+        <div id="tone[[index]]" class="button"
+             style$="transform: rotate([[item.rotation]]deg) scale([[item.scale]]); background: [[item.color]]; border-radius: 0 50% 50% 50%;"
+             on-click="toneSelected">
+          [[item.name]]
+        </div>
+      </template>
+    </div>
 
     <iron-selector attr-for-selected="select" multi>
       <tab-wrapper title="JSON" select="0">
@@ -193,14 +248,14 @@
 
       colorSelected(e) {
         for (let letter of this.selected)
-            letter.info.style = e.detail.color;
+            letter.info.style = e.target.id;
         this.notifyPath("letters");
       }
 
-      _toneSelected(e) {
+      toneSelected(e) {
         for (let letter of this.selected) {
-          letter.info.style = e.detail.tone;
-          letter.info.matrix.angle = this.coloredScale[e.detail.tone.substr(-1)].rotation / 180 * Math.PI;
+          letter.info.style = e.target.id;
+          letter.info.matrix.angle = this.coloredScale[e.target.id.substr(-1)].rotation / 180 * Math.PI;
         }
         this.notifyPath("letters");
       }

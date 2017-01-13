@@ -43,7 +43,10 @@
       }
 
     </style>
-    <slot></slot>
+    <iron-selector id="dropSelector" on-click="singleSelect" selectable="shape-info" selected-attribute="data-selected"
+                   selected-values="{{selectedDropsNum}}" selected-items="{{selectedDrops}}" multi>
+      <slot></slot>
+    </iron-selector>
     <div id="crossX"></div>
     <div id="crossY"></div>
     <div id="pastePosition" style$="top: [[position.1]]px; left: [[position.0]]px"></div>
@@ -58,13 +61,18 @@
       static get config() {
         return {
           properties: {
-            selected: Object,
             center: {
               type: Object,
               value: function () {
                 return {};
               },
               notify: true
+            },
+            selectedDropsNum:Array,
+            selectedDrops: {
+              type: Array,
+              notify: true,
+              reflectToAttribute: true
             }
           }
         }
@@ -79,14 +87,65 @@
       }
 
       _registerKey(e) {
-        if (e.code === "KeyC") {
-          this.copiedShapes = this.selected.slice();
-        }
-        if (e.code === "KeyV") {
+        if (e.code === "Escape")
+          this.deSelect();
+        else if (e.code === "KeyD")
+          this._deleteElem();
+        else if (e.code === "KeyC")
+          this.copiedShapes = this.selectedDrops.slice();
+        else if (e.code === "KeyV") {
           for (let i = 0; i < this.copiedShapes.length; i++)
             this._addShape(this.copiedShapes[i].info);
         }
+        //        if (e.code === "Equal" || e.code === "Minus")
+//          this._changeZ(e.code);
       }
+
+      _deleteElem() {
+        this.dispatchEvent(new CustomEvent("del-drops", {detail: this.selectedDrops}));
+        this.deSelect();
+      }
+
+      //this is a fix of the lack of shift+click in the multi iron selector.
+      singleSelect(e){
+        //skip no selected
+        if (!this.selectedDropsNum || this.selectedDropsNum.length == 0)
+          return;
+        //use normal behaviour when shift is held down
+        if (e.shiftKey)
+          return;
+        this.deSelect();
+        //somehow this is enough, the iron selector looks to wait till last until it updates its selectedVALUES (not items)
+      }
+
+      deSelect() {
+        this.selectedDropsNum = [];
+        this.notifyPath("selectedDrops");
+      }
+
+//      _changeZ(key) {
+//        if (key === "Equal") {
+//          let node = this.$.shapeSelector.selected;
+//          node.style.zIndex = node.style.zIndex ? Number(node.style.zIndex) + 1 : 1;
+//        } else if (key === "Minus") {
+//          let node = this.$.shapeSelector.selected;
+//          if (node.style.zIndex < 1) {
+//            let nodes = this.$.shapeSelector.querySelectorAll("shape-info");
+//            for (let i = 0; i < nodes.length; i++) {
+//              nodes[i].style.zIndex = Number(nodes[i].style.zIndex) + 1;
+//            }
+//            node.style.zIndex = Number(node.style.zIndex) - 1;
+//          } else {
+//            node.style.zIndex = node.style.zIndex ? Number(node.style.zIndex) - 1 : 0;
+//          }
+//        }
+//
+//        let nodes = this.$.shapeSelector.querySelectorAll("shape-info");
+//        for (let i = 0; i < this.letters.length; i++) {
+//          this.letters[i].zIndex = nodes[i].style.zIndex;
+//        }
+//        this.notifyPath("letters");
+//      }
 
       _addShape(info) {
         this._makeShape(info.makeCopy(this.position[0], this.position[1]));

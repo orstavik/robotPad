@@ -92,7 +92,7 @@
         <json-object key="myLetters" obj="[[letters]]" on-writeop="writeInChanges"></json-object>
       </tab-wrapper>
       <tab-wrapper title="Palette" select="1">
-        <color-palette id="palette" computed-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
+        <color-palette id="palette" css-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
       </tab-wrapper>
       <tab-wrapper title="Flower" select="2">
         <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"
@@ -249,7 +249,7 @@
 
       colorsChanged() {
         for (let i = 0; i < this.colors.length; i++)
-          this.style.setProperty('--tone-color-' + i, this.$.palette._computeHSL(this.colors[i]));
+          this.style.setProperty('--tone-color-' + i, this.colors[i]);
       }
 
       //todo move this to the droppad canvas

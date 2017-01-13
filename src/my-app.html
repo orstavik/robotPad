@@ -75,7 +75,7 @@
     </style>
 
 
-    <droppad-canvas id="shapeSelector" selected="[[selectedDrops]]" on-new-drop="addDropShape" center="{{center}}">
+    <droppad-canvas id="shapeSelector" selected="[[selectedDropsObjects]]" on-new-drop="addDropShape" center="{{center}}">
       <iron-selector id="dropSelector" on-click="singleSelect" selectable="shape-info" selected-attribute="data-selected"
                      selected-values="{{selectedDrops}}" selected-items="{{selectedDropsObjects}}" multi>
         <template is="dom-repeat" items="[[letters]]">
@@ -150,7 +150,8 @@
             selectedDrops: {
               type: Array,
               observer: "changedSelection"
-            }
+            },
+            selectedDropsObjects: Array
           },
           observers: []
         };

@@ -31,9 +31,12 @@
         align-items: center;
         justify-content: center;
         position: relative;
-        background: lightblue;
+        border: 2px solid #d9e6ea;
         cursor: pointer;
         pointer-events: auto;
+        transform: rotate(90deg);
+        transform-origin: 14px 16px;
+        border-radius: 1vh 1vh 0 0;
       }
     </style>
 
@@ -64,7 +67,7 @@
       }
 
       positionTitle(select) {
-        this.$.tabTitle.style.top = (select * 30) + "px";
+        this.$.tabTitle.style.top = ((select-1) * 90) + "px";
       }
 
       stopPropagate(e) {

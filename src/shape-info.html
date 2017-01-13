@@ -29,14 +29,12 @@
           angle: 0
         };
         this.centered = true;
-        this.selected = false;
       }
 
       makeCopy(x, y) {
         let c = new ShapeInfoObject(x, y);
         c.style = this.style;
         c.centered = this.centered;
-        c.selected = this.selected;
         c.matrix.scale.x = this.matrix.scale.x;
         c.matrix.scale.y = this.matrix.scale.y;
         c.matrix.position.x += this.matrix.position.x;
@@ -54,9 +52,7 @@
         return {
           properties: {
             counter: Number,
-            info: {
-              type: Object
-            },
+            info:  Object,
             matrix: {
               type: Array,
               computed: "calcMatrix(info.matrix.angle, info.matrix.position.x, info.matrix.position.y, info.matrix.scale.x, info.matrix.scale.y)"
@@ -88,10 +84,7 @@
       }
 
       changeSelected() {
-        if (this.info.selected == this.dataSelected)
-          return;
-        this.info.selected = this.dataSelected;
-        if (this.info.selected)
+        if (this.dataSelected)
           this.select();
         else
           this.deselect();
@@ -137,7 +130,6 @@
       }
 
       notifyInfo() {
-        this.notifyPath("info");
         this.dispatchEvent(new CustomEvent("info-updated", {detail: this.info}));
       }
 
@@ -146,7 +138,7 @@
       };
 
       mouseMove(e) {
-        if (e.which != 1 || !this.info.selected)
+        if (e.which != 1 || !this.dataSelected)
           return;
 
         if (this.ctrl && this.alt)

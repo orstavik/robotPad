@@ -35,17 +35,6 @@
         box-shadow: 0 0 3px 0px black;
       }
 
-      /*#cross {*/
-        /*position: absolute;*/
-        /*bottom: 20%;*/
-        /*left: 20%;*/
-        /*width: 60%;*/
-        /*height: 50%;*/
-        /*border: 1px dotted black;*/
-        /*border-right: none;*/
-        /*border-top: none;*/
-      /*}*/
-
       :host {
         --tone-color-0: blue;
         --tone-color-1: red;
@@ -87,10 +76,11 @@
 
 
     <droppad-canvas id="shapeSelector" selected="[[selectedDrops]]" on-new-drop="addDropShape" center="{{center}}">
-      <iron-selector id="dropSelector" selectable="shape-info" selected-attribute="data-selected" selected-items="{{selectedDrops}}" multi>
+      <iron-selector id="dropSelector" on-click="singleSelect" selectable="shape-info" selected-attribute="data-selected"
+                     selected-values="{{selectedDrops}}" multi>
         <template is="dom-repeat" items="[[letters]]">
-          <shape-info id="drop[[index]]" info="{{item}}" counter="[[index]]" center="[[center]]"
-                      on-info-updated="anInfoUpdated" style="z-index: [[item.zIndex]]">
+          <shape-info id="drop[[index]]" info="[[item]]" counter="[[index]]" center="[[center]]"
+                      on-info-updated="notifyLetters" style="z-index: [[item.zIndex]]">
             <drop-shape input="[[item]]" centered$="[[item.centered]]"></drop-shape>
           </shape-info>
         </template>
@@ -172,7 +162,19 @@
         this.set("letters", JSON.parse(start));
       }
 
-      anInfoUpdated(e) {
+      //this is a fix of the lack of shift+click in the multi iron selector.
+      singleSelect(e){
+        //skip no selected
+        if (!this.selectedDrops || this.selectedDrops.length == 0)
+          return;
+        //use normal behaviour when shift is held down
+        if (e.shiftKey)
+          return;
+        this.selectedDrops = [];  //somehow this is enough, the iron selector looks to wait till last until it updates its selectedVALUES (not items)
+        this.notifyPath("selectedDrops");
+      }
+
+      notifyLetters(e) {
         this.notifyPath("letters");
       }
 

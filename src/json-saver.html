@@ -94,6 +94,11 @@
               },
               observer: "createCopy"
             },
+            jsonName: {
+              type: String,
+              value: "newSketch",
+              notify: true
+            },
             jsonCopy: Object,
             jsonArray: Array
           }
@@ -128,7 +133,7 @@
         this.jsonPath = undefined;
         this.jsonString = undefined;
         this.$.firedoc.disabled = false;
-        if (!this.jsonName) {
+        if (this.jsonName == "newSketch") {
           var timeStamp = new Date().getTime();
           this.jsonPath = "/drop-images/" + timeStamp;
         } else

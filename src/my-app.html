@@ -168,9 +168,11 @@
         <color-palette id="palette" css-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
       </tab-wrapper>
       <tab-wrapper title="Save/Load" select="3">
-        <json-saver input="[[letters]]" on-sketchload="loadSketch"></json-saver>
+        <json-saver input="[[letters]]" on-sketchload="loadSketch" json-name="{{sketchName}}"></json-saver>
       </tab-wrapper>
     </iron-selector>
+
+    <div id="title" style="position: fixed; right: 0">[[sketchName]]</div>
 
     <action-log object="[[letters]]" id="log" on-undo="_undo"></action-log>
 
@@ -199,7 +201,8 @@
               type: Array,
               observer: "colorScaleChanged"
             },
-            selected: Array
+            selected: Array,
+            sketchName: String
           },
           observers: []
         };
@@ -237,7 +240,7 @@
       }
 
       newSketch(e){
-        //todo tom: reset name for the json-saver
+        this.sketchName = "newSketch";
         this.letters = [];
         this.notifyLetters();
       }

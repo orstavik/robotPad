@@ -133,7 +133,7 @@
           this.jsonPath = "/drop-images/" + timeStamp;
         } else
           this.jsonPath = "/drop-images/" + this.jsonName;
-        this.jsonString = JSON.stringify(this.input);
+        this.jsonString = JSON.stringify(JSON.parse(JSON.stringify(this.input)));
         this.$.firedoc.disabled = true;
         this.$.jsonName.value = "";
       }

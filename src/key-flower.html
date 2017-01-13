@@ -2,14 +2,14 @@
   <template>
     <style>
       :host {
-        display: flex;
+        display: block;
+        position: fixed;
+        bottom: 4vh;
+        right: 4vh;
         align-items: center;
         justify-content: center;
-        width: 20vh;
-        height: 20vh;
-        position: relative;
-        top: 15%;
-        left: 25%;
+        width: 8vh;
+        height: 8vh;
       }
 
       .leaf {
@@ -34,23 +34,31 @@
         transform: rotate(45deg);
         transition-duration: 0.5s;
         box-shadow: 0 0 3px 0px black;
-        font-size: 12px;
         color: black;
       }
 
       #flowerCenter {
+
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 10vh;
-        height: 10vh;
+
+        margin: auto;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0.1vh;
+        right: 1vh;
+
+        width: 4vh;
+        height: 4vh;
         border-radius: 50%;
-        background: black;
+        background: lightgrey;
         box-shadow: 0 0 3px 0 black;
-        color: wheat;
+        color: black;
         line-height: normal;
         text-align: center;
-        font-size: 2vh;
+        font-size: 1vh;
         z-index: 1;
       }
 
@@ -59,7 +67,7 @@
         left: 50%;
         top: 0%;
         margin-top: 1vh;
-        font-size: 3.5vh;
+        font-size: 2vh;
         font-weight: bold;
         transform: translateX(-50%) scaleY(0.75);
       }
@@ -70,7 +78,7 @@
       [[scale.mode]]
     </div>
     <template is="dom-repeat" items="[[coloredScale]]">
-      <div class="leaf" style$="transform: rotate([[item.rotation]]deg) scale([[item.scale]]) translateY(-7vh);">
+      <div class="leaf" style$="transform: rotate([[item.rotation]]deg) scale([[item.scale]]) translateY(-2vh);">
         <div id="tone[[index]]" class="innerLeaf" style$="background: [[item.color]]"></div>
         <span class="note">
           [[item.name]]
@@ -126,10 +134,6 @@
         }
         return arr;
       }
-
-//      _toneClicked(e) {
-//        this.dispatchEvent(new CustomEvent("tone-selected", {detail: {tone: e.target.id}}));
-//      }
     }
     customElements.define(KeyFlower.is, KeyFlower);
   </script>

@@ -8,7 +8,8 @@
     "polymer": "polymer/Polymer#2.0-preview",
     "webcomponentsjs": "^0.7.22",
     "polymerfire": "^0.10.0",
-    "iron-selector": "PolymerElements/iron-selector#^1.5.2"
+    "iron-selector": "PolymerElements/iron-selector#^1.5.2",
+    "iron-collapse": "PolymerElements/iron-collapse#^1.0.0"
   },
   "devDependencies": {},
   "resolutions": {

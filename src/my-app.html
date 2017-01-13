@@ -1,5 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="drop-shape.html">
 <link rel="import" href="color-palette.html">
 <link rel="import" href="shape-info.html">
@@ -65,18 +66,18 @@
         --tone-rotation-5: rotate(0deg);
         --tone-rotation-6: rotate(0deg);
 
-        --tone-grey-0: hsl(0,0%,0%);
-        --tone-grey-1: hsl(0,0%,9%);
-        --tone-grey-2: hsl(0,0%,18%);
-        --tone-grey-3: hsl(0,0%,27%);
-        --tone-grey-4: hsl(0,0%,36%);
-        --tone-grey-5: hsl(0,0%,45%);
-        --tone-grey-6: hsl(0,0%,54%);
-        --tone-grey-7: hsl(0,0%,63%);
-        --tone-grey-8: hsl(0,0%,72%);
-        --tone-grey-9: hsl(0,0%,81%);
-        --tone-grey-10: hsl(0,0%,90%);
-        --tone-grey-11: hsl(0,0%,100%);
+        --tone-grey-0: hsl(0, 0%, 0%);
+        --tone-grey-1: hsl(0, 0%, 9%);
+        --tone-grey-2: hsl(0, 0%, 18%);
+        --tone-grey-3: hsl(0, 0%, 27%);
+        --tone-grey-4: hsl(0, 0%, 36%);
+        --tone-grey-5: hsl(0, 0%, 45%);
+        --tone-grey-6: hsl(0, 0%, 54%);
+        --tone-grey-7: hsl(0, 0%, 63%);
+        --tone-grey-8: hsl(0, 0%, 72%);
+        --tone-grey-9: hsl(0, 0%, 81%);
+        --tone-grey-10: hsl(0, 0%, 90%);
+        --tone-grey-11: hsl(0, 0%, 100%);
       }
 
       #guide {
@@ -85,51 +86,44 @@
         font-size: 12px;
         color: grey;
       }
+
       .button {
         display: inline-block;
+        float: left;
         width: 32px;
         height: 32px;
         border: 1px solid grey;
         border-radius: 4px;
         margin: 2px;
       }
+
+      .spacer{
+        clear: left;
+        width: 1px;
+      }
+
       #toolbar {
-        margin-left: 100px;
-        position: relative;
+        left: 0;
+        bottom: 0;
+        max-width: 80vh;
+        position: fixed;
         z-index: 1;
       }
     </style>
 
 
-    <droppad-canvas id="shapeSelector" selected-drops="{{selected}}" on-new-drop="addDropShape" on-del-drops="_delDrops" center="{{center}}">
-        <template is="dom-repeat" items="[[letters]]">
-          <shape-info id="drop[[index]]" info="[[item]]" counter="[[index]]" center="[[center]]"
-                      on-info-updated="notifyLetters" style="z-index: [[item.zIndex]]">
-            <drop-shape input="[[item]]" centered$="[[item.centered]]"></drop-shape>
-          </shape-info>
-        </template>
+    <droppad-canvas id="shapeSelector" selected-drops="{{selected}}" on-new-drop="addDropShape" on-del-drops="_delDrops"
+                    center="{{center}}">
+      <template is="dom-repeat" items="[[letters]]">
+        <shape-info id="drop[[index]]" info="[[item]]" counter="[[index]]" center="[[center]]"
+                    on-info-updated="notifyLetters" style="z-index: [[item.zIndex]]">
+          <drop-shape input="[[item]]" centered$="[[item.centered]]"></drop-shape>
+        </shape-info>
+      </template>
     </droppad-canvas>
 
     <div id="toolbar">
-      <div class="button" title="Double click left mouse button on the canvas to create new shape.">New</div>
-      <div class="button" title="Esc deselects the elements.">Esc</div>
-      <div class="button" title="Delete the shape by choosing the shape and pressing 'd'."> d </div>
-      <div class="button" title="Move the shape one layer above/below pressing '-'/'+'.">+ / -</div>
-      <div class="button" title="Rotate the shape: hold 'r' + drag it."> r </div>
-      <div class="button" title="Resize the shape: hold 'e' + drag it."> e </div>
-      <div class="button" title="Resize the shape (while preserving proportions): hold 'e'+'r' + drag it."> e+r </div>
-      <div class="button" title="Resize the shape (normalized): hold 'e'+'w' + drag it."> e+w </div>
-      <div class="button" title="Mirror the shape: press 'm', maybe in the future we can add different mirror modes."> m </div>
-      <div class="button" title="Skew the shape: press 'n'"> n </div>
-      <div class="button" title="space" style="border: none;">  </div>
-      <template is="dom-repeat" items="[[colors]]">
-        <div id="color[[index]]" class="button" style$="background: [[item]];" on-click="colorSelected">[[index]]</div>
-      </template>
-      <div class="button" title="space" style="border: none;">  </div>
-      <template is="dom-repeat" items="[0,1,2,3,4,5,6,7,8,9,10,11]">
-        <div id="grey[[index]]" class="button" style$="background: var(--tone-grey-[[index]]);" on-click="colorSelected">[[index]]</div>
-      </template>
-      <div class="button" title="space" style="border: none;">  </div>
+      <div class="button spacer"></div>
       <template is="dom-repeat" items="[[coloredScale]]">
         <div id="tone[[index]]" class="button"
              style$="transform: rotate([[item.rotation]]deg) scale([[item.scale]]); background: [[item.color]]; border-radius: 0 50% 50% 50%;"
@@ -137,38 +131,42 @@
           [[item.name]]
         </div>
       </template>
+      <div class="button spacer" ></div>
+      <template is="dom-repeat" items="[[colors]]">
+        <div id="color[[index]]" class="button" style$="background: [[item]];" on-click="colorSelected">[[index]]</div>
+      </template>
+      <div class="button spacer"></div>
+      <template is="dom-repeat" items="[0,1,2,3,4,5,6,7,8,9,10,11]">
+        <div id="grey[[index]]" class="button" style$="background: var(--tone-grey-[[index]]);"
+             on-click="colorSelected">[[index]]
+        </div>
+      </template>
+      <div class="button spacer"></div>
+      <div class="button" title="Double click left mouse button on the canvas to create new shape.">New</div>
+      <div class="button" title="Esc deselects the elements.">Esc</div>
+      <div class="button" title="Delete the shape by choosing the shape and pressing 'd'."> d</div>
+      <div class="button" title="Move the shape one layer above/below pressing '-'/'+'.">+ / -</div>
+      <div class="button" title="Rotate the shape: hold 'r' + drag it."> r</div>
+      <div class="button" title="Resize the shape: hold 'e' + drag it."> e</div>
+      <div class="button" title="Resize the shape (while preserving proportions): hold 'e'+'r' + drag it."> e+r</div>
+      <div class="button" title="Resize the shape (normalized): hold 'e'+'w' + drag it."> e+w</div>
+      <div class="button" title="Mirror the shape: press 'm', coming different mirror modes."> m </div>
+      <div class="button" title="Skew the shape: press 'n'"> n</div>
     </div>
 
+    <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower>
+    <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
+
+
     <iron-selector attr-for-selected="select" multi>
-      <tab-wrapper title="JSON" select="0">
+      <tab-wrapper title="JSON" select="1">
         <json-object key="myLetters" obj="[[letters]]" on-writeop="writeInChanges"></json-object>
       </tab-wrapper>
-      <tab-wrapper title="Palette" select="1">
+      <tab-wrapper title="Palette" select="2">
         <color-palette id="palette" css-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
-      </tab-wrapper>
-      <tab-wrapper title="Flower" select="2">
-        <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"
-                    on-tone-selected="_toneSelected"></key-flower>
-        <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
       </tab-wrapper>
       <tab-wrapper title="Save/Load" select="3">
         <json-saver input="[[letters]]" on-sketchload="loadSketch"></json-saver>
-      </tab-wrapper>
-      <tab-wrapper title="Help" select="4">
-        <div id="guide">
-          - Double click left mouse button on the canvas to create shape. <br>
-          - Select the shape by pressing left mouse button on it (Esc deselects the elements). <br>
-          - Delete the shape by choosing the shape and pressing "D" on the keyboard. <br>
-          - Move the shape one layer above/below pressing "-"/"+" on the keyboard. <br>
-          - Change the shape color by chosing the shape and chosing the color on the top palette. <br>
-          - Change the shape move by chosing the shape and pressing "M" on the keyboard. <br>
-          - Move the shape: drag it (click left mouse button and move the mouse). <br>
-          - Rotate the shape: hold "r" + drag it. <br>
-          - Resize ("escalate") the shape: hold "e" + drag it. <br>
-          - Resize the shape (while preserving proportions): hold "e"+"r" + drag it. <br>
-          - Resize the shape (normalized): hold "e"+"w" + drag it. <br>
-          - Mirror the shape: press "j", maybe in the future we can add different mirror modes. <br>
-        </div>
       </tab-wrapper>
     </iron-selector>
 
@@ -236,9 +234,9 @@
           this.$.clef.turnModusLeft();
       }
 
-      _delDrops(e, detail){
-        this.letters = this.letters.filter(function(item){
-          let i = detail.find(function(select){
+      _delDrops(e, detail) {
+        this.letters = this.letters.filter(function (item) {
+          let i = detail.find(function (select) {
             return select.info == item;
           });
           return !i;
@@ -248,7 +246,7 @@
 
       colorSelected(e) {
         for (let letter of this.selected)
-            letter.info.style = e.target.id;
+          letter.info.style = e.target.id;
         this.notifyPath("letters");
       }
 
@@ -275,6 +273,9 @@
         }
       }
 
+      toggleJSON() {
+        this.$.collapse.toggle();
+      }
       colorsChanged() {
         for (let i = 0; i < this.colors.length; i++)
           this.style.setProperty('--tone-color-' + i, this.colors[i]);

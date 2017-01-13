@@ -77,7 +77,7 @@
 
     <droppad-canvas id="shapeSelector" selected="[[selectedDrops]]" on-new-drop="addDropShape" center="{{center}}">
       <iron-selector id="dropSelector" on-click="singleSelect" selectable="shape-info" selected-attribute="data-selected"
-                     selected-values="{{selectedDrops}}" multi>
+                     selected-values="{{selectedDrops}}" selected-items="{{selectedDropsObjects}}" multi>
         <template is="dom-repeat" items="[[letters]]">
           <shape-info id="drop[[index]]" info="[[item]]" counter="[[index]]" center="[[center]]"
                       on-info-updated="notifyLetters" style="z-index: [[item.zIndex]]">
@@ -219,19 +219,15 @@
       }
 
       colorSelected(e) {
-        for (let letter of this.letters) {
-          if (letter.selected)
-            letter.style = e.detail.color;
-        }
+        for (let letter of this.selectedDropsObjects)
+            letter.info.style = e.detail.color;
         this.notifyPath("letters");
       }
 
       _toneSelected(e) {
-        for (let letter of this.letters) {
-          if (letter.selected) {
-            letter.style = e.detail.tone;
-            letter.matrix.angle = this.coloredScale[e.detail.tone.substr(-1)].rotation / 180 * Math.PI;
-          }
+        for (let letter of this.selectedDropsObjects) {
+          letter.info.style = e.detail.tone;
+          letter.info.matrix.angle = this.coloredScale[e.detail.tone.substr(-1)].rotation / 180 * Math.PI;
         }
         this.notifyPath("letters");
       }

@@ -61,13 +61,6 @@
       static get config() {
         return {
           properties: {
-            center: {
-              type: Object,
-              value: function () {
-                return {};
-              },
-              notify: true
-            },
             selectedDropsNum:Array,
             selectedDrops: {
               type: Array,
@@ -79,11 +72,9 @@
       }
 
       connectedCallback() {
-        this._calcCenter();
         this.addEventListener("click", this._singleClick.bind(this));
         this.addEventListener("dblclick", this._doubleClick.bind(this));
         window.addEventListener("keydown", this._registerKey.bind(this));
-        window.addEventListener("resize", this._calcCenter.bind(this));
       }
 
       _registerKey(e) {
@@ -154,7 +145,7 @@
       };
 
       _singleClick(e) {
-        this.position = [e.x - this.center.x, e.y - this.center.y];
+        this.position = [e.x - window.innerWidth / 2, e.y - window.innerHeight / 2];
       }
 
       _doubleClick(e) {
@@ -163,13 +154,6 @@
 
       _makeShape(shapeInfoObj){
         this.dispatchEvent(new CustomEvent("new-drop", {detail: shapeInfoObj}));
-      }
-
-      _calcCenter() {
-        this.center = {
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2
-        }
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

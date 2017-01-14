@@ -93,7 +93,7 @@
       }
 
       _deleteElem() {
-        this.dispatchEvent(new CustomEvent("del-drops", {detail: this.selectedDrops}));
+        this.dispatchEvent(new CustomEvent("delete", {detail: this.selectedDrops}));
         this.deSelect();
       }
 
@@ -153,7 +153,7 @@
       }
 
       _makeShape(shapeInfoObj){
-        this.dispatchEvent(new CustomEvent("new-drop", {detail: shapeInfoObj}));
+        this.dispatchEvent(new CustomEvent("new", {detail: shapeInfoObj}));
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

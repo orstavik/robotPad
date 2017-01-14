@@ -147,7 +147,7 @@
         else if (this.ctrl)
           this.scaleIt(e.movementX, e.movementY, 0);
         else if (this.shift)
-          this.rotateIt(e.x, e.y, e.movementX, e.movementY);
+          this.rotateIt(e.movementY);
         else
           this.translateIt(e.movementX, e.movementY);
         this.notifyInfo();
@@ -180,7 +180,7 @@
       }
 
       //2*PI = 360gr
-      rotateIt(x, y, dx, dy) {
+      rotateIt(dy) {
         this.info.matrix.angle = (2 * Math.PI + (this.info.matrix.angle + dy / 50)) % (2 * Math.PI);
       }
 

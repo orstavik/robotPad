@@ -61,7 +61,7 @@
       static get config() {
         return {
           properties: {
-            selectedDropsNum:Array,
+            selectedDropsNum: Array,
             selectedDrops: {
               type: Array,
               notify: true,
@@ -73,7 +73,7 @@
 
       connectedCallback() {
         this.addEventListener("click", this._singleClick.bind(this));
-        this.addEventListener("dblclick", this._doubleClick.bind(this));
+//        this.addEventListener("dblclick", this._doubleClick.bind(this));
         window.addEventListener("keydown", this._registerKey.bind(this));
       }
 
@@ -88,8 +88,6 @@
           for (let i = 0; i < this.copiedShapes.length; i++)
             this._addShape(this.copiedShapes[i].info);
         }
-        //        if (e.code === "Equal" || e.code === "Minus")
-//          this._changeZ(e.code);
       }
 
       _deleteElem() {
@@ -98,7 +96,7 @@
       }
 
       //this is a fix of the lack of shift+click in the multi iron selector.
-      singleSelect(e){
+      singleSelect(e) {
         //skip no selected
         if (!this.selectedDropsNum || this.selectedDropsNum.length == 0)
           return;
@@ -117,49 +115,28 @@
         this.notifyPath("selectedDrops");
       }
 
-//      _changeZ(key) {
-//        if (key === "Equal") {
-//          let node = this.$.shapeSelector.selected;
-//          node.style.zIndex = node.style.zIndex ? Number(node.style.zIndex) + 1 : 1;
-//        } else if (key === "Minus") {
-//          let node = this.$.shapeSelector.selected;
-//          if (node.style.zIndex < 1) {
-//            let nodes = this.$.shapeSelector.querySelectorAll("shape-info");
-//            for (let i = 0; i < nodes.length; i++) {
-//              nodes[i].style.zIndex = Number(nodes[i].style.zIndex) + 1;
-//            }
-//            node.style.zIndex = Number(node.style.zIndex) - 1;
-//          } else {
-//            node.style.zIndex = node.style.zIndex ? Number(node.style.zIndex) - 1 : 0;
-//          }
-//        }
-//
-//        let nodes = this.$.shapeSelector.querySelectorAll("shape-info");
-//        for (let i = 0; i < this.letters.length; i++) {
-//          this.letters[i].zIndex = nodes[i].style.zIndex;
-//        }
-//        this.notifyPath("letters");
-//      }
-
       _addShape(info) {
         this._makeShape(info.makeCopy(this.position[0], this.position[1]));
       };
 
       _singleClick(e) {
         this.position = [e.x - window.innerWidth / 2, e.y - window.innerHeight / 2];
-        //deselect all if the original target is the canvas
-//        if (e.target == this){
-//          debugger;
-//          this.deSelect();
-//          return;
-//        }
+        if (e.ctrlKey) {
+          this._makeShape(new ShapeInfoObject(this.position[0], this.position[1]));
+          //todo make this one selected
+          return;
+        }
+        if (e.target == this) {
+          this.deSelect();
+          return;
+        }
       }
 
-      _doubleClick(e) {
-        this._makeShape(new ShapeInfoObject(this.position[0], this.position[1]));
-      }
+//      _doubleClick(e) {
+//        this._makeShape(new ShapeInfoObject(this.position[0], this.position[1]));
+//      }
 
-      _makeShape(shapeInfoObj){
+      _makeShape(shapeInfoObj) {
         this.dispatchEvent(new CustomEvent("new", {detail: shapeInfoObj}));
       }
     }

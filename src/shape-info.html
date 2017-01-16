@@ -42,6 +42,40 @@
         c.matrix.position.y += this.matrix.position.y;
         return c;
       }
+
+      //2*PI = 360gr
+      rotate(deg){
+        this.matrix.angle = (2 * Math.PI + (this.matrix.angle + deg / 50)) % (2 * Math.PI);
+      }
+
+      move(x, y) {
+        this.matrix.position.x += x;
+        this.matrix.position.y += y;
+      }
+
+      scaleIt(x, y, constraints) {
+        const matrix = this.matrix;
+        let cos = Math.cos(matrix.angle);
+        let sin = Math.sin(matrix.angle);
+        let nx = cos * x + sin * y;
+        let ny = cos * y - sin * x;
+        if (constraints == 1) {
+          const max = (matrix.scale.x > matrix.scale.y) ? matrix.scale.x : matrix.scale.y;
+          matrix.scale.x = max;
+          matrix.scale.y = max;
+          nx = -ny;
+        }
+        if (constraints == 2) {
+          let divis = matrix.scale.x / matrix.scale.y;
+          nx = -ny * divis;
+        }
+        matrix.scale.x += nx / 20;
+        matrix.scale.y -= ny / 20;
+      }
+
+      mirror(){
+        this.matrix.scale.x *= -1;
+      }
     }
 
     class ShapeInfo extends Polymer.Element {
@@ -122,7 +156,7 @@
             return;
         }
         if (!value && e.code == "KeyM")
-          this.mirror();
+          this.info.mirror();
         else if (!value && e.code == "KeyN")
           this.info.centered = !this.info.centered;
         else if (!value && e.code == "PageUp")
@@ -136,56 +170,21 @@
         this.dispatchEvent(new CustomEvent("info-updated", null));
       }
 
-      mirror() {
-        this.info.matrix.scale.x *= -1;
-      }
-
       mouseMove(e) {
         if (e.which != 1 || !this.dataSelected)
           return;
 
         if (this.ctrl && this.alt)
-          this.scaleIt(e.movementX, e.movementY, 1);
+          this.info.info.scaleIt(e.movementX, e.movementY, 1);
         else if (this.ctrl && this.shift)
-          this.scaleIt(e.movementX, e.movementY, 2);
+          this.info.info.scaleIt(e.movementX, e.movementY, 2);
         else if (this.ctrl)
-          this.scaleIt(e.movementX, e.movementY, 0);
+          this.info.info.scaleIt(e.movementX, e.movementY, 0);
         else if (this.shift)
-          this.rotateIt(e.movementY);
+          this.info.rotate(e.movementY);
         else
-          this.translateIt(e.movementX, e.movementY);
+          this.info.move(e.movementX, e.movementY);
         this.notifyInfo();
-      }
-
-      translateIt(x, y) {
-        const matrix = this.info.matrix;
-        matrix.position.x += x;
-        matrix.position.y += y;
-      }
-
-      scaleIt(x, y, constraints) {
-        const matrix = this.info.matrix;
-        let cos = Math.cos(matrix.angle);
-        let sin = Math.sin(matrix.angle);
-        let nx = cos * x + sin * y;
-        let ny = cos * y - sin * x;
-        if (constraints == 1) {
-          const max = (matrix.scale.x > matrix.scale.y) ? matrix.scale.x : matrix.scale.y;
-          matrix.scale.x = max;
-          matrix.scale.y = max;
-          nx = -ny;
-        }
-        if (constraints == 2) {
-          let divis = matrix.scale.x / matrix.scale.y;
-          nx = -ny * divis;
-        }
-        matrix.scale.x += nx / 20;
-        matrix.scale.y -= ny / 20;
-      }
-
-      //2*PI = 360gr
-      rotateIt(dy) {
-        this.info.matrix.angle = (2 * Math.PI + (this.info.matrix.angle + dy / 50)) % (2 * Math.PI);
       }
 
       calcMatrix(angle, posX, posY, scX, scY) {

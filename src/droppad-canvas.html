@@ -73,7 +73,6 @@
 
       connectedCallback() {
         this.addEventListener("click", this._singleClick.bind(this));
-//        this.addEventListener("dblclick", this._doubleClick.bind(this));
         window.addEventListener("keydown", this._registerKey.bind(this));
       }
 
@@ -131,10 +130,6 @@
           return;
         }
       }
-
-//      _doubleClick(e) {
-//        this._makeShape(new ShapeInfoObject(this.position[0], this.position[1]));
-//      }
 
       _makeShape(shapeInfoObj) {
         this.dispatchEvent(new CustomEvent("new", {detail: shapeInfoObj}));

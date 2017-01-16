@@ -105,10 +105,11 @@
         //use normal behaviour when shift is held down
         if (e.shiftKey)
           return;
+        //one element selected, and that is the one clicked, it should be deselected by the default logic
+        if (this.selectedDropsNum.length == 1 && e.target.parentElement == this.selectedDrops[0])
+          return;
         this.deSelect();
         //somehow this is enough, the iron selector looks to wait till last until it updates its selectedVALUES (not items)
-        //todo here we need to check if it is a single element that is selected and that we are clicking and deselecting
-        //todo here we can add the deselection of all when we are clicking on the background
       }
 
       deSelect() {
@@ -146,6 +147,12 @@
 
       _singleClick(e) {
         this.position = [e.x - window.innerWidth / 2, e.y - window.innerHeight / 2];
+        //deselect all if the original target is the canvas
+//        if (e.target == this){
+//          debugger;
+//          this.deSelect();
+//          return;
+//        }
       }
 
       _doubleClick(e) {

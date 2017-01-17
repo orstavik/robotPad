@@ -53,24 +53,23 @@
         this.matrix.position.y += y;
       }
 
-      scaleIt(x, y, constraints) {
-        const matrix = this.matrix;
-        let cos = Math.cos(matrix.angle);
-        let sin = Math.sin(matrix.angle);
+      scaleSquare(y){
+        this.matrix.scale.x = this.matrix.scale.y = this.matrix.scale.y + y/20;
+      }
+
+      scaleRestrict(y){
+        let divis = this.matrix.scale.x / this.matrix.scale.y;
+        this.matrix.scale.x += y/30*divis;
+        this.matrix.scale.y += y/30;
+      }
+
+      scaleFree(x, y) {
+        let cos = Math.cos(this.matrix.angle);
+        let sin = Math.sin(this.matrix.angle);
         let nx = cos * x + sin * y;
         let ny = cos * y - sin * x;
-        if (constraints == 1) {
-          const max = (matrix.scale.x > matrix.scale.y) ? matrix.scale.x : matrix.scale.y;
-          matrix.scale.x = max;
-          matrix.scale.y = max;
-          nx = -ny;
-        }
-        if (constraints == 2) {
-          let divis = matrix.scale.x / matrix.scale.y;
-          nx = -ny * divis;
-        }
-        matrix.scale.x += nx / 20;
-        matrix.scale.y -= ny / 20;
+        this.matrix.scale.x += nx / 20;
+        this.matrix.scale.y -= ny / 20;
       }
 
       mirror(){
@@ -175,11 +174,11 @@
           return;
 
         if (this.ctrl && this.alt)
-          this.info.info.scaleIt(e.movementX, e.movementY, 1);
+          this.info.scaleRestrict(e.movementY);
         else if (this.ctrl && this.shift)
-          this.info.info.scaleIt(e.movementX, e.movementY, 2);
+          this.info.scaleSquare(e.movementY);
         else if (this.ctrl)
-          this.info.info.scaleIt(e.movementX, e.movementY, 0);
+          this.info.scaleFree(e.movementX, e.movementY);
         else if (this.shift)
           this.info.rotate(e.movementY);
         else

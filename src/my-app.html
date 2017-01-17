@@ -124,9 +124,8 @@
     <div id="toolbar">
       <div class="button spacer"></div>
       <template is="dom-repeat" items="[[coloredScale]]">
-        <div id="tone[[index]]" class="button"
-             style$="transform: rotate([[item.rotation]]deg) scale([[item.scale]]); background: [[item.color]]; border-radius: 0 50% 50% 50%;"
-             on-click="toneSelected">
+        <div id="tone[[index]]" class="button" on-click="toneSelected"
+             style$="transform: rotate([[item.rotation]]deg) scale([[item.scale]]); background: [[item.color]]; border-radius: 0 50% 50% 50%;">
           [[item.name]]
         </div>
       </template>
@@ -213,13 +212,29 @@
         this.set("letters", JSON.parse(start));
       }
 
-      notifyLetters(e) {
+      notifyLetters() {
         this.notifyPath("letters");
       }
 
       addDropShape(e) {
         this.letters.push(e.detail);
-        this.notifyPath("letters");
+        this.notifyLetters();
+      }
+
+      _delDrops(e, detail) {
+        this.letters = this.letters.filter(function (item) {
+          let i = detail.find(function (select) {
+            return select.info == item;
+          });
+          return !i;
+        });
+        this.notifyLetters();
+      }
+
+      newSketch(e){
+        this.sketchName = "newSketch";
+        this.letters = [];
+        this.notifyLetters();
       }
 
       _undo(e) {
@@ -236,22 +251,6 @@
           this.$.clef.turnModusRight();
         if (e.code === "Backquote")
           this.$.clef.turnModusLeft();
-      }
-
-      newSketch(e){
-        this.sketchName = "newSketch";
-        this.letters = [];
-        this.notifyLetters();
-      }
-
-      _delDrops(e, detail) {
-        this.letters = this.letters.filter(function (item) {
-          let i = detail.find(function (select) {
-            return select.info == item;
-          });
-          return !i;
-        });
-        this.notifyPath("letters");
       }
 
       colorSelected(e) {

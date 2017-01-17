@@ -113,7 +113,7 @@
     </style>
 
 
-    <droppad-canvas id="shapeSelector" selected-drops="{{selected}}" on-new="addDropShape" on-delete="_delDrops">
+    <droppad-canvas id="shapeSelector" selected-drops="{{selected}}" on-new="addDropShape" on-delete="_delDrops" held-keys="[[heldKeys]]" on-info-updated="notifyLetters" >
       <template is="dom-repeat" items="[[letters]]">
         <shape-info id="drop[[index]]" info="[[item]]" on-info-updated="notifyLetters" held-keys="[[heldKeys]]" style="z-index: [[item.zIndex]]">
           <drop-shape input="[[item]]" centered$="[[item.centered]]"></drop-shape>

@@ -66,7 +66,8 @@
               type: Array,
               notify: true,
               reflectToAttribute: true
-            }
+            },
+            heldKeys: Array
           }
         }
       }
@@ -74,6 +75,7 @@
       connectedCallback() {
         this.addEventListener("click", this._singleClick.bind(this));
         window.addEventListener("keydown", this._registerKey.bind(this));
+        window.addEventListener("mousemove", this.mouseMove.bind(this));
       }
 
       _registerKey(e) {
@@ -87,11 +89,45 @@
           for (let i = 0; i < this.copiedShapes.length; i++)
             this._addShape(this.copiedShapes[i].info);
         }
+        else if (e.code == "KeyM")
+          this.selectedDrops.map(function (shape) {
+            shape.info.mirror()
+          });
+        else if (e.code == "KeyN")
+          this.selectedDrops.map(function (shape) {
+            shape.info.centered = !shape.info.centered;
+          });
+        else if (e.code == "PageUp")
+          this.selectedDrops.map(function (shape) {
+            shape.info.zIndex += 1;
+          });
+        else if (e.code == "PageDown")
+          this.selectedDrops.map(function (shape) {
+            shape.info.zIndex -= 1;
+          });
+        this.dispatchEvent(new CustomEvent("info-updated", null));
       }
 
       _deleteElem() {
         this.dispatchEvent(new CustomEvent("delete", {detail: this.selectedDrops}));
         this.deSelect();
+      }
+
+      mouseMove(e) {
+        if (e.which != 1)
+          return;
+        if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
+          this.selectedDrops.map(function (shape) { shape.info.scaleRestrict(e.movementY); });
+        else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
+          this.selectedDrops.map(function (shape) { shape.info.scaleSquare(e.movementY); });
+        else if (this.heldKeys["KeyE"])
+          this.selectedDrops.map(function (shape) { shape.info.scaleFree(e.movementX, e.movementY); });
+        else if (this.heldKeys["KeyR"])
+          this.selectedDrops.map(function (shape) { shape.info.rotate(e.movementY); });
+        else
+          this.selectedDrops.map(function (shape) { shape.info.move(e.movementX, e.movementY); });
+        this.dispatchEvent(new CustomEvent("info-updated", null));
+//        this.notifyInfo();
       }
 
       //this is a fix of the lack of shift+click in the multi iron selector.

@@ -85,6 +85,7 @@
       static get config() {
         return {
           properties: {
+            heldKeys: Array,
             info:  Object,
             matrix: {
               type: Array,
@@ -127,33 +128,16 @@
         window.addEventListener("keydown", this.keyListener);
         window.addEventListener("keyup", this.keyListener);
         window.addEventListener("mousemove", this.moveListener);
-        this.shift = false;
-        this.ctrl = false;
-        this.alt = false;
       }
 
       deselect() {
         window.removeEventListener("keydown", this.keyListener);
         window.removeEventListener("keyup", this.keyListener);
         window.removeEventListener("mousemove", this.moveListener);
-        this.shift = false;
-        this.ctrl = false;
-        this.alt = false;
       }
 
       registerKey(e) {
         let value = (e.type == "keydown");
-        switch (e.code) {
-          case "KeyR":
-            this.shift = value;
-            return;
-          case "KeyE":
-            this.ctrl = value;
-            return;
-          case "KeyW":
-            this.alt = value;
-            return;
-        }
         if (!value && e.code == "KeyM")
           this.info.mirror();
         else if (!value && e.code == "KeyN")
@@ -173,13 +157,13 @@
         if (e.which != 1 || !this.dataSelected)
           return;
 
-        if (this.ctrl && this.alt)
+        if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
           this.info.scaleRestrict(e.movementY);
-        else if (this.ctrl && this.shift)
+        else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
           this.info.scaleSquare(e.movementY);
-        else if (this.ctrl)
+        else if (this.heldKeys["KeyE"])
           this.info.scaleFree(e.movementX, e.movementY);
-        else if (this.shift)
+        else if (this.heldKeys["KeyR"])
           this.info.rotate(e.movementY);
         else
           this.info.move(e.movementX, e.movementY);

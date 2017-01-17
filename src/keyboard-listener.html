@@ -68,6 +68,7 @@
         }
         this.prevKeyEvent = e;
         this.heldKeys[e.code] = e;
+        this.notifyPath("heldKeys");
       }
 
       isRepeatKeyEvent(e) {
@@ -82,6 +83,7 @@
           return;
         let keyE = new KeyEvent(e.code, correspondingDown.absTime, e.absTime);
         delete this.heldKeys[e.code];
+        this.notifyPath("heldKeys");
         this.dispatchEvent(new CustomEvent("key-stroke", {"composed": true, "bubbles": true, detail: keyE}));
       }
 

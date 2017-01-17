@@ -58,7 +58,7 @@
       }
 
       scaleRestrict(y){
-        let divis = this.matrix.scale.x / this.matrix.scale.y;
+        const divis = this.matrix.scale.x / this.matrix.scale.y;
         this.matrix.scale.x += y/30*divis;
         this.matrix.scale.y += y/30;
       }

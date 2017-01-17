@@ -174,7 +174,7 @@
 
     <action-log object="[[letters]]" id="log" on-undo="_undo"></action-log>
 
-    <keyboard-listener on-key-down="_checkKey"></keyboard-listener>
+    <keyboard-listener on-key-down="_checkKey" held-keys="{{heldKeys}}"></keyboard-listener>
 
   </template>
 
@@ -200,10 +200,10 @@
               observer: "colorScaleChanged"
             },
             selected: Array,
+            heldKeys: Array,
             sketchName: String
-          },
-          observers: []
-        };
+          }
+        }
       }
 
       connectedCallback() {
@@ -243,13 +243,13 @@
 
       _checkKey(e) {
         e.preventDefault();
-        if (e.code === "Enter")
+        if (e.detail.code === "Enter")
           this.$.clef.turnKeyRight();
-        if (e.code === "Tab")
+        if (e.detail.code === "Tab")
           this.$.clef.turnKeyLeft();
-        if (e.code === "Backspace")
+        if (e.detail.code === "Backspace")
           this.$.clef.turnModusRight();
-        if (e.code === "Backquote")
+        if (e.detail.code === "Backquote")
           this.$.clef.turnModusLeft();
       }
 

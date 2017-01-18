@@ -31,7 +31,7 @@
         z-index: 1;
       }
 
-      shape-info[data-selected] drop-shape {
+      drop-shape[data-selected] {
         box-shadow: 0 0 3px 0px black;
       }
 
@@ -112,12 +112,9 @@
       }
     </style>
 
-
     <droppad-canvas id="shapeSelector" selected-drops="{{selected}}" on-new="addDropShape" on-delete="_delDrops" held-keys="[[heldKeys]]" on-info-updated="notifyLetters" >
       <template is="dom-repeat" items="[[letters]]">
-        <shape-info id="drop[[index]]" info="[[item]]" on-info-updated="notifyLetters" held-keys="[[heldKeys]]" style="z-index: [[item.zIndex]]">
-          <drop-shape input="[[item]]" centered$="[[item.centered]]"></drop-shape>
-        </shape-info>
+        <drop-shape info="[[item]]"></drop-shape>
       </template>
     </droppad-canvas>
 
@@ -272,7 +269,7 @@
           this.style.setProperty('--tone-tone-' + i, this.coloredScale[i].color);
         if (this.letters) {
           this.letters = this.letters.map(function (item) {
-            if (item.style.substr(0, 5) !== "color") {
+            if (item.style.substr(0, 4) == "tone") {
               let i = Number(item.style.replace("tone", ""));
               item.matrix.angle = this.coloredScale[i].rotation / 180 * Math.PI;
             }

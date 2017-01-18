@@ -4,6 +4,7 @@
     <style>
       :host {
         display: flex;
+        position: absolute;
         width: 40px;
         height: 40px;
         border-radius: 50%;
@@ -148,7 +149,7 @@
       }
     </style>
 
-    <div id="inner" class$="[[input.style]]"></div>
+    <div id="inner" class$="[[info.style]]"></div>
 
   </template>
 
@@ -161,14 +162,30 @@
       static get config() {
         return {
           properties: {
-            input: Object,
-            counter: Number,
-            selected: {
-              type: Boolean,
-              observer: "getElementInfo"
-            }
-          }
+            info: Object,
+            selected: Boolean,
+          },
+          observers: [
+            "calcMatrix(info.matrix.angle, info.matrix.position.x, info.matrix.position.y, info.matrix.scale.x, info.matrix.scale.y)",
+            "setZ(info.zIndex)",
+            "centerIt(info.centered)"
+          ]
         };
+      }
+
+      setZ(z) {
+        this.style.zIndex = z;
+      }
+
+      centerIt(center){
+        center ?
+          this.setAttribute("centered", true) :
+          this.removeAttribute("centered");
+      }
+
+      calcMatrix(angle, posX, posY, scX, scY) {
+        let matrix = [scX * Math.cos(angle), scX * Math.sin(angle), -scY * Math.sin(angle), scY * Math.cos(angle), posX, posY];
+        this.style.transform = "matrix(" + matrix.join(',') + ")";
       }
     }
     customElements.define(DropShape.is, DropShape);

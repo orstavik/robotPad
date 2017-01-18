@@ -1,4 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="drop-shape.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 
 <dom-module id="droppad-canvas">
   <template>
@@ -11,6 +13,10 @@
         top: 0;
         width: 100vw;
         height: 100vh;
+      }
+
+      drop-shape[data-selected] {
+        box-shadow: 0 0 3px 0px black;
       }
 
       #crossX, #crossY, #pastePosition {
@@ -45,7 +51,9 @@
     </style>
     <iron-selector id="dropSelector" on-click="singleSelect" selectable="drop-shape" selected-attribute="data-selected"
                    selected-values="{{selectedDropsNum}}" selected-items="{{selectedDrops}}" multi>
-      <slot></slot>
+      <template is="dom-repeat" items="[[drops]]">
+        <drop-shape info="[[item]]"></drop-shape>
+      </template>
     </iron-selector>
     <div id="crossX"></div>
     <div id="crossY"></div>
@@ -125,6 +133,7 @@
       static get config() {
         return {
           properties: {
+            drops: Array,
             selectedDropsNum: Array,
             selectedDrops: {
               type: Array,
@@ -227,13 +236,14 @@
           //todo make this one selected
           return;
         }
-        if (e.target == this) {
+        if (e.path[0] == this) {
           this.deSelect();
           return;
         }
       }
 
       _makeShape(shapeInfoObj) {
+
         this.dispatchEvent(new CustomEvent("new", {detail: shapeInfoObj}));
       }
     }

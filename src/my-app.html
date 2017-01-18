@@ -1,6 +1,5 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
-<link rel="import" href="drop-shape.html">
 <link rel="import" href="color-palette.html">
 <link rel="import" href="shape-info.html">
 <link rel="import" href="json-object.html">
@@ -29,10 +28,6 @@
         position: relative;
         overflow-y: scroll;
         z-index: 1;
-      }
-
-      drop-shape[data-selected] {
-        box-shadow: 0 0 3px 0px black;
       }
 
       :host {
@@ -112,10 +107,7 @@
       }
     </style>
 
-    <droppad-canvas id="shapeSelector" selected-drops="{{selected}}" on-new="addDropShape" on-delete="_delDrops" held-keys="[[heldKeys]]" on-info-updated="notifyLetters" >
-      <template is="dom-repeat" items="[[letters]]">
-        <drop-shape info="[[item]]"></drop-shape>
-      </template>
+    <droppad-canvas id="shapeSelector" drops="[[letters]]" selected-drops="{{selected}}" on-new="addDropShape" on-delete="_delDrops" held-keys="[[heldKeys]]" on-info-updated="notifyLetters" >
     </droppad-canvas>
 
     <div id="toolbar">

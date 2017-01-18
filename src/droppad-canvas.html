@@ -49,6 +49,7 @@
       }
 
     </style>
+    History: <input type="range" min="0" max="100" value="0" id="h" on-input="setHistory"/> <br>
     <iron-selector id="dropSelector" on-click="singleSelect" selectable="drop-shape" selected-attribute="data-selected"
                    selected-values="{{selectedDropsNum}}" selected-items="{{selectedDrops}}" multi>
       <template is="dom-repeat" items="[[drops]]">
@@ -75,68 +76,96 @@
       }
 
       makeCopy(x, y) {
-        let c = this.clone();
+        let c = Object.assign(new ShapeInfoObject(0,0), this);
         c.number = ShapeInfoObject.generateId();
         c.x += x;
         c.y += y;
         return c;
       }
 
+      //todo make all the ShapeInfoObject alter methods return a new object.
       //2*PI = 360gr
       rotate(deg){
-        this.angle = (2 * Math.PI + (this.angle + deg / 50)) % (2 * Math.PI);
+        let c = Object.assign(new ShapeInfoObject(0,0), this);
+        c.angle = (2 * Math.PI + (c.angle + deg / 50)) % (2 * Math.PI);
+        return c;
       }
 
       move(x, y) {
-        this.x += x;
-        this.y += y;
+        let c = Object.assign(new ShapeInfoObject(0,0), this);
+        c.x += x;
+        c.y += y;
+        return c;
       }
 
       scaleSquare(y){
-        this.w = this.h = this.h + y/20;
+        let c = Object.assign(new ShapeInfoObject(0,0), this);
+        c.w = c.h = c.h + y/20;
+        return c;
       }
 
       scaleRestrict(y){
-        const divis = this.w / this.h;
-        this.w += y/30*divis;
-        this.h += y/30;
+        let c = Object.assign(new ShapeInfoObject(0,0), this);
+        const divis = c.w / c.h;
+        c.w += y/30*divis;
+        c.h += y/30;
+        return c;
       }
 
       scaleFree(x, y) {
-        let cos = Math.cos(this.angle);
-        let sin = Math.sin(this.angle);
+        let c = Object.assign(new ShapeInfoObject(0,0), this);
+        let cos = Math.cos(c.angle);
+        let sin = Math.sin(c.angle);
         let nx = cos * x + sin * y;
         let ny = cos * y - sin * x;
-        this.w += nx / 20;
-        this.h -= ny / 20;
+        c.w += nx / 20;
+        c.h -= ny / 20;
+        return c;
       }
 
       mirror(){
-        this.w *= -1;
+        let c = Object.assign(new ShapeInfoObject(0,0), this);
+        c.w *= -1;
+        return c;
       }
       center(){
-        this.centered =! this.centered;
+        let c = Object.assign(new ShapeInfoObject(0,0), this);
+        c.centered =! c.centered;
+        return c;
       }
       zUp(){
-        this.zIndex += 1;
+        let c = Object.assign(new ShapeInfoObject(0,0), this);
+        c.zIndex += 1;
+        return c;
       }
       zDown(){
-        this.zIndex -= 1;
+        let c = Object.assign(new ShapeInfoObject(0,0), this);
+        c.zIndex -= 1;
+        return c;
       }
       setStyle(styleName){
-        this.style = styleName;
+        let c = Object.assign(new ShapeInfoObject(0,0), this);
+        c.style = styleName;
+        return c;
       }
 
-      update(value){
-        Object.assign(this, value);
-      }
-
-      cssMatrix(){
+      getAngle(){
         let angle = this.angle;
         if (this.centered)
           angle+=45/180*Math.PI;
         if (this.style.startsWith("tone"))
           angle = 0;
+        return angle;
+      }
+
+      update(value){
+        let c = Object.assign(new ShapeInfoObject(0,0), this);
+        Object.assign(c, value);
+        return c;
+      }
+
+      cssMatrix(){
+        let angle = this.getAngle();
         let matrix = [
           this.w * Math.cos(angle),
           this.w * Math.sin(angle),
@@ -171,11 +200,22 @@
               notify: true,
               reflectToAttribute: true
             },
-            heldKeys: Array
+            heldKeys: Array,
+            history:{
+              type: Array,
+              value: function(){
+                return [];
+              }
+            }
           }
         }
       }
-
+      setHistory(e){
+        if (e.target.valueAsNumber >= this.history.length) e.target.valueAsNumber = this.history.length;
+        this.drops = this.history[e.target.valueAsNumber];
+        console.log(this.drops);
+        this.notifyPath("drops");
+      }
       connectedCallback() {
         this.addEventListener("click", this._singleClick.bind(this));
         window.addEventListener("keydown", this._registerKey.bind(this));
@@ -195,34 +235,13 @@
           }
         }
         else if (e.code == "KeyM")
-          this.selectedDrops.map(function (shape) {
-            shape.info.mirror()
-          });
+          this.alterSelected(function (shape) { return shape.info.mirror(); });
         else if (e.code == "KeyN")
-          this.selectedDrops.map(function (shape) {
-            shape.info.center();
-          });
+          this.alterSelected(function (shape) { return shape.info.center(); });
         else if (e.code == "PageUp")
-          this.selectedDrops.map(function (shape) {
-            shape.info.zUp();
-          });
+          this.alterSelected(function (shape) { return shape.info.zUp(); });
         else if (e.code == "PageDown")
-          this.selectedDrops.map(function (shape) {
-            shape.info.zDown();
-          });
-        this.notifyPath("drops", this.drops);
-      }
-
-      _deleteElem() {
-        let selects = this.selectedDrops;
-        this.drops = this.drops.filter(function (item) {
-          let i = selects.find(function (select) {
-            return select.info == item;
-          });
-          return !i;
-        });
-        this.notifyPath("drops", this.drops);
-        this.deSelect();
+          this.alterSelected(function (shape) { return shape.info.zDown(); });
       }
 
       mouseMove(e) {
@@ -231,16 +250,19 @@
         if (!this.selectedDrops)
           return;
         if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
-          this.selectedDrops.map(function (shape) { shape.info.scaleRestrict(e.movementY); });
+          this.alterSelected(function (shape) { return shape.info.scaleRestrict(e.movementY); });
         else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
-          this.selectedDrops.map(function (shape) { shape.info.scaleSquare(e.movementY); });
+          this.alterSelected(function (shape) { return shape.info.scaleSquare(e.movementY); });
         else if (this.heldKeys["KeyE"])
-          this.selectedDrops.map(function (shape) { shape.info.scaleFree(e.movementX, e.movementY); });
+          this.alterSelected(function (shape) { return shape.info.scaleFree(e.movementX, e.movementY); });
         else if (this.heldKeys["KeyR"])
-          this.selectedDrops.map(function (shape) { shape.info.rotate(e.movementY); });
+          this.alterSelected(function (shape) { return shape.info.rotate(e.movementY); });
         else
-          this.selectedDrops.map(function (shape) { shape.info.move(e.movementX, e.movementY); });
-        this.notifyPath("drops", this.drops);
+          this.alterSelected(function (shape) { return shape.info.move(e.movementX, e.movementY); });
+      }
+
+      addStyleToSelected(styleName){
+        this.alterSelected(function (shape) { return shape.info.setStyle(styleName); });
       }
 
       //this is a fix of the lack of shift+click in the multi iron selector.
@@ -284,18 +306,44 @@
         let target = this.drops.find(function(drop){
           return drop.number == id;
         });
-        target.update(value);
+        let newInfo = target.update(value);
+        this.alterInfos([newInfo]);
+      }
+
+      alterSelected(func){
+        let newInfos = this.selectedDrops.map(func);
+        this.alterInfos(newInfos);
+      }
+
+      alterInfos(newInfos) {
+        this.history.push(this.drops);
+        this.drops = this.drops.map(function (drop) {
+          let newInfo = newInfos.find(function (nevv) {
+            return nevv.number == drop.number;
+          });
+          if (newInfo)
+            return newInfo;
+          return drop;
+        });
         this.notifyPath("drops", this.drops);
       }
 
-      addStyleToSelected(styleName){
-        for (let drop of this.selectedDrops)
-          drop.info.setStyle(styleName);
+      _deleteElem() {
+        let selects = this.selectedDrops;
+        this.history.push(this.drops);
+        this.drops = this.drops.filter(function (item) {
+          let i = selects.find(function (select) {
+            return select.info == item;
+          });
+          return !i;
+        });
         this.notifyPath("drops", this.drops);
+        this.deSelect();
       }
 
-      //todo, here we have the making of new history
       _makeShape(shapeInfoObj) {
+        this.history.push(this.drops);
+        this.drops = this.drops.slice();
         this.drops.push(shapeInfoObj);
         this.notifyPath("drops", this.drops);
       }

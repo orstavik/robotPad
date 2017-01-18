@@ -72,10 +72,7 @@
         return {
           properties: {
             key: String,
-            obj: {
-              type: Object,
-//                            notify: true
-            },
+            obj: Object,
             level: {
               type: Number,
               value: 0
@@ -122,24 +119,21 @@
       }
 
       transferEditInDomToPolymerObj(e) {
-        var txt = this.shadowRoot.querySelector("#editable").innerText;
-        var myType = this.getType();
+        let txt = this.shadowRoot.querySelector("#editable").innerText;
+        let myType = this.getType();
         if (myType === "number")
-          this.set("obj", Number(txt));
+          txt = Number(txt);
         else if (myType === "boolean")
-          this.set("obj", Boolean(txt));
-        else
-          this.set("obj", txt);
-        var detail = {detail: [this.key, this.obj]};
-        var cE = new CustomEvent("writeop", detail);
-        this.dispatchEvent(cE);
+          txt = Boolean(txt);
+        let res = {};
+        res[this.key] = txt;
+        this.dispatchEvent(new CustomEvent("writeop", {detail: res}));
       }
 
       childsEdited(e) {
-        this.obj[e.detail[0]] = e.detail[1];
-//                e.stopPropagation();
-        var cE = new CustomEvent("writeop", {detail: [this.key, this.obj]});
-        this.dispatchEvent(cE);
+        let res = {};
+        res[this.key] = e.detail;
+        this.dispatchEvent(new CustomEvent("writeop", {detail: res}));
       }
     }
     customElements.define(JSONObject.is, JSONObject);

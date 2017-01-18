@@ -63,67 +63,95 @@
   <script>
     class ShapeInfoObject {
       constructor(x, y) {
+        this.number = ShapeInfoObject.generateId();
         this.style = "no";
-        this.matrix = {
-          position: {
-            x: x,
-            y: y
-          },
-          scale: {
-            x: 1,
-            y: 1
-          },
-          angle: 0
-        };
+        this.x = x;
+        this.y = y;
+        this.w = 1;
+        this.h = 1;
+        this.angle = 0;
         this.zIndex = 1000;
         this.centered = true;
       }
 
       makeCopy(x, y) {
-        let c = new ShapeInfoObject(x, y);
-        c.style = this.style;
-        c.centered = this.centered;
-        c.matrix.scale.x = this.matrix.scale.x;
-        c.matrix.scale.y = this.matrix.scale.y;
-        c.matrix.position.x += this.matrix.position.x;
-        c.matrix.position.y += this.matrix.position.y;
-        c.matrix.angle = this.matrix.angle;
+        let c = this.clone();
+        c.number = ShapeInfoObject.generateId();
+        c.x += x;
+        c.y += y;
         return c;
       }
 
       //2*PI = 360gr
       rotate(deg){
-        this.matrix.angle = (2 * Math.PI + (this.matrix.angle + deg / 50)) % (2 * Math.PI);
+        this.angle = (2 * Math.PI + (this.angle + deg / 50)) % (2 * Math.PI);
       }
 
       move(x, y) {
-        this.matrix.position.x += x;
-        this.matrix.position.y += y;
+        this.x += x;
+        this.y += y;
       }
 
       scaleSquare(y){
-        this.matrix.scale.x = this.matrix.scale.y = this.matrix.scale.y + y/20;
+        this.w = this.h = this.h + y/20;
       }
 
       scaleRestrict(y){
-        const divis = this.matrix.scale.x / this.matrix.scale.y;
-        this.matrix.scale.x += y/30*divis;
-        this.matrix.scale.y += y/30;
+        const divis = this.w / this.h;
+        this.w += y/30*divis;
+        this.h += y/30;
       }
 
       scaleFree(x, y) {
-        let cos = Math.cos(this.matrix.angle);
-        let sin = Math.sin(this.matrix.angle);
+        let cos = Math.cos(this.angle);
+        let sin = Math.sin(this.angle);
         let nx = cos * x + sin * y;
         let ny = cos * y - sin * x;
-        this.matrix.scale.x += nx / 20;
-        this.matrix.scale.y -= ny / 20;
+        this.w += nx / 20;
+        this.h -= ny / 20;
       }
 
       mirror(){
-        this.matrix.scale.x *= -1;
+        this.w *= -1;
+      }
+      center(){
+        this.centered =! this.centered;
+      }
+      zUp(){
+        this.zIndex += 1;
+      }
+      zDown(){
+        this.zIndex -= 1;
+      }
+      setStyle(styleName){
+        this.style = styleName;
+      }
+
+      update(value){
+        Object.assign(this, value);
+      }
+
+      cssMatrix(){
+        let angle = this.angle;
+        if (this.centered)
+          angle+=45/180*Math.PI;
+        if (this.style.startsWith("tone"))
+          angle = 0;
+        let matrix = [
+          this.w * Math.cos(angle),
+          this.w * Math.sin(angle),
+          -this.h * Math.sin(angle),
+          this.h * Math.cos(angle),
+          this.x,
+          this.y];
+        return "matrix(" + matrix.join(',') + ")";
+      }
+
+      static generateId(){
+        return ShapeInfoObject.__sessionID++;
       }
     }
+    ShapeInfoObject.__sessionID = 0;
 
     class DroppadCanvas extends Polymer.Element {
       static get is() {
@@ -162,8 +190,9 @@
         else if (e.code === "KeyC")
           this.copiedShapes = this.selectedDrops.slice();
         else if (e.code === "KeyV") {
-          for (let i = 0; i < this.copiedShapes.length; i++)
-            this._addShape(this.copiedShapes[i].info);
+          for (let i = 0; i < this.copiedShapes.length; i++) {
+            this._makeShape(this.copiedShapes[i].info.makeCopy(this.position[0], this.position[1]));
+          }
         }
         else if (e.code == "KeyM")
           this.selectedDrops.map(function (shape) {
@@ -171,17 +200,17 @@
           });
         else if (e.code == "KeyN")
           this.selectedDrops.map(function (shape) {
-            shape.info.centered = !shape.info.centered;
+            shape.info.center();
           });
         else if (e.code == "PageUp")
           this.selectedDrops.map(function (shape) {
-            shape.info.zIndex += 1;
+            shape.info.zUp();
           });
         else if (e.code == "PageDown")
           this.selectedDrops.map(function (shape) {
-            shape.info.zIndex -= 1;
+            shape.info.zDown();
           });
-        this.dispatchEvent(new CustomEvent("info-updated", null));
+        this.notifyPath("drops", this.drops);
       }
 
       _deleteElem() {
@@ -192,8 +221,7 @@
           });
           return !i;
         });
-        this.dispatchEvent(new CustomEvent("info-updated", null));
-//        this.dispatchEvent(new CustomEvent("delete", {detail: this.selectedDrops}));
+        this.notifyPath("drops", this.drops);
         this.deSelect();
       }
 
@@ -212,8 +240,7 @@
           this.selectedDrops.map(function (shape) { shape.info.rotate(e.movementY); });
         else
           this.selectedDrops.map(function (shape) { shape.info.move(e.movementX, e.movementY); });
-        this.dispatchEvent(new CustomEvent("info-updated", null));
-//        this.notifyInfo();
+        this.notifyPath("drops", this.drops);
       }
 
       //this is a fix of the lack of shift+click in the multi iron selector.
@@ -236,10 +263,6 @@
         this.notifyPath("selectedDropsNum");
       }
 
-      _addShape(info) {
-        this._makeShape(info.makeCopy(this.position[0], this.position[1]));
-      }
-
       _singleClick(e) {
         this.position = [e.x - window.innerWidth / 2, e.y - window.innerHeight / 2];
         if (e.ctrlKey) {
@@ -254,20 +277,27 @@
       }
 
       loadSketch(drops){
-        this.drops = drops;
-        this.dispatchEvent(new CustomEvent("info-updated", null));
+        this.set("drops", drops);
+      }
+
+      updateShape(id, value){
+        let target = this.drops.find(function(drop){
+          return drop.number == id;
+        });
+        target.update(value);
+        this.notifyPath("drops", this.drops);
       }
 
       addStyleToSelected(styleName){
         for (let drop of this.selectedDrops)
-          drop.info.style = styleName;
-        this.dispatchEvent(new CustomEvent("info-updated", null));
+          drop.info.setStyle(styleName);
+        this.notifyPath("drops", this.drops);
       }
 
+      //todo, here we have the making of new history
       _makeShape(shapeInfoObj) {
         this.drops.push(shapeInfoObj);
-        this.dispatchEvent(new CustomEvent("info-updated", null));
-        //this.dispatchEvent(new CustomEvent("new", {detail: shapeInfoObj}));
+        this.notifyPath("drops", this.drops);
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

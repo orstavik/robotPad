@@ -173,7 +173,7 @@
             selected: Boolean,
           },
           observers: [
-            "calcMatrix(info.style, info.matrix.angle, info.matrix.position.x, info.matrix.position.y, info.matrix.scale.x, info.matrix.scale.y, info.centered)",
+            "calcMatrix(info, info.style, info.angle, info.x, info.y, info.w, info.h, info.centered)",
             "setZ(info.zIndex)"
           ]
         };
@@ -182,13 +182,8 @@
       setZ(z) {
         this.style.zIndex = z;
       }
-      calcMatrix(style, angle, posX, posY, scX, scY, centered) {
-        if (centered)
-          angle+=45/180*Math.PI;
-        if (style.startsWith("tone"))
-          angle = 0;
-        let matrix = [scX * Math.cos(angle), scX * Math.sin(angle), -scY * Math.sin(angle), scY * Math.cos(angle), posX, posY];
-        this.style.transform = "matrix(" + matrix.join(',') + ")";
+      calcMatrix(info, style, angle, posX, posY, scX, scY, centered) {
+        this.style.transform = info.cssMatrix();
       }
     }
     customElements.define(DropShape.is, DropShape);

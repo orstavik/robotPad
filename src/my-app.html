@@ -23,7 +23,7 @@
         width: 250px;
         font-size: 12px;
         line-height: normal;
-        height: 100vh;
+        /*height: 100vh;*/
         position: relative;
         overflow-y: scroll;
         z-index: 1;
@@ -106,8 +106,7 @@
       }
     </style>
 
-    <droppad-canvas id="shapeSelector" drops="{{letters}}" selected-drops="{{selected}}" on-new="addDropShape" on-delete="_delDrops" held-keys="[[heldKeys]]" on-info-updated="notifyLetters" >
-    </droppad-canvas>
+    <droppad-canvas id="shapeSelector" drops="{{letters}}" held-keys="[[heldKeys]]"></droppad-canvas>
 
     <div id="toolbar">
       <div class="button spacer"></div>
@@ -148,7 +147,9 @@
 
     <iron-selector attr-for-selected="select" multi>
       <tab-wrapper title="JSON" select="1">
-        <json-object key="myLetters" obj="[[letters]]" on-writeop="writeInChanges"></json-object>
+        <template is="dom-repeat" items="[[letters]]">
+          <json-object key="[[item.number]]" obj="[[item]]" on-writeop="writeInChanges"></json-object>
+        </template>
       </tab-wrapper>
       <tab-wrapper title="Palette" select="2">
         <color-palette id="palette" css-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
@@ -207,8 +208,9 @@
         this.$.shapeSelector.loadSketch([]);
       }
 
-      writeInChanges(e, detail) {
-        this.notifyLetters();
+      writeInChanges(e) {
+        this.$.shapeSelector.updateShape(e.target.key, e.detail[e.target.key]);
+//        this.notifyLetters();
       }
 
       notifyLetters() {

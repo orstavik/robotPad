@@ -63,7 +63,7 @@
   <script>
     class ShapeInfoObject {
       constructor(x, y) {
-        this.style = 0;
+        this.style = "no";
         this.matrix = {
           position: {
             x: x,
@@ -133,7 +133,10 @@
       static get config() {
         return {
           properties: {
-            drops: Array,
+            drops: {
+              type: Array,
+              notify: true
+            },
             selectedDropsNum: Array,
             selectedDrops: {
               type: Array,
@@ -182,7 +185,15 @@
       }
 
       _deleteElem() {
-        this.dispatchEvent(new CustomEvent("delete", {detail: this.selectedDrops}));
+        let selects = this.selectedDrops;
+        this.drops = this.drops.filter(function (item) {
+          let i = selects.find(function (select) {
+            return select.info == item;
+          });
+          return !i;
+        });
+        this.dispatchEvent(new CustomEvent("info-updated", null));
+//        this.dispatchEvent(new CustomEvent("delete", {detail: this.selectedDrops}));
         this.deSelect();
       }
 
@@ -242,9 +253,21 @@
         }
       }
 
-      _makeShape(shapeInfoObj) {
+      loadSketch(drops){
+        this.drops = drops;
+        this.dispatchEvent(new CustomEvent("info-updated", null));
+      }
 
-        this.dispatchEvent(new CustomEvent("new", {detail: shapeInfoObj}));
+      addStyleToSelected(styleName){
+        for (let drop of this.selectedDrops)
+          drop.info.style = styleName;
+        this.dispatchEvent(new CustomEvent("info-updated", null));
+      }
+
+      _makeShape(shapeInfoObj) {
+        this.drops.push(shapeInfoObj);
+        this.dispatchEvent(new CustomEvent("info-updated", null));
+        //this.dispatchEvent(new CustomEvent("new", {detail: shapeInfoObj}));
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

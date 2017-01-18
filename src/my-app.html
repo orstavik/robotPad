@@ -1,7 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="color-palette.html">
-<link rel="import" href="shape-info.html">
 <link rel="import" href="json-object.html">
 <link rel="import" href="json-saver.html">
 <link rel="import" href="action-log.html">
@@ -107,25 +106,25 @@
       }
     </style>
 
-    <droppad-canvas id="shapeSelector" drops="[[letters]]" selected-drops="{{selected}}" on-new="addDropShape" on-delete="_delDrops" held-keys="[[heldKeys]]" on-info-updated="notifyLetters" >
+    <droppad-canvas id="shapeSelector" drops="{{letters}}" selected-drops="{{selected}}" on-new="addDropShape" on-delete="_delDrops" held-keys="[[heldKeys]]" on-info-updated="notifyLetters" >
     </droppad-canvas>
 
     <div id="toolbar">
       <div class="button spacer"></div>
       <template is="dom-repeat" items="[[coloredScale]]">
-        <div id="tone[[index]]" class="button" on-click="toneSelected"
+        <div id="tone[[index]]" class="button" on-click="setStyleName"
              style$="transform: rotate([[item.rotation]]deg) scale([[item.scale]]); background: [[item.color]]; border-radius: 0 50% 50% 50%;">
           [[item.name]]
         </div>
       </template>
       <div class="button spacer" ></div>
       <template is="dom-repeat" items="[[colors]]">
-        <div id="color[[index]]" class="button" style$="background: [[item]];" on-click="colorSelected">[[index]]</div>
+        <div id="color[[index]]" class="button" style$="background: [[item]];" on-click="setStyleName">[[index]]</div>
       </template>
       <div class="button spacer"></div>
       <template is="dom-repeat" items="[0,1,2,3,4,5,6,7,8,9,10,11]">
         <div id="grey[[index]]" class="button" style$="background: var(--tone-grey-[[index]]);"
-             on-click="colorSelected">[[index]]
+             on-click="setStyleName">[[index]]
         </div>
       </template>
       <div class="button spacer"></div>
@@ -197,33 +196,23 @@
 
       connectedCallback() {
         super.connectedCallback();
-        var start = '[]';
-        this.set("letters", JSON.parse(start));
+        this.newSketch();
+      }
+
+      loadSketch(e) {
+        this.$.shapeSelector.loadSketch(e.detail.json);
+      }
+
+      newSketch(){
+        this.$.shapeSelector.loadSketch([]);
+      }
+
+      writeInChanges(e, detail) {
+        this.notifyLetters();
       }
 
       notifyLetters() {
         this.notifyPath("letters");
-      }
-
-      addDropShape(e) {
-        this.letters.push(e.detail);
-        this.notifyLetters();
-      }
-
-      _delDrops(e, detail) {
-        this.letters = this.letters.filter(function (item) {
-          let i = detail.find(function (select) {
-            return select.info == item;
-          });
-          return !i;
-        });
-        this.notifyLetters();
-      }
-
-      newSketch(e){
-        this.sketchName = "newSketch";
-        this.letters = [];
-        this.notifyLetters();
       }
 
       _undo(e) {
@@ -242,51 +231,20 @@
           this.$.clef.turnModusLeft();
       }
 
-      colorSelected(e) {
-        for (let letter of this.selected)
-          letter.info.style = e.target.id;
-        this.notifyPath("letters");
-      }
-
-      toneSelected(e) {
-        for (let letter of this.selected) {
-          letter.info.style = e.target.id;
-          letter.info.matrix.angle = this.coloredScale[e.target.id.substr(-1)].rotation / 180 * Math.PI;
-        }
-        this.notifyPath("letters");
+      setStyleName(e) {
+        this.$.shapeSelector.addStyleToSelected(e.target.id);
       }
 
       colorScaleChanged() {
-        for (let i = 0; i < this.coloredScale.length; i++)
+        for (let i = 0; i < this.coloredScale.length; i++){
           this.style.setProperty('--tone-tone-' + i, this.coloredScale[i].color);
-        if (this.letters) {
-          this.letters = this.letters.map(function (item) {
-            if (item.style.substr(0, 4) == "tone") {
-              let i = Number(item.style.replace("tone", ""));
-              item.matrix.angle = this.coloredScale[i].rotation / 180 * Math.PI;
-            }
-            return item;
-          }.bind(this));
-          this.notifyPath("letters");
+          this.style.setProperty('--tone-rotation-' + i, "rotate("+this.coloredScale[i].rotation+"deg)");
         }
       }
 
-      toggleJSON() {
-        this.$.collapse.toggle();
-      }
       colorsChanged() {
         for (let i = 0; i < this.colors.length; i++)
           this.style.setProperty('--tone-color-' + i, this.colors[i]);
-      }
-
-      loadSketch(e) {
-        this.letters = JSON.parse(e.detail.json);
-        this.notifyPath("letters");
-      }
-
-      writeInChanges(e, detail) {
-//                this.letters = detail[1];
-        this.notifyPath("letters");
       }
     }
     customElements.define(MyApp.is, MyApp);

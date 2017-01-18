@@ -20,7 +20,7 @@
         transition-duration: 0.5s;
       }
 
-      :host([centered]) #inner {
+      :host([centered]) {
         transform: rotate(45deg);
       }
 
@@ -122,30 +122,37 @@
 
       #inner.tone0 {
         background: var(--tone-tone-0);
+        transform: var(--tone-rotation-0);
       }
 
       #inner.tone1 {
         background: var(--tone-tone-1);
+        transform: var(--tone-rotation-1);
       }
 
       #inner.tone2 {
         background: var(--tone-tone-2);
+        transform: var(--tone-rotation-2);
       }
 
       #inner.tone3 {
         background: var(--tone-tone-3);
+        transform: var(--tone-rotation-3);
       }
 
       #inner.tone4 {
         background: var(--tone-tone-4);
+        transform: var(--tone-rotation-4);
       }
 
       #inner.tone5 {
         background: var(--tone-tone-5);
+        transform: var(--tone-rotation-5);
       }
 
       #inner.tone6 {
         background: var(--tone-tone-6);
+        transform: var(--tone-rotation-6);
       }
     </style>
 
@@ -166,9 +173,8 @@
             selected: Boolean,
           },
           observers: [
-            "calcMatrix(info.matrix.angle, info.matrix.position.x, info.matrix.position.y, info.matrix.scale.x, info.matrix.scale.y)",
-            "setZ(info.zIndex)",
-            "centerIt(info.centered)"
+            "calcMatrix(info.style, info.matrix.angle, info.matrix.position.x, info.matrix.position.y, info.matrix.scale.x, info.matrix.scale.y, info.centered)",
+            "setZ(info.zIndex)"
           ]
         };
       }
@@ -176,14 +182,11 @@
       setZ(z) {
         this.style.zIndex = z;
       }
-
-      centerIt(center){
-        center ?
-          this.setAttribute("centered", true) :
-          this.removeAttribute("centered");
-      }
-
-      calcMatrix(angle, posX, posY, scX, scY) {
+      calcMatrix(style, angle, posX, posY, scX, scY, centered) {
+        if (centered)
+          angle+=45/180*Math.PI;
+        if (style.startsWith("tone"))
+          angle = 0;
         let matrix = [scX * Math.cos(angle), scX * Math.sin(angle), -scY * Math.sin(angle), scY * Math.cos(angle), posX, posY];
         this.style.transform = "matrix(" + matrix.join(',') + ")";
       }

@@ -236,7 +236,7 @@
           this.copiedShapes = this.selectedDrops.slice();
         else if (e.code === "KeyV") {
           for (let i = 0; i < this.copiedShapes.length; i++) {
-            this._makeShape(this.copiedShapes[i].info.makeCopy(this.position[0], this.position[1]));
+            this._addElem(this.copiedShapes[i].info.makeCopy(this.position[0], this.position[1]));
           }
         }
         else if (e.code == "KeyM")
@@ -270,6 +270,12 @@
         this.alterSelected(ShapeInfoObject.prototype.setStyle, styleName);
       }
 
+      updateShape(id, value){
+        this.deSelect();
+        this.select(id);
+        this.alterSelected(ShapeInfoObject.prototype.update, value);
+      }
+
       //this is a fix of the lack of shift+click in the multi iron selector.
       singleSelect(e) {
         //skip no selected
@@ -296,8 +302,12 @@
       _singleClick(e) {
         this.position = [e.x - window.innerWidth / 2, e.y - window.innerHeight / 2];
         if (e.ctrlKey) {
-          this._makeShape(new ShapeInfoObject(this.position[0], this.position[1]));
-          //todo make this one selected
+          let shape = new ShapeInfoObject(this.position[0], this.position[1]);
+          this._addElem(shape);
+          this.deSelect();
+          setTimeout(function(){    //hack so polymer will have time to update itself.
+            this.select(shape.number);
+          }.bind(this));
           return;
         }
         if (e.path[0] == this) {
@@ -308,12 +318,6 @@
 
       loadSketch(drops){
         this.set("drops", drops);
-      }
-
-      updateShape(id, value){
-        this.deSelect();
-        this.select(id);
-        this.alterSelected(function(){return this.update(value);});
       }
 
       alterSelected(func, arg1, arg2){
@@ -337,7 +341,7 @@
         this.deSelect();
       }
 
-      _makeShape(shapeInfoObj) {
+      _addElem(shapeInfoObj) {
         this.history.push(this.drops);
         this.drops = this.drops.slice();
         this.drops.push(shapeInfoObj);

@@ -53,7 +53,7 @@
     <iron-selector id="dropSelector" on-click="singleSelect" selectable="drop-shape" selected-attribute="data-selected"
                    selected-values="{{selectedDropsNum}}" selected-items="{{selectedDrops}}" multi>
       <template is="dom-repeat" items="[[drops]]">
-        <drop-shape info="[[item]]"></drop-shape>
+        <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
       </template>
     </iron-selector>
     <div id="crossX"></div>
@@ -83,7 +83,6 @@
         return c;
       }
 
-      //todo make all the ShapeInfoObject alter methods return a new object.
       //2*PI = 360gr
       rotate(deg){
         let c = Object.assign(new ShapeInfoObject(0,0), this);
@@ -200,6 +199,10 @@
               notify: true,
               reflectToAttribute: true
             },
+            selectedInfos:{
+              type: Array,
+              computed: "_fromDrops(selectedDrops)"
+            },
             heldKeys: Array,
             history:{
               type: Array,
@@ -210,10 +213,12 @@
           }
         }
       }
+      _fromDrops(selected){
+        return selected.map(function(drop){return drop.info.number;});
+      }
       setHistory(e){
         if (e.target.valueAsNumber >= this.history.length) e.target.valueAsNumber = this.history.length;
         this.drops = this.history[e.target.valueAsNumber];
-        console.log(this.drops);
         this.notifyPath("drops");
       }
       connectedCallback() {
@@ -235,13 +240,13 @@
           }
         }
         else if (e.code == "KeyM")
-          this.alterSelected(function (shape) { return shape.info.mirror(); });
+          this.alterSelected(ShapeInfoObject.prototype.mirror);
         else if (e.code == "KeyN")
-          this.alterSelected(function (shape) { return shape.info.center(); });
+          this.alterSelected(ShapeInfoObject.prototype.center);
         else if (e.code == "PageUp")
-          this.alterSelected(function (shape) { return shape.info.zUp(); });
+          this.alterSelected(ShapeInfoObject.prototype.zUp);
         else if (e.code == "PageDown")
-          this.alterSelected(function (shape) { return shape.info.zDown(); });
+          this.alterSelected(ShapeInfoObject.prototype.zDown);
       }
 
       mouseMove(e) {
@@ -250,19 +255,19 @@
         if (!this.selectedDrops)
           return;
         if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
-          this.alterSelected(function (shape) { return shape.info.scaleRestrict(e.movementY); });
+          this.alterSelected(ShapeInfoObject.prototype.scaleRestrict, e.movementY);
         else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
-          this.alterSelected(function (shape) { return shape.info.scaleSquare(e.movementY); });
+          this.alterSelected(ShapeInfoObject.prototype.scaleSquare, e.movementY);
         else if (this.heldKeys["KeyE"])
-          this.alterSelected(function (shape) { return shape.info.scaleFree(e.movementX, e.movementY); });
+          this.alterSelected(ShapeInfoObject.prototype.scaleFree, e.movementX, e.movementY);
         else if (this.heldKeys["KeyR"])
-          this.alterSelected(function (shape) { return shape.info.rotate(e.movementY); });
+          this.alterSelected(ShapeInfoObject.prototype.rotate, e.movementY);
         else
-          this.alterSelected(function (shape) { return shape.info.move(e.movementX, e.movementY); });
+          this.alterSelected(ShapeInfoObject.prototype.move, e.movementX, e.movementY);
       }
 
       addStyleToSelected(styleName){
-        this.alterSelected(function (shape) { return shape.info.setStyle(styleName); });
+        this.alterSelected(ShapeInfoObject.prototype.setStyle, styleName);
       }
 
       //this is a fix of the lack of shift+click in the multi iron selector.
@@ -284,6 +289,9 @@
         this.selectedDropsNum = [];
         this.notifyPath("selectedDropsNum");
       }
+      select(id){
+        this.shadowRoot.querySelector("#drop"+id).click();
+      }
 
       _singleClick(e) {
         this.position = [e.x - window.innerWidth / 2, e.y - window.innerHeight / 2];
@@ -303,39 +311,27 @@
       }
 
       updateShape(id, value){
-        let target = this.drops.find(function(drop){
-          return drop.number == id;
-        });
-        let newInfo = target.update(value);
-        this.alterInfos([newInfo]);
+        this.deSelect();
+        this.select(id);
+        this.alterSelected(function(){return this.update(value);});
       }
 
-      alterSelected(func){
-        let newInfos = this.selectedDrops.map(func);
-        this.alterInfos(newInfos);
-      }
-
-      alterInfos(newInfos) {
+      alterSelected(func, arg1, arg2){
         this.history.push(this.drops);
+        let selects = this.selectedInfos;
         this.drops = this.drops.map(function (drop) {
-          let newInfo = newInfos.find(function (nevv) {
-            return nevv.number == drop.number;
-          });
-          if (newInfo)
-            return newInfo;
-          return drop;
+          if (selects.indexOf(drop.number) == -1)
+            return drop;
+          return func.call(drop, arg1, arg2);
         });
         this.notifyPath("drops", this.drops);
       }
 
       _deleteElem() {
-        let selects = this.selectedDrops;
+        let selects = this.selectedInfos;
         this.history.push(this.drops);
         this.drops = this.drops.filter(function (item) {
-          let i = selects.find(function (select) {
-            return select.info == item;
-          });
-          return !i;
+          return selects.indexOf(item.number) == -1;
         });
         this.notifyPath("drops", this.drops);
         this.deSelect();

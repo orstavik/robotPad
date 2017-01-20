@@ -3,7 +3,6 @@
 <link rel="import" href="color-palette.html">
 <link rel="import" href="json-object.html">
 <link rel="import" href="json-saver.html">
-<link rel="import" href="action-log.html">
 <link rel="import" href="droppad-canvas.html">
 <link rel="import" href="keyboard-listener.html">
 <link rel="import" href="music-clef.html">
@@ -23,7 +22,6 @@
         width: 250px;
         font-size: 12px;
         line-height: normal;
-        /*height: 100vh;*/
         position: relative;
         overflow-y: scroll;
         z-index: 1;
@@ -106,7 +104,7 @@
       }
     </style>
 
-    <droppad-canvas id="shapeSelector" drops="{{letters}}" held-keys="[[heldKeys]]"></droppad-canvas>
+    <droppad-canvas id="shapeSelector" drops="{{letters}}" held-keys="[[heldKeys]]" history="{{history}}"></droppad-canvas>
 
     <div id="toolbar">
       <div class="button spacer"></div>
@@ -158,11 +156,12 @@
       <tab-wrapper title="Save/Load" select="3">
         <json-saver input="[[letters]]" on-sketchload="loadSketch" json-name="{{sketchName}}"></json-saver>
       </tab-wrapper>
+      <tab-wrapper title="History" select="4">
+        History: <input type="range" min="0" max="10000" value="0" id="h" on-input="timeTravel"/> <br>
+      </tab-wrapper>
     </iron-selector>
 
     <div id="title" style="position: fixed; right: 0">[[sketchName]]</div>
-
-    <!--<action-log object="[[letters]]" id="log" on-undo="_undo"></action-log>-->
 
     <keyboard-listener on-key-down="_checkKey" held-keys="{{heldKeys}}"></keyboard-listener>
 
@@ -178,20 +177,15 @@
       static get config() {
         return {
           properties: {
-            colors: {
-              type: Array,
-              observer: "colorsChanged"
-            },
-            letters: {
-              type: Array
-            },
+            colors: Array,
+            letters: Array,
             coloredScale: {
               type: Array,
               observer: "colorScaleChanged"
             },
-            selected: Array,
             heldKeys: Array,
-            sketchName: String
+            sketchName: String,
+            history: Array
           }
         }
       }
@@ -199,6 +193,13 @@
       connectedCallback() {
         super.connectedCallback();
         this.newSketch();
+      }
+
+      timeTravel(e) {
+        if (e.target.valueAsNumber >= this.history.length)
+          e.target.valueAsNumber = this.history.length;
+        let x = this.history[e.target.valueAsNumber];
+        this.$.shapeSelector.loadSketch(x);
       }
 
       loadSketch(e) {
@@ -211,15 +212,6 @@
 
       writeInChanges(e) {
         this.$.shapeSelector.updateShape(e.target.key, e.detail[e.target.key]);
-//        this.notifyLetters();
-      }
-
-      notifyLetters() {
-        this.notifyPath("letters");
-      }
-
-      _undo(e) {
-        this.letters = e.detail.state;
       }
 
       _checkKey(e) {
@@ -243,9 +235,6 @@
           this.style.setProperty('--tone-tone-' + i, this.coloredScale[i].color);
           this.style.setProperty('--tone-rotation-' + i, "rotate("+this.coloredScale[i].rotation+"deg)");
         }
-      }
-
-      colorsChanged() {
         for (let i = 0; i < this.colors.length; i++)
           this.style.setProperty('--tone-color-' + i, this.colors[i]);
       }

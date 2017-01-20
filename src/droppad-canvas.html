@@ -61,7 +61,6 @@
       </droppad-selector>
       <div id="pastePosition" style$="top: [[position.1]]px; left: [[position.0]]px"></div>
     </div>
-    History: <input type="range" min="0" max="100" value="0" id="h" on-input="setHistory"/> <br>
   </template>
 
   <script>
@@ -146,7 +145,7 @@
       getAngle() {
         let angle = this.angle;
         if (this.centered)
-          angle += 45 / 180 * Math.PI;
+          angle += (45 / 180 * Math.PI);
         if (this.style.startsWith("tone"))
           angle = 0;
         return angle;
@@ -274,7 +273,8 @@
               type: Array,
               value: function () {
                 return [];
-              }
+              },
+              notify: true
             }
           }
         }
@@ -282,12 +282,6 @@
 
       _setSelectedIds(elems) {
         return elems.map(item => item.info.number);
-      }
-
-      setHistory(e) {
-        if (e.target.valueAsNumber >= this.history.length) e.target.valueAsNumber = this.history.length;
-        this.drops = this.history[e.target.valueAsNumber];
-        this.notifyPath("drops");
       }
 
       connectedCallback() {
@@ -324,7 +318,7 @@
       mouseMove(e) {
         if (e.which != 1)
           return;
-        if (!this.selectedDrops)
+        if (!this.selectedIds)
           return;
         if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
           this.alterSelected(ShapeInfoObject.prototype.scaleRestrict, e.movementY);

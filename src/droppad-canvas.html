@@ -75,6 +75,10 @@
         this.centered = true;
       }
 
+      clone() {
+        return Object.assign(new ShapeInfoObject(0, 0), this); //this correctly overwrite the new number, as it should do.
+      }
+
       makeCopy(x, y) {
         let c = this.clone();
         c.number = ShapeInfoObject.generateId();
@@ -83,73 +87,52 @@
         return c;
       }
 
-      clone() {
-        return Object.assign(new ShapeInfoObject(0, 0), this);
-      }
-
       //2*PI = 360gr
       rotate(deg){
-        let c = Object.assign(new ShapeInfoObject(0,0), this);
-        c.angle = (2 * Math.PI + (c.angle + deg / 50)) % (2 * Math.PI);
-        return c;
+        this.angle = (2 * Math.PI + (this.angle + deg / 50)) % (2 * Math.PI);
       }
 
       move(x, y) {
-        let c = Object.assign(new ShapeInfoObject(0,0), this);
-        c.x += x;
-        c.y += y;
-        return c;
+        this.x += x;
+        this.y += y;
       }
 
       scaleSquare(y){
-        let c = Object.assign(new ShapeInfoObject(0,0), this);
-        c.w = c.h = c.h + y/20;
-        return c;
+        this.w = this.h = this.h + y/20;
       }
 
       scaleRestrict(y){
-        let c = Object.assign(new ShapeInfoObject(0,0), this);
-        const divis = c.w / c.h;
-        c.w += y/30*divis;
-        c.h += y/30;
-        return c;
+        const divis = this.w / this.h;
+        this.w += y/30*divis;
+        this.h += y/30;
       }
 
       scaleFree(x, y) {
-        let c = Object.assign(new ShapeInfoObject(0,0), this);
-        let cos = Math.cos(c.angle);
-        let sin = Math.sin(c.angle);
+        let cos = Math.cos(this.angle);
+        let sin = Math.sin(this.angle);
         let nx = cos * x + sin * y;
         let ny = cos * y - sin * x;
-        c.w += nx / 20;
-        c.h -= ny / 20;
-        return c;
+        this.w += nx / 20;
+        this.h -= ny / 20;
       }
 
       mirror(){
-        let c = Object.assign(new ShapeInfoObject(0,0), this);
-        c.w *= -1;
-        return c;
+        this.w *= -1;
       }
       center(){
-        let c = Object.assign(new ShapeInfoObject(0,0), this);
-        c.centered =! c.centered;
-        return c;
+        this.centered =! this.centered;
       }
       zUp(){
-        let c = Object.assign(new ShapeInfoObject(0,0), this);
-        c.zIndex += 1;
-        return c;
+        this.zIndex += 1;
       }
       zDown(){
-        let c = Object.assign(new ShapeInfoObject(0,0), this);
-        c.zIndex -= 1;
-        return c;
+        this.zIndex -= 1;
       }
       setStyle(styleName){
-        let c = Object.assign(new ShapeInfoObject(0,0), this);
-        c.style = styleName;
-        return c;
+        this.style = styleName;
+      }
+      update(value){
+        Object.assign(this, value);
       }
 
       getAngle(){
@@ -159,12 +142,6 @@
         if (this.style.startsWith("tone"))
           angle = 0;
         return angle;
-      }
-
-      update(value){
-        let c = Object.assign(new ShapeInfoObject(0,0), this);
-        Object.assign(c, value);
-        return c;
       }
 
       cssMatrix(){
@@ -183,7 +160,7 @@
         return ShapeInfoObject.__sessionID++;
       }
     }
-    ShapeInfoObject.__sessionID = 0;
+    ShapeInfoObject.__sessionID = new Date().getTime();
 
     class ImmutableArrayFunctions {
       static push(array, obj) {
@@ -196,7 +173,7 @@
           return numbers.indexOf(item.number) == -1;
         });
       }
-      static alter(array, numbers, func, arg1, arg2){
+      static alterSlow(array, numbers, func, arg1, arg2){
         array = array.map(function (item) {
           if (numbers.indexOf(item.number) == -1)
             return item;
@@ -209,7 +186,9 @@
       //todo, First, we do a .map on all the items that makes a new array object, with clones for the selected objects. The parallell structure is in place.
       //todo, Second, then run over all the selected objects in the new array, and alter their position.
       //todo, this strategy is 10 times (!!) faster than alter1. Without removing the complexities inside ShapeInfoObject.
-      static alter2(array, numbers, func, arg1, arg2){
+
+      //todo, get toBeAltered from outside instead of from within the first array.map function
+      static alter(array, numbers, func, arg1, arg2){
         let toBeAltered = [];
         array = array.map(function (item) {
           if (numbers.indexOf(item.number) == -1)
@@ -218,10 +197,8 @@
           toBeAltered.push(item);
           return item;
         });
-        toBeAltered = toBeAltered.map(function(item){
-          item = func.call(item, arg1, arg2);
-          console.log(item);
-          return item;
+        toBeAltered.map(function(item){
+          return func.call(item, arg1, arg2);
         });
         return array;
       }
@@ -260,7 +237,7 @@
 
         start = stop;
         console.log("speed 2: " + start);
-        ar = ImmutableArrayFunctions.alter2(ar, selected, ShapeInfoObject.prototype.scaleFree, -10, 10);
+        ar = ImmutableArrayFunctions.alter(ar, selected, ShapeInfoObject.prototype.scaleFree, -10, 10);
         stop = new Date().getTime();
         console.log("speed 2: " + (stop - start));
       }

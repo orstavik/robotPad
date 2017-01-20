@@ -62,21 +62,27 @@
 //        return el.dataset.selected ? this.deselect(el) : this.select(el);
 //      }
 
-      abort(){
+      abort() {
         this.actions.abort = true;
       }
+
       _mouseDown(e) {
         let el = e.target;
-        this.actions = {shift: e.shiftKey, el: el};
+        this.actions = {shift: e.shiftKey, el: el, wasSelectedAlready: el.dataset.selected};
         this.select(el);
       }
+
       _mouseUp(e) {
-        if (this.actions.abort)
-          return;
-        if (this.actions.shift)
-          return;
-        this.deselectAll();
-        this.select(this.actions.el);
+        if (this.actions.abort) {
+
+        } else if (this.actions.shift && !this.actions.wasSelectedAlready) {
+
+        } else if (!this.actions.wasSelectedAlready) {
+          this.deselectAll();
+          this.select(this.actions.el);
+        } else {
+          this.deselect(this.actions.el);
+        }
       }
     }
     customElements.define(DroppadSelector.is, DroppadSelector);

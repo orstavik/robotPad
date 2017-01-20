@@ -1,6 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="drop-shape.html">
-<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="droppad-selector.html">
 
 <dom-module id="droppad-canvas">
   <template>
@@ -50,12 +50,11 @@
 
     </style>
     History: <input type="range" min="0" max="100" value="0" id="h" on-input="setHistory"/> <br>
-    <iron-selector id="dropSelector" on-click="singleSelect" selectable="drop-shape" selected-attribute="data-selected"
-                   selected-values="{{selectedDropsNum}}" selected-items="{{selectedDrops}}" multi>
+    <droppad-selector id="dropSelector" selected-elements="{{selectedDrops}}">
       <template is="dom-repeat" items="[[drops]]">
         <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
       </template>
-    </iron-selector>
+    </droppad-selector>
     <div id="crossX"></div>
     <div id="crossY"></div>
     <div id="pastePosition" style$="top: [[position.1]]px; left: [[position.0]]px"></div>
@@ -88,7 +87,7 @@
       }
 
       //2*PI = 360gr
-      rotate(deg){
+      rotate(deg) {
         this.angle = (2 * Math.PI + (this.angle + deg / 50)) % (2 * Math.PI);
       }
 
@@ -97,14 +96,14 @@
         this.y += y;
       }
 
-      scaleSquare(y){
-        this.w = this.h = this.h + y/20;
+      scaleSquare(y) {
+        this.w = this.h = this.h + y / 20;
       }
 
-      scaleRestrict(y){
+      scaleRestrict(y) {
         const divis = this.w / this.h;
-        this.w += y/30*divis;
-        this.h += y/30;
+        this.w += y / 30 * divis;
+        this.h += y / 30;
       }
 
       scaleFree(x, y) {
@@ -116,35 +115,40 @@
         this.h -= ny / 20;
       }
 
-      mirror(){
+      mirror() {
         this.w *= -1;
       }
-      center(){
-        this.centered =! this.centered;
+
+      center() {
+        this.centered = !this.centered;
       }
-      zUp(){
+
+      zUp() {
         this.zIndex += 1;
       }
-      zDown(){
+
+      zDown() {
         this.zIndex -= 1;
       }
-      setStyle(styleName){
+
+      setStyle(styleName) {
         this.style = styleName;
       }
-      update(value){
+
+      update(value) {
         Object.assign(this, value);
       }
 
-      getAngle(){
+      getAngle() {
         let angle = this.angle;
         if (this.centered)
-          angle+=45/180*Math.PI;
+          angle += 45 / 180 * Math.PI;
         if (this.style.startsWith("tone"))
           angle = 0;
         return angle;
       }
 
-      cssMatrix(){
+      cssMatrix() {
         let angle = this.getAngle();
         let matrix = [
           this.w * Math.cos(angle),
@@ -156,7 +160,7 @@
         return "matrix(" + matrix.join(',') + ")";
       }
 
-      static generateId(){
+      static generateId() {
         return ShapeInfoObject.__sessionID++;
       }
     }
@@ -168,12 +172,14 @@
         array.push(obj);
         return array;
       }
+
       static filter(array, numbers) {
         return array.filter(function (item) {
           return numbers.indexOf(item.number) == -1;
         });
       }
-      static alterSlow(array, numbers, func, arg1, arg2){
+
+      static alterSlow(array, numbers, func, arg1, arg2) {
         array = array.map(function (item) {
           if (numbers.indexOf(item.number) == -1)
             return item;
@@ -188,7 +194,7 @@
       //todo, this strategy is 10 times (!!) faster than alter1. Without removing the complexities inside ShapeInfoObject.
 
       //todo, get toBeAltered from outside instead of from within the first array.map function
-      static alter(array, numbers, func, arg1, arg2){
+      static alter(array, numbers, func, arg1, arg2) {
         let toBeAltered = [];
         array = array.map(function (item) {
           if (numbers.indexOf(item.number) == -1)
@@ -197,7 +203,7 @@
           toBeAltered.push(item);
           return item;
         });
-        toBeAltered.map(function(item){
+        toBeAltered.map(function (item) {
           return func.call(item, arg1, arg2);
         });
         return array;
@@ -227,13 +233,13 @@
         console.log("speed 1: " + start);
         let ar = [];
         for (var i = 0; i < count; i++) {
-          ar[i] = new ShapeInfoObject(i,i);
+          ar[i] = new ShapeInfoObject(i, i);
         }
         let stop = new Date().getTime();
         console.log("speed 1: " + (stop - start));
 
-        let number = Math.floor(count/10);
-        let selected = [0, number*1, number*3, number*5, number*7, number*2, number*4, number*6, number*8, number*9];
+        let number = Math.floor(count / 10);
+        let selected = [0, number * 1, number * 3, number * 5, number * 7, number * 2, number * 4, number * 6, number * 8, number * 9];
 
         start = stop;
         console.log("speed 2: " + start);
@@ -255,47 +261,52 @@
               type: Array,
               notify: true
             },
-            selectedDropsNum: Array,
             selectedDrops: {
               type: Array,
-              notify: true,
-              reflectToAttribute: true
+              notify: true
             },
-            selectedInfos:{
+            selectedIds: {
               type: Array,
-              computed: "_fromDrops(selectedDrops)"
+              notify: true,
+              computed: "_setSelectedIds(selectedDrops)"
             },
             heldKeys: Array,
-            history:{
+            history: {
               type: Array,
-              value: function(){
+              value: function () {
                 return [];
               }
+            },
+            hasMoved:{
+              type: Boolean,
+              value: false
             }
           }
         }
       }
-      _fromDrops(selected){
-        return selected.map(function(drop){return drop.info.number;});
+
+      _setSelectedIds(elems) {
+        return elems.map(item => item.info.number);
       }
-      setHistory(e){
+
+      setHistory(e) {
         if (e.target.valueAsNumber >= this.history.length) e.target.valueAsNumber = this.history.length;
         this.drops = this.history[e.target.valueAsNumber];
         this.notifyPath("drops");
       }
+
       connectedCallback() {
-        this.addEventListener("click", this._singleClick.bind(this));
+//        this.addEventListener("click", this._singleClick.bind(this));
+        this.addEventListener("dblclick", this._doubleClick.bind(this));
         window.addEventListener("keydown", this._registerKey.bind(this));
         window.addEventListener("mousemove", this.mouseMove.bind(this));
-//        ImmutableArrayFunctions.testJSONstringifyParseSpeed();
         ImmutableArrayFunctions.testSpeed(100000);
-// making 100000 objects and then moving 10 of them takes only 44+24ms on this machine. The problem is then only the painting.
       }
 
       _registerKey(e) {
         if (e.code === "Escape")
-          this.deSelect();
-        else if (e.code === "KeyD"){
+          this.$.dropSelector.deselectAll();
+        else if (e.code === "KeyD") {
           this._deleteElem();
           this.deSelect();
         } else if (e.code === "KeyC")
@@ -332,73 +343,47 @@
           this.alterSelected(ShapeInfoObject.prototype.move, e.movementX, e.movementY);
       }
 
-      addStyleToSelected(styleName){
+      addStyleToSelected(styleName) {
         this.alterSelected(ShapeInfoObject.prototype.setStyle, styleName);
       }
 
-      updateShape(id, value){
-        this.deSelect();
+      updateShape(id, value) {
+        this.$.dropSelector.deselectAll();
         this.select(id);
         this.alterSelected(ShapeInfoObject.prototype.update, value);
       }
 
-      //this is a fix of the lack of shift+click in the multi iron selector.
-      singleSelect(e) {
-        //skip no selected
-        if (!this.selectedDropsNum || this.selectedDropsNum.length == 0)
-          return;
-        //use normal behaviour when shift is held down
-        if (e.shiftKey)
-          return;
-        //one element selected, and that is the one clicked, it should be deselected by the default logic
-        if (this.selectedDropsNum.length == 1 && e.target.parentElement == this.selectedDrops[0])
-          return;
-        this.deSelect();
-        //somehow this is enough, the iron selector looks to wait till last until it updates its selectedVALUES (not items)
+      select(id) {
+        this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + id));
       }
 
-      deSelect() {
-        this.selectedDropsNum = [];
-        this.notifyPath("selectedDropsNum");
-      }
-      select(id){
-        this.shadowRoot.querySelector("#drop"+id).click();
-      }
-
-      _singleClick(e) {
+      _doubleClick(e) {
         this.position = [e.x - window.innerWidth / 2, e.y - window.innerHeight / 2];
-        if (e.ctrlKey) {
-          let shape = new ShapeInfoObject(this.position[0], this.position[1]);
-          this._addElem(shape);
-          this.deSelect();
-          setTimeout(function(){    //hack so polymer will have time to update itself.
-            this.select(shape.number);
-          }.bind(this));
-          return;
-        }
-        if (e.path[0] == this) {
-          this.deSelect();
-          return;
-        }
+        let shape = new ShapeInfoObject(this.position[0], this.position[1]);
+        this._addElem(shape);
       }
 
-      loadSketch(drops){
+      loadSketch(drops) {
         this.set("drops", drops);
       }
 
-      alterSelected(func, arg1, arg2){
+      alterSelected(func, arg1, arg2) {
         this.history.push(this.drops);
-        this.set("drops", ImmutableArrayFunctions.alter(this.drops, this.selectedInfos, func, arg1, arg2));
+        this.$.dropSelector.abort();
+        this.set("drops", ImmutableArrayFunctions.alter(this.drops, this.selectedIds, func, arg1, arg2));
+        this.notifyPath("drops");
       }
 
       _deleteElem() {
         this.history.push(this.drops);
-        this.set("drops", ImmutableArrayFunctions.filter(this.drops, this.selectedInfos));
+        this.set("drops", ImmutableArrayFunctions.filter(this.drops, this.selectedIds));
+        this.notifyPath("drops");
       }
 
       _addElem(shapeInfoObj) {
         this.history.push(this.drops);
         this.set("drops", ImmutableArrayFunctions.push(this.drops, shapeInfoObj));
+        this.notifyPath("drops");
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

@@ -181,6 +181,27 @@
     }
     ShapeInfoObject.__sessionID = 0;
 
+    class ImmutableArrayFunctions {
+      static push(array, obj) {
+        array = array.slice();
+        array.push(obj);
+        return array;
+      }
+      static filter(array, numbers) {
+        return array.filter(function (item) {
+          return numbers.indexOf(item.number) == -1;
+        });
+      }
+      static alter(array, numbers, func, arg1, arg2){
+        array = array.map(function (item) {
+          if (numbers.indexOf(item.number) == -1)
+            return item;
+          return func.call(item, arg1, arg2);
+        });
+        return array;
+      }
+    }
+
     class DroppadCanvas extends Polymer.Element {
       static get is() {
         return "droppad-canvas";
@@ -230,9 +251,10 @@
       _registerKey(e) {
         if (e.code === "Escape")
           this.deSelect();
-        else if (e.code === "KeyD")
+        else if (e.code === "KeyD"){
           this._deleteElem();
-        else if (e.code === "KeyC")
+          this.deSelect();
+        } else if (e.code === "KeyC")
           this.copiedShapes = this.selectedDrops.slice();
         else if (e.code === "KeyV") {
           for (let i = 0; i < this.copiedShapes.length; i++) {
@@ -322,30 +344,17 @@
 
       alterSelected(func, arg1, arg2){
         this.history.push(this.drops);
-        let selects = this.selectedInfos;
-        this.drops = this.drops.map(function (drop) {
-          if (selects.indexOf(drop.number) == -1)
-            return drop;
-          return func.call(drop, arg1, arg2);
-        });
-        this.notifyPath("drops", this.drops);
+        this.set("drops", ImmutableArrayFunctions.alter(this.drops, this.selectedInfos, func, arg1, arg2));
       }
 
       _deleteElem() {
-        let selects = this.selectedInfos;
         this.history.push(this.drops);
-        this.drops = this.drops.filter(function (item) {
-          return selects.indexOf(item.number) == -1;
-        });
-        this.notifyPath("drops", this.drops);
-        this.deSelect();
+        this.set("drops", ImmutableArrayFunctions.filter(this.drops, this.selectedInfos));
       }
 
       _addElem(shapeInfoObj) {
         this.history.push(this.drops);
-        this.drops = this.drops.slice();
-        this.drops.push(shapeInfoObj);
-        this.notifyPath("drops", this.drops);
+        this.set("drops", ImmutableArrayFunctions.push(this.drops, shapeInfoObj));
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

@@ -112,7 +112,8 @@
       <div class="button spacer"></div>
       <template is="dom-repeat" items="[[coloredScale]]">
         <div id="tone[[index]]" class="button" on-click="setStyleName"
-             style$="transform: rotate([[item.rotation]]deg) scale([[item.scale]]); background: [[item.color]]; border-radius: 0 50% 50% 50%;">
+             style$="transform: rotate([[item.rotation]]deg) scale([[item.scale]]);
+             background: [[item.color]]; border-radius: 0 50% 50% 50%;">
           [[item.name]]
         </div>
       </template>

@@ -6,11 +6,10 @@
   <template>
     <style>
       :host {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: block;
         position: absolute;
         top: 0;
+        left: 0;
         width: 100vw;
         height: 100vh;
       }
@@ -19,29 +18,32 @@
         box-shadow: 0 0 3px 0px black;
       }
 
-      #crossX, #crossY, #pastePosition {
+      #crossX, #crossY, #center {
         display: block;
         position: absolute;
-        top: 0;
-        left: 0;
-        pointer-events: none;
+        top: 50%;
+        left: 50%;
+        height: 52%;
+        width: 52%;
       }
-
-      #crossX {
-        height: 50%;
-        width: 100%;
-        border-bottom: 1px dashed lightgray;
+      #crossX, #crossY {
+        pointer-events: none;
+        box-sizing: border-box;
+        border: 1px dashed lightgray;
       }
 
       #crossY {
-        width: 50%;
-        height: 100%;
-        border-right: 1px dashed lightgray;
+        transform-origin: top left;
+        transform: rotate(180deg);
+      }
+
+      #center {
+        overflow: visible;
+        width: 1px;
+        height: 1px;
       }
 
       #pastePosition {
-        margin-top: 50vh;
-        margin-left: 50vw;
         width: 7px;
         height: 7px;
         border-right: 2px dotted red;
@@ -49,15 +51,17 @@
       }
 
     </style>
-    History: <input type="range" min="0" max="100" value="0" id="h" on-input="setHistory"/> <br>
-    <droppad-selector id="dropSelector" selected-elements="{{selectedDrops}}">
-      <template is="dom-repeat" items="[[drops]]">
-        <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
-      </template>
-    </droppad-selector>
-    <div id="crossX"></div>
     <div id="crossY"></div>
-    <div id="pastePosition" style$="top: [[position.1]]px; left: [[position.0]]px"></div>
+    <div id="crossX"></div>
+    <div id="center">
+      <droppad-selector id="dropSelector" selected-elements="{{selectedDrops}}">
+        <template is="dom-repeat" items="[[drops]]">
+          <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
+        </template>
+      </droppad-selector>
+      <div id="pastePosition" style$="top: [[position.1]]px; left: [[position.0]]px"></div>
+    </div>
+    History: <input type="range" min="0" max="100" value="0" id="h" on-input="setHistory"/> <br>
   </template>
 
   <script>
@@ -179,6 +183,7 @@
         });
       }
 
+      //todo 10 times slower..
       static alterSlow(array, numbers, func, arg1, arg2) {
         array = array.map(function (item) {
           if (numbers.indexOf(item.number) == -1)
@@ -188,12 +193,6 @@
         return array;
       }
 
-      //todo, breaking the alter method in two.
-      //todo, First, we do a .map on all the items that makes a new array object, with clones for the selected objects. The parallell structure is in place.
-      //todo, Second, then run over all the selected objects in the new array, and alter their position.
-      //todo, this strategy is 10 times (!!) faster than alter1. Without removing the complexities inside ShapeInfoObject.
-
-      //todo, get toBeAltered from outside instead of from within the first array.map function
       static alter(array, numbers, func, arg1, arg2) {
         let toBeAltered = [];
         array = array.map(function (item) {
@@ -276,10 +275,6 @@
               value: function () {
                 return [];
               }
-            },
-            hasMoved:{
-              type: Boolean,
-              value: false
             }
           }
         }
@@ -308,7 +303,7 @@
           this.$.dropSelector.deselectAll();
         else if (e.code === "KeyD") {
           this._deleteElem();
-          this.deSelect();
+          this.$.dropSelector.deselectAll();
         } else if (e.code === "KeyC")
           this.copiedShapes = this.selectedDrops.slice();
         else if (e.code === "KeyV") {
@@ -358,9 +353,14 @@
       }
 
       _doubleClick(e) {
-        this.position = [e.x - window.innerWidth / 2, e.y - window.innerHeight / 2];
+        this.position = [e.clientX - (window.innerWidth / 2), e.clientY - (window.innerHeight / 2)];
         let shape = new ShapeInfoObject(this.position[0], this.position[1]);
         this._addElem(shape);
+        if (!e.shiftKey)
+          this.$.dropSelector.deselectAll();
+        setTimeout(function () {
+          this.select(shape.number);
+        }.bind(this), 0);
       }
 
       loadSketch(drops) {
@@ -371,19 +371,16 @@
         this.history.push(this.drops);
         this.$.dropSelector.abort();
         this.set("drops", ImmutableArrayFunctions.alter(this.drops, this.selectedIds, func, arg1, arg2));
-        this.notifyPath("drops");
       }
 
       _deleteElem() {
         this.history.push(this.drops);
         this.set("drops", ImmutableArrayFunctions.filter(this.drops, this.selectedIds));
-        this.notifyPath("drops");
       }
 
       _addElem(shapeInfoObj) {
         this.history.push(this.drops);
         this.set("drops", ImmutableArrayFunctions.push(this.drops, shapeInfoObj));
-        this.notifyPath("drops");
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

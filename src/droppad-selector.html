@@ -63,7 +63,8 @@
 //      }
 
       abort() {
-        this.actions.abort = true;
+        if (this.actions)
+          this.actions.abort = true;
       }
 
       _mouseDown(e) {

@@ -76,11 +76,15 @@
       }
 
       makeCopy(x, y) {
-        let c = Object.assign(new ShapeInfoObject(0,0), this);
+        let c = this.clone();
         c.number = ShapeInfoObject.generateId();
         c.x += x;
         c.y += y;
         return c;
+      }
+
+      clone() {
+        return Object.assign(new ShapeInfoObject(0, 0), this);
       }
 
       //2*PI = 360gr
@@ -200,6 +204,66 @@
         });
         return array;
       }
+
+      //todo, breaking the alter method in two.
+      //todo, First, we do a .map on all the items that makes a new array object, with clones for the selected objects. The parallell structure is in place.
+      //todo, Second, then run over all the selected objects in the new array, and alter their position.
+      //todo, this strategy is 10 times (!!) faster than alter1. Without removing the complexities inside ShapeInfoObject.
+      static alter2(array, numbers, func, arg1, arg2){
+        let toBeAltered = [];
+        array = array.map(function (item) {
+          if (numbers.indexOf(item.number) == -1)
+            return item;
+          item = item.clone();
+          toBeAltered.push(item);
+          return item;
+        });
+        toBeAltered = toBeAltered.map(function(item){
+          item = func.call(item, arg1, arg2);
+          console.log(item);
+          return item;
+        });
+        return array;
+      }
+
+      //todo it looks like Stringify is 2x as slow as parse(?!).
+      static testJSONstringifyParseSpeed() {
+        let start = new Date().getTime();
+        console.log("test1: " + start);
+        let ar = [];
+        for (var i = 0; i < 100000; i++) {
+          ar[i] = JSON.stringify(start);
+        }
+        let stop = new Date().getTime();
+        console.log("test1: " + (stop - start));
+        start = stop;
+        console.log("test2: " + start);
+        for (var j = 0; j < 100000; j++) {
+          ar[100000 + j] = JSON.parse(ar[j]);
+        }
+        stop = new Date().getTime();
+        console.log("test2: " + (stop - start));
+      }
+
+      static testSpeed(count) {
+        let start = new Date().getTime();
+        console.log("speed 1: " + start);
+        let ar = [];
+        for (var i = 0; i < count; i++) {
+          ar[i] = new ShapeInfoObject(i,i);
+        }
+        let stop = new Date().getTime();
+        console.log("speed 1: " + (stop - start));
+
+        let number = Math.floor(count/10);
+        let selected = [0, number*1, number*3, number*5, number*7, number*2, number*4, number*6, number*8, number*9];
+
+        start = stop;
+        console.log("speed 2: " + start);
+        ar = ImmutableArrayFunctions.alter2(ar, selected, ShapeInfoObject.prototype.scaleFree, -10, 10);
+        stop = new Date().getTime();
+        console.log("speed 2: " + (stop - start));
+      }
     }
 
     class DroppadCanvas extends Polymer.Element {
@@ -246,6 +310,9 @@
         this.addEventListener("click", this._singleClick.bind(this));
         window.addEventListener("keydown", this._registerKey.bind(this));
         window.addEventListener("mousemove", this.mouseMove.bind(this));
+//        ImmutableArrayFunctions.testJSONstringifyParseSpeed();
+        ImmutableArrayFunctions.testSpeed(100000);
+// making 100000 objects and then moving 10 of them takes only 44+24ms on this machine. The problem is then only the painting.
       }
 
       _registerKey(e) {

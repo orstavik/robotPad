@@ -1,0 +1,84 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="droppad-selector">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <slot></slot>
+  </template>
+
+  <script>
+    class DroppadSelector extends Polymer.Element {
+      static get is() {
+        return "droppad-selector";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            selectedElements: {
+              type: Array,
+              notify: true
+            }
+          }
+        }
+      }
+
+      connectedCallback() {
+        this.selectedElements = [];
+        this.addEventListener("mousedown", this._mouseDown.bind(this));
+        this.addEventListener("mouseup", this._mouseUp.bind(this));
+      }
+
+      select(el) {
+        if (el.dataset.selected)
+          return;
+        el.setAttribute("data-selected", true);
+        this.selectedElements.push(el);
+        this.notifyPath("selectedElements");
+      }
+
+      deselect(el) {
+        let pos = this.selectedElements.indexOf(el);
+        if (pos == -1)
+          throw new Error("wtf, should not happen");
+        let item = this.selectedElements.splice(pos, 1); //obs: alters the array of this.selectedElements
+        item[0].removeAttribute("data-selected");
+        this.notifyPath("selectedElements");
+      }
+
+      deselectAll() {
+        this.selectedElements.map(function (item) {
+          item.removeAttribute("data-selected");
+        });
+        this.selectedElements = [];
+        this.notifyPath("selectedElements");
+      }
+
+//      toggleSelect(el) {
+//        return el.dataset.selected ? this.deselect(el) : this.select(el);
+//      }
+
+      abort(){
+        this.actions.abort = true;
+      }
+      _mouseDown(e) {
+        let el = e.target;
+        this.actions = {shift: e.shiftKey, el: el};
+        this.select(el);
+      }
+      _mouseUp(e) {
+        if (this.actions.abort)
+          return;
+        if (this.actions.shift)
+          return;
+        this.deselectAll();
+        this.select(this.actions.el);
+      }
+    }
+    customElements.define(DroppadSelector.is, DroppadSelector);
+  </script>
+</dom-module>

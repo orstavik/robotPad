@@ -285,7 +285,7 @@
       }
 
       connectedCallback() {
-//        this.addEventListener("click", this._singleClick.bind(this));
+        this.addEventListener("click", this._mouseDown.bind(this));
         this.addEventListener("dblclick", this._doubleClick.bind(this));
         window.addEventListener("keydown", this._registerKey.bind(this));
         window.addEventListener("mousemove", this.mouseMove.bind(this));
@@ -320,6 +320,8 @@
           return;
         if (!this.selectedIds)
           return;
+//        if (e.path[0] == this) //todo doesn't work
+//          return;
         if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
           this.alterSelected(ShapeInfoObject.prototype.scaleRestrict, e.movementY);
         else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
@@ -355,6 +357,11 @@
         setTimeout(function () {
           this.select(shape.number);
         }.bind(this), 0);
+      }
+
+      _mouseDown(e) {
+        if (e.path[0] == this)
+          this.$.dropSelector.deselectAll();
       }
 
       loadSketch(drops) {

@@ -21,15 +21,21 @@
       #crossX, #crossY, #center {
         display: block;
         position: absolute;
-        top: 50%;
-        left: 50%;
-        height: 52%;
-        width: 52%;
+      }
+      #center {
+        overflow: visible;
+        width: 1px;
+        height: 1px;
+        border: 1px solid red;
+        top: 50vh;
+        left: 50vw;
       }
       #crossX, #crossY {
         pointer-events: none;
         box-sizing: border-box;
         border: 1px dashed lightgray;
+        height: 51vh;
+        width: 51vw;
       }
 
       #crossY {
@@ -37,11 +43,6 @@
         transform: rotate(180deg);
       }
 
-      #center {
-        overflow: visible;
-        width: 1px;
-        height: 1px;
-      }
 
       #pastePosition {
         width: 7px;
@@ -51,15 +52,14 @@
       }
 
     </style>
-    <div id="crossY"></div>
-    <div id="crossX"></div>
-    <div id="center">
+    <div id="center" style$="transform: scale([[zoom]])">
+      <div id="crossY"></div>
+      <div id="crossX"></div>
       <droppad-selector id="dropSelector" selected-elements="{{selectedDrops}}">
         <template is="dom-repeat" items="[[drops]]">
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
         </template>
       </droppad-selector>
-      <div id="pastePosition" style$="top: [[position.1]]px; left: [[position.0]]px"></div>
     </div>
   </template>
 
@@ -275,6 +275,11 @@
                 return [];
               },
               notify: true
+            },
+            position: Object,
+            zoom: {
+              type: Number,
+              value: 1
             }
           }
         }
@@ -289,6 +294,7 @@
         this.addEventListener("dblclick", this._doubleClick.bind(this));
         window.addEventListener("keydown", this._registerKey.bind(this));
         window.addEventListener("mousemove", this.mouseMove.bind(this));
+        window.addEventListener("wheel", this._mouseScroll.bind(this));
         ImmutableArrayFunctions.testSpeed(100000);
       }
 
@@ -302,7 +308,7 @@
           this.copiedShapes = this.selectedDrops.slice();
         else if (e.code === "KeyV") {
           for (let i = 0; i < this.copiedShapes.length; i++) {
-            this._addElem(this.copiedShapes[i].info.makeCopy(this.position[0], this.position[1]));
+            this._addElem(this.copiedShapes[i].info.makeCopy(this.position.x, this.position.y));
           }
         }
         else if (e.code == "KeyM")
@@ -316,22 +322,25 @@
       }
 
       mouseMove(e) {
+        this.setPosition(e.clientX,e.clientY);
         if (e.which != 1)
           return;
         if (!this.selectedIds)
           return;
-//        if (e.path[0] == this) //todo doesn't work
+//        if (e.path[0] == this) //todo make the listener only work when you hold the mouse over a selected item. Stops working the minute the mouse pointer moves out of the drop.
 //          return;
+        let yMove = e.movementY/this.zoom;
+        let xMove = e.movementX/this.zoom;
         if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
-          this.alterSelected(ShapeInfoObject.prototype.scaleRestrict, e.movementY);
+          this.alterSelected(ShapeInfoObject.prototype.scaleRestrict, yMove);
         else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
-          this.alterSelected(ShapeInfoObject.prototype.scaleSquare, e.movementY);
+          this.alterSelected(ShapeInfoObject.prototype.scaleSquare, yMove);
         else if (this.heldKeys["KeyE"])
-          this.alterSelected(ShapeInfoObject.prototype.scaleFree, e.movementX, e.movementY);
+          this.alterSelected(ShapeInfoObject.prototype.scaleFree, xMove, yMove);
         else if (this.heldKeys["KeyR"])
-          this.alterSelected(ShapeInfoObject.prototype.rotate, e.movementY);
+          this.alterSelected(ShapeInfoObject.prototype.rotate, yMove);
         else
-          this.alterSelected(ShapeInfoObject.prototype.move, e.movementX, e.movementY);
+          this.alterSelected(ShapeInfoObject.prototype.move, xMove, yMove);
       }
 
       addStyleToSelected(styleName) {
@@ -349,8 +358,7 @@
       }
 
       _doubleClick(e) {
-        this.position = [e.clientX - (window.innerWidth / 2), e.clientY - (window.innerHeight / 2)];
-        let shape = new ShapeInfoObject(this.position[0], this.position[1]);
+        let shape = new ShapeInfoObject(this.position.x/this.zoom, this.position.y/this.zoom);
         this._addElem(shape);
         if (!e.shiftKey)
           this.$.dropSelector.deselectAll();
@@ -359,9 +367,19 @@
         }.bind(this), 0);
       }
 
+      //todo heavy, can cache event only and then get the coordinate upon use?
+      setPosition(x, y) {
+        const center = this.$.center.getBoundingClientRect();
+        this.position = {x: x - center.left, y: y - center.top};
+      }
+
       _mouseDown(e) {
         if (e.path[0] == this)
           this.$.dropSelector.deselectAll();
+      }
+
+      _mouseScroll(e){
+        this.zoom += e.deltaY/530;
       }
 
       loadSketch(drops) {

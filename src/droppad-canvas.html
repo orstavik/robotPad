@@ -1,6 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="drop-shape.html">
 <link rel="import" href="droppad-selector.html">
+<link rel="import" href="droppad-canvas-canvas.html">
 
 <dom-module id="droppad-canvas">
   <template>
@@ -18,49 +19,14 @@
         box-shadow: 0 0 3px 0px black;
       }
 
-      #crossX, #crossY, #center {
-        display: block;
-        position: absolute;
-      }
-      #center {
-        overflow: visible;
-        width: 1px;
-        height: 1px;
-        border: 1px solid red;
-        top: 50vh;
-        left: 50vw;
-      }
-      #crossX, #crossY {
-        pointer-events: none;
-        box-sizing: border-box;
-        border: 1px dashed lightgray;
-        height: 51vh;
-        width: 51vw;
-      }
-
-      #crossY {
-        transform-origin: top left;
-        transform: rotate(180deg);
-      }
-
-
-      #pastePosition {
-        width: 7px;
-        height: 7px;
-        border-right: 2px dotted red;
-        border-bottom: 2px dotted red;
-      }
-
     </style>
-    <div id="center" style$="transform: scale([[zoom]])">
-      <div id="crossY"></div>
-      <div id="crossX"></div>
+    <droppad-canvas-canvas center="{{position}}" zoom="{{zoom}}" on-new-shape="_newShape">
       <droppad-selector id="dropSelector" selected-elements="{{selectedDrops}}">
         <template is="dom-repeat" items="[[drops]]">
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
         </template>
       </droppad-selector>
-    </div>
+    </droppad-canvas-canvas>
   </template>
 
   <script>
@@ -275,11 +241,6 @@
                 return [];
               },
               notify: true
-            },
-            position: Object,
-            zoom: {
-              type: Number,
-              value: 1
             }
           }
         }
@@ -291,16 +252,17 @@
 
       connectedCallback() {
         this.addEventListener("click", this._mouseDown.bind(this));
-        this.addEventListener("dblclick", this._doubleClick.bind(this));
         window.addEventListener("keydown", this._registerKey.bind(this));
         window.addEventListener("mousemove", this.mouseMove.bind(this));
-        window.addEventListener("wheel", this._mouseScroll.bind(this));
+//        window.addEventListener("wheel", this._mouseScroll.bind(this));
         ImmutableArrayFunctions.testSpeed(100000);
       }
 
       _registerKey(e) {
         if (e.code === "Escape")
           this.$.dropSelector.deselectAll();
+        if (e.code === "Digit0" && e.ctrlKey)
+          this.zoom = 1;
         else if (e.code === "KeyD") {
           this._deleteElem();
           this.$.dropSelector.deselectAll();
@@ -322,14 +284,14 @@
       }
 
       mouseMove(e) {
-        this.setPosition(e.clientX,e.clientY);
+//        this.setCenter(e.clientX,e.clientY);
         if (e.which != 1)
           return;
         if (!this.selectedIds)
           return;
 //        if (e.path[0] == this) //todo make the listener only work when you hold the mouse over a selected item. Stops working the minute the mouse pointer moves out of the drop.
 //          return;
-        let yMove = e.movementY/this.zoom;
+        let yMove = e.movementY/this.zoom; //todo, this conversion is necessary for move, and maybe scaleFree in the future.
         let xMove = e.movementX/this.zoom;
         if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
           this.alterSelected(ShapeInfoObject.prototype.scaleRestrict, yMove);
@@ -357,8 +319,8 @@
         this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + id));
       }
 
-      _doubleClick(e) {
-        let shape = new ShapeInfoObject(this.position.x/this.zoom, this.position.y/this.zoom);
+      _newShape(e) {
+        let shape = new ShapeInfoObject(e.detail.x, e.detail.y);
         this._addElem(shape);
         if (!e.shiftKey)
           this.$.dropSelector.deselectAll();
@@ -367,19 +329,9 @@
         }.bind(this), 0);
       }
 
-      //todo heavy, can cache event only and then get the coordinate upon use?
-      setPosition(x, y) {
-        const center = this.$.center.getBoundingClientRect();
-        this.position = {x: x - center.left, y: y - center.top};
-      }
-
       _mouseDown(e) {
         if (e.path[0] == this)
           this.$.dropSelector.deselectAll();
-      }
-
-      _mouseScroll(e){
-        this.zoom += e.deltaY/530;
       }
 
       loadSketch(drops) {

@@ -1,0 +1,133 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="drop-shape.html">
+<link rel="import" href="droppad-selector.html">
+
+<dom-module id="droppad-canvas-canvas">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      #crossX, #crossY, #center {
+        display: block;
+        position: absolute;
+      }
+      #center {
+        overflow: visible;
+        width: 1px;
+        height: 1px;
+        border: 1px solid red;
+        top: 50vh;
+        left: 50vw;
+      }
+      #crossX, #crossY {
+        pointer-events: none;
+        box-sizing: border-box;
+        border: 1px dashed lightgray;
+        top: 50vh;
+        left: 50vw;
+        height: 51vh;
+        width: 51vw;
+      }
+
+      #crossY {
+        transform-origin: top left;
+        transform: rotate(180deg);
+      }
+    </style>
+    <div id="crossY" style$="margin-left: [[marginLeft]]vw"></div>
+    <div id="crossX" style$="margin-left: [[marginLeft]]vw"></div>
+    <div id="center" style$="transform: scale([[zoom]])">
+      <slot></slot>
+    </div>
+  </template>
+
+  <script>
+    class DroppadCanvasCanvas extends Polymer.Element {
+      static get is() {
+        return "droppad-canvas-canvas";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            marginLeft: {
+              type: Number,
+              value: 0
+            },
+            zoom: {
+              type: Number,
+              value: 1,
+              notify: true
+            },
+            center: {
+              type: Object,
+              value: {
+                x: 0,
+                y: 0
+              },
+              notify: true
+            },
+            position: {
+              type: Object,
+              value: {
+                x: 0,
+                y: 0
+              }
+            },
+            leftShift: {
+              type: Number,
+              value: 0
+            },
+            topShift: {
+              type: Number,
+              value: 0
+            }
+          }
+        }
+      }
+
+      connectedCallback() {
+        window.addEventListener("wheel", this._mouseScroll.bind(this));
+        this.addEventListener("dblclick", this._doubleClick.bind(this));
+      }
+
+      setCenter() {
+        const center = this.$.center.getBoundingClientRect();
+        this.center = {x: center.left, y: center.top};
+      }
+
+      setPosition(e) {
+        this.setCenter();
+        const x = (e.clientX-this.center.x)/this.zoom;
+        const y = (e.clientY-this.center.y)/this.zoom;
+        this.position = {x: x, y: y};
+      }
+
+      _mouseScroll(e){
+        if (this.zoom < 0.2 && e.deltaY < 0)
+          return;
+        this.setPosition(e);
+        let beforePosition = Object.assign({}, this.position);
+        this.zoom += e.deltaY/530;
+        this.setPosition(e);
+        this.leftShift += (this.position.x-beforePosition.x)*this.zoom;
+        this.topShift += (this.position.y-beforePosition.y)*this.zoom;
+        this.style.marginLeft = this.leftShift + "px";
+        this.style.marginTop = this.topShift + "px";
+      }
+
+      _doubleClick(e) {
+        this.setPosition(e);
+        this.dispatchEvent(new CustomEvent("new-shape", {detail: this.position}));
+      }
+    }
+    customElements.define(DroppadCanvasCanvas.is, DroppadCanvasCanvas);
+  </script>
+</dom-module>

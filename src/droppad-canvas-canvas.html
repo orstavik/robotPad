@@ -18,6 +18,7 @@
         display: block;
         position: absolute;
       }
+
       #center {
         overflow: visible;
         width: 1px;
@@ -26,6 +27,7 @@
         top: 50vh;
         left: 50vw;
       }
+
       #crossX, #crossY {
         pointer-events: none;
         box-sizing: border-box;
@@ -40,7 +42,13 @@
         transform-origin: top left;
         transform: rotate(180deg);
       }
+      #test {
+        width: 100px;
+        height: 100px;
+        background: red;
+      }
     </style>
+    <div id="test"></div>
     <div id="crossY" style$="margin-left: [[marginLeft]]vw"></div>
     <div id="crossX" style$="margin-left: [[marginLeft]]vw"></div>
     <div id="center" style$="transform: scale([[zoom]])">
@@ -89,13 +97,21 @@
               type: Number,
               value: 0
             }
-          }
+          },
+          listeners: {"test.down": "_debug"}
         }
+      }
+
+      _debug(e){
+        console.log(e);
       }
 
       connectedCallback() {
         window.addEventListener("wheel", this._mouseScroll.bind(this));
         this.addEventListener("dblclick", this._doubleClick.bind(this));
+        this.addEventListener("mousedown", this._mouseDown.bind(this));
+        this.addEventListener("mouseup", this._mouseUp.bind(this));
+        this.mouseMoveListener = this._mouseMove.bind(this);
       }
 
       setCenter() {
@@ -103,29 +119,62 @@
         this.center = {x: center.left, y: center.top};
       }
 
+      _mouseDown(e) {
+        if (e.path[0] == this) {
+          this.hasMoved
+          this.addEventListener("mousemove", this.mouseMoveListener);
+          e.stopPropagation();
+          e.preventDefault();
+          return false;
+        }
+        //todo, but this, we could do in the canvas. Then we intercept the event in the canvas, handle it, or let it pass.
+        if (e.path[0] == this) //todo, here we must check whether it is the canvas-canvas that is first clicked, or a drop.
+          this.$.dropSelector.deselectAll(); //todo If it is a drop, then we are in drop mode, if it is the canvas, we are in canvas mode.
+      }
+
+      _mouseUp(e) {
+        this.removeEventListener("mousemove", this.mouseMoveListener);
+      }
+
+      _mouseMove(e){
+        this.leftShift += e.movementX;
+        this.topShift += e.movementY;
+        this.updateStyle();
+        e.stopPropagation();
+        e.preventDefault();
+        return false;
+      }
+
       setPosition(e) {
         this.setCenter();
-        const x = (e.clientX-this.center.x)/this.zoom;
-        const y = (e.clientY-this.center.y)/this.zoom;
+        const x = (e.clientX - this.center.x) / this.zoom;
+        const y = (e.clientY - this.center.y) / this.zoom;
         this.position = {x: x, y: y};
       }
 
-      _mouseScroll(e){
+      _mouseScroll(e) {
         if (this.zoom < 0.2 && e.deltaY < 0)
           return;
         this.setPosition(e);
         let beforePosition = Object.assign({}, this.position);
-        this.zoom += e.deltaY/530;
+        this.zoom -= e.deltaY / 530;
         this.setPosition(e);
-        this.leftShift += (this.position.x-beforePosition.x)*this.zoom;
-        this.topShift += (this.position.y-beforePosition.y)*this.zoom;
+        this.leftShift += (this.position.x - beforePosition.x) * this.zoom;
+        this.topShift += (this.position.y - beforePosition.y) * this.zoom;
+        this.updateStyle();
+      }
+
+      updateStyle(){
         this.style.marginLeft = this.leftShift + "px";
         this.style.marginTop = this.topShift + "px";
       }
 
       _doubleClick(e) {
         this.setPosition(e);
+        e.stopPropagation();
+        e.preventDefault();
         this.dispatchEvent(new CustomEvent("new-shape", {detail: this.position}));
+        return false;
       }
     }
     customElements.define(DroppadCanvasCanvas.is, DroppadCanvasCanvas);

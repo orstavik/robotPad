@@ -251,10 +251,9 @@
       }
 
       connectedCallback() {
-        this.addEventListener("click", this._mouseDown.bind(this));
+//        this.addEventListener("click", this._mouseDown.bind(this));
         window.addEventListener("keydown", this._registerKey.bind(this));
         window.addEventListener("mousemove", this.mouseMove.bind(this));
-//        window.addEventListener("wheel", this._mouseScroll.bind(this));
         ImmutableArrayFunctions.testSpeed(100000);
       }
 
@@ -284,7 +283,6 @@
       }
 
       mouseMove(e) {
-//        this.setCenter(e.clientX,e.clientY);
         if (e.which != 1)
           return;
         if (!this.selectedIds)
@@ -327,11 +325,6 @@
         setTimeout(function () {
           this.select(shape.number);
         }.bind(this), 0);
-      }
-
-      _mouseDown(e) {
-        if (e.path[0] == this)
-          this.$.dropSelector.deselectAll();
       }
 
       loadSketch(drops) {

@@ -20,7 +20,7 @@
       }
 
     </style>
-    <droppad-canvas-canvas center="{{position}}" zoom="{{zoom}}" on-new-shape="_newShape">
+    <droppad-canvas-canvas center="{{position}}" zoom="{{zoom}}" on-new-shape="_newShape" on-deselect="_deselectAll">
       <droppad-selector id="dropSelector" selected-elements="{{selectedDrops}}">
         <template is="dom-repeat" items="[[drops]]">
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
@@ -253,7 +253,8 @@
       connectedCallback() {
 //        this.addEventListener("click", this._mouseDown.bind(this));
         window.addEventListener("keydown", this._registerKey.bind(this));
-        window.addEventListener("mousemove", this.mouseMove.bind(this));
+        this.mouseMoveListener = this.mouseMove.bind(this);
+        window.addEventListener("mousemove", this.mouseMoveListener);
         ImmutableArrayFunctions.testSpeed(100000);
       }
 
@@ -315,6 +316,10 @@
 
       select(id) {
         this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + id));
+      }
+
+      _deselectAll(){
+        this.$.dropSelector.deselectAll();
       }
 
       _newShape(e) {

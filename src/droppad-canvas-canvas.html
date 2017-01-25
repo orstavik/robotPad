@@ -42,13 +42,7 @@
         transform-origin: top left;
         transform: rotate(180deg);
       }
-      #test {
-        width: 100px;
-        height: 100px;
-        background: red;
-      }
     </style>
-    <div id="test"></div>
     <div id="crossY" style$="margin-left: [[marginLeft]]vw"></div>
     <div id="crossX" style$="margin-left: [[marginLeft]]vw"></div>
     <div id="center" style$="transform: scale([[zoom]])">
@@ -96,22 +90,17 @@
             topShift: {
               type: Number,
               value: 0
-            }
-          },
-          listeners: {"test.down": "_debug"}
+            },
+            pointDown: Object,
+          }
         }
       }
 
-      _debug(e){
-        console.log(e);
-      }
-
       connectedCallback() {
-        window.addEventListener("wheel", this._mouseScroll.bind(this));
-        this.addEventListener("dblclick", this._doubleClick.bind(this));
-        this.addEventListener("mousedown", this._mouseDown.bind(this));
-        this.addEventListener("mouseup", this._mouseUp.bind(this));
+        this.addEventListener("wheel", this._mouseScroll.bind(this));
+        this.addEventListener("pointerdown", this._mouseDown.bind(this));
         this.mouseMoveListener = this._mouseMove.bind(this);
+        this.mouseUpListener = this._mouseUp.bind(this);
       }
 
       setCenter() {
@@ -120,29 +109,60 @@
       }
 
       _mouseDown(e) {
-        if (e.path[0] == this) {
-          this.hasMoved
-          this.addEventListener("mousemove", this.mouseMoveListener);
-          e.stopPropagation();
-          e.preventDefault();
-          return false;
+        if (e.path[0] != this)
+          return;
+        let lastPointDown = this.pointDown;
+        console.log(lastPointDown);
+        let lastTime = Number(lastPointDown ? lastPointDown.timeStamp : 0);
+        this.pointDown = e;
+        if ((this.pointDown.timeStamp - lastTime) < 300) {
+          this.removeFireDeselect();
+          this.setPosition(e);
+//          console.log(this.position);
+          this.dispatchEvent(new CustomEvent("new-shape", {detail: this.position}));
+        } else {
+          this.fireDeselect = setTimeout(function () {
+            this.dispatchEvent(new CustomEvent("deselect"), null);
+          }.bind(this), 300);
+          this.setPointerCapture(e.pointerId);
+          this.addEventListener("pointermove", this.mouseMoveListener);
+          this.addEventListener("pointerup", this.mouseUpListener);
         }
-        //todo, but this, we could do in the canvas. Then we intercept the event in the canvas, handle it, or let it pass.
-        if (e.path[0] == this) //todo, here we must check whether it is the canvas-canvas that is first clicked, or a drop.
-          this.$.dropSelector.deselectAll(); //todo If it is a drop, then we are in drop mode, if it is the canvas, we are in canvas mode.
+        DroppadCanvasCanvas.endAll(e);
+      }
+
+      removeFireDeselect() {
+        clearTimeout(this.fireDeselect);
+        this.fireDeselect = null;
       }
 
       _mouseUp(e) {
-        this.removeEventListener("mousemove", this.mouseMoveListener);
+        this.leftShift += this.pointDown.moveX || 0;
+        this.topShift += this.pointDown.moveY || 0;
+//        this.pointDown = null;
+        this.updateStyle(0, 0);
+        this._cleanUpMoveAndUpListeners(e);
+        DroppadCanvasCanvas.endAll(e);
       }
 
-      _mouseMove(e){
-        this.leftShift += e.movementX;
-        this.topShift += e.movementY;
-        this.updateStyle();
+      _mouseMove(e) {
+        if (this.fireDeselect)
+          this.removeFireDeselect();
+        this.pointDown.moveX = e.clientX - this.pointDown.clientX;
+        this.pointDown.moveY = e.clientY - this.pointDown.clientY;
+        this.updateStyle(this.pointDown.moveX, this.pointDown.moveY);
+        DroppadCanvasCanvas.endAll(e);
+      }
+
+      static endAll(e) {
         e.stopPropagation();
         e.preventDefault();
-        return false;
+      }
+
+      _cleanUpMoveAndUpListeners(e) {
+        this.releasePointerCapture(e.pointerId);
+        this.removeEventListener("pointermove", this.mouseMoveListener);
+        this.removeEventListener("pointerup", this.mouseMoveListener);
       }
 
       setPosition(e) {
@@ -161,20 +181,12 @@
         this.setPosition(e);
         this.leftShift += (this.position.x - beforePosition.x) * this.zoom;
         this.topShift += (this.position.y - beforePosition.y) * this.zoom;
-        this.updateStyle();
+        this.updateStyle(0, 0);
       }
 
-      updateStyle(){
-        this.style.marginLeft = this.leftShift + "px";
-        this.style.marginTop = this.topShift + "px";
-      }
-
-      _doubleClick(e) {
-        this.setPosition(e);
-        e.stopPropagation();
-        e.preventDefault();
-        this.dispatchEvent(new CustomEvent("new-shape", {detail: this.position}));
-        return false;
+      updateStyle(x, y) {
+        this.style.marginLeft = this.leftShift + x + "px";
+        this.style.marginTop = this.topShift + y + "px";
       }
     }
     customElements.define(DroppadCanvasCanvas.is, DroppadCanvasCanvas);

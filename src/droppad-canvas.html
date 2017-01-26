@@ -2,6 +2,7 @@
 <link rel="import" href="drop-shape.html">
 <link rel="import" href="droppad-selector.html">
 <link rel="import" href="droppad-canvas-canvas.html">
+<link rel="import" href="droppad-item-marker.html">
 
 <dom-module id="droppad-canvas">
   <template>
@@ -26,6 +27,7 @@
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
         </template>
       </droppad-selector>
+      <droppad-item-marker id="square" items="[[selectedDrops]]"></droppad-item-marker>
     </droppad-canvas-canvas>
   </template>
 
@@ -82,6 +84,39 @@
         let ny = cos * y - sin * x;
         this.w += nx / 20;
         this.h -= ny / 20;
+      }
+
+      getBoundingRect() {
+        let square = {left: this.x, top: this.y, width: this.w * 40, height: this.h * 40};
+        square.right = square.left + square.width;
+        square.bottom = square.top + square.height;
+        if (square.right < square.left) {
+          let l = square.left;
+          square.left = square.right;
+          square.right = l;
+        }
+        if (square.bottom < square.top) {
+          let t = square.top;
+          square.top = square.bottom;
+          square.bottom = t;
+        }
+        return square;
+      }
+
+      static getSurroundingSquare(elems) {
+        if (!elems || elems.length == 0)
+          return {left: 0, top: 0, width: 0, height: 0, right: 0, bottom: 0};
+        let res = elems[0].getBoundingRect();
+        for (let i = 1; i < elems.length; i++) {
+          let next = elems[i].getBoundingRect();
+          res.left = Math.min(res.left, next.left);
+          res.top = Math.min(res.top, next.top);
+          res.right = Math.max(res.right, next.right);
+          res.bottom = Math.max(res.bottom, next.bottom);
+        }
+        res.width = res.right - res.left;
+        res.height = res.bottom - res.top;
+        return res;
       }
 
       mirror() {
@@ -290,8 +325,8 @@
           return;
 //        if (e.path[0] == this) //todo make the listener only work when you hold the mouse over a selected item. Stops working the minute the mouse pointer moves out of the drop.
 //          return;
-        let yMove = e.movementY/this.zoom; //todo, this conversion is necessary for move, and maybe scaleFree in the future.
-        let xMove = e.movementX/this.zoom;
+        let yMove = e.movementY / this.zoom; //todo, this conversion is necessary for move, and maybe scaleFree in the future.
+        let xMove = e.movementX / this.zoom;
         if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
           this.alterSelected(ShapeInfoObject.prototype.scaleRestrict, yMove);
         else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
@@ -318,7 +353,7 @@
         this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + id));
       }
 
-      _deselectAll(){
+      _deselectAll() {
         this.$.dropSelector.deselectAll();
       }
 

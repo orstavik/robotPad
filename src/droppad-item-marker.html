@@ -49,13 +49,38 @@
       }
 
       connectedCallback() {
-//        this.addEventListener("click", this._mouseDown.bind(this));
-//        window.addEventListener("keydown", this._registerKey.bind(this));
-//        this.mouseMoveListener = this.mouseMove.bind(this);
-//        window.addEventListener("mousemove", this.mouseMoveListener);
-//        ImmutableArrayFunctions.testSpeed(100000);
+        this.addEventListener("pointerdown", this._pointerDown.bind(this));
+        this.pointermoveListener = this._pointerMove.bind(this);
+        this.pointerupListener = this._pointerUp.bind(this);
       }
 
+      _pointerDown(e) {
+        this.lastDown = {x: e.clientX, y: e.clientY};
+        this.addEventListener("pointermove", this.pointermoveListener);
+        this.addEventListener("pointerup", this.pointerupListener);
+        this.setPointerCapture(e.pointerId);
+        DroppadItemMarker._cancelPropDefault(e);
+      }
+
+      _pointerUp(e) {
+        this.lastDown = null;
+        this.releasePointerCapture(e.pointerId);
+        this.removeEventListener("pointerup", this.pointerupListener);
+        this.removeEventListener("pointermove", this.pointermoveListener);
+        DroppadItemMarker._cancelPropDefault(e);
+      }
+
+      static _cancelPropDefault(e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+
+      _pointerMove(e) {
+        let detail = {x: e.clientX - this.lastDown.x, y: e.clientY - this.lastDown.y};
+        this.dispatchEvent(new CustomEvent("pointer-move", {detail: detail}));
+        this.lastDown = {x: e.clientX, y: e.clientY};
+        DroppadItemMarker._cancelPropDefault(e);
+      }
     }
     customElements.define(DroppadItemMarker.is, DroppadItemMarker);
   </script>

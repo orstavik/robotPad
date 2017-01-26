@@ -27,7 +27,7 @@
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
         </template>
       </droppad-selector>
-      <droppad-item-marker id="square" items="[[selectedDrops]]"></droppad-item-marker>
+      <droppad-item-marker id="square" items="[[selectedDrops]]" on-pointer-move="_selectedMoving"></droppad-item-marker>
     </droppad-canvas-canvas>
   </template>
 
@@ -70,11 +70,7 @@
       }
 
       connectedCallback() {
-//        this.addEventListener("click", this._mouseDown.bind(this));
-        window.addEventListener("keydown", this._registerKey.bind(this));
-        this.mouseMoveListener = this.mouseMove.bind(this);
-        window.addEventListener("mousemove", this.mouseMoveListener);
-        ImmutableArrayFunctions.testSpeed(100000);
+        window.addEventListener("keydown", this._registerKey.bind(this)); //todo move this out of this canvas layer and into the keyboard listener
       }
 
       _registerKey(e) {
@@ -102,23 +98,19 @@
           this.alterSelected(ShapeInfoObject.prototype.zDown);
       }
 
-      mouseMove(e) {
-        if (e.which != 1)
-          return;
-        if (!this.selectedIds)
-          return;
-//        if (e.path[0] == this) //todo make the listener only work when you hold the mouse over a selected item.
-//          return;              //todo Stops working the minute the mouse pointer moves out of the drop.
-        let yMove = e.movementY / this.zoom; //todo, this conversion is necessary for move, and maybe scaleFree in the future.
+      _selectedMoving(e) {
+        e.movementX = e.detail.x;
+        e.movementY = e.detail.y;
+        let yMove = e.movementY / this.zoom;
         let xMove = e.movementX / this.zoom;
         if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
-          this.alterSelected(ShapeInfoObject.prototype.scaleRestrict, yMove);
+          this.alterSelected(ShapeInfoObject.prototype.scaleRestrict, e.movementY );
         else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
-          this.alterSelected(ShapeInfoObject.prototype.scaleSquare, yMove);
+          this.alterSelected(ShapeInfoObject.prototype.scaleSquare, e.movementY );
         else if (this.heldKeys["KeyE"])
           this.alterSelected(ShapeInfoObject.prototype.scaleFree, xMove, yMove);
         else if (this.heldKeys["KeyR"])
-          this.alterSelected(ShapeInfoObject.prototype.rotate, yMove);
+          this.alterSelected(ShapeInfoObject.prototype.rotate, e.movementY);
         else
           this.alterSelected(ShapeInfoObject.prototype.move, xMove, yMove);
       }

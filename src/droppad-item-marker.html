@@ -1,0 +1,62 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="drop-shape.html">
+<link rel="import" href="droppad-selector.html">
+<link rel="import" href="droppad-canvas-canvas.html">
+
+<dom-module id="droppad-item-marker">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      #marker {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100px;
+        height: 100px;
+        border: 2px solid black;
+      }
+    </style>
+    <div id="marker"></div>
+  </template>
+
+  <script>
+    class DroppadItemMarker extends Polymer.Element {
+      static get is() {
+        return "droppad-item-marker";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            items: {
+              type: Array,
+              observer: "newSelected"
+            }
+          }
+        }
+      }
+
+      newSelected(elems) {
+        let boudingRect = ShapeInfoObject.getSurroundingSquare(elems.map(e => e.info));
+        this.$.marker.style.left = boudingRect.left + "px";
+        this.$.marker.style.top = boudingRect.top + "px";
+        this.$.marker.style.width = boudingRect.width + "px";
+        this.$.marker.style.height = boudingRect.height + "px";
+      }
+
+      connectedCallback() {
+//        this.addEventListener("click", this._mouseDown.bind(this));
+//        window.addEventListener("keydown", this._registerKey.bind(this));
+//        this.mouseMoveListener = this.mouseMove.bind(this);
+//        window.addEventListener("mousemove", this.mouseMoveListener);
+//        ImmutableArrayFunctions.testSpeed(100000);
+      }
+
+    }
+    customElements.define(DroppadItemMarker.is, DroppadItemMarker);
+  </script>
+</dom-module>

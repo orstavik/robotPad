@@ -2,6 +2,7 @@
 <link rel="import" href="drop-shape.html">
 <link rel="import" href="droppad-selector.html">
 <link rel="import" href="droppad-canvas-canvas.html">
+<link rel="import" href="droppad-item-marker.html">
 
 <dom-module id="droppad-canvas">
   <template>
@@ -26,6 +27,7 @@
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
         </template>
       </droppad-selector>
+      <droppad-item-marker id="square" items="[[selectedDrops]]"></droppad-item-marker>
     </droppad-canvas-canvas>
   </template>
 
@@ -293,10 +295,10 @@
           return;
         if (!this.selectedIds)
           return;
-//        if (e.path[0] == this) //todo make the listener only work when you hold the mouse over a selected item. Stops working the minute the mouse pointer moves out of the drop.
-//          return;
-        let yMove = e.movementY/this.zoom; //todo, this conversion is necessary for move, and maybe scaleFree in the future.
-        let xMove = e.movementX/this.zoom;
+//        if (e.path[0] == this) //todo make the listener only work when you hold the mouse over a selected item.
+//          return;              //todo Stops working the minute the mouse pointer moves out of the drop.
+        let yMove = e.movementY / this.zoom; //todo, this conversion is necessary for move, and maybe scaleFree in the future.
+        let xMove = e.movementX / this.zoom;
         if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
           this.alterSelected(ShapeInfoObject.prototype.scaleRestrict, yMove);
         else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
@@ -323,7 +325,7 @@
         this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + id));
       }
 
-      _deselectAll(){
+      _deselectAll() {
         this.$.dropSelector.deselectAll();
       }
 

@@ -11,19 +11,30 @@
       }
 
       #marker {
-        display: block;
         position: absolute;
         top: 0;
         left: 0;
         width: 100px;
         height: 100px;
-        border: 2px solid black;
+        border: 1px dotted grey;
+      }
+      #nw {
+        position: absolute;
+        top: -3px;
+        left: -3px;
+        width: 6px;
+        height: 6px;
+        background-color: lightgrey;
+        border: 1px solid grey;
       }
     </style>
     <div id="marker" style$="left:   [[boundingRect.left]]px;
                              top:    [[boundingRect.top]]px;
                              width:  [[boundingRect.width]]px;
-                             height: [[boundingRect.height]]px;"></div>
+                             height: [[boundingRect.height]]px;">
+      <div id="nw"></div>
+
+    </div>
     <template is="dom-repeat" items="[[_clones]]">
       <drop-shape id="copy[[item.number]]" class="copy" info="[[item]]"></drop-shape>
     </template>
@@ -39,24 +50,35 @@
         return {
           properties: {
             items: Array,
-            boundingRect: {
-              type: Object,
-              computed: "_makeBoundingRect(items)"
-            },
-            heldkeys: Array,
-            zoom: Number,
             _clones: {
               type: Array,
-              value: function(){
-                return [];
-              }
-            }
+              computed: "_makeClones(items)"
+            },
+            boundingRect: {
+              type: Object,
+              computed: "_makeBoundingRect(_clones)"
+            },
+            heldkeys: Array,
+            zoom: Number
           }
         }
       }
 
-      _makeBoundingRect(elems) {
-        return ShapeInfoObject.getSurroundingSquare(elems.map(e => e.info));  //getSquare func is also needed for copying
+      //todo There is a conflict with the selected that is problematic.
+      //1. the down action is associated with selection.
+      //2. so when i press down, i select something.
+      //3. when I move the mouse, then i do something else
+      //todo make intuitive grab handles on the marker.
+      //todo fix the rotation of groups of elements.
+      //todo fix the scaling of groups of elements.
+      //todo many of the functions should have both individual and group values..
+
+      _makeClones(shapes) {
+        return shapes.map(el => el.info.clone());
+      }
+
+      _makeBoundingRect(infos) {
+        return ShapeInfoObject.getSurroundingSquare(infos);  //getSquare func is also needed for copying
       }
 
       connectedCallback() {
@@ -66,9 +88,6 @@
       }
 
       _pointerDown(e) {
-        this.set("_clones", this.items.map(function(el){
-          return el.info.clone();
-        }));
         this.lastPoint = e;
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);

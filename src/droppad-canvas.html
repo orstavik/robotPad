@@ -27,7 +27,7 @@
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
         </template>
       </droppad-selector>
-      <droppad-item-marker id="square" items="[[selectedDrops]]" on-pointer-move="_selectedMoving"></droppad-item-marker>
+      <droppad-item-marker id="square" items="[[selectedDrops]]" on-changed="_selectedChanged" held-keys="[[heldKeys]]" zoom="[[zoom]]"></droppad-item-marker>
     </droppad-canvas-canvas>
   </template>
 
@@ -77,9 +77,9 @@
         else if (e.code === "KeyD") {
           this._deleteElem();
           this.$.dropSelector.deselectAll();
-        } else if (e.code === "KeyC")
+        } else if (e.code === "KeyC")         //todo move this into the item-marker
           this.copiedShapes = this.selectedDrops.slice();
-        else if (e.code === "KeyV") {
+        else if (e.code === "KeyV") {         //todo move this into the item-marker
           for (let i = 0; i < this.copiedShapes.length; i++) {
             this._addElem(this.copiedShapes[i].info.makeCopy(this.position.x, this.position.y));
           }
@@ -94,21 +94,9 @@
           this.alterSelected(ShapeInfoObject.prototype.zDown);
       }
 
-      _selectedMoving(e) {
-        e.movementX = e.detail.x;
-        e.movementY = e.detail.y;
-        let yMove = e.movementY / this.zoom;
-        let xMove = e.movementX / this.zoom;
-        if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
-          this.alterSelected(ShapeInfoObject.prototype.scaleRestrict, e.movementY );
-        else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
-          this.alterSelected(ShapeInfoObject.prototype.scaleSquare, e.movementY );
-        else if (this.heldKeys["KeyE"])
-          this.alterSelected(ShapeInfoObject.prototype.scaleFree, xMove, yMove);
-        else if (this.heldKeys["KeyR"])
-          this.alterSelected(ShapeInfoObject.prototype.rotate, e.movementY);
-        else
-          this.alterSelected(ShapeInfoObject.prototype.move, xMove, yMove);
+      _selectedChanged(e) {
+        this.history.push(this.drops);
+        this.set("drops", ImmutableArrayFunctions.replaceEqualNumber(this.drops, e.detail));
       }
 
       addStyleToSelected(styleName) {

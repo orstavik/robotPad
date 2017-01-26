@@ -154,6 +154,10 @@
         background: var(--tone-tone-6);
         transform: var(--tone-rotation-6);
       }
+      :host(.copy) {
+        opacity: 0.5;
+        border: 2px dotted red;
+      }
     </style>
 
     <div id="inner" class$="[[info.style]]"></div>
@@ -173,18 +177,15 @@
             selected: Boolean,
           },
           observers: [
-            "calcMatrix(info, info.style, info.angle, info.x, info.y, info.w, info.h, info.centered)",
-            "setZ(info.zIndex)"
+            "updateStyle(info, info.style, info.angle, info.x, info.y, info.w, info.h, info.centered, info.zIndex)"
           ]
         };
       }
 
-      setZ(z) {
-        this.style.zIndex = z;
-      }
-      calcMatrix(info, style, angle, posX, posY, scX, scY, centered) {
+      updateStyle(info, style, angle, posX, posY, scX, scY, centered, zIndex) {
         this.style.transform = info.cssMatrix();
         this.setAttribute("centered", centered);
+        this.style.zIndex = zIndex;
       }
     }
     customElements.define(DropShape.is, DropShape);

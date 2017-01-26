@@ -21,6 +21,9 @@
       }
     </style>
     <div id="marker"></div>
+    <template is="dom-repeat" items="[[_clones]]">
+      <drop-shape id="copy[[item.number]]" class="copy" info="[[item]]"></drop-shape>
+    </template>
   </template>
 
   <script>
@@ -35,13 +38,22 @@
             items: {
               type: Array,
               observer: "newSelected"
+            },
+            heldkeys: Array,
+            zoom: Number,
+            _clones: {
+              type: Array,
+              value: function(){
+                return [];
+              }
             }
           }
         }
       }
 
       newSelected(elems) {
-        let boudingRect = ShapeInfoObject.getSurroundingSquare(elems.map(e => e.info));
+        let boudingRect = ShapeInfoObject.getSurroundingSquare(elems.map(e => e.info));  //this function we still need for the copying functionality
+
         this.$.marker.style.left = boudingRect.left + "px";
         this.$.marker.style.top = boudingRect.top + "px";
         this.$.marker.style.width = boudingRect.width + "px";
@@ -54,8 +66,19 @@
         this.pointerupListener = this._pointerUp.bind(this);
       }
 
+//      //todo need pointerId and is not used at the moment. How and when can the user change his mind while he is holding down the mousebutton??
+//      abort(){
+//        this.set("_clones", []);
+//        this.releasePointerCapture(e.pointerId);
+//        this.removeEventListener("pointerup", this.pointerupListener);
+//        this.removeEventListener("pointermove", this.pointermoveListener);
+//      }
+
       _pointerDown(e) {
-        this.lastDown = {x: e.clientX, y: e.clientY};
+        this.set("_clones", this.items.map(function(el){
+          return el.info.clone();
+        }));
+        this.lastPoint = e;
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);
         this.setPointerCapture(e.pointerId);
@@ -63,7 +86,9 @@
       }
 
       _pointerUp(e) {
-        this.lastDown = null;
+        this.dispatchEvent(new CustomEvent("changed", {detail: this._clones}));
+        this.set("_clones", []);
+        this.lastPoint = null;
         this.releasePointerCapture(e.pointerId);
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
@@ -76,9 +101,21 @@
       }
 
       _pointerMove(e) {
-        let detail = {x: e.clientX - this.lastDown.x, y: e.clientY - this.lastDown.y};
-        this.dispatchEvent(new CustomEvent("pointer-move", {detail: detail}));
-        this.lastDown = {x: e.clientX, y: e.clientY};
+        let movementX = e.clientX - this.lastPoint.clientX;
+        let movementY = e.clientY - this.lastPoint.clientY;
+        let yMove = movementY / this.zoom;
+        let xMove = movementX / this.zoom;
+        if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
+          this.set("_clones", ImmutableArrayFunctions.alterPreSelected(this._clones, ShapeInfoObject.prototype.scaleRestrict, movementY));
+        else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
+          this.set("_clones", ImmutableArrayFunctions.alterPreSelected(this._clones, ShapeInfoObject.prototype.scaleSquare, movementY));
+        else if (this.heldKeys["KeyE"])
+          this.set("_clones", ImmutableArrayFunctions.alterPreSelected(this._clones, ShapeInfoObject.prototype.scaleFree, xMove, yMove));
+        else if (this.heldKeys["KeyR"])
+          this.set("_clones", ImmutableArrayFunctions.alterPreSelected(this._clones, ShapeInfoObject.prototype.rotate, movementY));
+        else
+          this.set("_clones", ImmutableArrayFunctions.alterPreSelected(this._clones, ShapeInfoObject.prototype.move, xMove, yMove));
+        this.lastPoint = e;
         DroppadItemMarker._cancelPropDefault(e);
       }
     }

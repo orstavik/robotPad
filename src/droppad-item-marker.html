@@ -49,36 +49,27 @@
       static get config() {
         return {
           properties: {
-            items: Array,
-            _clones: {
+            items: {
               type: Array,
-              computed: "_makeClones(items)"
+              observer: "_itemsChanged"
             },
-            boundingRect: {
-              type: Object,
-              computed: "_makeBoundingRect(_clones)"
-            },
+            _clones: Array,
+            boundingRect:  Object,
             heldkeys: Array,
             zoom: Number
           }
         }
       }
 
-      //todo There is a conflict with the selected that is problematic.
-      //1. the down action is associated with selection.
-      //2. so when i press down, i select something.
-      //3. when I move the mouse, then i do something else
       //todo make intuitive grab handles on the marker.
       //todo fix the rotation of groups of elements.
       //todo fix the scaling of groups of elements.
       //todo many of the functions should have both individual and group values..
+      //
+      //todo move over the copy and paste functionality
 
-      _makeClones(shapes) {
-        return shapes.map(el => el.info.clone());
-      }
-
-      _makeBoundingRect(infos) {
-        return ShapeInfoObject.getSurroundingSquare(infos);  //getSquare func is also needed for copying
+      _itemsChanged(items) {
+        this.set("boundingRect", ShapeInfoObject.getSurroundingSquare(items.map(el => el.info)));
       }
 
       connectedCallback() {
@@ -88,6 +79,8 @@
       }
 
       _pointerDown(e) {
+        this.set("_clones", this.items.map(el => el.info.clone()));
+        this.set("boundingRect", ShapeInfoObject.getSurroundingSquare(this._clones));
         this.lastPoint = e;
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);
@@ -97,17 +90,12 @@
 
       _pointerUp(e) {
         this.dispatchEvent(new CustomEvent("changed", {detail: this._clones}));
-        this.set("_clones", []);
+        this.set("_clones", null);
         this.lastPoint = null;
         this.releasePointerCapture(e.pointerId);
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
         DroppadItemMarker._cancelPropDefault(e);
-      }
-
-      static _cancelPropDefault(e) {
-        e.stopPropagation();
-        e.preventDefault();
       }
 
       _pointerMove(e) {
@@ -125,9 +113,15 @@
           this._clones.map(clone => clone.rotate(movementY));
         else
           this._clones.map(clone => clone.move(xMove, yMove));
+        this.set("boundingRect", ShapeInfoObject.getSurroundingSquare(this._clones));
         this.notifyPath("_clones", this._clones);
         this.lastPoint = e;
         DroppadItemMarker._cancelPropDefault(e);
+      }
+
+      static _cancelPropDefault(e) {
+        e.stopPropagation();
+        e.preventDefault();
       }
     }
     customElements.define(DroppadItemMarker.is, DroppadItemMarker);

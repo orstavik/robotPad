@@ -69,14 +69,10 @@
         return elems.map(item => item.info.number);
       }
 
-      connectedCallback() {
-        window.addEventListener("keydown", this._registerKey.bind(this)); //todo move this out of this canvas layer and into the keyboard listener
-      }
-
-      _registerKey(e) {
+      handleKeyPress(e) {
         if (e.code === "Escape")
           this.$.dropSelector.deselectAll();
-        if (e.code === "Digit0" && e.ctrlKey)
+        else if (e.code === "Digit0" && this.heldKeys["ControlLeft"])
           this.zoom = 1;
         else if (e.code === "KeyD") {
           this._deleteElem();

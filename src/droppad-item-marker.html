@@ -106,15 +106,16 @@
         let yMove = movementY / this.zoom;
         let xMove = movementX / this.zoom;
         if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
-          this.set("_clones", ImmutableArrayFunctions.alterPreSelected(this._clones, ShapeInfoObject.prototype.scaleRestrict, movementY));
+          this._clones.map(clone => clone.scaleRestrict(movementY));
         else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
-          this.set("_clones", ImmutableArrayFunctions.alterPreSelected(this._clones, ShapeInfoObject.prototype.scaleSquare, movementY));
+          this._clones.map(clone => clone.scaleSquare(movementY));
         else if (this.heldKeys["KeyE"])
-          this.set("_clones", ImmutableArrayFunctions.alterPreSelected(this._clones, ShapeInfoObject.prototype.scaleFree, xMove, yMove));
+          this._clones.map(clone => clone.scaleFree(xMove, yMove));
         else if (this.heldKeys["KeyR"])
-          this.set("_clones", ImmutableArrayFunctions.alterPreSelected(this._clones, ShapeInfoObject.prototype.rotate, movementY));
+          this._clones.map(clone => clone.rotate(movementY));
         else
-          this.set("_clones", ImmutableArrayFunctions.alterPreSelected(this._clones, ShapeInfoObject.prototype.move, xMove, yMove));
+          this._clones.map(clone => clone.move(xMove, yMove));
+        this.notifyPath("_clones", this._clones);
         this.lastPoint = e;
         DroppadItemMarker._cancelPropDefault(e);
       }

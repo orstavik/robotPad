@@ -20,7 +20,10 @@
         border: 2px solid black;
       }
     </style>
-    <div id="marker"></div>
+    <div id="marker" style$="left:   [[boundingRect.left]]px;
+                             top:    [[boundingRect.top]]px;
+                             width:  [[boundingRect.width]]px;
+                             height: [[boundingRect.height]]px;"></div>
     <template is="dom-repeat" items="[[_clones]]">
       <drop-shape id="copy[[item.number]]" class="copy" info="[[item]]"></drop-shape>
     </template>
@@ -35,9 +38,10 @@
       static get config() {
         return {
           properties: {
-            items: {
-              type: Array,
-              observer: "newSelected"
+            items: Array,
+            boundingRect: {
+              type: Object,
+              computed: "_makeBoundingRect(items)"
             },
             heldkeys: Array,
             zoom: Number,
@@ -51,13 +55,8 @@
         }
       }
 
-      newSelected(elems) {
-        let boudingRect = ShapeInfoObject.getSurroundingSquare(elems.map(e => e.info));  //this function we still need for the copying functionality
-
-        this.$.marker.style.left = boudingRect.left + "px";
-        this.$.marker.style.top = boudingRect.top + "px";
-        this.$.marker.style.width = boudingRect.width + "px";
-        this.$.marker.style.height = boudingRect.height + "px";
+      _makeBoundingRect(elems) {
+        return ShapeInfoObject.getSurroundingSquare(elems.map(e => e.info));  //getSquare func is also needed for copying
       }
 
       connectedCallback() {
@@ -65,14 +64,6 @@
         this.pointermoveListener = this._pointerMove.bind(this);
         this.pointerupListener = this._pointerUp.bind(this);
       }
-
-//      //todo need pointerId and is not used at the moment. How and when can the user change his mind while he is holding down the mousebutton??
-//      abort(){
-//        this.set("_clones", []);
-//        this.releasePointerCapture(e.pointerId);
-//        this.removeEventListener("pointerup", this.pointerupListener);
-//        this.removeEventListener("pointermove", this.pointermoveListener);
-//      }
 
       _pointerDown(e) {
         this.set("_clones", this.items.map(function(el){

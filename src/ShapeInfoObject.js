@@ -111,8 +111,6 @@ class ShapeInfoObject {
 
   getAngle() {
     let angle = this.angle;
-    if (this.centered)
-      angle += (45 / 180 * Math.PI);
     if (this.style.startsWith("tone"))
       angle = 0;
     return angle;

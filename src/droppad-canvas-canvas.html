@@ -8,10 +8,10 @@
       :host {
         display: block;
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
+        top: -50vh;
+        left: -50vw;
+        width: 200vw;
+        height: 200vh;
       }
 
       #crossX, #crossY, #center {
@@ -24,18 +24,19 @@
         width: 1px;
         height: 1px;
         border: 1px solid red;
-        top: 50vh;
-        left: 50vw;
+        top: 100vh;
+        left: 100vw;
       }
 
       #crossX, #crossY {
         pointer-events: none;
         box-sizing: border-box;
-        border: 1px dashed lightgray;
-        top: 50vh;
-        left: 50vw;
-        height: 51vh;
-        width: 51vw;
+        border-top: 1px dashed lightgray;
+        border-left: 1px dashed lightgray;
+        top: 100vh;
+        left: 100vw;
+        height: 100vh;
+        width: 100vw;
       }
 
       #crossY {
@@ -43,8 +44,8 @@
         transform: rotate(180deg);
       }
     </style>
-    <div id="crossY" style$="margin-left: [[marginLeft]]vw"></div>
-    <div id="crossX" style$="margin-left: [[marginLeft]]vw"></div>
+    <div id="crossY"></div>
+    <div id="crossX"></div>
     <div id="center" style$="transform: scale([[zoom]])">
       <slot></slot>
     </div>
@@ -139,8 +140,7 @@
       _mouseUp(e) {
         this.leftShift += this.pointDown.moveX || 0;
         this.topShift += this.pointDown.moveY || 0;
-//        this.pointDown = null;
-        this.updateStyle(0, 0);
+        // this.updateStyle(0, 0);
         this._cleanUpMoveAndUpListeners(e);
         DroppadCanvasCanvas.endAll(e);
       }
@@ -173,11 +173,9 @@
       }
 
       _mouseScroll(e) {
-        if (this.zoom < 0.2 && e.deltaY < 0)
-          return;
         this.setPosition(e);
         let beforePosition = Object.assign({}, this.position);
-        this.zoom -= e.deltaY / 530;
+        this.zoom *= 1-(e.deltaY/1000);
         this.setPosition(e);
         this.leftShift += (this.position.x - beforePosition.x) * this.zoom;
         this.topShift += (this.position.y - beforePosition.y) * this.zoom;
@@ -185,8 +183,7 @@
       }
 
       updateStyle(x, y) {
-        this.style.marginLeft = this.leftShift + x + "px";
-        this.style.marginTop = this.topShift + y + "px";
+        this.style.transform = "translate("+(this.leftShift+x)+"px, "+(this.topShift+y)+"px)";
       }
     }
     customElements.define(DroppadCanvasCanvas.is, DroppadCanvasCanvas);

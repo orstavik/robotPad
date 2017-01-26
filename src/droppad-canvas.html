@@ -110,8 +110,6 @@
 
       getAngle() {
         let angle = this.angle;
-        if (this.centered)
-          angle += (45 / 180 * Math.PI);
         if (this.style.startsWith("tone"))
           angle = 0;
         return angle;
@@ -148,11 +146,12 @@
         });
       }
 
-      //todo 10 times slower..
+      //todo 10 times slower.. sometimes
       static alterSlow(array, numbers, func, arg1, arg2) {
         array = array.map(function (item) {
           if (numbers.indexOf(item.number) == -1)
             return item;
+          item = item.clone();
           return func.call(item, arg1, arg2);
         });
         return array;
@@ -210,6 +209,12 @@
         ar = ImmutableArrayFunctions.alter(ar, selected, ShapeInfoObject.prototype.scaleFree, -10, 10);
         stop = new Date().getTime();
         console.log("speed 2: " + (stop - start));
+
+        start = stop;
+        console.log("speed 3: " + start);
+        ar = ImmutableArrayFunctions.alterSlow(ar, selected, ShapeInfoObject.prototype.scaleFree, -10, 10);
+        stop = new Date().getTime();
+        console.log("speed 3: " + (stop - start));
       }
     }
 

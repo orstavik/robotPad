@@ -8,10 +8,10 @@
       :host {
         display: block;
         position: absolute;
-        top: -50vh;
-        left: -50vw;
-        width: 200vw;
-        height: 200vh;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
       }
 
       #crossX, #crossY, #center {
@@ -20,33 +20,34 @@
       }
 
       #center {
+        box-sizing: border-box;
         overflow: visible;
-        width: 1px;
-        height: 1px;
-        border: 1px solid red;
-        top: 100vh;
-        left: 100vw;
+        top: 50%;
+        left: 50%;
       }
 
       #crossX, #crossY {
         pointer-events: none;
         box-sizing: border-box;
-        border-top: 1px dashed lightgray;
-        border-left: 1px dashed lightgray;
-        top: 100vh;
-        left: 100vw;
-        height: 100vh;
-        width: 100vw;
+        top: 0;
+        left: 0;
+      }
+
+      #crossX {
+        border-bottom: 1px dashed darkgray;
+        height: 50%;
+        width: 100%;
       }
 
       #crossY {
-        transform-origin: top left;
-        transform: rotate(180deg);
+        border-right: 1px dashed darkgray;
+        height: 100%;
+        width: 50%;
       }
     </style>
     <div id="crossY"></div>
     <div id="crossX"></div>
-    <div id="center" style$="transform: scale([[zoom]])">
+    <div id="center">
       <slot></slot>
     </div>
   </template>
@@ -183,7 +184,9 @@
       }
 
       updateStyle(x, y) {
-        this.style.transform = "translate("+(this.leftShift+x)+"px, "+(this.topShift+y)+"px)";
+        this.$.crossX.style.transform = "translateY("+(this.topShift+y)+"px)";
+        this.$.crossY.style.transform = "translateX("+(this.leftShift+x)+"px)";
+        this.$.center.style.transform = "translate("+(this.leftShift+x)+"px, "+(this.topShift+y)+"px) scale("+this.zoom+")";
       }
     }
     customElements.define(DroppadCanvasCanvas.is, DroppadCanvasCanvas);

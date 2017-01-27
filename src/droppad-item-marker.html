@@ -131,13 +131,13 @@
       }
 
       _pointerDownCorner(e) {
-        this.method = ShapeInfoObject.prototype.scaleFree;
+        this.method = ShapeInfoObject.prototype.scaleMurder;
         this._pointerDown(e);
       }
 
       _pointerDown(e) {
         this.set("_clones", this.items.map(el => el.info.clone()));
-        this.set("boundingRect", ShapeInfoObject.getSurroundingSquare(this._clones));
+        // this.set("boundingRect", ShapeInfoObject.getSurroundingSquare(this._clones));
         this.lastPoint = e;
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);

@@ -52,6 +52,11 @@ class ShapeInfoObject {
     this.h -= ny / 20;
   }
 
+  scaleMurder(x,y) {
+    this.scaleFree(x/2,y/2);
+    this.move(x/2,y/2);
+  }
+
   getBoundingRect() {
     let square = {left: this.x, top: this.y, width: this.w * 40, height: this.h * 40};
     square.right = square.left + square.width;

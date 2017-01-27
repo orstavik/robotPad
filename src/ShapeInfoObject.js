@@ -236,16 +236,24 @@ class ImmutableArrayFunctions {
       ar[i] = new ShapeInfoObject(i, i);
     }
     let stop = new Date().getTime();
-    console.log("build array 1 for loop: " + (stop - start));
+    console.log("build array 1 for loop with building objects: " + (stop - start));
 
     start = stop;
     let ar2 = [];
     for (var i = 0; i < count; i++) {
       ar[i].move(10,10);
-      // ar2[i] = ar[i];
     }
     stop = new Date().getTime();
     console.log("alter array for loop: " + (stop - start));
+
+    start = stop;
+    ar2 = [];
+    for (var i = 0; i < count; i++) {
+      ar[i].move(10,10);
+      ar2[i] = ar[i];
+    }
+    stop = new Date().getTime();
+    console.log("alter array for loop, with duplication: " + (stop - start));
 
     start = stop;
     ar2 = ar.map(function(item ){item.move(10,10)});

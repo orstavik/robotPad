@@ -227,4 +227,43 @@ class ImmutableArrayFunctions {
     stop = new Date().getTime();
     console.log("speed 2: " + (stop - start));
   }
+  static testSpeedArrayMap(count) {
+    let start = new Date().getTime();
+    let ar = [];
+    for (var i = 0; i < count; i++) {
+      ar[i] = new ShapeInfoObject(i, i);
+    }
+    let stop = new Date().getTime();
+    console.log("build array 1 for loop with building objects: " + (stop - start));
+
+    start = stop;
+    let ar2 = [];
+    for (var i = 0; i < count; i++) {
+      ar[i].move(10,10);
+    }
+    stop = new Date().getTime();
+    console.log("alter array for loop: " + (stop - start));
+
+    start = stop;
+    ar2 = [];
+    for (var i = 0; i < count; i++) {
+      ar[i].move(10,10);
+      ar2[i] = ar[i];
+    }
+    stop = new Date().getTime();
+    console.log("alter array for loop, with duplication: " + (stop - start));
+
+    start = stop;
+    ar2 = ar.map(function(item){item.move(9,9)});
+    stop = new Date().getTime();
+    console.log("alter array map, old syntax: " + (stop - start));
+
+    start = stop;
+    ar2 = ar.map(item => item.move(10,10));
+    stop = new Date().getTime();
+    console.log("alter array map, arrow syntax: " + (stop - start));
+  }
 }
+// ImmutableArrayFunctions.testJSONstringifyParseSpeed();
+// ImmutableArrayFunctions.testSpeed(100000);
+// ImmutableArrayFunctions.testSpeedArrayMap(5000000);

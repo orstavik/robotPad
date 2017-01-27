@@ -77,20 +77,21 @@
         else if (e.code === "KeyD") {
           this._deleteElem();
           this.$.dropSelector.deselectAll();
-        } else if (e.code === "KeyC")         //todo move this into the item-marker
+        }
+        else if (e.code === "KeyC")         //todo move this into the item-marker
           this.copiedShapes = this.selectedDrops.slice();
         else if (e.code === "KeyV") {         //todo move this into the item-marker
           for (let i = 0; i < this.copiedShapes.length; i++) {
             this._addElem(this.copiedShapes[i].info.makeCopy(this.position.x, this.position.y));
           }
         }
-        else if (e.code == "KeyM")
+        else if (e.code == "KeyM")//todo move this into the item-marker
           this.alterSelected(ShapeInfoObject.prototype.mirror);
-        else if (e.code == "KeyN")
+        else if (e.code == "KeyN")//todo move this into the item-marker
           this.alterSelected(ShapeInfoObject.prototype.center);
-        else if (e.code == "PageUp")
+        else if (e.code == "PageUp")//todo move this into the item-marker
           this.alterSelected(ShapeInfoObject.prototype.zUp);
-        else if (e.code == "PageDown")
+        else if (e.code == "PageDown")//todo move this into the item-marker
           this.alterSelected(ShapeInfoObject.prototype.zDown);
       }
 

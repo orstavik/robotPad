@@ -18,22 +18,71 @@
         margin: -20px;
         border: 1px dotted grey;
       }
-      #nw {
+
+      .minimarker {
         position: absolute;
-        top: -3px;
-        left: -3px;
         width: 6px;
         height: 6px;
         background-color: lightgrey;
         border: 1px solid grey;
       }
+
+      #nw {
+        top: -4px;
+        left: -4px;
+      }
+
+      #ne {
+        top: -4px;
+        right: -4px;
+      }
+
+      #sw {
+        bottom: -4px;
+        left: -4px;
+      }
+
+      #se {
+        bottom: -4px;
+        right: -4px;
+      }
+
+      #w {
+        top: calc(50% - 4px);
+        left: -4px;
+        border-radius: 50% 0 0 50%;
+      }
+
+      #e {
+        top: calc(50% - 4px);
+        right: -4px;
+        border-radius: 0 50% 50% 0;
+      }
+
+      #s {
+        bottom: -4px;
+        left: calc(50% - 4px);
+        border-radius: 0 0 50% 50%;
+      }
+
+      #n {
+        top: -4px;
+        left: calc(50% - 4px);
+        border-radius: 50% 50% 0 0;
+      }
     </style>
-    <div id="marker" style$="left:   [[boundingRect.left]]px;
-                             top:    [[boundingRect.top]]px;
-                             width:  [[boundingRect.width]]px;
-                             height: [[boundingRect.height]]px;">
-      <div id="nw"></div>
-    </div>
+    <div id="marker" hidden$="[[!items.length]]" style$="left: [[boundingRect.left]]px; top: [[boundingRect.top]]px; width:  [[boundingRect.width]]px; height: [[boundingRect.height]]px;">
+        <div id="nw" class="minimarker corner"></div>
+        <div id="ne" class="minimarker corner"></div>
+        <div id="sw" class="minimarker corner"></div>
+        <div id="se" class="minimarker corner"></div>
+        <div id="w" class="minimarker edge"></div>
+        <div id="n" class="minimarker edge"></div>
+        <div id="s" class="minimarker edge"></div>
+        <div id="e" class="minimarker edge"></div>
+        <div id="mover" class="minimarker mover"></div>
+        <div id="rotator" class="minimarker rotator"></div>
+      </div>
     <template is="dom-repeat" items="[[_clones]]">
       <drop-shape id="copy[[item.number]]" class="copy" info="[[item]]"></drop-shape>
     </template>
@@ -53,7 +102,7 @@
               observer: "_itemsChanged"
             },
             _clones: Array,
-            boundingRect:  Object,
+            boundingRect: Object,
             heldkeys: Array,
             zoom: Number
           }
@@ -72,9 +121,18 @@
       }
 
       connectedCallback() {
-        this.addEventListener("pointerdown", this._pointerDown.bind(this));
+        this.$.se.addEventListener("pointerdown", this._pointerDownCorner.bind(this));
+        this.$.ne.addEventListener("pointerdown", this._pointerDownCorner.bind(this));
+        this.$.sw.addEventListener("pointerdown", this._pointerDownCorner.bind(this));
+        this.$.nw.addEventListener("pointerdown", this._pointerDownCorner.bind(this));
+        this.$.marker.addEventListener("pointerdown", this._pointerDown.bind(this));
         this.pointermoveListener = this._pointerMove.bind(this);
         this.pointerupListener = this._pointerUp.bind(this);
+      }
+
+      _pointerDownCorner(e) {
+        this.method = ShapeInfoObject.prototype.scaleFree;
+        this._pointerDown(e);
       }
 
       _pointerDown(e) {
@@ -91,6 +149,7 @@
         this.dispatchEvent(new CustomEvent("changed", {detail: this._clones}));
         this.set("_clones", null);
         this.lastPoint = null;
+        this.method = null;
         this.releasePointerCapture(e.pointerId);
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
@@ -102,16 +161,20 @@
         let movementY = e.clientY - this.lastPoint.clientY;
         let yMove = movementY / this.zoom;
         let xMove = movementX / this.zoom;
-        if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
-          this._clones.map(clone => clone.scaleRestrict(movementY));
-        else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
-          this._clones.map(clone => clone.scaleSquare(movementY));
-        else if (this.heldKeys["KeyE"])
-          this._clones.map(clone => clone.scaleFree(xMove, yMove));
-        else if (this.heldKeys["KeyR"])
-          this._clones.map(clone => clone.rotate(movementY));
-        else
-          this._clones.map(clone => clone.move(xMove, yMove));
+        if (this.method)
+          this._clones.map(clone => this.method.call(clone, xMove, yMove));
+        else {
+          if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
+            this._clones.map(clone => clone.scaleRestrict(movementY));
+          else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
+            this._clones.map(clone => clone.scaleSquare(movementY));
+          else if (this.heldKeys["KeyE"])
+            this._clones.map(clone => clone.scaleFree(xMove, yMove));
+          else if (this.heldKeys["KeyR"])
+            this._clones.map(clone => clone.rotate(movementY));
+          else
+            this._clones.map(clone => clone.move(xMove, yMove));
+        }
         this.set("boundingRect", ShapeInfoObject.getSurroundingSquare(this._clones));
         this.notifyPath("_clones", this._clones);
         this.lastPoint = e;

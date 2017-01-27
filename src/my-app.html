@@ -218,12 +218,13 @@
         e.preventDefault();
         if (e.detail.code === "Enter")
           this.$.clef.turnKeyRight();
-        if (e.detail.code === "Tab")
+        else if (e.detail.code === "Tab")
           this.$.clef.turnKeyLeft();
-        if (e.detail.code === "Backspace")
+        else if (e.detail.code === "Backspace")
           this.$.clef.turnModusRight();
-        if (e.detail.code === "Backquote")
+        else if (e.detail.code === "Backquote")
           this.$.clef.turnModusLeft();
+        this.$.shapeSelector.handleKeyPress(e.detail);
       }
 
       setStyleName(e) {

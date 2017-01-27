@@ -172,6 +172,23 @@ class ImmutableArrayFunctions {
     return array;
   }
 
+  static replaceEqualNumber(original, replacements) {
+    let listOfNumbers = replacements.map(function(item){ return item.number; });
+    return original.map(function(item){
+      let posOfNumber = listOfNumbers.indexOf(item.number);
+      if (posOfNumber == -1)
+        return item;
+      return replacements[posOfNumber];
+    });
+  }
+
+  static alterPreSelected(array, func, arg1, arg2) {
+    array.map(function (item) {
+      return func.call(item, arg1, arg2);
+    });
+    return array;
+  }
+
   //todo it looks like Stringify is 2x as slow as parse(?!).
   static testJSONstringifyParseSpeed() {
     let start = new Date().getTime();

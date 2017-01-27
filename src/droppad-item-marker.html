@@ -120,7 +120,9 @@
       //todo move over the copy and paste functionality
 
       _itemsChanged(items) {
-        this.set("boundingRect", ShapeInfoObject.getSurroundingSquare(items.map(el => el.info)));
+        let elems = items.map(el => el.info);
+        let surroundingSquare = ShapeInfoObject.getSurroundingSquare(elems, 40);
+        this.set("boundingRect", surroundingSquare);
       }
 
       connectedCallback() {

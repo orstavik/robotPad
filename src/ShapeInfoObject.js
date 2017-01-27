@@ -52,36 +52,40 @@ class ShapeInfoObject {
     this.h -= ny / 20;
   }
 
-  scaleMurder(x,y) {
-    this.scaleFree(x/2,y/2);
-    this.move(x/2,y/2);
+  scaleMurder(x, y) {
+    this.scaleFree(x / 2, y / 2);
+    this.move(x / 2, y / 2);
   }
 
-  getBoundingRect() {
-    let square = {left: this.x, top: this.y, width: this.w * 40, height: this.h * 40};
-    square.left -= 40*(this.w-1)/2;
-    square.top -= 40*(this.h-1)/2;
+  getLeft(widthCount) {
+    if (this.w < 0)
+      return this.x - (widthCount * (this.w - 1) / 2) + widthCount*this.w;
+    return this.x - (widthCount * (this.w - 1) / 2);
+  }
+  getTop(heightCount) {
+    if (this.h < 0)
+      return this.y - (heightCount * (this.h - 1) / 2) + heightCount*this.h;
+    return this.y - (heightCount * (this.h - 1) / 2);
+  }
+
+  getBoundingRect(factor) {
+    let square = {
+      left: this.getLeft(factor),
+      top: this.getTop(factor),
+      width: Math.abs(this.w) * factor,
+      height: Math.abs(this.h) * factor
+    };
     square.right = square.left + square.width;
     square.bottom = square.top + square.height;
-    if (square.right < square.left) {
-      let l = square.left;
-      square.left = square.right;
-      square.right = l;
-    }
-    if (square.bottom < square.top) {
-      let t = square.top;
-      square.top = square.bottom;
-      square.bottom = t;
-    }
     return square;
   }
 
-  static getSurroundingSquare(elems) {
+  static getSurroundingSquare(elems, factor) {
     if (!elems || elems.length == 0)
       return null;
-    let res = elems[0].getBoundingRect();
+    let res = elems[0].getBoundingRect(factor);
     for (let i = 1; i < elems.length; i++) {
-      let next = elems[i].getBoundingRect();
+      let next = elems[i].getBoundingRect(factor);
       res.left = Math.min(res.left, next.left);
       res.top = Math.min(res.top, next.top);
       res.right = Math.max(res.right, next.right);
@@ -180,8 +184,10 @@ class ImmutableArrayFunctions {
   }
 
   static replaceEqualNumber(original, replacements) {
-    let listOfNumbers = replacements.map(function(item){ return item.number; });
-    return original.map(function(item){
+    let listOfNumbers = replacements.map(function (item) {
+      return item.number;
+    });
+    return original.map(function (item) {
       let posOfNumber = listOfNumbers.indexOf(item.number);
       if (posOfNumber == -1)
         return item;
@@ -234,6 +240,7 @@ class ImmutableArrayFunctions {
     stop = new Date().getTime();
     console.log("speed 2: " + (stop - start));
   }
+
   static testSpeedArrayMap(count) {
     let start = new Date().getTime();
     let ar = [];
@@ -246,7 +253,7 @@ class ImmutableArrayFunctions {
     start = stop;
     let ar2 = [];
     for (var i = 0; i < count; i++) {
-      ar[i].move(10,10);
+      ar[i].move(10, 10);
     }
     stop = new Date().getTime();
     console.log("alter array for loop: " + (stop - start));
@@ -254,19 +261,21 @@ class ImmutableArrayFunctions {
     start = stop;
     ar2 = [];
     for (var i = 0; i < count; i++) {
-      ar[i].move(10,10);
+      ar[i].move(10, 10);
       ar2[i] = ar[i];
     }
     stop = new Date().getTime();
     console.log("alter array for loop, with duplication: " + (stop - start));
 
     start = stop;
-    ar2 = ar.map(function(item){item.move(9,9)});
+    ar2 = ar.map(function (item) {
+      item.move(9, 9)
+    });
     stop = new Date().getTime();
     console.log("alter array map, old syntax: " + (stop - start));
 
     start = stop;
-    ar2 = ar.map(item => item.move(10,10));
+    ar2 = ar.map(item => item.move(10, 10));
     stop = new Date().getTime();
     console.log("alter array map, arrow syntax: " + (stop - start));
   }

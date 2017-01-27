@@ -256,7 +256,7 @@ class ImmutableArrayFunctions {
     console.log("alter array for loop, with duplication: " + (stop - start));
 
     start = stop;
-    ar2 = ar.map(function(item ){item.move(10,10)});
+    ar2 = ar.map(function(item){item.move(9,9)});
     stop = new Date().getTime();
     console.log("alter array map, old syntax: " + (stop - start));
 
@@ -266,6 +266,6 @@ class ImmutableArrayFunctions {
     console.log("alter array map, arrow syntax: " + (stop - start));
   }
 }
-ImmutableArrayFunctions.testJSONstringifyParseSpeed();
-ImmutableArrayFunctions.testSpeed(100000);
-ImmutableArrayFunctions.testSpeedArrayMap(5000000);
+// ImmutableArrayFunctions.testJSONstringifyParseSpeed();
+// ImmutableArrayFunctions.testSpeed(100000);
+// ImmutableArrayFunctions.testSpeedArrayMap(5000000);

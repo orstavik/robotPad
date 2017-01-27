@@ -58,14 +58,13 @@ class ShapeInfoObject {
   }
 
   getLeft(widthCount) {
-    if (this.w < 0)
-      return this.x - (widthCount * (this.w - 1) / 2) + widthCount*this.w;
-    return this.x - (widthCount * (this.w - 1) / 2);
+    let normal = this.x - (widthCount * (this.w - 1) / 2);
+    return this.w < 0 ? normal + widthCount*this.w : normal;
   }
+
   getTop(heightCount) {
-    if (this.h < 0)
-      return this.y - (heightCount * (this.h - 1) / 2) + heightCount*this.h;
-    return this.y - (heightCount * (this.h - 1) / 2);
+    let normal = this.y - (heightCount * (this.h - 1) / 2);
+    return this.h < 0 ?  normal + heightCount*this.h : normal;
   }
 
   getBoundingRect(factor) {

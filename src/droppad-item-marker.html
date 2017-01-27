@@ -11,11 +11,11 @@
       }
 
       #marker {
+        box-sizing: border-box;
         position: absolute;
         top: 0;
         left: 0;
-        width: 100px;
-        height: 100px;
+        margin: -20px;
         border: 1px dotted grey;
       }
       #nw {
@@ -33,7 +33,6 @@
                              width:  [[boundingRect.width]]px;
                              height: [[boundingRect.height]]px;">
       <div id="nw"></div>
-
     </div>
     <template is="dom-repeat" items="[[_clones]]">
       <drop-shape id="copy[[item.number]]" class="copy" info="[[item]]"></drop-shape>

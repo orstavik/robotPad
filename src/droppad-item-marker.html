@@ -71,24 +71,59 @@
         border-radius: 50% 50% 0 0;
       }
     </style>
-    <div id="marker" hidden$="[[!boundingRect]]" style$="left: [[boundingRect.left]]px; top: [[boundingRect.top]]px; width:  [[boundingRect.width]]px; height: [[boundingRect.height]]px;">
-        <div id="nw" class="minimarker corner"></div>
-        <div id="ne" class="minimarker corner"></div>
-        <div id="sw" class="minimarker corner"></div>
-        <div id="se" class="minimarker corner"></div>
-        <div id="w" class="minimarker edge"></div>
-        <div id="n" class="minimarker edge"></div>
-        <div id="s" class="minimarker edge"></div>
-        <div id="e" class="minimarker edge"></div>
-        <div id="mover" class="minimarker mover"></div>
-        <div id="rotator" class="minimarker rotator"></div>
-      </div>
+    <div id="marker" hidden$="[[!boundingRect.show]]"
+         style$="left: [[boundingRect.left]]px; top: [[boundingRect.top]]px; width:  [[boundingRect.width]]px; height: [[boundingRect.height]]px;">
+      <div id="nw" class="minimarker corner"></div>
+      <div id="ne" class="minimarker corner"></div>
+      <div id="sw" class="minimarker corner"></div>
+      <div id="se" class="minimarker corner"></div>
+      <div id="w" class="minimarker edge"></div>
+      <div id="n" class="minimarker edge"></div>
+      <div id="s" class="minimarker edge"></div>
+      <div id="e" class="minimarker edge"></div>
+      <div id="mover" class="minimarker mover"></div>
+      <div id="rotator" class="minimarker rotator"></div>
+    </div>
     <template is="dom-repeat" items="[[_clones]]">
       <drop-shape id="copy[[item.number]]" class="copy" info="[[item]]"></drop-shape>
     </template>
   </template>
 
   <script>
+    class MarkerBox {
+
+      static createMarkerSquare(elems, factor) {
+        return !elems || !elems.length ? null : new MarkerBox(elems, factor);
+      }
+
+      constructor(elems, factor) {
+        this.factor = factor;
+        this.show = this._addBoxes(elems.map(el => el.info));
+      }
+
+      _addBoxes(infos){
+        if (!infos || infos.length == 0)
+          return false;
+        for (let elem of infos)
+          this._addBox(elem.getBoundingRect(this.factor));
+        this.width = this.right - this.left;
+        this.height = this.bottom - this.top;
+        return true;
+      }
+
+      _addBox(next) {
+        this.left = Math.min(this.left || Number.MAX_VALUE, next.left);
+        this.top = Math.min(this.top || Number.MAX_VALUE, next.top);
+        this.right = Math.max(this.right || -Number.MAX_VALUE, next.right);
+        this.bottom = Math.max(this.bottom || -Number.MAX_VALUE, next.bottom);
+      }
+
+      start(e){
+        this.show = false;
+        this.startEvent = e;
+      }
+    }
+
     class DroppadItemMarker extends Polymer.Element {
       static get is() {
         return "droppad-item-marker";
@@ -102,10 +137,7 @@
               observer: "_itemsChanged"
             },
             _clones: Array,
-            boundingRect: {
-              type: Object,
-              value: function(){return null;}
-            },
+            boundingRect: Object,
             heldkeys: Array,
             zoom: Number
           }
@@ -120,9 +152,7 @@
       //todo move over the copy and paste functionality
 
       _itemsChanged(items) {
-        let elems = items.map(el => el.info);
-        let surroundingSquare = ShapeInfoObject.getSurroundingSquare(elems, 40);
-        this.set("boundingRect", surroundingSquare);
+        this.set("boundingRect", MarkerBox.createMarkerSquare(items, 40));
       }
 
       connectedCallback() {
@@ -137,12 +167,14 @@
 
       _pointerDownCorner(e) {
         this.method = ShapeInfoObject.prototype.scaleMurder;
+        this.methodPosition = e.target.id;
         this._pointerDown(e);
       }
 
       _pointerDown(e) {
         this.set("_clones", this.items.map(el => el.info.clone()));
         this.lastPoint = e;
+        this.boundingRect.start(e);
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);
         this.setPointerCapture(e.pointerId);
@@ -158,20 +190,27 @@
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
         DroppadItemMarker._cancelPropDefault(e);
-        setTimeout(function(){
-            this.notifyPath("items");
-        }.bind(this),0);
+        setTimeout(function () {
+          this.notifyPath("items");
+        }.bind(this), 0);
       }
 
       _pointerMove(e) {
-        this.set("boundingRect",null);
         let movementX = e.clientX - this.lastPoint.clientX;
         let movementY = e.clientY - this.lastPoint.clientY;
         let yMove = movementY / this.zoom;
         let xMove = movementX / this.zoom;
-        if (this.method)
+        if (this.method) {
+          console.log(this.methodPosition);
+          if (this.methodPosition == "se") {
+            //this.boundingRect.width += xMove;
+            //this.boundingRect.height += yMove;
+          }
+          let xPercent = xMove / this.boundingRect.width;
+          let yPercent = yMove / this.boundingRect.height;
+          //todo pass in the top left and bottom right corner of the boundingbox?
           this._clones.map(clone => this.method.call(clone, xMove, yMove));
-        else {
+        } else {
           if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
             this._clones.map(clone => clone.scaleRestrict(movementY));
           else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])

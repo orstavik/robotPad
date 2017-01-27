@@ -163,7 +163,7 @@
       _mouseScroll(e) {
         this.setPosition(e);
         let beforePosition = Object.assign({}, this.position);
-        this.zoom *= 1-(e.deltaY/1000);
+        this.zoom *= 1-(e.deltaY/500);
         this.setPosition(e);
         this.leftShift += (this.position.x - beforePosition.x) * this.zoom;
         this.topShift += (this.position.y - beforePosition.y) * this.zoom;

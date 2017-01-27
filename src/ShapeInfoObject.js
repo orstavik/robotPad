@@ -79,22 +79,6 @@ class ShapeInfoObject {
     return square;
   }
 
-  static getSurroundingSquare(elems, factor) {
-    if (!elems || elems.length == 0)
-      return null;
-    let res = elems[0].getBoundingRect(factor);
-    for (let i = 1; i < elems.length; i++) {
-      let next = elems[i].getBoundingRect(factor);
-      res.left = Math.min(res.left, next.left);
-      res.top = Math.min(res.top, next.top);
-      res.right = Math.max(res.right, next.right);
-      res.bottom = Math.max(res.bottom, next.bottom);
-    }
-    res.width = res.right - res.left;
-    res.height = res.bottom - res.top;
-    return res;
-  }
-
   mirror() {
     this.w *= -1;
   }

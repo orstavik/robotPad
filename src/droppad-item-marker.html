@@ -71,7 +71,7 @@
         border-radius: 50% 50% 0 0;
       }
     </style>
-    <div id="marker" hidden$="[[!items.length]]" style$="left: [[boundingRect.left]]px; top: [[boundingRect.top]]px; width:  [[boundingRect.width]]px; height: [[boundingRect.height]]px;">
+    <div id="marker" hidden$="[[!boundingRect]]" style$="left: [[boundingRect.left]]px; top: [[boundingRect.top]]px; width:  [[boundingRect.width]]px; height: [[boundingRect.height]]px;">
         <div id="nw" class="minimarker corner"></div>
         <div id="ne" class="minimarker corner"></div>
         <div id="sw" class="minimarker corner"></div>
@@ -102,7 +102,10 @@
               observer: "_itemsChanged"
             },
             _clones: Array,
-            boundingRect: Object,
+            boundingRect: {
+              type: Object,
+              value: function(){return null;}
+            },
             heldkeys: Array,
             zoom: Number
           }
@@ -137,7 +140,6 @@
 
       _pointerDown(e) {
         this.set("_clones", this.items.map(el => el.info.clone()));
-        // this.set("boundingRect", ShapeInfoObject.getSurroundingSquare(this._clones));
         this.lastPoint = e;
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);
@@ -154,9 +156,13 @@
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
         DroppadItemMarker._cancelPropDefault(e);
+        setTimeout(function(){
+            this.notifyPath("items");
+        }.bind(this),0);
       }
 
       _pointerMove(e) {
+        this.set("boundingRect",null);
         let movementX = e.clientX - this.lastPoint.clientX;
         let movementY = e.clientY - this.lastPoint.clientY;
         let yMove = movementY / this.zoom;
@@ -175,7 +181,6 @@
           else
             this._clones.map(clone => clone.move(xMove, yMove));
         }
-        this.set("boundingRect", ShapeInfoObject.getSurroundingSquare(this._clones));
         this.notifyPath("_clones", this._clones);
         this.lastPoint = e;
         DroppadItemMarker._cancelPropDefault(e);

@@ -59,6 +59,8 @@ class ShapeInfoObject {
 
   getBoundingRect() {
     let square = {left: this.x, top: this.y, width: this.w * 40, height: this.h * 40};
+    square.left -= 40*(this.w-1)/2;
+    square.top -= 40*(this.h-1)/2;
     square.right = square.left + square.width;
     square.bottom = square.top + square.height;
     if (square.right < square.left) {
@@ -76,7 +78,7 @@ class ShapeInfoObject {
 
   static getSurroundingSquare(elems) {
     if (!elems || elems.length == 0)
-      return {left: 0, top: 0, width: 0, height: 0, right: 0, bottom: 0};
+      return null;
     let res = elems[0].getBoundingRect();
     for (let i = 1; i < elems.length; i++) {
       let next = elems[i].getBoundingRect();

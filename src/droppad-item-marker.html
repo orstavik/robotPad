@@ -71,8 +71,8 @@
         border-radius: 50% 50% 0 0;
       }
     </style>
-    <div id="marker" hidden$="[[!boundingRect.show]]"
-         style$="left: [[boundingRect.left]]px; top: [[boundingRect.top]]px; width:  [[boundingRect.width]]px; height: [[boundingRect.height]]px;">
+    <div id="marker" hidden$="[[!groupOfShapes.show]]"
+         style$="left: [[groupOfShapes.left]]px; top: [[groupOfShapes.top]]px; width:  [[groupOfShapes.width]]px; height: [[groupOfShapes.height]]px;">
       <div id="nw" class="minimarker corner"></div>
       <div id="ne" class="minimarker corner"></div>
       <div id="sw" class="minimarker corner"></div>
@@ -84,31 +84,28 @@
       <div id="mover" class="minimarker mover"></div>
       <div id="rotator" class="minimarker rotator"></div>
     </div>
-    <template is="dom-repeat" items="[[_clones]]">
-      <drop-shape id="copy[[item.number]]" class="copy" info="[[item]]"></drop-shape>
+    <template is="dom-if" if="[[!groupOfShapes.show]]">
+      <template is="dom-repeat" items="[[groupOfShapes.clones]]">
+        <drop-shape id="copy[[item.number]]" class="copy" info="[[item]]"></drop-shape>
+      </template>
     </template>
   </template>
 
   <script>
-    class MarkerBox {
+    class GroupOfShapes {
 
-      static createMarkerSquare(elems, factor) {
-        return !elems || !elems.length ? null : new MarkerBox(elems, factor);
+      constructor(infos, factor) {
+        this.infos = infos;
+        this.clones = this.infos.map(info => info.clone());
+        this._calcGroupBorders(this.infos, factor);
+        this.show = true;
       }
 
-      constructor(elems, factor) {
-        this.factor = factor;
-        this.show = this._addBoxes(elems.map(el => el.info));
-      }
-
-      _addBoxes(infos){
-        if (!infos || infos.length == 0)
-          return false;
-        for (let elem of infos)
-          this._addBox(elem.getBoundingRect(this.factor));
+      _calcGroupBorders(infos, factor) {
+        for (let info of infos)
+          this._addBox(info.getBoundingRect(factor));
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
-        return true;
       }
 
       _addBox(next) {
@@ -118,9 +115,23 @@
         this.bottom = Math.max(this.bottom || -Number.MAX_VALUE, next.bottom);
       }
 
-      start(e){
+      start(e, method) {
         this.show = false;
-        this.startEvent = e;
+        this.startEvent = this.lastEvent = e;
+        this.active = e.target.id;
+        this.method = method;
+      }
+
+      move(e, zoom) {
+        this.movementX = e.clientX - this.lastEvent.clientX;
+        this.movementY = e.clientY - this.lastEvent.clientY;
+        this.percentX = (this.movementX /zoom) / this.width;
+        this.percentY = (this.movementY /zoom) / this.height;
+        this.lastEvent = e;
+      }
+
+      scale(e, zoom){
+        this.move(e, zoom);
       }
     }
 
@@ -132,12 +143,11 @@
       static get config() {
         return {
           properties: {
-            items: {
-              type: Array,
-              observer: "_itemsChanged"
+            items: Array,
+            groupOfShapes: {
+              type: Object,
+              computed: "_itemsChanged(items)"
             },
-            _clones: Array,
-            boundingRect: Object,
             heldkeys: Array,
             zoom: Number
           }
@@ -152,7 +162,7 @@
       //todo move over the copy and paste functionality
 
       _itemsChanged(items) {
-        this.set("boundingRect", MarkerBox.createMarkerSquare(items, 40));
+        return items && items.length ? new GroupOfShapes(items.map(el => el.info), 40) : null;
       }
 
       connectedCallback() {
@@ -160,71 +170,59 @@
         this.$.ne.addEventListener("pointerdown", this._pointerDownCorner.bind(this));
         this.$.sw.addEventListener("pointerdown", this._pointerDownCorner.bind(this));
         this.$.nw.addEventListener("pointerdown", this._pointerDownCorner.bind(this));
-        this.$.marker.addEventListener("pointerdown", this._pointerDown.bind(this));
+        this.$.marker.addEventListener("pointerdown", this._pointerDownCenter.bind(this));
         this.pointermoveListener = this._pointerMove.bind(this);
         this.pointerupListener = this._pointerUp.bind(this);
       }
 
       _pointerDownCorner(e) {
-        this.method = ShapeInfoObject.prototype.scaleMurder;
-        this.methodPosition = e.target.id;
+        this.groupOfShapes.start(e, ShapeInfoObject.prototype.scaleMurder);
+        this._pointerDown(e);
+      }
+
+      _pointerDownCenter(e) {
+        this.groupOfShapes.start(e, ShapeInfoObject.prototype.move);
         this._pointerDown(e);
       }
 
       _pointerDown(e) {
         this.set("_clones", this.items.map(el => el.info.clone()));
-        this.lastPoint = e;
-        this.boundingRect.start(e);
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);
         this.setPointerCapture(e.pointerId);
         DroppadItemMarker._cancelPropDefault(e);
+        this.notifyPath("groupOfShapes");
       }
 
       _pointerUp(e) {
-        this.dispatchEvent(new CustomEvent("changed", {detail: this._clones}));
-        this.set("_clones", null);
-        this.lastPoint = null;
-        this.method = null;
+        this.dispatchEvent(new CustomEvent("changed", {detail: this.groupOfShapes.clones}));
         this.releasePointerCapture(e.pointerId);
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
         DroppadItemMarker._cancelPropDefault(e);
-        setTimeout(function () {
-          this.notifyPath("items");
-        }.bind(this), 0);
+        setTimeout(function () { this.notifyPath("items"); }.bind(this), 0);
       }
 
       _pointerMove(e) {
-        let movementX = e.clientX - this.lastPoint.clientX;
-        let movementY = e.clientY - this.lastPoint.clientY;
-        let yMove = movementY / this.zoom;
-        let xMove = movementX / this.zoom;
-        if (this.method) {
-          console.log(this.methodPosition);
-          if (this.methodPosition == "se") {
-            //this.boundingRect.width += xMove;
-            //this.boundingRect.height += yMove;
-          }
-          let xPercent = xMove / this.boundingRect.width;
-          let yPercent = yMove / this.boundingRect.height;
-          //todo pass in the top left and bottom right corner of the boundingbox?
-          this._clones.map(clone => this.method.call(clone, xMove, yMove));
+        this.groupOfShapes.move(e, this.zoom);
+        if (this.groupOfShapes.active) {
+          this.groupOfShapes.clones.map(clone => this.groupOfShapes.method.call(clone, this.groupOfShapes.percentX, this.groupOfShapes.percentY));
         } else {
+          let yMove = this.groupOfShapes.movementY / this.zoom;
+          let xMove = this.groupOfShapes.movementX / this.zoom;
           if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
-            this._clones.map(clone => clone.scaleRestrict(movementY));
+            this.groupOfShapes.clones.map(clone => clone.scaleRestrict(this.groupOfShapes.movementY));
           else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
-            this._clones.map(clone => clone.scaleSquare(movementY));
+            this.groupOfShapes.clones.map(clone => clone.scaleSquare(this.groupOfShapes.movementY));
           else if (this.heldKeys["KeyE"])
-            this._clones.map(clone => clone.scaleFree(xMove, yMove));
+            this.groupOfShapes.clones.map(clone => clone.scaleFree(xMove, yMove));
           else if (this.heldKeys["KeyR"])
-            this._clones.map(clone => clone.rotate(movementY));
+            this.groupOfShapes.clones.map(clone => clone.rotate(this.groupOfShapes.movementY));
           else
-            this._clones.map(clone => clone.move(xMove, yMove));
+            this.groupOfShapes.clones.map(clone => clone.move(xMove, yMove));
         }
-        this.notifyPath("_clones", this._clones);
-        this.lastPoint = e;
         DroppadItemMarker._cancelPropDefault(e);
+        this.notifyPath("groupOfShapes");
       }
 
       static _cancelPropDefault(e) {

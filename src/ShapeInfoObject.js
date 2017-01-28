@@ -53,8 +53,8 @@ class ShapeInfoObject {
   }
 
   scaleMurder(x, y) {
-    this.scaleFree(x / 2, y / 2);
-    this.move(x / 2, y / 2);
+    this.w += this.w * x;
+    this.h += this.h * y;
   }
 
   getLeft(widthCount) {

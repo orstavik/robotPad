@@ -118,16 +118,39 @@
       start(e, method) {
         this.show = false;
         this.startEvent = this.lastEvent = e;
+        console.log(e.path[0]);
         this.active = e.target.id;
         this.method = method;
       }
 
-      move(e, zoom) {
+      move(e, zoom, heldKeys) {
         this.movementX = e.clientX - this.lastEvent.clientX;
         this.movementY = e.clientY - this.lastEvent.clientY;
+        this.xMove = this.movementX/zoom;
+        this.yMove = this.movementY/zoom;
         this.percentX = (this.movementX /zoom) / this.width;
         this.percentY = (this.movementY /zoom) / this.height;
         this.lastEvent = e;
+        this.runAction(heldKeys);
+      }
+
+      runAction(heldKeys) {
+        console.log(this.active);
+        if (this.active) {
+          for (let clone of this.clones)
+            this.method.call(clone, this.percentX, this.percentY);
+        } else {
+          if (heldKeys["KeyE"] && heldKeys["KeyW"])
+            this.clones.map(clone => clone.scaleRestrict(this.movementY));
+          else if (heldKeys["KeyE"] && heldKeys["KeyR"])
+            this.clones.map(clone => clone.scaleSquare(this.movementY));
+          else if (heldKeys["KeyE"])
+            this.clones.map(clone => clone.scaleFree(this.xMove, this.yMove));
+          else if (heldKeys["KeyR"])
+            this.clones.map(clone => clone.rotate(this.movementY));
+          else
+            this.clones.map(clone => clone.move(this.xMove, this.yMove));
+        }
       }
 
       scale(e, zoom){
@@ -145,7 +168,7 @@
           properties: {
             items: Array,
             groupOfShapes: {
-              type: Object,
+              type: GroupOfShapes,
               computed: "_itemsChanged(items)"
             },
             heldkeys: Array,
@@ -166,31 +189,17 @@
       }
 
       connectedCallback() {
-        this.$.se.addEventListener("pointerdown", this._pointerDownCorner.bind(this));
-        this.$.ne.addEventListener("pointerdown", this._pointerDownCorner.bind(this));
-        this.$.sw.addEventListener("pointerdown", this._pointerDownCorner.bind(this));
-        this.$.nw.addEventListener("pointerdown", this._pointerDownCorner.bind(this));
-        this.$.marker.addEventListener("pointerdown", this._pointerDownCenter.bind(this));
+        this.$.marker.addEventListener("pointerdown", this._pointerDown.bind(this));
         this.pointermoveListener = this._pointerMove.bind(this);
         this.pointerupListener = this._pointerUp.bind(this);
       }
 
-      _pointerDownCorner(e) {
-        this.groupOfShapes.start(e, ShapeInfoObject.prototype.scaleMurder);
-        this._pointerDown(e);
-      }
-
-      _pointerDownCenter(e) {
-        this.groupOfShapes.start(e, ShapeInfoObject.prototype.move);
-        this._pointerDown(e);
-      }
-
       _pointerDown(e) {
-        this.set("_clones", this.items.map(el => el.info.clone()));
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);
         this.setPointerCapture(e.pointerId);
         DroppadItemMarker._cancelPropDefault(e);
+        this.groupOfShapes.start(e, ShapeInfoObject.prototype.move);
         this.notifyPath("groupOfShapes");
       }
 
@@ -201,27 +210,14 @@
         this.removeEventListener("pointermove", this.pointermoveListener);
         DroppadItemMarker._cancelPropDefault(e);
         setTimeout(function () { this.notifyPath("items"); }.bind(this), 0);
+        //att! The setTimout(func, 0) makes the notifyPath("items") wait until Polymer has updated the selected items so that
+        //     the groupOfShapes and its bounding box is updated with the new position info, and not the current one in the objects..
+        //     This is a cascading problem..
       }
 
       _pointerMove(e) {
-        this.groupOfShapes.move(e, this.zoom);
-        if (this.groupOfShapes.active) {
-          this.groupOfShapes.clones.map(clone => this.groupOfShapes.method.call(clone, this.groupOfShapes.percentX, this.groupOfShapes.percentY));
-        } else {
-          let yMove = this.groupOfShapes.movementY / this.zoom;
-          let xMove = this.groupOfShapes.movementX / this.zoom;
-          if (this.heldKeys["KeyE"] && this.heldKeys["KeyW"])
-            this.groupOfShapes.clones.map(clone => clone.scaleRestrict(this.groupOfShapes.movementY));
-          else if (this.heldKeys["KeyE"] && this.heldKeys["KeyR"])
-            this.groupOfShapes.clones.map(clone => clone.scaleSquare(this.groupOfShapes.movementY));
-          else if (this.heldKeys["KeyE"])
-            this.groupOfShapes.clones.map(clone => clone.scaleFree(xMove, yMove));
-          else if (this.heldKeys["KeyR"])
-            this.groupOfShapes.clones.map(clone => clone.rotate(this.groupOfShapes.movementY));
-          else
-            this.groupOfShapes.clones.map(clone => clone.move(xMove, yMove));
-        }
         DroppadItemMarker._cancelPropDefault(e);
+        this.groupOfShapes.move(e, this.zoom, this.heldKeys);
         this.notifyPath("groupOfShapes");
       }
 

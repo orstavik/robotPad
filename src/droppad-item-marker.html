@@ -10,17 +10,23 @@
         display: block;
       }
 
+      div {
+        position: absolute;
+      }
+
       #marker {
         box-sizing: border-box;
-        position: absolute;
         top: 0;
         left: 0;
         margin: -20px;
         border: 1px dotted grey;
       }
 
-      .minimarker {
-        position: absolute;
+      #marker div {
+        z-index: 10000;
+      }
+
+      .scale {
         width: 6px;
         height: 6px;
         background-color: lightgrey;
@@ -70,19 +76,69 @@
         left: calc(50% - 4px);
         border-radius: 50% 50% 0 0;
       }
+      #marker #move {
+        top: calc(50% - 6px);
+        left: calc(50% - 6px);
+        width: 12px;
+        height: 12px;
+        transform: rotate(45deg);
+        background: url(../images/move.png);
+        background-size: contain;
+      }
+      #marker #rotate{
+        top: -20px;
+        right: -20px;
+        width: 16px;
+        height: 16px;
+        background: url(../images/rotate.png);
+        background-size: contain;
+      }
+      #ne:hover { cursor: nesw-resize;}
+      #sw:hover { cursor: nesw-resize;}
+      #nw:hover { cursor: nwse-resize;}
+      #se:hover { cursor: nwse-resize;}
+      #e:hover { cursor: ew-resize;}
+      #w:hover { cursor: ew-resize;}
+      #n:hover { cursor: ns-resize;}
+      #s:hover { cursor: ns-resize;}
+      #rotate:hover { cursor: ns-resize; }
+      #move:hover { cursor: move; }
+      #marker:hover { cursor: move; }
+
+      .help {
+        display: none;
+        top: -80px;
+        left: -40px;
+        font-size: 10px;
+        width: 180px;
+        height: 10px;
+        background: rgba(0,0,0,0.3);
+        border: none;
+        border-radius: 20px;
+        padding: 15px;
+        line-height: 10px;
+        color: white;
+        font-weight: bold;
+      }
+      #marker .corner:hover ~ #cornerhelp {
+        display: block;
+      }
+
     </style>
     <div id="marker" hidden$="[[!groupOfShapes.show]]"
          style$="left: [[groupOfShapes.left]]px; top: [[groupOfShapes.top]]px; width:  [[groupOfShapes.width]]px; height: [[groupOfShapes.height]]px;">
-      <div id="nw" class="minimarker scale"></div>
-      <div id="ne" class="minimarker scale"></div>
-      <div id="sw" class="minimarker scale"></div>
-      <div id="se" class="minimarker scale"></div>
-      <div id="w" class="minimarker scale"></div>
-      <div id="n" class="minimarker scale"></div>
-      <div id="s" class="minimarker scale"></div>
-      <div id="e" class="minimarker scale"></div>
-      <div id="mover" class="minimarker mover"></div>
-      <div id="rotator" class="minimarker rotator"></div>
+      <div id="nw" class="scale corner"></div>
+      <div id="ne" class="scale corner"></div>
+      <div id="sw" class="scale corner"></div>
+      <div id="se" class="scale corner"></div>
+      <div id="w" class="scale"></div>
+      <div id="n" class="scale"></div>
+      <div id="s" class="scale"></div>
+      <div id="e" class="scale"></div>
+      <div id="move"></div>
+      <div id="rotate"></div>
+
+      <div id="cornerhelp" class="help">Hold "shift" to scale symmetrically.</div>
     </div>
     <template is="dom-if" if="[[!groupOfShapes.show]]">
       <template is="dom-repeat" items="[[groupOfShapes.infos]]">
@@ -104,30 +160,6 @@
           this._addDimension(info.getBoundingRect(factor));
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
-      }
-
-      getPercentOfHeight(info) {
-        return info.height / this.height;
-      }
-
-      getPercentOfWidth(info) {
-        return info.width / this.width;
-      }
-
-      getDistanceFromLeft(info) {
-        return (info.x - this.left);
-      }
-
-      getDistanceFromRight(info) {
-        return (this.right - info.x );
-      }
-
-      getDistanceFromTop(info) {
-        return (this.top - info.y);
-      }
-
-      getDistanceFromBottom(info) {
-        return (info.y - this.bottom);
       }
 
       _addDimension(next) {
@@ -155,18 +187,31 @@
         this.infos = this.runAction();
       }
 
-      stop() {
-        this.startEvent = null;
+      getPercentOfHeight(info) {
+        return info.height / this.height;
       }
 
-      //todo use the heldKeys and the path[0].id to find the method ID.
-      //todo but, how do we keep track of what we need? Can we only rely on percent?
-      //todo Or do we need absolute value/distance in the x/y plane?
-      //todo should we have percentX, percentY, distance up/down, angle moved from center?
+      getPercentOfWidth(info) {
+        return info.width / this.width;
+      }
+
+      getDistanceFromLeft(info) {
+        return (info.x - this.left);
+      }
+
+      getDistanceFromRight(info) {
+        return (this.right - info.x );
+      }
+
+      getDistanceFromTop(info) {
+        return (this.top - info.y);
+      }
+
+      getDistanceFromBottom(info) {
+        return (info.y - this.bottom);
+      }
 
       //todo rotate needs extra angle from center.
-      //todo move needs x/y zoom-relative.
-      //todo scale needs percentX, percentY.
       runAction() {
         let clones = this.originals.map(info => info.clone());
         switch (this.action.method) {
@@ -210,9 +255,7 @@
         }
       }
 
-      //todo make intuitive grab handles on the marker.
       //todo fix the rotation of groups of elements.
-      //todo fix the scaling of groups of elements.
       //todo many of the functions should have both individual and group values..
       //
       //todo move over the copy and paste functionality
@@ -266,11 +309,13 @@
         let direction = e.target.id;
         console.log(direction);
         let shift = heldKeys["ShiftLeft"] || heldKeys["ShiftRight"];
-        let action = "move";
+        let action = "move"; //default action is move
         if (e.target.classList.contains("scale") || heldKeys["KeyE"])
           action = "scale";
-        else if (heldKeys["KeyR"])
+        else if (e.target.id == "rotate" || heldKeys["KeyR"])
           action = "rotate";
+        else if (e.target.id == "move")
+          action = "move";
         return {method: action, direction: direction, shift: shift};
       }
     }

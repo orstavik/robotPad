@@ -33,6 +33,25 @@ class ShapeInfoObject {
     this.y += y;
   }
 
+  scaleDirection(xPercent, yPercent, topPercent, leftPercent, direction) {
+    if (direction.indexOf("s") >= 0) {
+      this.y += topPercent * yPercent;
+      this.h *= yPercent;
+    }
+    if (direction.indexOf("n") >= 0) {
+      this.y += topPercent * yPercent;
+      this.h *= yPercent;
+    }
+    if (direction.indexOf("e") >= 0) {
+      this.x += leftPercent * xPercent;
+      this.w *= xPercent;
+    }
+    if (direction.indexOf("n") >= 0) {
+      this.x += leftPercent * xPercent;
+      this.w *= xPercent;
+    }
+  }
+
   scaleSquare(y) {
     this.w = this.h = this.h + y / 20;
   }
@@ -59,12 +78,12 @@ class ShapeInfoObject {
 
   getLeft(widthCount) {
     let normal = this.x - (widthCount * (this.w - 1) / 2);
-    return this.w < 0 ? normal + widthCount*this.w : normal;
+    return this.w < 0 ? normal + widthCount * this.w : normal;
   }
 
   getTop(heightCount) {
     let normal = this.y - (heightCount * (this.h - 1) / 2);
-    return this.h < 0 ?  normal + heightCount*this.h : normal;
+    return this.h < 0 ? normal + heightCount * this.h : normal;
   }
 
   getBoundingRect(factor) {

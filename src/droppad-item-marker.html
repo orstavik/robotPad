@@ -73,19 +73,19 @@
     </style>
     <div id="marker" hidden$="[[!groupOfShapes.show]]"
          style$="left: [[groupOfShapes.left]]px; top: [[groupOfShapes.top]]px; width:  [[groupOfShapes.width]]px; height: [[groupOfShapes.height]]px;">
-      <div id="nw" class="minimarker corner"></div>
-      <div id="ne" class="minimarker corner"></div>
-      <div id="sw" class="minimarker corner"></div>
-      <div id="se" class="minimarker corner"></div>
-      <div id="w" class="minimarker edge"></div>
-      <div id="n" class="minimarker edge"></div>
-      <div id="s" class="minimarker edge"></div>
-      <div id="e" class="minimarker edge"></div>
+      <div id="nw" class="minimarker scale"></div>
+      <div id="ne" class="minimarker scale"></div>
+      <div id="sw" class="minimarker scale"></div>
+      <div id="se" class="minimarker scale"></div>
+      <div id="w" class="minimarker scale"></div>
+      <div id="n" class="minimarker scale"></div>
+      <div id="s" class="minimarker scale"></div>
+      <div id="e" class="minimarker scale"></div>
       <div id="mover" class="minimarker mover"></div>
       <div id="rotator" class="minimarker rotator"></div>
     </div>
     <template is="dom-if" if="[[!groupOfShapes.show]]">
-      <template is="dom-repeat" items="[[groupOfShapes.clones]]">
+      <template is="dom-repeat" items="[[groupOfShapes.infos]]">
         <drop-shape id="copy[[item.number]]" class="copy" info="[[item]]"></drop-shape>
       </template>
     </template>
@@ -95,66 +95,89 @@
     class GroupOfShapes {
 
       constructor(infos, factor) {
-        this.infos = infos;
-        this.clones = this.infos.map(info => info.clone());
-        this._calcGroupBorders(this.infos, factor);
+        this.originals = infos;
+        this.infos = infos.map(info => info.clone());
+        this._calcDimensions(infos, factor);
         this.show = true;
       }
 
-      _calcGroupBorders(infos, factor) {
+      _calcDimensions(infos, factor) {
         for (let info of infos)
-          this._addBox(info.getBoundingRect(factor));
+          this._addDimension(info.getBoundingRect(factor));
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
       }
 
-      _addBox(next) {
+      getPercentOfHeight(info) {
+        return info.height / this.height;
+      }
+
+      getPercentOfWidth(info) {
+        return info.width / this.width;
+      }
+
+      getPercentFromLeft(info) {
+        return (info.x - this.left) / this.width;
+      }
+
+      getPercentFromTop(info) {
+        return (this.top - info.y) / this.height;
+      }
+
+      _addDimension(next) {
         this.left = Math.min(this.left || Number.MAX_VALUE, next.left);
         this.top = Math.min(this.top || Number.MAX_VALUE, next.top);
         this.right = Math.max(this.right || -Number.MAX_VALUE, next.right);
         this.bottom = Math.max(this.bottom || -Number.MAX_VALUE, next.bottom);
       }
 
-      start(e, method) {
+      start(e, action) {
         this.show = false;
-        this.startEvent = this.lastEvent = e;
-        console.log(e.path[0]);
-        this.active = e.target.id;
-        this.method = method;
+        this.startEvent = e;
+        this.action = action;
       }
 
-      move(e, zoom, heldKeys) {
-        this.movementX = e.clientX - this.lastEvent.clientX;
-        this.movementY = e.clientY - this.lastEvent.clientY;
-        this.xMove = this.movementX/zoom;
-        this.yMove = this.movementY/zoom;
-        this.percentX = (this.movementX /zoom) / this.width;
-        this.percentY = (this.movementY /zoom) / this.height;
-        this.lastEvent = e;
-        this.runAction(heldKeys);
+      move(e, zoom) {
+        this.xMove = (e.clientX- this.startEvent.clientX) / zoom;
+        this.yMove = (e.clientY- this.startEvent.clientY) / zoom;
+        if (this.action.shift)
+          this.xMove= this.yMove;
+        this.percentX = 1 + this.xMove / this.width;
+        this.percentY = 1 + this.yMove / this.height;
+        this.infos = this.runAction();
       }
 
-      runAction(heldKeys) {
-        console.log(this.active);
-        if (this.active) {
-          for (let clone of this.clones)
-            this.method.call(clone, this.percentX, this.percentY);
-        } else {
-          if (heldKeys["KeyE"] && heldKeys["KeyW"])
-            this.clones.map(clone => clone.scaleRestrict(this.movementY));
-          else if (heldKeys["KeyE"] && heldKeys["KeyR"])
-            this.clones.map(clone => clone.scaleSquare(this.movementY));
-          else if (heldKeys["KeyE"])
-            this.clones.map(clone => clone.scaleFree(this.xMove, this.yMove));
-          else if (heldKeys["KeyR"])
-            this.clones.map(clone => clone.rotate(this.movementY));
-          else
-            this.clones.map(clone => clone.move(this.xMove, this.yMove));
+      stop() {
+        this.startEvent = null;
+      }
+
+      //todo use the heldKeys and the path[0].id to find the method ID.
+      //todo but, how do we keep track of what we need? Can we only rely on percent?
+      //todo Or do we need absolute value/distance in the x/y plane?
+      //todo should we have percentX, percentY, distance up/down, angle moved from center?
+
+      //todo rotate needs extra angle from center.
+      //todo move needs x/y zoom-relative.
+      //todo scale needs percentX, percentY.
+      runAction() {
+        let clones = this.originals.map(info => info.clone());
+        switch (this.action.method) {
+          case "scale":
+            return clones.map(function(info){
+              info.scaleDirection(
+                this.percentX,
+                this.percentY,
+                this.getPercentFromLeft(info),
+                this.getPercentFromTop(info),
+                this.action.direction
+              );
+              return info;}.bind(this)
+            );
+          case "rotate":
+            return clones.map(function(info){info.rotate(this.movementY); return info;}.bind(this));
+          case "move":
+            return clones.map(function(info){info.move(this.xMove, this.yMove); return info;}.bind(this));
         }
-      }
-
-      scale(e, zoom){
-        this.move(e, zoom);
       }
     }
 
@@ -199,17 +222,20 @@
         this.addEventListener("pointerup", this.pointerupListener);
         this.setPointerCapture(e.pointerId);
         DroppadItemMarker._cancelPropDefault(e);
-        this.groupOfShapes.start(e, ShapeInfoObject.prototype.move);
+        let action = this.setMoveAction(e, this.heldKeys);
+        this.groupOfShapes.start(e, action);
         this.notifyPath("groupOfShapes");
       }
 
       _pointerUp(e) {
-        this.dispatchEvent(new CustomEvent("changed", {detail: this.groupOfShapes.clones}));
+        this.dispatchEvent(new CustomEvent("changed", {detail: this.groupOfShapes.infos}));
         this.releasePointerCapture(e.pointerId);
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
         DroppadItemMarker._cancelPropDefault(e);
-        setTimeout(function () { this.notifyPath("items"); }.bind(this), 0);
+        setTimeout(function () {
+          this.notifyPath("items");
+        }.bind(this), 0);
         //att! The setTimout(func, 0) makes the notifyPath("items") wait until Polymer has updated the selected items so that
         //     the groupOfShapes and its bounding box is updated with the new position info, and not the current one in the objects..
         //     This is a cascading problem..
@@ -217,13 +243,24 @@
 
       _pointerMove(e) {
         DroppadItemMarker._cancelPropDefault(e);
-        this.groupOfShapes.move(e, this.zoom, this.heldKeys);
+        this.groupOfShapes.move(e, this.zoom);
         this.notifyPath("groupOfShapes");
       }
 
       static _cancelPropDefault(e) {
         e.stopPropagation();
         e.preventDefault();
+      }
+
+      setMoveAction(e, heldKeys) {
+        let direction = e.target.id;
+        let shift = heldKeys["ShiftLeft"] || heldKeys["ShiftRight"];
+        let action = "move";
+        if (e.target.classList.contains("scale") || heldKeys["KeyE"])
+          action = "scale";
+        else if (heldKeys["KeyR"])
+          action = "rotate";
+        return {method: action, direction: direction, shift: shift};
       }
     }
     customElements.define(DroppadItemMarker.is, DroppadItemMarker);

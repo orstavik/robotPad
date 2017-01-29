@@ -95,8 +95,6 @@
     class GroupOfShapes {
 
       constructor(infos, factor) {
-        this.originals = infos;
-        this.infos = infos.map(info => info.clone());
         this._calcDimensions(infos, factor);
         this.show = true;
       }
@@ -139,7 +137,9 @@
         this.bottom = Math.max(this.bottom || -Number.MAX_VALUE, next.bottom);
       }
 
-      start(e, action) {
+      start(e, action, infos) {
+        this.originals = infos;
+        this.infos = this.originals.map(info => info.clone());
         this.show = false;
         this.startEvent = e;
         this.action = action;
@@ -233,7 +233,7 @@
         this.setPointerCapture(e.pointerId);
         DroppadItemMarker._cancelPropDefault(e);
         let action = this.setMoveAction(e, this.heldKeys);
-        this.groupOfShapes.start(e, action);
+        this.groupOfShapes.start(e, action, this.items.map(el => el.info));
         this.notifyPath("groupOfShapes");
       }
 

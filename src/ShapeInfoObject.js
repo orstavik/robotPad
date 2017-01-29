@@ -33,22 +33,22 @@ class ShapeInfoObject {
     this.y += y;
   }
 
-  scaleDirection(xPercent, yPercent, topPercent, leftPercent, direction) {
+  scaleDirection(xPercent, yPercent, topDistance, rightDistance, bottomDistance, leftDistance, direction) {
     if (direction.indexOf("s") >= 0) {
-      this.y += topPercent * yPercent;
-      this.h *= yPercent;
+      this.y -= topDistance * yPercent;
+      this.h *= (1+yPercent);
     }
     if (direction.indexOf("n") >= 0) {
-      this.y += topPercent * yPercent;
-      this.h *= yPercent;
+      this.y -= bottomDistance * yPercent;
+      this.h *= (1-yPercent);
     }
     if (direction.indexOf("e") >= 0) {
-      this.x += leftPercent * xPercent;
-      this.w *= xPercent;
+      this.x += leftDistance * xPercent;
+      this.w *= (1+xPercent);
     }
-    if (direction.indexOf("n") >= 0) {
-      this.x += leftPercent * xPercent;
-      this.w *= xPercent;
+    if (direction.indexOf("w") >= 0) {
+      this.x += rightDistance * xPercent;
+      this.w *= (1-xPercent);
     }
   }
 

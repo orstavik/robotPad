@@ -116,12 +116,20 @@
         return info.width / this.width;
       }
 
-      getPercentFromLeft(info) {
-        return (info.x - this.left) / this.width;
+      getDistanceFromLeft(info) {
+        return (info.x - this.left);
       }
 
-      getPercentFromTop(info) {
-        return (this.top - info.y) / this.height;
+      getDistanceFromRight(info) {
+        return (this.right - info.x );
+      }
+
+      getDistanceFromTop(info) {
+        return (this.top - info.y);
+      }
+
+      getDistanceFromBottom(info) {
+        return (info.y - this.bottom);
       }
 
       _addDimension(next) {
@@ -142,8 +150,8 @@
         this.yMove = (e.clientY- this.startEvent.clientY) / zoom;
         if (this.action.shift)
           this.xMove= this.yMove;
-        this.percentX = 1 + this.xMove / this.width;
-        this.percentY = 1 + this.yMove / this.height;
+        this.percentX = this.xMove / this.width;
+        this.percentY = this.yMove / this.height;
         this.infos = this.runAction();
       }
 
@@ -167,14 +175,16 @@
               info.scaleDirection(
                 this.percentX,
                 this.percentY,
-                this.getPercentFromLeft(info),
-                this.getPercentFromTop(info),
+                this.getDistanceFromTop(info),
+                this.getDistanceFromRight(info),
+                this.getDistanceFromBottom(info),
+                this.getDistanceFromLeft(info),
                 this.action.direction
               );
               return info;}.bind(this)
             );
           case "rotate":
-            return clones.map(function(info){info.rotate(this.movementY); return info;}.bind(this));
+            return clones.map(function(info){info.rotate(this.yMove); return info;}.bind(this));
           case "move":
             return clones.map(function(info){info.move(this.xMove, this.yMove); return info;}.bind(this));
         }
@@ -254,6 +264,7 @@
 
       setMoveAction(e, heldKeys) {
         let direction = e.target.id;
+        console.log(direction);
         let shift = heldKeys["ShiftLeft"] || heldKeys["ShiftRight"];
         let action = "move";
         if (e.target.classList.contains("scale") || heldKeys["KeyE"])

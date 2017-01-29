@@ -177,11 +177,16 @@
         this.action = action;
       }
 
-      move(e, zoom) {
+      move(e, zoom, shift) {
         this.xMove = (e.clientX- this.startEvent.clientX) / zoom;
         this.yMove = (e.clientY- this.startEvent.clientY) / zoom;
-        if (this.action.shift)
+        if (shift)
           this.xMove= this.yMove;
+        //snap to start position if move in both directions is less than 3
+        if (Math.abs(this.xMove) < 6 && Math.abs(this.yMove) < 6){
+          console.log("snap");
+          this.yMove = this.xMove = 0;
+        }
         this.percentX = this.xMove / this.width;
         this.percentY = this.yMove / this.height;
         this.infos = this.runAction();
@@ -256,10 +261,7 @@
       }
 
       //todo fix the rotation of groups of elements.
-      //todo many of the functions should have both individual and group values..
-      //
       //todo move over the copy and paste functionality
-
       _itemsChanged(items) {
         return items && items.length ? new GroupOfShapes(items.map(el => el.info), 40) : null;
       }
@@ -296,7 +298,8 @@
 
       _pointerMove(e) {
         DroppadItemMarker._cancelPropDefault(e);
-        this.groupOfShapes.move(e, this.zoom);
+        let shift = this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"];
+        this.groupOfShapes.move(e, this.zoom, shift);
         this.notifyPath("groupOfShapes");
       }
 
@@ -308,7 +311,6 @@
       setMoveAction(e, heldKeys) {
         let direction = e.target.id;
         console.log(direction);
-        let shift = heldKeys["ShiftLeft"] || heldKeys["ShiftRight"];
         let action = "move"; //default action is move
         if (e.target.classList.contains("scale") || heldKeys["KeyE"])
           action = "scale";
@@ -316,7 +318,7 @@
           action = "rotate";
         else if (e.target.id == "move")
           action = "move";
-        return {method: action, direction: direction, shift: shift};
+        return {method: action, direction: direction};
       }
     }
     customElements.define(DroppadItemMarker.is, DroppadItemMarker);

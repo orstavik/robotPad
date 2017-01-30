@@ -159,7 +159,6 @@
       #marker .corner:hover ~ #cornerhelp {
         display: block;
       }
-
     </style>
     <div id="marker" hidden$="[[!groupOfShapes.show]]"
          style$="left: [[groupOfShapes.left]]px; top: [[groupOfShapes.top]]px; width:  [[groupOfShapes.width]]px; height: [[groupOfShapes.height]]px;">
@@ -175,6 +174,8 @@
       <div id="rotate"></div>
 
       <div id="cornerhelp" class="help">Hold "shift" to scale symmetrically.</div>
+      <!--<div id="rotatehelp" class="help">Hold "shift" to snap to nearest 30 deg.</div>-->
+      <!--<div id="rotatehelp" class="help">Hold "shift" to rotate the elements individually.</div>-->
     </div>
     <template is="dom-if" if="[[!groupOfShapes.show]]">
       <template is="dom-repeat" items="[[groupOfShapes.infos]]">
@@ -196,11 +197,6 @@
           this._addDimension(info.getBoundingRect(factor));
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
-        this.center = {
-          x: this.left,// + (this.width/ 2),
-          y: this.top// + (this.height / 2)
-        };
-        console.log(this.center);
       }
 
       _addDimension(next) {
@@ -210,40 +206,20 @@
         this.bottom = Math.max(this.bottom || -Number.MAX_VALUE, next.bottom);
       }
 
-      start(e, action, infos) {
+      start(action, infos) {
         this.originals = infos;
         this.infos = this.originals.map(info => info.clone());
         this.show = false;
-        this.startEvent = e;
-        this.startAngle = GroupOfShapes.calcAngle(this.center, {x: e.clientX, y: e.clientY});
         this.action = action;
       }
 
-      move(e, zoom, shift) {
-        this.xMove = (e.clientX - this.startEvent.clientX) / zoom;
-        this.yMove = (e.clientY - this.startEvent.clientY) / zoom;
-        if (shift)
-          this.xMove = this.yMove;
-        //snap to start position if move in both directions is less than 3
-        if (Math.abs(this.xMove) < 6 && Math.abs(this.yMove) < 6)
-          this.yMove = this.xMove = 0;
+      move(e, xMove, yMove, angle) {
+        this.xMove = xMove;
+        this.yMove = yMove;
         this.percentX = this.xMove / this.width;
         this.percentY = this.yMove / this.height;
-        this.angleMove = (GroupOfShapes.calcAngle(this.center, {x: e.clientX, y: e.clientY}) - this.startAngle);// + 360) % 360;
+        this.angleMove = angle;
         this.infos = this.runAction();
-      }
-
-      static calcAngle(p1, p2) {
-        console.log(p1);
-        console.log(p2);
-        let y = p2.y - p1.y;
-        let x = p2.x - p1.x;
-        var angleRadians = Math.atan2(y, x) - 0.5*Math.PI;
-        console.log(angleRadians);
-        return angleRadians;
-//        let degree = (angleRadians * 180) / Math.PI;
-//        console.log(degree);
-//        return degree;
       }
 
       getPercentOfHeight(info) {
@@ -270,7 +246,6 @@
         return (info.y - this.bottom);
       }
 
-      //todo rotate needs extra angle from center.
       runAction() {
         let clones = this.originals.map(info => info.clone());
         switch (this.action.method) {
@@ -290,7 +265,7 @@
             );
           case "rotate":
             return clones.map(function (info) {
-              info.rotate2(this.angleMove);
+              info.rotate(this.angleMove);
               return info;
             }.bind(this));
           case "move":
@@ -316,7 +291,6 @@
               computed: "_itemsChanged(items)"
             },
             heldkeys: Array,
-//            zoom: Number,
             p2p: PointToPoint
           }
         }
@@ -324,9 +298,6 @@
 
       //todo fix the rotation of groups of elements.
       //todo move over the copy and paste functionality
-
-      //todo make the canvas return a good tool to find the 0,0 to logical positions.
-      //todo make a ConvertScreenCoordinatesToLogicalCoordinates object in canvas canvas that can be transported out into the rest of the app as a read only unit
       _itemsChanged(items) {
         return items && items.length ? new GroupOfShapes(items.map(el => el.info), 40) : null;
       }
@@ -343,7 +314,11 @@
         this.setPointerCapture(e.pointerId);
         DroppadItemMarker._cancelPropDefault(e);
         let action = this.setMoveAction(e, this.heldKeys);
-        this.groupOfShapes.start(e, action, this.items.map(el => el.info));
+        this.markerCenterScreen = DroppadItemMarker.getScreenCenter(this.$.marker);
+        this.startEvent = e;
+        this.startAngle = DroppadItemMarker.calcAngle(this.markerCenterScreen, {x: e.clientX, y: e.clientY});
+        this.groupOfShapes.start(action, this.items.map(el => el.info));
+
         this.notifyPath("groupOfShapes");
       }
 
@@ -363,8 +338,16 @@
 
       _pointerMove(e) {
         DroppadItemMarker._cancelPropDefault(e);
-        let shift = this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"];
-        this.groupOfShapes.move(e, this.p2p.zoom, shift);
+        let xMove = this.p2p.calcLogicalDistance(e.clientX, this.startEvent.clientX);
+        let yMove = this.p2p.calcLogicalDistance(e.clientY, this.startEvent.clientY);
+        let angle = DroppadItemMarker.calcAngle(this.markerCenterScreen, {x: e.clientX, y: e.clientY});
+        //snap  start
+        if (Math.abs(xMove) < 6 && Math.abs(yMove) < 6)
+          xMove = yMove = 0;
+        else if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"])
+          xMove = yMove;
+        //snap  end
+        this.groupOfShapes.move(e, xMove, yMove, angle);
         this.notifyPath("groupOfShapes");
       }
 
@@ -375,7 +358,6 @@
 
       setMoveAction(e, heldKeys) {
         let direction = e.target.id;
-        console.log(direction);
         let action = "move"; //default action is move
         if (e.target.classList.contains("scale") || heldKeys["KeyE"])
           action = "scale";
@@ -384,6 +366,25 @@
         else if (e.target.id == "move")
           action = "move";
         return {method: action, direction: direction};
+      }
+
+      static getScreenCenter(elem) {
+        const box = elem.getBoundingClientRect();
+        return {x: box.left + box.width / 2, y: box.top + box.height / 2};
+      }
+
+      static calcAngle(c, p1) {
+        let p0 = {x: c.x, y: -1};
+        let p0c = Math.sqrt(Math.pow(c.x - p0.x, 2) +
+          Math.pow(c.y - p0.y, 2)); // p0->c (b)
+        let p1c = Math.sqrt(Math.pow(c.x - p1.x, 2) +
+          Math.pow(c.y - p1.y, 2)); // p1->c (a)
+        let p0p1 = Math.sqrt(Math.pow(p1.x - p0.x, 2) +
+          Math.pow(p1.y - p0.y, 2)); // p0->p1 (c)
+        let number = Math.acos((p1c * p1c + p0c * p0c - p0p1 * p0p1) / (2 * p1c * p0c));
+        if (p1.x < c.x)
+          number= 2*Math.PI-number;
+        return number;
       }
     }
     customElements.define(DroppadItemMarker.is, DroppadItemMarker);

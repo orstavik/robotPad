@@ -58,9 +58,9 @@
       }
 
       setZoom(zoom, x, y) {
-        let before = this.toLogicPoint(x, y);
+        let before = this.calcLogicPoint(x, y);
         this.zoom *= 1 - (zoom);
-        let after = this.toLogicPoint(x, y);
+        let after = this.calcLogicPoint(x, y);
         this.moveLogical(after.x - before.x, after.y - before.y);
       }
 
@@ -74,10 +74,14 @@
         this.left += leftShift * this.zoom;
       }
 
-      toLogicPoint(screenX, screenY) {
+      calcLogicPoint(screenX, screenY) {
         const x2 = (screenX - this.left) / this.zoom;
         const y2 = (screenY - this.top) / this.zoom;
         return {x: x2, y: y2};
+      }
+
+      calcLogicalDistance(XorY1, XorY2) {
+        return (XorY1 - XorY2) / this.zoom;
       }
 
       reset(left, top) {
@@ -99,7 +103,7 @@
             p2p: {
               type: PointToPoint,
               value: function () {
-                return new PointToPoint(window.innerWidth/2, window.innerHeight/2);
+                return new PointToPoint(window.innerWidth / 2, window.innerHeight / 2);
               },
               notify: true
             }
@@ -115,7 +119,7 @@
       }
 
       reset() {
-        this.set("p2p", new PointToPoint(window.innerWidth/2, window.innerHeight/2));
+        this.set("p2p", new PointToPoint(window.innerWidth / 2, window.innerHeight / 2));
       }
 
       _mouseDown(e) {
@@ -126,7 +130,7 @@
         this.pointDown = e;
         if ((this.pointDown.timeStamp - lastTime) < 300) {
           this.removeFireDeselect();
-          this.dispatchEvent(new CustomEvent("new-shape", {detail: this.p2p.toLogicPoint(e.clientX, e.clientY)}));
+          this.dispatchEvent(new CustomEvent("new-shape", {detail: this.p2p.calcLogicPoint(e.clientX, e.clientY)}));
         } else {
           this.fireDeselect = setTimeout(function () {
             this.dispatchEvent(new CustomEvent("deselect"), null);
@@ -154,7 +158,7 @@
         if (this.fireDeselect)
           this.removeFireDeselect();
         this.p2p.moveScreen(e.clientX - this.pointDown.clientX, e.clientY - this.pointDown.clientY);
-        this.notifyPath("p2p");
+        this.notifyPath("p2p"); //todo delay this using requestAnimationFrame??
         DroppadCanvasCanvas.endAll(e);
         this.pointDown = e;
       }

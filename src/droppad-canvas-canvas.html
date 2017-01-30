@@ -17,42 +17,76 @@
       #crossX, #crossY, #center {
         display: block;
         position: absolute;
-      }
-
-      #center {
-        box-sizing: border-box;
-        overflow: visible;
-        top: 50%;
-        left: 50%;
-      }
-
-      #crossX, #crossY {
-        pointer-events: none;
         box-sizing: border-box;
         top: 0;
         left: 0;
       }
 
+      #center {
+        overflow: visible;
+      }
+
+      #crossX, #crossY {
+        pointer-events: none;
+      }
+
       #crossX {
         border-bottom: 1px dashed darkgray;
-        height: 50%;
         width: 100%;
       }
 
       #crossY {
         border-right: 1px dashed darkgray;
         height: 100%;
-        width: 50%;
       }
     </style>
-    <div id="crossY" style$="transform: translateX([[leftShift]]px);"></div>
-    <div id="crossX" style$="transform: translateY([[topShift]]px);"></div>
-    <div id="center" style$="transform: translateX([[leftShift]]px) translateY([[topShift]]px) scale([[zoom]]);">
+    <div id="crossY" style$="transform: translateX([[p2p.left]]px);"></div>
+    <div id="crossX" style$="transform: translateY([[p2p.top]]px);"></div>
+    <div id="center"
+         style$="transform: translateX([[p2p.left]]px) translateY([[p2p.top]]px) scale([[p2p.zoom]]);">
       <slot></slot>
     </div>
   </template>
 
   <script>
+    class PointToPoint {
+
+      constructor(left, top) {
+        this.zoom = 1;
+        this.top = top;
+        this.left = left;
+      }
+
+      setZoom(zoom, x, y) {
+        let before = this.toLogicPoint(x, y);
+        this.zoom *= 1 - (zoom);
+        let after = this.toLogicPoint(x, y);
+        this.moveLogical(after.x - before.x, after.y - before.y);
+      }
+
+      moveScreen(leftShift, topShift) {
+        this.top += topShift;
+        this.left += leftShift;
+      }
+
+      moveLogical(leftShift, topShift) {
+        this.top += topShift * this.zoom;
+        this.left += leftShift * this.zoom;
+      }
+
+      toLogicPoint(screenX, screenY) {
+        const x2 = (screenX - this.left) / this.zoom;
+        const y2 = (screenY - this.top) / this.zoom;
+        return {x: x2, y: y2};
+      }
+
+      reset(left, top) {
+        this.zoom = 1;
+        this.left = left;
+        this.top = top;
+      }
+    }
+
     class DroppadCanvasCanvas extends Polymer.Element {
       static get is() {
         return "droppad-canvas-canvas";
@@ -61,39 +95,14 @@
       static get config() {
         return {
           properties: {
-            marginLeft: {
-              type: Number,
-              value: 0
-            },
-            zoom: {
-              type: Number,
-              value: 1,
-              notify: true
-            },
-            center: {
-              type: Object,
-              value: {
-                x: 0,
-                y: 0
+            pointDown: Object,
+            p2p: {
+              type: PointToPoint,
+              value: function () {
+                return new PointToPoint(window.innerWidth/2, window.innerHeight/2);
               },
               notify: true
-            },
-            position: {
-              type: Object,
-              value: {
-                x: 0,
-                y: 0
-              }
-            },
-            leftShift: {
-              type: Number,
-              value: 0
-            },
-            topShift: {
-              type: Number,
-              value: 0
-            },
-            pointDown: Object,
+            }
           }
         }
       }
@@ -105,6 +114,10 @@
         this.mouseUpListener = this._mouseUp.bind(this);
       }
 
+      reset() {
+        this.set("p2p", new PointToPoint(window.innerWidth/2, window.innerHeight/2));
+      }
+
       _mouseDown(e) {
         if (e.path[0] != this)
           return;
@@ -113,8 +126,7 @@
         this.pointDown = e;
         if ((this.pointDown.timeStamp - lastTime) < 300) {
           this.removeFireDeselect();
-          this.setPosition(e);
-          this.dispatchEvent(new CustomEvent("new-shape", {detail: this.position}));
+          this.dispatchEvent(new CustomEvent("new-shape", {detail: this.p2p.toLogicPoint(e.clientX, e.clientY)}));
         } else {
           this.fireDeselect = setTimeout(function () {
             this.dispatchEvent(new CustomEvent("deselect"), null);
@@ -141,8 +153,8 @@
       _mouseMove(e) {
         if (this.fireDeselect)
           this.removeFireDeselect();
-        this.topShift += e.clientY - this.pointDown.clientY;
-        this.leftShift += e.clientX - this.pointDown.clientX;
+        this.p2p.moveScreen(e.clientX - this.pointDown.clientX, e.clientY - this.pointDown.clientY);
+        this.notifyPath("p2p");
         DroppadCanvasCanvas.endAll(e);
         this.pointDown = e;
       }
@@ -152,21 +164,9 @@
         e.preventDefault();
       }
 
-      setPosition(e) {
-        const center = this.$.center.getBoundingClientRect();
-        this.center = {x: center.left, y: center.top};
-        const x = (e.clientX - this.center.x) / this.zoom;
-        const y = (e.clientY - this.center.y) / this.zoom;
-        this.position = {x: x, y: y};
-      }
-
       _mouseScroll(e) {
-        this.setPosition(e);
-        let beforePosition = Object.assign({}, this.position);
-        this.zoom *= 1-(e.deltaY/500);
-        this.setPosition(e);
-        this.leftShift += (this.position.x - beforePosition.x) * this.zoom;
-        this.topShift += (this.position.y - beforePosition.y) * this.zoom;
+        this.p2p.setZoom(e.deltaY / 500, e.clientX, e.clientY);
+        this.notifyPath("p2p");
       }
     }
     customElements.define(DroppadCanvasCanvas.is, DroppadCanvasCanvas);

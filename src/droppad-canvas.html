@@ -21,13 +21,13 @@
       }
 
     </style>
-    <droppad-canvas-canvas center="{{position}}" zoom="{{zoom}}" on-new-shape="_newShape" on-deselect="_deselectAll">
+    <droppad-canvas-canvas id="canvas" center="{{position}}" p2p="{{p2p}}" on-new-shape="_newShape" on-deselect="_deselectAll">
       <droppad-selector id="dropSelector" selected-elements="{{selectedDrops}}">
         <template is="dom-repeat" items="[[drops]]">
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
         </template>
       </droppad-selector>
-      <droppad-item-marker id="square" items="[[selectedDrops]]" on-changed="_selectedChanged" held-keys="[[heldKeys]]" zoom="[[zoom]]"></droppad-item-marker>
+      <droppad-item-marker id="square" items="[[selectedDrops]]" on-changed="_selectedChanged" held-keys="[[heldKeys]]" p2p="[[p2p]]"></droppad-item-marker>
     </droppad-canvas-canvas>
   </template>
 
@@ -73,7 +73,7 @@
         if (e.code === "Escape")
           this.$.dropSelector.deselectAll();
         else if (e.code === "Digit0" && this.heldKeys["ControlLeft"])
-          this.zoom = 1;
+          this.$.canvas.reset();
         else if (e.code === "KeyD") {
           this._deleteElem();
           this.$.dropSelector.deselectAll();

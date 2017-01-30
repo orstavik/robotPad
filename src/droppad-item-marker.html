@@ -76,6 +76,7 @@
         left: calc(50% - 4px);
         border-radius: 50% 50% 0 0;
       }
+
       #marker #move {
         top: calc(50% - 6px);
         left: calc(50% - 6px);
@@ -85,7 +86,8 @@
         background: url(../images/move.png);
         background-size: contain;
       }
-      #marker #rotate{
+
+      #marker #rotate {
         top: -20px;
         right: -20px;
         width: 16px;
@@ -93,17 +95,50 @@
         background: url(../images/rotate.png);
         background-size: contain;
       }
-      #ne:hover { cursor: nesw-resize;}
-      #sw:hover { cursor: nesw-resize;}
-      #nw:hover { cursor: nwse-resize;}
-      #se:hover { cursor: nwse-resize;}
-      #e:hover { cursor: ew-resize;}
-      #w:hover { cursor: ew-resize;}
-      #n:hover { cursor: ns-resize;}
-      #s:hover { cursor: ns-resize;}
-      #rotate:hover { cursor: ns-resize; }
-      #move:hover { cursor: move; }
-      #marker:hover { cursor: move; }
+
+      #ne:hover {
+        cursor: nesw-resize;
+      }
+
+      #sw:hover {
+        cursor: nesw-resize;
+      }
+
+      #nw:hover {
+        cursor: nwse-resize;
+      }
+
+      #se:hover {
+        cursor: nwse-resize;
+      }
+
+      #e:hover {
+        cursor: ew-resize;
+      }
+
+      #w:hover {
+        cursor: ew-resize;
+      }
+
+      #n:hover {
+        cursor: ns-resize;
+      }
+
+      #s:hover {
+        cursor: ns-resize;
+      }
+
+      #rotate:hover {
+        cursor: ns-resize;
+      }
+
+      #move:hover {
+        cursor: move;
+      }
+
+      #marker:hover {
+        cursor: move;
+      }
 
       .help {
         display: none;
@@ -112,7 +147,7 @@
         font-size: 10px;
         width: 180px;
         height: 10px;
-        background: rgba(0,0,0,0.3);
+        background: rgba(0, 0, 0, 0.3);
         border: none;
         border-radius: 20px;
         padding: 15px;
@@ -120,6 +155,7 @@
         color: white;
         font-weight: bold;
       }
+
       #marker .corner:hover ~ #cornerhelp {
         display: block;
       }
@@ -160,6 +196,11 @@
           this._addDimension(info.getBoundingRect(factor));
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
+        this.center = {
+          x: this.left,// + (this.width/ 2),
+          y: this.top// + (this.height / 2)
+        };
+        console.log(this.center);
       }
 
       _addDimension(next) {
@@ -174,22 +215,35 @@
         this.infos = this.originals.map(info => info.clone());
         this.show = false;
         this.startEvent = e;
+        this.startAngle = GroupOfShapes.calcAngle(this.center, {x: e.clientX, y: e.clientY});
         this.action = action;
       }
 
       move(e, zoom, shift) {
-        this.xMove = (e.clientX- this.startEvent.clientX) / zoom;
-        this.yMove = (e.clientY- this.startEvent.clientY) / zoom;
+        this.xMove = (e.clientX - this.startEvent.clientX) / zoom;
+        this.yMove = (e.clientY - this.startEvent.clientY) / zoom;
         if (shift)
-          this.xMove= this.yMove;
+          this.xMove = this.yMove;
         //snap to start position if move in both directions is less than 3
-        if (Math.abs(this.xMove) < 6 && Math.abs(this.yMove) < 6){
-          console.log("snap");
+        if (Math.abs(this.xMove) < 6 && Math.abs(this.yMove) < 6)
           this.yMove = this.xMove = 0;
-        }
         this.percentX = this.xMove / this.width;
         this.percentY = this.yMove / this.height;
+        this.angleMove = (GroupOfShapes.calcAngle(this.center, {x: e.clientX, y: e.clientY}) - this.startAngle);// + 360) % 360;
         this.infos = this.runAction();
+      }
+
+      static calcAngle(p1, p2) {
+        console.log(p1);
+        console.log(p2);
+        let y = p2.y - p1.y;
+        let x = p2.x - p1.x;
+        var angleRadians = Math.atan2(y, x) - 0.5*Math.PI;
+        console.log(angleRadians);
+        return angleRadians;
+//        let degree = (angleRadians * 180) / Math.PI;
+//        console.log(degree);
+//        return degree;
       }
 
       getPercentOfHeight(info) {
@@ -221,22 +275,29 @@
         let clones = this.originals.map(info => info.clone());
         switch (this.action.method) {
           case "scale":
-            return clones.map(function(info){
-              info.scaleDirection(
-                this.percentX,
-                this.percentY,
-                this.getDistanceFromTop(info),
-                this.getDistanceFromRight(info),
-                this.getDistanceFromBottom(info),
-                this.getDistanceFromLeft(info),
-                this.action.direction
-              );
-              return info;}.bind(this)
+            return clones.map(function (info) {
+                info.scaleDirection(
+                  this.percentX,
+                  this.percentY,
+                  this.getDistanceFromTop(info),
+                  this.getDistanceFromRight(info),
+                  this.getDistanceFromBottom(info),
+                  this.getDistanceFromLeft(info),
+                  this.action.direction
+                );
+                return info;
+              }.bind(this)
             );
           case "rotate":
-            return clones.map(function(info){info.rotate(this.yMove); return info;}.bind(this));
+            return clones.map(function (info) {
+              info.rotate2(this.angleMove);
+              return info;
+            }.bind(this));
           case "move":
-            return clones.map(function(info){info.move(this.xMove, this.yMove); return info;}.bind(this));
+            return clones.map(function (info) {
+              info.move(this.xMove, this.yMove);
+              return info;
+            }.bind(this));
         }
       }
     }
@@ -255,13 +316,17 @@
               computed: "_itemsChanged(items)"
             },
             heldkeys: Array,
-            zoom: Number
+//            zoom: Number,
+            p2p: PointToPoint
           }
         }
       }
 
       //todo fix the rotation of groups of elements.
       //todo move over the copy and paste functionality
+
+      //todo make the canvas return a good tool to find the 0,0 to logical positions.
+      //todo make a ConvertScreenCoordinatesToLogicalCoordinates object in canvas canvas that can be transported out into the rest of the app as a read only unit
       _itemsChanged(items) {
         return items && items.length ? new GroupOfShapes(items.map(el => el.info), 40) : null;
       }
@@ -299,7 +364,7 @@
       _pointerMove(e) {
         DroppadItemMarker._cancelPropDefault(e);
         let shift = this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"];
-        this.groupOfShapes.move(e, this.zoom, shift);
+        this.groupOfShapes.move(e, this.p2p.zoom, shift);
         this.notifyPath("groupOfShapes");
       }
 

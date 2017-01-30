@@ -24,8 +24,13 @@ class ShapeInfoObject {
   }
 
   //2*PI = 360gr
-  rotate(deg) {
-    this.angle = (2 * Math.PI + (this.angle + deg / 50)) % (2 * Math.PI);
+  rotate(value) {
+    this.angle = (2 * Math.PI + (this.angle + value / 50)) % (2 * Math.PI);
+  }
+
+  //2*PI = 360gr
+  rotate2(radian) {
+    this.angle += (2 * Math.PI + (radian)) % (2 * Math.PI);
   }
 
   move(x, y) {

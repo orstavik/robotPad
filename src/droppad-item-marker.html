@@ -300,7 +300,7 @@
         DroppadItemMarker._cancelPropDefault(e);
         let action = this.setMoveAction(e, this.heldKeys);
         this.markerCenterScreen = DroppadItemMarker.getScreenCenter(this.$.marker);
-        this.startEvent = e;
+        this.start = {x:e.clientX, y:e.clientY};
         this.groupOfShapes.start(action, this.items.map(el => el.info));
 
         this.notifyPath("groupOfShapes");
@@ -322,10 +322,10 @@
 
       _pointerMove(e) {
         DroppadItemMarker._cancelPropDefault(e);
-        let xMove = this.p2p.calcLogicalDistance(e.clientX, this.startEvent.clientX);
-        let yMove = this.p2p.calcLogicalDistance(e.clientY, this.startEvent.clientY);
-        let startAngle = DroppadItemMarker.calcAngle(this.markerCenterScreen, {x: this.startEvent.clientX, y: this.startEvent.clientY});
-        let angle = DroppadItemMarker.calcAngle(this.markerCenterScreen, {x: e.clientX, y: e.clientY});
+        let xMove = this.p2p.calcLogicalDistance(e.clientX, this.start.x);
+        let yMove = this.p2p.calcLogicalDistance(e.clientY, this.start.y);
+        let startAngle = Math.atan2(this.start.y - this.markerCenterScreen.y, this.start.x - this.markerCenterScreen.x);
+        let angle = Math.atan2(e.clientY - this.markerCenterScreen.y, e.clientX - this.markerCenterScreen.x);
         //snap  start
         if (Math.abs(xMove) < 6 && Math.abs(yMove) < 6)
           xMove = yMove = 0;
@@ -356,20 +356,6 @@
       static getScreenCenter(elem) {
         const box = elem.getBoundingClientRect();
         return {x: box.left + box.width / 2, y: box.top + box.height / 2};
-      }
-
-      static calcAngle(c, p1) {
-        let p0 = {x: c.x, y: -1};
-        let p0c = Math.sqrt(Math.pow(c.x - p0.x, 2) +
-          Math.pow(c.y - p0.y, 2)); // p0->c (b)
-        let p1c = Math.sqrt(Math.pow(c.x - p1.x, 2) +
-          Math.pow(c.y - p1.y, 2)); // p1->c (a)
-        let p0p1 = Math.sqrt(Math.pow(p1.x - p0.x, 2) +
-          Math.pow(p1.y - p0.y, 2)); // p0->p1 (c)
-        let number = Math.acos((p1c * p1c + p0c * p0c - p0p1 * p0p1) / (2 * p1c * p0c));
-        if (p1.x < c.x)
-          number = 2 * Math.PI - number;
-        return number;
       }
     }
     customElements.define(DroppadItemMarker.is, DroppadItemMarker);

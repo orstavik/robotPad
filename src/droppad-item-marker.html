@@ -220,21 +220,50 @@
         this.cDims.bottom = Math.max(this.cDims.bottom || -Number.MAX_VALUE, next.y);
       }
 
-      start(action, infos, startAngle) {
+      start(action, infos) {
         this.originals = infos;
         this.infos = this.originals.map(info => info.clone());
         this.show = false;
-        this.startAngle = startAngle;
         this.action = action;
       }
 
-      move(e, xMove, yMove, angle) {
-        this.xMove = xMove;
-        this.yMove = yMove;
-        this.percentX = this.xMove / this.width;
-        this.percentY = this.yMove / this.height;
-        this.angleMove = angle;
-        this.infos = this.runAction();
+      move(xMove, yMove, angle) {
+        let percentX = xMove / this.width;
+        let percentY = yMove / this.height;
+        this.infos = this.originals.map(function (info) {
+          info = info.clone();
+          switch (this.action.method) {
+            case "scale":
+              info.scaleDirection(percentX, percentY,
+                this.getDistanceFromTop(info),
+                this.getDistanceFromRight(info),
+                this.getDistanceFromBottom(info),
+                this.getDistanceFromLeft(info),
+                this.action.direction
+              );
+              return info;
+
+            case "rotate":
+
+              let x = this.getLeftFromCenter(info);
+              let y = this.getTopFromCenter(info);
+              let radius = Math.sqrt(x * x + y * y);
+              let degreeForShape = GroupOfShapes.calcAngle2({x: 0, y: 0}, {x: x, y: y});
+              let angleChange = angle;
+
+              let shapeNewAngle = (degreeForShape + angleChange) % (Math.PI * 2);
+              let newX = Math.cos(shapeNewAngle) * radius;
+              let newY = Math.sin(shapeNewAngle) * radius;
+              let newXpos = this.cDims.centerX + newX;
+              let newYpos = this.cDims.centerY + newY;
+              info.setNewPosition(newXpos, newYpos);
+              info.rotate(angleChange);
+              return info;
+            case "move":
+              info.move(xMove, yMove);
+              return info;
+          }
+        }.bind(this));
       }
 
       getPercentOfHeight(info) {
@@ -269,62 +298,20 @@
         return info.y - this.cDims.centerY;
       }
 
-      runAction() {
-        let clones = this.originals.map(info => info.clone());
-        switch (this.action.method) {
-          case "scale":
-            return clones.map(function (info) {
-                info.scaleDirection(
-                  this.percentX,
-                  this.percentY,
-                  this.getDistanceFromTop(info),
-                  this.getDistanceFromRight(info),
-                  this.getDistanceFromBottom(info),
-                  this.getDistanceFromLeft(info),
-                  this.action.direction
-                );
-                return info;
-              }.bind(this)
-            );
-          case "rotate":
-            return clones.map(function (info) {
-
-              let x = this.getLeftFromCenter(info);
-              let y = this.getTopFromCenter(info);
-              let radius = Math.sqrt(x * x + y * y);
-
-              let boxcenter = {x: this.cDims.centerX, y: this.cDims.centerY };
-              let shapecenter = {x: info.x, y: info.y };
-              let degreeForShape = GroupOfShapes.calcAngle2(boxcenter, shapecenter);
-              let angleChange = this.angleMove - this.startAngle;
-
-              let shapeNewAngle = (degreeForShape + angleChange) % (Math.PI*2);
-              let newX = Math.cos(shapeNewAngle) * radius;
-              let newY = Math.sin(shapeNewAngle) * radius;
-              let newXpos = this.cDims.centerX + newX;
-              let newYpos = this.cDims.centerY + newY;
-              info.setNewPosition(newXpos, newYpos);
-              info.rotate(angleChange);
-              return info;
-            }.bind(this));
-          case "move":
-            return clones.map(function (info) {
-              info.move(this.xMove, this.yMove);
-              return info;
-            }.bind(this));
-        }
+      runAction(xMove, yMove, angle) {
       }
 
       static calcAngle2(c, p1) {
-        let xVec = p1.x-c.x;
-        let yVec = p1.y-c.y;
+        let xVec = p1.x - c.x;
+        let yVec = p1.y - c.y;
         let angle = Math.atan2(yVec, xVec);
         angle = (angle + Math.PI * 2) % (Math.PI * 2);
         return angle;
       }
     }
 
-    class DroppadItemMarker extends Polymer.Element {
+    class DroppadItemMarker extends Polymer
+      .Element {
       static get is() {
         return "droppad-item-marker";
       }
@@ -362,8 +349,7 @@
         let action = this.setMoveAction(e, this.heldKeys);
         this.markerCenterScreen = DroppadItemMarker.getScreenCenter(this.$.marker);
         this.startEvent = e;
-        this.startAngle = DroppadItemMarker.calcAngle(this.markerCenterScreen, {x: e.clientX, y: e.clientY});
-        this.groupOfShapes.start(action, this.items.map(el => el.info), this.startAngle);
+        this.groupOfShapes.start(action, this.items.map(el => el.info));
 
         this.notifyPath("groupOfShapes");
       }
@@ -386,6 +372,7 @@
         DroppadItemMarker._cancelPropDefault(e);
         let xMove = this.p2p.calcLogicalDistance(e.clientX, this.startEvent.clientX);
         let yMove = this.p2p.calcLogicalDistance(e.clientY, this.startEvent.clientY);
+        let startAngle = DroppadItemMarker.calcAngle(this.markerCenterScreen, {x: this.startEvent.clientX, y: this.startEvent.clientY});
         let angle = DroppadItemMarker.calcAngle(this.markerCenterScreen, {x: e.clientX, y: e.clientY});
         //snap  start
         if (Math.abs(xMove) < 6 && Math.abs(yMove) < 6)
@@ -393,7 +380,7 @@
         else if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"])
           xMove = yMove;
         //snap  end
-        this.groupOfShapes.move(e, xMove, yMove, angle);
+        this.groupOfShapes.move(xMove, yMove, angle - startAngle);
         this.notifyPath("groupOfShapes");
       }
 

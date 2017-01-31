@@ -251,14 +251,14 @@
       }
 
       rotatePosition(info, angleChange){
-        let x = info.x - this.center.x;   //sets the center of this group of elements as 0,0 and recalculates the position of the shape from that point.
-        let y = info.y - this.center.y;
-        let radius = Math.sqrt(x * x + y * y);    //the diagonal to the center
-        let oldAngle = Math.atan2(y, x);    //calculates the angle from point 0.0, or against a vector running parallell with x=0. (or maybe y=0?)
-        let newAngle = oldAngle + angleChange;    //finds the angle to where the point should move.
-        let newX = Math.cos(newAngle) * radius;   //calculate the x and y coordinate of this new position
-        let newY = Math.sin(newAngle) * radius;
-        return {x: this.center.x+ newX, y: this.center.y + newY};  //returns the new position against the complete map again
+        const x = info.x - this.center.x;           //the center of this group = {0,0}. The position of the shape from this center = {x,y}.
+        const y = info.y - this.center.y;
+        const radius = Math.sqrt(x * x + y * y);    //the length of the radius from the center of the group to the center of the shape.
+        const oldAngle = Math.atan2(y, x);          //the angle between the vertical (horisontal?) line and to the shape, from 0->2PI
+        const newAngle = oldAngle + angleChange;    //adds the angle change
+        const newX = Math.cos(newAngle) * radius;   //calculates the new x and y coordinates to where the shape should move.
+        const newY = Math.sin(newAngle) * radius;
+        return {x: this.center.x+ newX, y: this.center.y + newY};  //returns the new position positioned against the underlying map again.
       }
     }
 
@@ -299,10 +299,10 @@
         this.setPointerCapture(e.pointerId);
         DroppadItemMarker._cancelPropDefault(e);
         let action = this.setMoveAction(e, this.heldKeys);
-        this.markerCenterScreen = DroppadItemMarker.getScreenCenter(this.$.marker);
+        this.groupCenter = DroppadItemMarker.getScreenCenter(this.$.marker);
         this.start = {x:e.clientX, y:e.clientY};
+        this.startAngle = Math.atan2(this.start.y - this.groupCenter.y, this.start.x - this.groupCenter.x);
         this.groupOfShapes.start(action, this.items.map(el => el.info));
-
         this.notifyPath("groupOfShapes");
       }
 
@@ -322,17 +322,16 @@
 
       _pointerMove(e) {
         DroppadItemMarker._cancelPropDefault(e);
-        let xMove = this.p2p.calcLogicalDistance(e.clientX, this.start.x);
-        let yMove = this.p2p.calcLogicalDistance(e.clientY, this.start.y);
-        let startAngle = Math.atan2(this.start.y - this.markerCenterScreen.y, this.start.x - this.markerCenterScreen.x);
-        let angle = Math.atan2(e.clientY - this.markerCenterScreen.y, e.clientX - this.markerCenterScreen.x);
+        let xMove = this.p2p.addZoom(e.clientX - this.start.x);
+        let yMove = this.p2p.addZoom(e.clientY - this.start.y);
+        let angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
         //snap  start
         if (Math.abs(xMove) < 6 && Math.abs(yMove) < 6)
           xMove = yMove = 0;
         else if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"])
           xMove = yMove;
         //snap  end
-        this.groupOfShapes.move(xMove, yMove, angle - startAngle);
+        this.groupOfShapes.move(xMove, yMove, angle - this.startAngle);
         this.notifyPath("groupOfShapes");
       }
 

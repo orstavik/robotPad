@@ -75,13 +75,14 @@
       }
 
       calcLogicPoint(screenX, screenY) {
-        const x2 = (screenX - this.left) / this.zoom;
-        const y2 = (screenY - this.top) / this.zoom;
+        const x2 = this.addZoom(screenX - this.left);
+        const y2 = this.addZoom(screenY - this.top);
         return {x: x2, y: y2};
       }
 
-      calcLogicalDistance(XorY1, XorY2) {
-        return (XorY1 - XorY2) / this.zoom;
+      //returns the logical equivalent
+      addZoom(screenValue) {
+        return screenValue / this.zoom;
       }
 
       reset(left, top) {

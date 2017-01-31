@@ -33,6 +33,11 @@ class ShapeInfoObject {
     this.y += y;
   }
 
+  setNewPosition(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+
   scaleDirection(xPercent, yPercent, topDistance, rightDistance, bottomDistance, leftDistance, direction) {
     if (direction.indexOf("s") >= 0) {
       this.y -= topDistance * yPercent;
@@ -50,30 +55,6 @@ class ShapeInfoObject {
       this.x += rightDistance * xPercent;
       this.w *= (1-xPercent);
     }
-  }
-
-  scaleSquare(y) {
-    this.w = this.h = this.h + y / 20;
-  }
-
-  scaleRestrict(y) {
-    const divis = this.w / this.h;
-    this.w += y / 30 * divis;
-    this.h += y / 30;
-  }
-
-  scaleFree(x, y) {
-    let cos = Math.cos(this.angle);
-    let sin = Math.sin(this.angle);
-    let nx = cos * x + sin * y;
-    let ny = cos * y - sin * x;
-    this.w += nx / 20;
-    this.h -= ny / 20;
-  }
-
-  scaleMurder(x, y) {
-    this.w += this.w * x;
-    this.h += this.h * y;
   }
 
   getLeft(widthCount) {
@@ -238,7 +219,7 @@ class ImmutableArrayFunctions {
 
     start = stop;
     console.log("speed 2: " + start);
-    ar = ImmutableArrayFunctions.alter(ar, selected, ShapeInfoObject.prototype.scaleFree, -10, 10);
+    ar = ImmutableArrayFunctions.alter(ar, selected, ShapeInfoObject.prototype.setNewPosition, -10, 10);
     stop = new Date().getTime();
     console.log("speed 2: " + (stop - start));
   }

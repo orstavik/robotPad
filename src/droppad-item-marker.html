@@ -188,15 +188,22 @@
     class GroupOfShapes {
 
       constructor(infos, factor) {
+        this.cDims = {};
         this._calcDimensions(infos, factor);
         this.show = true;
       }
 
       _calcDimensions(infos, factor) {
-        for (let info of infos)
+        for (let info of infos) {
+          this._addCenterDimension(info);
           this._addDimension(info.getBoundingRect(factor));
+        }
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
+        this.cDims.width = this.cDims.right - this.cDims.left;
+        this.cDims.height = this.cDims.bottom - this.cDims.top;
+        this.cDims.centerX = this.cDims.left + this.cDims.width / 2;
+        this.cDims.centerY = this.cDims.top + this.cDims.height / 2;
       }
 
       _addDimension(next) {
@@ -206,10 +213,18 @@
         this.bottom = Math.max(this.bottom || -Number.MAX_VALUE, next.bottom);
       }
 
-      start(action, infos) {
+      _addCenterDimension(next) {
+        this.cDims.left = Math.min(this.cDims.left || Number.MAX_VALUE, next.x);
+        this.cDims.top = Math.min(this.cDims.top || Number.MAX_VALUE, next.y);
+        this.cDims.right = Math.max(this.cDims.right || -Number.MAX_VALUE, next.x);
+        this.cDims.bottom = Math.max(this.cDims.bottom || -Number.MAX_VALUE, next.y);
+      }
+
+      start(action, infos, startAngle) {
         this.originals = infos;
         this.infos = this.originals.map(info => info.clone());
         this.show = false;
+        this.startAngle = startAngle;
         this.action = action;
       }
 
@@ -246,6 +261,14 @@
         return (info.y - this.bottom);
       }
 
+      getLeftFromCenter(info) {
+        return info.x - this.cDims.centerX;
+      }
+
+      getTopFromCenter(info) {
+        return info.y - this.cDims.centerY;
+      }
+
       runAction() {
         let clones = this.originals.map(info => info.clone());
         switch (this.action.method) {
@@ -265,7 +288,23 @@
             );
           case "rotate":
             return clones.map(function (info) {
-              info.rotate(this.angleMove);
+
+              let x = this.getLeftFromCenter(info);
+              let y = this.getTopFromCenter(info);
+              let radius = Math.sqrt(x * x + y * y);
+
+              let boxcenter = {x: this.cDims.centerX, y: this.cDims.centerY };
+              let shapecenter = {x: info.x, y: info.y };
+              let degreeForShape = GroupOfShapes.calcAngle2(boxcenter, shapecenter);
+              let angleChange = this.angleMove - this.startAngle;
+
+              let shapeNewAngle = (degreeForShape + angleChange) % (Math.PI*2);
+              let newX = Math.cos(shapeNewAngle) * radius;
+              let newY = Math.sin(shapeNewAngle) * radius;
+              let newXpos = this.cDims.centerX + newX;
+              let newYpos = this.cDims.centerY + newY;
+              info.setNewPosition(newXpos, newYpos);
+              info.rotate(angleChange);
               return info;
             }.bind(this));
           case "move":
@@ -274,6 +313,14 @@
               return info;
             }.bind(this));
         }
+      }
+
+      static calcAngle2(c, p1) {
+        let xVec = p1.x-c.x;
+        let yVec = p1.y-c.y;
+        let angle = Math.atan2(yVec, xVec);
+        angle = (angle + Math.PI * 2) % (Math.PI * 2);
+        return angle;
       }
     }
 
@@ -296,7 +343,6 @@
         }
       }
 
-      //todo fix the rotation of groups of elements.
       //todo move over the copy and paste functionality
       _itemsChanged(items) {
         return items && items.length ? new GroupOfShapes(items.map(el => el.info), 40) : null;
@@ -317,7 +363,7 @@
         this.markerCenterScreen = DroppadItemMarker.getScreenCenter(this.$.marker);
         this.startEvent = e;
         this.startAngle = DroppadItemMarker.calcAngle(this.markerCenterScreen, {x: e.clientX, y: e.clientY});
-        this.groupOfShapes.start(action, this.items.map(el => el.info));
+        this.groupOfShapes.start(action, this.items.map(el => el.info), this.startAngle);
 
         this.notifyPath("groupOfShapes");
       }
@@ -383,7 +429,7 @@
           Math.pow(p1.y - p0.y, 2)); // p0->p1 (c)
         let number = Math.acos((p1c * p1c + p0c * p0c - p0p1 * p0p1) / (2 * p1c * p0c));
         if (p1.x < c.x)
-          number= 2*Math.PI-number;
+          number = 2 * Math.PI - number;
         return number;
       }
     }

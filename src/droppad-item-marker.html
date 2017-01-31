@@ -194,30 +194,25 @@
       }
 
       _calcDimensions(infos, factor) {
-        for (let info of infos) {
-          this._addCenterDimension(info);
-          this._addDimension(info.getBoundingRect(factor));
-        }
+        for (let info of infos)
+          this._addDimensions(info,factor);
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
         this.cDims.width = this.cDims.right - this.cDims.left;
         this.cDims.height = this.cDims.bottom - this.cDims.top;
-        this.cDims.centerX = this.cDims.left + this.cDims.width / 2;
-        this.cDims.centerY = this.cDims.top + this.cDims.height / 2;
+        this.center = {x: this.cDims.left + this.cDims.width / 2, y: this.cDims.top + this.cDims.height / 2};
       }
 
-      _addDimension(next) {
+      _addDimensions(info, factor) {
+        let next = info.getBoundingRect(factor);
         this.left = Math.min(this.left || Number.MAX_VALUE, next.left);
         this.top = Math.min(this.top || Number.MAX_VALUE, next.top);
         this.right = Math.max(this.right || -Number.MAX_VALUE, next.right);
         this.bottom = Math.max(this.bottom || -Number.MAX_VALUE, next.bottom);
-      }
-
-      _addCenterDimension(next) {
-        this.cDims.left = Math.min(this.cDims.left || Number.MAX_VALUE, next.x);
-        this.cDims.top = Math.min(this.cDims.top || Number.MAX_VALUE, next.y);
-        this.cDims.right = Math.max(this.cDims.right || -Number.MAX_VALUE, next.x);
-        this.cDims.bottom = Math.max(this.cDims.bottom || -Number.MAX_VALUE, next.y);
+        this.cDims.left = Math.min(this.cDims.left || Number.MAX_VALUE, info.x);
+        this.cDims.top = Math.min(this.cDims.top || Number.MAX_VALUE, info.y);
+        this.cDims.right = Math.max(this.cDims.right || -Number.MAX_VALUE, info.x);
+        this.cDims.bottom = Math.max(this.cDims.bottom || -Number.MAX_VALUE, info.y);
       }
 
       start(action, infos) {
@@ -235,29 +230,18 @@
           switch (this.action.method) {
             case "scale":
               info.scaleDirection(percentX, percentY,
-                this.getDistanceFromTop(info),
-                this.getDistanceFromRight(info),
-                this.getDistanceFromBottom(info),
-                this.getDistanceFromLeft(info),
+                this.top - info.y,
+                this.right - info.x,
+                info.y - this.bottom,
+                info.x - this.left,
                 this.action.direction
               );
               return info;
 
             case "rotate":
-
-              let x = this.getLeftFromCenter(info);
-              let y = this.getTopFromCenter(info);
-              let radius = Math.sqrt(x * x + y * y);
-              let degreeForShape = GroupOfShapes.calcAngle2({x: 0, y: 0}, {x: x, y: y});
-              let angleChange = angle;
-
-              let shapeNewAngle = (degreeForShape + angleChange) % (Math.PI * 2);
-              let newX = Math.cos(shapeNewAngle) * radius;
-              let newY = Math.sin(shapeNewAngle) * radius;
-              let newXpos = this.cDims.centerX + newX;
-              let newYpos = this.cDims.centerY + newY;
-              info.setNewPosition(newXpos, newYpos);
-              info.rotate(angleChange);
+              let newPos = this.rotatePosition(info, angle);
+              info.setNewPosition(newPos.x, newPos.y);
+              info.rotate(angle);
               return info;
             case "move":
               info.move(xMove, yMove);
@@ -266,47 +250,15 @@
         }.bind(this));
       }
 
-      getPercentOfHeight(info) {
-        return info.height / this.height;
-      }
-
-      getPercentOfWidth(info) {
-        return info.width / this.width;
-      }
-
-      getDistanceFromLeft(info) {
-        return (info.x - this.left);
-      }
-
-      getDistanceFromRight(info) {
-        return (this.right - info.x );
-      }
-
-      getDistanceFromTop(info) {
-        return (this.top - info.y);
-      }
-
-      getDistanceFromBottom(info) {
-        return (info.y - this.bottom);
-      }
-
-      getLeftFromCenter(info) {
-        return info.x - this.cDims.centerX;
-      }
-
-      getTopFromCenter(info) {
-        return info.y - this.cDims.centerY;
-      }
-
-      runAction(xMove, yMove, angle) {
-      }
-
-      static calcAngle2(c, p1) {
-        let xVec = p1.x - c.x;
-        let yVec = p1.y - c.y;
-        let angle = Math.atan2(yVec, xVec);
-        angle = (angle + Math.PI * 2) % (Math.PI * 2);
-        return angle;
+      rotatePosition(info, angleChange){
+        let x = info.x - this.center.x;   //sets the center of this group of elements as 0,0 and recalculates the position of the shape from that point.
+        let y = info.y - this.center.y;
+        let radius = Math.sqrt(x * x + y * y);    //the diagonal to the center
+        let oldAngle = Math.atan2(y, x);    //calculates the angle from point 0.0, or against a vector running parallell with x=0. (or maybe y=0?)
+        let newAngle = oldAngle + angleChange;    //finds the angle to where the point should move.
+        let newX = Math.cos(newAngle) * radius;   //calculate the x and y coordinate of this new position
+        let newY = Math.sin(newAngle) * radius;
+        return {x: this.center.x+ newX, y: this.center.y + newY};  //returns the new position against the complete map again
       }
     }
 

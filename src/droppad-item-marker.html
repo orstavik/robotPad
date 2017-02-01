@@ -296,7 +296,7 @@
         DroppadItemMarker._cancelPropDefault(e);
         let xMove = this.p2p.addZoom(e.clientX - this.copyCenter.x);
         let yMove = this.p2p.addZoom(e.clientY - this.copyCenter.y);
-        return this.$.ghostCopy.move(xMove, yMove);
+        this.$.ghostCopy.move(xMove, yMove);
       }
 
       _copyPlacer(e){
@@ -355,6 +355,7 @@
 
       paste() {
         this.set("visualCopy", this.hiddenCopy);
+        this.$.ghostCopy.start();
         this.parentNode.addEventListener("pointermove", this._copyMoverListener);
         this.parentNode.addEventListener("pointerdown", this._copyPlacerListener);
       }

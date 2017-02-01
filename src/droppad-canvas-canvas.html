@@ -80,6 +80,19 @@
         return {x: x2, y: y2};
       }
 
+      makeLogical(dims) {
+        let leftTop = this.calcLogicPoint(dims.left, dims.top);
+        let rightBottom = this.calcLogicPoint(dims.right, dims.bottom);
+        return {
+          left: leftTop.x,
+          top: leftTop.y,
+          right: rightBottom.x,
+          bottom: rightBottom.y,
+          height: this.addZoom(dims.height),
+          width: this.addZoom(dims.width)
+        };
+      }
+
       //returns the logical equivalent
       addZoom(screenValue) {
         return screenValue / this.zoom;
@@ -140,7 +153,6 @@
           this.addEventListener("pointermove", this.mouseMoveListener);
           this.addEventListener("pointerup", this.mouseUpListener);
         }
-        DroppadCanvasCanvas.endAll(e);
       }
 
       removeFireDeselect() {
@@ -152,7 +164,6 @@
         this.releasePointerCapture(e.pointerId);
         this.removeEventListener("pointermove", this.mouseMoveListener);
         this.removeEventListener("pointerup", this.mouseMoveListener);
-        DroppadCanvasCanvas.endAll(e);
       }
 
       _mouseMove(e) {
@@ -160,13 +171,7 @@
           this.removeFireDeselect();
         this.p2p.moveScreen(e.clientX - this.pointDown.clientX, e.clientY - this.pointDown.clientY);
         this.notifyPath("p2p"); //todo delay this using requestAnimationFrame??
-        DroppadCanvasCanvas.endAll(e);
         this.pointDown = e;
-      }
-
-      static endAll(e) {
-        e.stopPropagation();
-        e.preventDefault();
       }
 
       _mouseScroll(e) {

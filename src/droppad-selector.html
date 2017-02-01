@@ -29,8 +29,8 @@
 
       connectedCallback() {
         this.selectedElements = [];
-        this.addEventListener("mousedown", this._mouseDown.bind(this));
-        this.addEventListener("mouseup", this._mouseUp.bind(this));
+        this.addEventListener("pointerdown", this._pointerDown.bind(this));
+        this.pointerUpListener  = this._mouseUp.bind(this);
       }
 
       select(el) {
@@ -67,7 +67,8 @@
           this.actions.abort = true;
       }
 
-      _mouseDown(e) {
+      _pointerDown(e) {
+        this.addEventListener("mouseup", this.pointerUpListener);
         let el = e.target;
         this.actions = {shift: e.shiftKey, el: el, wasSelectedAlready: el.dataset.selected};
         this.select(el);

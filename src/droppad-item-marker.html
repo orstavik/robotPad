@@ -187,16 +187,10 @@
         return {
           properties: {
             items: Array,
-            infos: Array,
+            p2p: PointToPoint,
             groupOfShapes: {
               type: Object,
-              computed: "_itemsChanged(items, p2p)"
-            },
-            heldkeys: Array,
-            p2p: PointToPoint,
-            factor: {
-              type: Number,
-              value: 40
+              computed: "_calcRectangle(items, p2p)"
             }
           }
         }
@@ -215,15 +209,7 @@
         }
         dims.width = dims.right - dims.left;
         dims.height = dims.bottom - dims.top;
-        let leftTop = p2p.calcLogicPoint(dims.left, dims.top);
-        let rightBottom = p2p.calcLogicPoint(dims.right, dims.bottom);
-        dims.left = leftTop.x;
-        dims.top = leftTop.y;
-        dims.right = rightBottom.x;
-        dims.bottom = rightBottom.y;
-        dims.height = p2p.addZoom(dims.height);
-        dims.width = p2p.addZoom(dims.width);
-        return dims;
+        return p2p.makeLogical(dims);
       }
 
       connectedCallback() {
@@ -233,63 +219,27 @@
       }
 
       _pointerDown(e) {
+        DroppadItemMarker._cancelPropDefault(e);
+        this.setPointerCapture(e.pointerId);
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);
-        this.setPointerCapture(e.pointerId);
-        DroppadItemMarker._cancelPropDefault(e);
         this.groupCenter = DroppadItemMarker.getScreenCenter(this.$.marker);
         this.start = {x: e.clientX, y: e.clientY};
         this.startAngle = Math.atan2(this.start.y - this.groupCenter.y, this.start.x - this.groupCenter.x);
         this.dispatchEvent(new CustomEvent("track-start", {detail: DroppadItemMarker.setMoveAction(e)}));
       }
 
-      static setMoveAction(e) {
-        if (e.target.classList.contains("scale") )
-          return {method: "scale", direction: e.target.id};
-        if (e.target.id == "rotate")
-          return {method: "rotate", direction: e.target.id};
-        return {method: "move", direction: e.target.id};
+      _pointerMove(e) {
+        DroppadItemMarker._cancelPropDefault(e);
+        this.dispatchEvent(new CustomEvent("track-move", { detail: this.calculateTrackMovements(e)}));
       }
 
       _pointerUp(e) {
-        this.dispatchEvent(new CustomEvent("track-end", null));
+        DroppadItemMarker._cancelPropDefault(e);
         this.releasePointerCapture(e.pointerId);
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
-        DroppadItemMarker._cancelPropDefault(e);
-        this._refreshItems();
-      }
-
-      //att! The setTimout(func, 0) makes the notifyPath("items") wait until Polymer has updated the selected items so that
-      //     the groupOfShapes and its bounding box is updated with the new position info, and not the current one in the objects..
-      //     This is a cascading problem..
-      //todo this is a hack..
-      _refreshItems() {
-        setTimeout(function () {
-          this.notifyPath("items");
-        }.bind(this), 0);
-      }
-
-      _pointerMove(e) {
-        DroppadItemMarker._cancelPropDefault(e);
-        let xMove = this.p2p.addZoom(e.clientX - this.start.x);
-        let yMove = this.p2p.addZoom(e.clientY - this.start.y);
-        let percentX = xMove / this.groupOfShapes.width;
-        let percentY = yMove / this.groupOfShapes.height;
-        let angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
-        //snap  start
-        if (Math.abs(xMove) < 6 && Math.abs(yMove) < 6)
-          xMove = yMove = 0;
-        else if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"])
-          xMove = yMove;
-        //snap  end
-        this.dispatchEvent(new CustomEvent("track-move", {detail: {
-          xMove: xMove,
-          yMove: yMove,
-          percentX: percentX,
-          percentY: percentY,
-          angle: angle-this.startAngle
-        }}));
+        this.dispatchEvent(new CustomEvent("track-end", null));
       }
 
       static _cancelPropDefault(e) {
@@ -297,12 +247,25 @@
         e.preventDefault();
       }
 
-      abort() {
-        //todo make a function that aborts changes while altering or copying.
+      getCenter() {
+        return DroppadItemMarker.getScreenCenter(this.$.marker);
       }
 
-      getCenter(){
-        return DroppadItemMarker.getScreenCenter(this.$.marker);
+      static setMoveAction(e) {
+        if (e.target.classList.contains("scale"))
+          return {method: "scale", direction: e.target.id};
+        if (e.target.id == "rotate")
+          return {method: "rotate", direction: e.target.id};
+        return {method: "move", direction: e.target.id};
+      }
+
+      calculateTrackMovements(e) {
+        const movX = this.p2p.addZoom(e.clientX - this.start.x);
+        const movY = this.p2p.addZoom(e.clientY - this.start.y);
+        const scaleX = movX / this.groupOfShapes.width;
+        const scaleY = movY / this.groupOfShapes.height;
+        const angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
+        return { xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle};
       }
 
       static getScreenCenter(elem) {

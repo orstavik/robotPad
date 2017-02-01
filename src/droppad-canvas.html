@@ -28,11 +28,10 @@
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
         </template>
       </droppad-selector>
-      <!--on-changed="_selectedChanged"-->
-      <droppad-item-marker id="square" items="[[selectedDrops]]" infos="[[selectedInfos]]"
-                           on-track-start="_startMovingMarker" on-track-move="_movingMarker"
-                           on-track-end="_stopMovingMarker"
-                           on-new-shapes="_copyShapes" held-keys="[[heldKeys]]" p2p="[[p2p]]"></droppad-item-marker>
+      <droppad-item-marker id="square" items="[[selectedDrops]]" p2p="[[p2p]]"
+                           on-track-start="_startMovingMarker"
+                           on-track-move="_movingMarker"
+                           on-track-end="_stopMovingMarker"></droppad-item-marker>
       <group-of-shapes id="ghost" originals="[[selectedInfos]]"></group-of-shapes>
       <group-of-shapes id="ghostCopy" originals="[[visualCopy]]"></group-of-shapes>
     </droppad-canvas-canvas>
@@ -100,6 +99,7 @@
 
       _movingMarker(e) {
         let ms = e.detail;
+        this.doSnapping(ms);
         switch (this.$.ghost.action.method) {
           case "scale":
             return this.$.ghost.scaleDirection(ms.xMove, ms.yMove, ms.percentX, ms.percentY, this.$.ghost.action.direction);
@@ -108,6 +108,13 @@
           case "move":
             return this.$.ghost.move(ms.xMove, ms.yMove);
         }
+      }
+
+      doSnapping(ms) {
+        if (Math.abs(ms.xMove) < 6 && Math.abs(ms.yMove) < 6)
+          ms.xMove = ms.yMove = 0;
+        else if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"])
+          ms.xMove = ms.yMove;
       }
 
       _stopMovingMarker(e) {
@@ -231,11 +238,6 @@
         this.$.dropSelector.deselectAll(); //todo, is this necessary?? //todo should this be moved into the selectors listening on the drops
       }
 
-//      _copyShapes(e) {
-//        this.$.dropSelector.deselectAll();
-//        this._addElements(e.detail);
-//      }
-//
       _addElements(newShapes) {
         this.history.push(this.drops);
         this.set("drops", this.drops.concat(newShapes));//Immutable .concat() makes a new array object instance

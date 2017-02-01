@@ -25,36 +25,56 @@ class ShapeInfoObject {
 
   //2*PI = 360gr
   rotate(radian) {
-    this.angle += radian;
+    let c = this.clone();
+    c.angle += radian;
+    return c;
   }
 
   move(x, y) {
-    this.x += x;
-    this.y += y;
+    let c = this.clone();
+    c.x += x;
+    c.y += y;
+    return c;
   }
 
-  setNewPosition(x, y) {
-    this.x = x;
-    this.y = y;
+  rotatePositionFromExternalPoint(center, angle) {
+    let newPos = this.rotatePosition(center, angle);
+    let c = this.rotate(angle);
+    c.x = newPos.x;
+    c.y = newPos.y;
+    return c;
+  }
+
+  rotatePosition(center, angleChange) {
+    const x = this.x - center.x;           //the center of this group = {0,0}. The position of the shape from this center = {x,y}.
+    const y = this.y - center.y;
+    const radius = Math.sqrt(x * x + y * y);    //the length of the radius from the center of the group to the center of the shape.
+    const oldAngle = Math.atan2(y, x);          //the angle between the vertical (horisontal?) line and to the shape, from 0->2PI
+    const newAngle = oldAngle + angleChange;    //adds the angle change
+    const newX = Math.cos(newAngle) * radius;   //calculates the new x and y coordinates to where the shape should move.
+    const newY = Math.sin(newAngle) * radius;
+    return {x: center.x + newX, y: center.y + newY};  //returns the new position positioned against the underlying map again.
   }
 
   scaleDirection(xPercent, yPercent, topDistance, rightDistance, bottomDistance, leftDistance, direction) {
+    let c = this.clone();
     if (direction.indexOf("s") >= 0) {
-      this.y -= topDistance * yPercent;
-      this.h *= (1+yPercent);
+      c.y -= topDistance * yPercent;
+      c.h *= (1+yPercent);
     }
     if (direction.indexOf("n") >= 0) {
-      this.y -= bottomDistance * yPercent;
-      this.h *= (1-yPercent);
+      c.y -= bottomDistance * yPercent;
+      c.h *= (1-yPercent);
     }
     if (direction.indexOf("e") >= 0) {
-      this.x += leftDistance * xPercent;
-      this.w *= (1+xPercent);
+      c.x += leftDistance * xPercent;
+      c.w *= (1+xPercent);
     }
     if (direction.indexOf("w") >= 0) {
-      this.x += rightDistance * xPercent;
-      this.w *= (1-xPercent);
+      c.x += rightDistance * xPercent;
+      c.w *= (1-xPercent);
     }
+    return c;
   }
 
   getLeft(widthCount) {
@@ -137,12 +157,6 @@ class ShapeInfoObject {
 ShapeInfoObject.__sessionID = new Date().getTime();
 
 class ImmutableArrayFunctions {
-  // static filter(array, numbers) {
-  //   return array.filter(function (item) {
-  //     return numbers.indexOf(item.number) == -1;
-  //   });
-  // }
-  //
   //todo 10 times slower..
   static alterSlow(array, numbers, func, arg1, arg2) {
     array = array.map(function (item) {

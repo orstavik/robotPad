@@ -1,0 +1,100 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="drop-shape.html">
+
+<dom-module id="group-of-shapes">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <template is="dom-if" if="[[action]]">
+      <template is="dom-repeat" items="[[infos]]">
+        <drop-shape id="copy[[item.number]]" class="copy" info="[[item]]"></drop-shape>
+      </template>
+    </template>
+  </template>
+
+  <script>
+    class GroupOfShapes extends Polymer.Element {
+      static get is() {
+        return "group-of-shapes";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            originals: Array,
+            box: {
+              type: Object,
+              computed: "_updateGroupOfShapes(originals)"
+            },
+            infos: {
+              type: Array,
+              value: []
+            },
+            action: {
+              type: Boolean,
+              value: false
+            }
+          }
+        }
+      }
+
+      start(action) {
+        this.set("action", true);
+      }
+
+      end() {
+        this.set("action", false);
+        return this.infos;
+      }
+
+      _updateGroupOfShapes(infos) {
+        let box = {};
+        if (!infos || infos.length == 0)
+          return null;
+        for (let info of infos) {
+          box.left = Math.min(box.left || Number.MAX_VALUE, info.x);
+          box.top = Math.min(box.top || Number.MAX_VALUE, info.y);
+          box.right = Math.max(box.right || -Number.MAX_VALUE, info.x);
+          box.bottom = Math.max(box.bottom || -Number.MAX_VALUE, info.y);
+        }
+        box.width = box.right - box.left;
+        box.height = box.bottom - box.top;
+        box.centerX = box.left + box.width / 2;
+        box.centerY = box.top + box.height / 2;
+        return box;
+      }
+
+      makeACopy() {
+        let clone = Object.assign({}, this.box);
+        clone.infos = this.infos.map(info => info.makeACopy(0, 0));
+        return clone;
+      }
+
+      move(xMove, yMove) {
+        this.set("infos", this.originals.map(info => info.move(xMove, yMove)));
+      }
+
+      rotate(angle) {
+        let center = {x: this.box.centerX, y: this.box.centerY};
+        this.set("infos", this.originals.map(info =>
+          info.rotatePositionFromExternalPoint(center, angle)));
+      }
+
+      scaleDirection(xMove, yMove, percentX, percentY, direction) {
+        this.set("infos", this.originals.map(function(info){
+          return info.scaleDirection(percentX, percentY,
+            this.box.top - info.y,
+            this.box.right - info.x,
+            info.y - this.box.bottom,
+            info.x - this.box.left,
+            direction
+          );
+        }.bind(this)));
+      }
+    }
+    customElements.define(GroupOfShapes.is, GroupOfShapes);
+  </script>
+</dom-module>

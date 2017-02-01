@@ -131,6 +131,9 @@
         this.history.push(this.drops);
         this.$.dropSelector.abort();
         this.set("drops", ImmutableArrayFunctions.alter(this.drops, this.selectedIds, func, arg1, arg2));
+        setTimeout(function () {      //todo hack hack hack
+          this.notifyPath("selectedDrops");
+        }.bind(this), 0);
       }
 
       _deleteElem() {

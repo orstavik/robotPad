@@ -1,7 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="drop-shape.html">
-<link rel="import" href="droppad-selector.html">
-<link rel="import" href="droppad-canvas-canvas.html">
+<link rel="import" href="group-of-shapes.html">
 
 <dom-module id="droppad-item-marker">
   <template>
@@ -160,7 +159,7 @@
         display: block;
       }
     </style>
-    <div id="marker" hidden$="[[!groupOfShapes.show]]"
+    <div id="marker" hidden$="[[!groupOfShapes.left]]"
          style$="left: [[groupOfShapes.left]]px; top: [[groupOfShapes.top]]px; width:  [[groupOfShapes.width]]px; height: [[groupOfShapes.height]]px;">
       <div id="nw" class="scale corner"></div>
       <div id="ne" class="scale corner"></div>
@@ -177,102 +176,12 @@
       <!--<div id="rotatehelp" class="help">Hold "shift" to snap to nearest 30 deg.</div>-->
       <!--<div id="rotatehelp" class="help">Hold "shift" to rotate the elements individually.</div>-->
     </div>
-    <template is="dom-if" if="[[!groupOfShapes.show]]">
-      <template is="dom-repeat" items="[[groupOfShapes.infos]]">
-        <drop-shape id="copy[[item.number]]" class="copy" info="[[item]]"></drop-shape>
-      </template>
-    </template>
+    <group-of-shapes id="ghost" originals="[[infos]]"></group-of-shapes>
+    <group-of-shapes id="ghostCopy" originals="[[visualCopy]]"></group-of-shapes>
   </template>
 
   <script>
-    class GroupOfShapes {
-
-      constructor(infos, factor) {
-        this.cDims = {};
-        this._calcDimensions(infos, factor);
-        this.show = true;
-      }
-
-      _calcDimensions(infos, factor) {
-        for (let info of infos)
-          this._addDimensions(info,factor);
-        this.width = this.right - this.left;
-        this.height = this.bottom - this.top;
-        this.cDims.width = this.cDims.right - this.cDims.left;
-        this.cDims.height = this.cDims.bottom - this.cDims.top;
-        this.center = {x: this.cDims.left + this.cDims.width / 2, y: this.cDims.top + this.cDims.height / 2};
-      }
-
-      _addDimensions(info, factor) {
-        let next = info.getBoundingRect(factor);
-        this.left = Math.min(this.left || Number.MAX_VALUE, next.left);
-        this.top = Math.min(this.top || Number.MAX_VALUE, next.top);
-        this.right = Math.max(this.right || -Number.MAX_VALUE, next.right);
-        this.bottom = Math.max(this.bottom || -Number.MAX_VALUE, next.bottom);
-        this.cDims.left = Math.min(this.cDims.left || Number.MAX_VALUE, info.x);
-        this.cDims.top = Math.min(this.cDims.top || Number.MAX_VALUE, info.y);
-        this.cDims.right = Math.max(this.cDims.right || -Number.MAX_VALUE, info.x);
-        this.cDims.bottom = Math.max(this.cDims.bottom || -Number.MAX_VALUE, info.y);
-      }
-
-      start(action, infos) {
-        this.originals = infos;
-        this.infos = this.originals.map(info => info.clone());
-        this.show = false;
-        this.action = action;
-      }
-
-      makeACopy(infos){
-        let clone = new GroupOfShapes([], 0);
-        clone = Object.assign(clone, this);//transfer dimensions
-        clone.cDims = Object.assign({}, this.cDims);//transfer cDims
-        clone.originals = this.originals.map(info => info.makeCopy(0,0));
-        clone.infos = clone.originals.map(info => info.clone());
-      }
-
-
-      move(xMove, yMove, angle) {
-        let percentX = xMove / this.width;
-        let percentY = yMove / this.height;
-        this.infos = this.originals.map(function (info) {
-          info = info.clone();
-          switch (this.action.method) {
-            case "scale":
-              info.scaleDirection(percentX, percentY,
-                this.top - info.y,
-                this.right - info.x,
-                info.y - this.bottom,
-                info.x - this.left,
-                this.action.direction
-              );
-              return info;
-
-            case "rotate":
-              let newPos = this.rotatePosition(info, angle);
-              info.setNewPosition(newPos.x, newPos.y);
-              info.rotate(angle);
-              return info;
-            case "move":
-              info.move(xMove, yMove);
-              return info;
-          }
-        }.bind(this));
-      }
-
-      rotatePosition(info, angleChange){
-        const x = info.x - this.center.x;           //the center of this group = {0,0}. The position of the shape from this center = {x,y}.
-        const y = info.y - this.center.y;
-        const radius = Math.sqrt(x * x + y * y);    //the length of the radius from the center of the group to the center of the shape.
-        const oldAngle = Math.atan2(y, x);          //the angle between the vertical (horisontal?) line and to the shape, from 0->2PI
-        const newAngle = oldAngle + angleChange;    //adds the angle change
-        const newX = Math.cos(newAngle) * radius;   //calculates the new x and y coordinates to where the shape should move.
-        const newY = Math.sin(newAngle) * radius;
-        return {x: this.center.x+ newX, y: this.center.y + newY};  //returns the new position positioned against the underlying map again.
-      }
-    }
-
-    class DroppadItemMarker extends Polymer
-      .Element {
+    class DroppadItemMarker extends Polymer.Element {
       static get is() {
         return "droppad-item-marker";
       }
@@ -281,26 +190,52 @@
         return {
           properties: {
             items: Array,
+            infos: {
+              type: Array,
+              computed: "_getInfos(items)"
+            },
             groupOfShapes: {
-              type: GroupOfShapes,
-              computed: "_itemsChanged(items)"
+              type: Object,
+              computed: "_itemsChanged(items, factor)"
             },
             heldkeys: Array,
-            p2p: PointToPoint
+            p2p: PointToPoint,
+            factor: {
+              type: Number,
+              value: 40
+            }
           }
         }
       }
 
-      //todo move over the copy and paste functionality
-      _itemsChanged(items) {
-        return items && items.length ? new GroupOfShapes(items.map(el => el.info), 40) : null;
+      _getInfos(items) {
+        if (!items || items.length == 0)
+          return null;
+        return items.map(el => el.info);
+      }
+
+      _itemsChanged(items, factor) {
+        if (!items || items.length == 0)
+          return null;
+        let dims = {};
+        for (let item of items) {
+          let next = item.info.getBoundingRect(factor);
+          dims.left = Math.min(dims.left || Number.MAX_VALUE, next.left);
+          dims.top = Math.min(dims.top || Number.MAX_VALUE, next.top);
+          dims.right = Math.max(dims.right || -Number.MAX_VALUE, next.right);
+          dims.bottom = Math.max(dims.bottom || -Number.MAX_VALUE, next.bottom);
+        }
+        dims.width = dims.right - dims.left;
+        dims.height = dims.bottom - dims.top;
+        return dims;
       }
 
       connectedCallback() {
         this.$.marker.addEventListener("pointerdown", this._pointerDown.bind(this));
         this.pointermoveListener = this._pointerMove.bind(this);
         this.pointerupListener = this._pointerUp.bind(this);
-        this._pastePointerDownListener = this._pastePointerDown.bind(this);
+        this._copyMoverListener = this._copyMover.bind(this);
+        this._copyPlacerListener = this._copyPlacer.bind(this);
       }
 
       _pointerDown(e) {
@@ -308,32 +243,38 @@
         this.addEventListener("pointerup", this.pointerupListener);
         this.setPointerCapture(e.pointerId);
         DroppadItemMarker._cancelPropDefault(e);
-        let action = this.setMoveAction(e, this.heldKeys);
+        this.action = this.setMoveAction(e, this.heldKeys);
         this.groupCenter = DroppadItemMarker.getScreenCenter(this.$.marker);
-        this.start = {x:e.clientX, y:e.clientY};
+        this.start = {x: e.clientX, y: e.clientY};
         this.startAngle = Math.atan2(this.start.y - this.groupCenter.y, this.start.x - this.groupCenter.x);
-        this.groupOfShapes.start(action, this.items.map(el => el.info));
-        this.notifyPath("groupOfShapes");
+        this.$.ghost.start();
       }
 
       _pointerUp(e) {
-        this.dispatchEvent(new CustomEvent("changed", {detail: this.groupOfShapes.infos}));
+        this.dispatchEvent(new CustomEvent("changed", {detail: this.$.ghost.end()}));
         this.releasePointerCapture(e.pointerId);
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
         DroppadItemMarker._cancelPropDefault(e);
+        this._refreshItems();
+      }
+
+      //att! The setTimout(func, 0) makes the notifyPath("items") wait until Polymer has updated the selected items so that
+      //     the groupOfShapes and its bounding box is updated with the new position info, and not the current one in the objects..
+      //     This is a cascading problem..
+      //todo this is a hack..
+      _refreshItems() {
         setTimeout(function () {
           this.notifyPath("items");
         }.bind(this), 0);
-        //att! The setTimout(func, 0) makes the notifyPath("items") wait until Polymer has updated the selected items so that
-        //     the groupOfShapes and its bounding box is updated with the new position info, and not the current one in the objects..
-        //     This is a cascading problem..
       }
 
       _pointerMove(e) {
         DroppadItemMarker._cancelPropDefault(e);
         let xMove = this.p2p.addZoom(e.clientX - this.start.x);
         let yMove = this.p2p.addZoom(e.clientY - this.start.y);
+        let percentX = xMove / this.groupOfShapes.width;
+        let percentY = yMove / this.groupOfShapes.height;
         let angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
         //snap  start
         if (Math.abs(xMove) < 6 && Math.abs(yMove) < 6)
@@ -341,8 +282,29 @@
         else if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"])
           xMove = yMove;
         //snap  end
-        this.groupOfShapes.move(xMove, yMove, angle - this.startAngle);
-        this.notifyPath("groupOfShapes");
+        switch (this.action.method) {
+          case "scale":
+            return this.$.ghost.scaleDirection(xMove, yMove,percentX,percentY, this.action.direction);
+          case "rotate":
+            return this.$.ghost.rotate(angle - this.startAngle);
+          case "move":
+            return this.$.ghost.move(xMove, yMove);
+        }
+      }
+
+      _copyMover(e){
+        DroppadItemMarker._cancelPropDefault(e);
+        let xMove = this.p2p.addZoom(e.clientX - this.copyCenter.x);
+        let yMove = this.p2p.addZoom(e.clientY - this.copyCenter.y);
+        return this.$.ghostCopy.move(xMove, yMove);
+      }
+
+      _copyPlacer(e){
+        this.parentNode.removeEventListener("pointermove", this._copyMoverListener);
+        this.parentNode.removeEventListener("pointerdown", this._copyPlacerListener);
+        this.dispatchEvent(new CustomEvent("new-shapes", {detail: this.$.ghostCopy.end()}));
+        this.set("visualCopy", null);
+        this.set("copyCenter", null);
       }
 
       static _cancelPropDefault(e) {
@@ -363,45 +325,38 @@
       }
 
       mirror() {
-        let infos = this.items.map(el => el.info.mirror());
+        let infos = this.infos.map(el => el.mirror());
         this.dispatchEvent(new CustomEvent("changed", {detail: infos}));
-        this.notifyPath("groupOfShapes");
+        this._refreshItems();
       }
 
       center() {
-        let infos = this.items.map(el => el.info.center());
+        let infos = this.infos.map(el => el.center());
         this.dispatchEvent(new CustomEvent("changed", {detail: infos}));
-        this.notifyPath("groupOfShapes");
+        this._refreshItems();
       }
 
       zDown() {
-        let infos = this.items.map(el => el.info.zDown());
+        let infos = this.infos.map(el => el.zDown());
         this.dispatchEvent(new CustomEvent("changed", {detail: infos}));
-        this.notifyPath("groupOfShapes");
+        this._refreshItems();
       }
 
       zUp() {
-        let infos = this.items.map(el => el.info.zUp());
+        let infos = this.infos.map(el => el.zUp());
         this.dispatchEvent(new CustomEvent("changed", {detail: infos}));
-        this.notifyPath("groupOfShapes");
+        this._refreshItems();
       }
 
       copy() {
-        this.groupOfShapes.start({method: "move", direction: "c"}, this.items.map(el => el.info));
-        this.groupOfShapes.makeACopy();
+        this.hiddenCopy = this.infos.map(el => el.makeCopy(0,0));
+        this.copyCenter = DroppadItemMarker.getScreenCenter(this.$.marker);
       }
 
       paste() {
-        this.start = this.groupCenter = DroppadItemMarker.getScreenCenter(this.$.marker);
-        this.parentNode.addEventListener("pointermove", this.pointermoveListener);
-        this.parentNode.addEventListener("pointerdown", this._pastePointerDownListener);
-      }
-
-      _pastePointerDown(){
-        this.parentNode.removeEventListener("pointermove", this.pointermoveListener);
-        this.parentNode.removeEventListener("pointerdown", this._pastePointerDownListener);
-        this.dispatchEvent(new CustomEvent("new-shapes", {detail: this.groupOfShapes.infos}));
-        this.start = this.groupCenter = null;//not strictly necessary
+        this.set("visualCopy", this.hiddenCopy);
+        this.parentNode.addEventListener("pointermove", this._copyMoverListener);
+        this.parentNode.addEventListener("pointerdown", this._copyPlacerListener);
       }
 
       abort() {

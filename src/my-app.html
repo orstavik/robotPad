@@ -8,6 +8,7 @@
 <link rel="import" href="music-clef.html">
 <link rel="import" href="key-flower.html">
 <link rel="import" href="tab-wrapper.html">
+<link rel="import" href="app-ui.html">
 
 <dom-module id="my-app">
   <template>
@@ -143,6 +144,7 @@
     <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower>
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
+    <app-ui></app-ui>
 
     <iron-selector attr-for-selected="select" multi>
       <tab-wrapper title="JSON" select="1">

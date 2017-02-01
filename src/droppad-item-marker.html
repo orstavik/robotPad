@@ -388,7 +388,6 @@
 
       copy() {
         this.groupOfShapes.start({method: "move", direction: "c"}, this.items.map(el => el.info));
-        //todo make a copy, not a clone, so that all the id's of the elements are unique..
         this.groupOfShapes.makeACopy();
       }
 
@@ -403,8 +402,6 @@
         this.parentNode.removeEventListener("pointerdown", this._pastePointerDownListener);
         this.dispatchEvent(new CustomEvent("new-shapes", {detail: this.groupOfShapes.infos}));
         this.start = this.groupCenter = null;//not strictly necessary
-        this.groupOfShapes.show = true;
-        this.notifyPath("groupOfShapes");
       }
 
       abort() {

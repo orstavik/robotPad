@@ -27,7 +27,7 @@
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
         </template>
       </droppad-selector>
-      <droppad-item-marker id="square" items="[[selectedDrops]]" on-changed="_selectedChanged" on-new-shapes="_addGroupOfShapes" held-keys="[[heldKeys]]" p2p="[[p2p]]"></droppad-item-marker>
+      <droppad-item-marker id="square" items="[[selectedDrops]]" on-changed="_selectedChanged" on-new-shapes="_copyShapes" held-keys="[[heldKeys]]" p2p="[[p2p]]"></droppad-item-marker>
     </droppad-canvas-canvas>
   </template>
 
@@ -115,7 +115,7 @@
 
       _newShape(e) {
         let shape = new ShapeInfoObject(e.detail.x, e.detail.y);
-        this._addElem(shape);
+        this._addElements([shape]);
         if (!e.shiftKey)
           this.$.dropSelector.deselectAll();
         setTimeout(function () {
@@ -135,18 +135,18 @@
 
       _deleteElem() {
         this.history.push(this.drops);
-        this.set("drops", ImmutableArrayFunctions.filter(this.drops, this.selectedIds));
-        this.$.dropSelector.deselectAll(); //todo, is this necessary??
+        this.set("drops", this.drops.filter(item => this.selectedIds.indexOf(item.number) == -1)); //Immutable filter is immutable, returns a new array
+        this.$.dropSelector.deselectAll(); //todo, is this necessary?? //todo should this be moved into the selectors listening on the drops
       }
 
-      _addElem(shapeInfoObj) {
-        this.history.push(this.drops);
-        this.set("drops", this.drops.concat([shapeInfoObj]));//Immutable .concat() makes a new array object instance
+      _copyShapes(e) {
+        this.$.dropSelector.deselectAll();
+        this._addElements(e.detail);
       }
 
-      _addGroupOfShapes(e) {
+      _addElements(newShapes) {
         this.history.push(this.drops);
-        this.set("drops", this.drops.concat(e.detail));//Immutable .concat() makes a new array object instance
+        this.set("drops", this.drops.concat(newShapes));//Immutable .concat() makes a new array object instance
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

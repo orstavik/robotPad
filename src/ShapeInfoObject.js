@@ -137,12 +137,12 @@ class ShapeInfoObject {
 ShapeInfoObject.__sessionID = new Date().getTime();
 
 class ImmutableArrayFunctions {
-  static filter(array, numbers) {
-    return array.filter(function (item) {
-      return numbers.indexOf(item.number) == -1;
-    });
-  }
-
+  // static filter(array, numbers) {
+  //   return array.filter(function (item) {
+  //     return numbers.indexOf(item.number) == -1;
+  //   });
+  // }
+  //
   //todo 10 times slower..
   static alterSlow(array, numbers, func, arg1, arg2) {
     array = array.map(function (item) {

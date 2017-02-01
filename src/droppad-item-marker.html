@@ -175,8 +175,6 @@
       <!--<div id="rotatehelp" class="help">Hold "shift" to snap to nearest 30 deg.</div>-->
       <!--<div id="rotatehelp" class="help">Hold "shift" to rotate the elements individually.</div>-->
     </div>
-    <group-of-shapes id="ghost" originals="[[infos]]"></group-of-shapes>
-    <group-of-shapes id="ghostCopy" originals="[[visualCopy]]"></group-of-shapes>
   </template>
 
   <script>
@@ -190,10 +188,6 @@
           properties: {
             items: Array,
             infos: Array,
-//              {
-//              type: Array,
-//              computed: "_getInfos(items)"
-//            },
             groupOfShapes: {
               type: Object,
               computed: "_itemsChanged(items, p2p)"
@@ -208,12 +202,6 @@
         }
       }
 
-//      _getInfos(items) {
-//        if (!items || items.length == 0)
-//          return null;
-//        return items.map(el => el.info);
-//      }
-//
       _itemsChanged(items, p2p) {
         if (!items || items.length == 0)
           return null;
@@ -242,8 +230,6 @@
         this.$.marker.addEventListener("pointerdown", this._pointerDown.bind(this));
         this.pointermoveListener = this._pointerMove.bind(this);
         this.pointerupListener = this._pointerUp.bind(this);
-        this._copyMoverListener = this._copyMover.bind(this);
-        this._copyPlacerListener = this._copyPlacer.bind(this);
       }
 
       _pointerDown(e) {
@@ -251,15 +237,22 @@
         this.addEventListener("pointerup", this.pointerupListener);
         this.setPointerCapture(e.pointerId);
         DroppadItemMarker._cancelPropDefault(e);
-        this.action = this.setMoveAction(e, this.heldKeys);
         this.groupCenter = DroppadItemMarker.getScreenCenter(this.$.marker);
         this.start = {x: e.clientX, y: e.clientY};
         this.startAngle = Math.atan2(this.start.y - this.groupCenter.y, this.start.x - this.groupCenter.x);
-        this.$.ghost.start();
+        this.dispatchEvent(new CustomEvent("track-start", {detail: DroppadItemMarker.setMoveAction(e)}));
+      }
+
+      static setMoveAction(e) {
+        if (e.target.classList.contains("scale") )
+          return {method: "scale", direction: e.target.id};
+        if (e.target.id == "rotate")
+          return {method: "rotate", direction: e.target.id};
+        return {method: "move", direction: e.target.id};
       }
 
       _pointerUp(e) {
-        this.dispatchEvent(new CustomEvent("changed", {detail: this.$.ghost.end()}));
+        this.dispatchEvent(new CustomEvent("track-end", null));
         this.releasePointerCapture(e.pointerId);
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
@@ -290,29 +283,13 @@
         else if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"])
           xMove = yMove;
         //snap  end
-        switch (this.action.method) {
-          case "scale":
-            return this.$.ghost.scaleDirection(xMove, yMove,percentX,percentY, this.action.direction);
-          case "rotate":
-            return this.$.ghost.rotate(angle - this.startAngle);
-          case "move":
-            return this.$.ghost.move(xMove, yMove);
-        }
-      }
-
-      _copyMover(e){
-        DroppadItemMarker._cancelPropDefault(e);
-        let xMove = this.p2p.addZoom(e.clientX - this.copyCenter.x);
-        let yMove = this.p2p.addZoom(e.clientY - this.copyCenter.y);
-        this.$.ghostCopy.move(xMove, yMove);
-      }
-
-      _copyPlacer(e){
-        this.parentNode.removeEventListener("pointermove", this._copyMoverListener);
-        this.parentNode.removeEventListener("pointerdown", this._copyPlacerListener);
-        this.dispatchEvent(new CustomEvent("new-shapes", {detail: this.$.ghostCopy.end()}));
-        this.set("visualCopy", null);
-        this.set("copyCenter", null);
+        this.dispatchEvent(new CustomEvent("track-move", {detail: {
+          xMove: xMove,
+          yMove: yMove,
+          percentX: percentX,
+          percentY: percentY,
+          angle: angle-this.startAngle
+        }}));
       }
 
       static _cancelPropDefault(e) {
@@ -320,32 +297,12 @@
         e.preventDefault();
       }
 
-      setMoveAction(e, heldKeys) {
-        let direction = e.target.id;
-        let action = "move"; //default action is move
-        if (e.target.classList.contains("scale") || heldKeys["KeyE"])
-          action = "scale";
-        else if (e.target.id == "rotate" || heldKeys["KeyR"])
-          action = "rotate";
-        else if (e.target.id == "move")
-          action = "move";
-        return {method: action, direction: direction};
-      }
-
-      copy() {
-        this.hiddenCopy = this.infos.map(el => el.makeCopy(0,0));
-        this.copyCenter = DroppadItemMarker.getScreenCenter(this.$.marker);
-      }
-
-      paste() {
-        this.set("visualCopy", this.hiddenCopy);
-        this.$.ghostCopy.start();
-        this.parentNode.addEventListener("pointermove", this._copyMoverListener);
-        this.parentNode.addEventListener("pointerdown", this._copyPlacerListener);
-      }
-
       abort() {
         //todo make a function that aborts changes while altering or copying.
+      }
+
+      getCenter(){
+        return DroppadItemMarker.getScreenCenter(this.$.marker);
       }
 
       static getScreenCenter(elem) {

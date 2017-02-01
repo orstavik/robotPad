@@ -21,14 +21,20 @@
       }
 
     </style>
-    <droppad-canvas-canvas id="canvas" center="{{position}}" p2p="{{p2p}}" on-new-shape="_newShape" on-deselect="_deselectAll">
+    <droppad-canvas-canvas id="canvas" center="{{position}}" p2p="{{p2p}}" on-new-shape="_newShape"
+                           on-deselect="_deselectAll">
       <droppad-selector id="dropSelector" selected-elements="{{selectedDrops}}">
         <template is="dom-repeat" items="[[drops]]">
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
         </template>
       </droppad-selector>
-      <droppad-item-marker id="square" items="[[selectedDrops]]" on-changed="_selectedChanged" infos="[[selectedInfos]]"
+      <!--on-changed="_selectedChanged"-->
+      <droppad-item-marker id="square" items="[[selectedDrops]]" infos="[[selectedInfos]]"
+                           on-track-start="_startMovingMarker" on-track-move="_movingMarker"
+                           on-track-end="_stopMovingMarker"
                            on-new-shapes="_copyShapes" held-keys="[[heldKeys]]" p2p="[[p2p]]"></droppad-item-marker>
+      <group-of-shapes id="ghost" originals="[[selectedInfos]]"></group-of-shapes>
+      <group-of-shapes id="ghostCopy" originals="[[visualCopy]]"></group-of-shapes>
     </droppad-canvas-canvas>
   </template>
 
@@ -70,12 +76,70 @@
         }
       }
 
+      connectedCallback(){
+        this._copyMoverListener = this._copyMover.bind(this);
+        this._copyPlacerListener = this._copyPlacer.bind(this);
+      }
+
       _setSelectedIds(elems) {
         return elems.map(item => item.info.number);
       }
 
       _setSelectedInfos(elems) {
         return elems.map(item => item.info);
+      }
+
+      _startMovingMarker(e) {
+        let action = e.detail;
+        if (this.heldKeys["KeyR"])
+          action.method = "rotate";
+        else if (this.heldKeys["KeyE"])
+          action.method = "scale";
+        this.$.ghost.start(action);
+      }
+
+      _movingMarker(e) {
+        let ms = e.detail;
+        switch (this.$.ghost.action.method) {
+          case "scale":
+            return this.$.ghost.scaleDirection(ms.xMove, ms.yMove, ms.percentX, ms.percentY, this.$.ghost.action.direction);
+          case "rotate":
+            return this.$.ghost.rotate(ms.angle);
+          case "move":
+            return this.$.ghost.move(ms.xMove, ms.yMove);
+        }
+      }
+
+      _stopMovingMarker(e) {
+        this.replaceWithChanges(this.$.ghost.end());
+      }
+
+      _copyMover(e){
+        DroppadItemMarker._cancelPropDefault(e);
+        let xMove = this.p2p.addZoom(e.clientX - this.copyCenter.x);
+        let yMove = this.p2p.addZoom(e.clientY - this.copyCenter.y);
+        this.$.ghostCopy.move(xMove, yMove);
+      }
+
+      _copyPlacer(e){
+        this.removeEventListener("pointermove", this._copyMoverListener);
+        this.removeEventListener("pointerdown", this._copyPlacerListener);
+        this.$.dropSelector.deselectAll();
+        this._addElements(this.$.ghostCopy.end());
+        this.set("visualCopy", null);
+        this.set("copyCenter", null);
+      }
+
+      copy() {
+        this.hiddenCopy = this.selectedInfos.map(el => el.makeCopy(0,0));
+        this.copyCenter = this.$.square.getCenter();
+      }
+
+      paste() {
+        this.set("visualCopy", this.hiddenCopy);
+        this.$.ghostCopy.start("move");
+        this.addEventListener("pointermove", this._copyMoverListener);
+        this.addEventListener("pointerdown", this._copyPlacerListener);
       }
 
       handleKeyPress(e) {
@@ -86,9 +150,9 @@
         else if (e.code === "KeyD")
           this._deleteElem();
         else if (e.code === "KeyC")
-          this.$.square.copy();
+          this.copy();
         else if (e.code === "KeyV")
-          this.$.square.paste();
+          this.paste();
         else if (e.code == "KeyM")
           this.replaceWithChanges(this.selectedInfos.map(el => el.mirror()));
         else if (e.code == "KeyN")
@@ -99,10 +163,10 @@
           this.replaceWithChanges(this.selectedInfos.map(el => el.zDown()));
       }
 
-      _selectedChanged(e) {
-        this.replaceWithChanges(e.detail);
-      }
-
+//      _selectedChanged(e) {
+//        this.replaceWithChanges(e.detail);
+//      }
+//
       replaceWithChanges(changedCopies) {
         this.history.push(this.drops);
         this.set("drops", ImmutableArrayFunctions.replaceEqualNumber(this.drops, changedCopies));
@@ -114,7 +178,7 @@
       //     This is a cascading problem..
       //todo this is a hack..
       _refreshItems() {
-        setTimeout(function () {//todo testing without
+        setTimeout(function () {//todo test this better
           this.notifyPath("selectedInfos");
           this.notifyPath("selectedDrops");
         }.bind(this), 0);
@@ -167,11 +231,11 @@
         this.$.dropSelector.deselectAll(); //todo, is this necessary?? //todo should this be moved into the selectors listening on the drops
       }
 
-      _copyShapes(e) {
-        this.$.dropSelector.deselectAll();
-        this._addElements(e.detail);
-      }
-
+//      _copyShapes(e) {
+//        this.$.dropSelector.deselectAll();
+//        this._addElements(e.detail);
+//      }
+//
       _addElements(newShapes) {
         this.history.push(this.drops);
         this.set("drops", this.drops.concat(newShapes));//Immutable .concat() makes a new array object instance

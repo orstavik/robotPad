@@ -42,11 +42,11 @@
       }
 
       start(action) {
-        this.set("action", true);
+        this.set("action", action);
       }
 
       end() {
-        this.set("action", false);
+        this.set("action", null);
         return this.infos;
       }
 

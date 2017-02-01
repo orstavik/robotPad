@@ -74,7 +74,9 @@
       }
 
       _mouseUp(e) {
-        if (this.actions.abort) {
+        if (!this.actions) {
+          //something has triggered this while it shouldnt..
+        } else if (this.actions.abort) {
 
         } else if (this.actions.shift && !this.actions.wasSelectedAlready) {
 

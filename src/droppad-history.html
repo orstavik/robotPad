@@ -1,0 +1,178 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="drop-shape.html">
+
+<dom-module id="droppad-history">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 10%;
+      }
+
+      #view1 {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+      }
+
+      .grey {
+        background-color: grey;
+      }
+      .white {
+        background-color: white;
+      }
+
+      .pointer {
+        transform: rotate(36deg);
+        width: 20%;
+        height: 20%;
+      }
+
+      #outerFrame {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 80%;
+        height: 80%;
+      }
+
+      #innerFrame, .pointer {
+        position: absolute;
+      }
+
+      #innerFrame {
+        top: 10%;
+        left: 10%;
+        width: 80%;
+        height: 80%;
+      }
+
+      #outerFramePointer {
+        top: 50%;
+        left: -6%;
+      }
+      #innerFramePointer {
+        top: 49%;
+        left: 5%;
+      }
+
+    </style>
+    <div id="scrollbar">
+      <template is="dom-repeat" items="[[history]]">
+        <div id="entry[[index]]">[[history.timestamp]] :: [[history.fullstate]]</div>
+      </template>
+    </div>
+    <div id="view1">
+      <div id="outerFrame" class="grey">
+        <div id="outerFramePointer" class="grey pointer"></div>
+        <div id="innerFramePointer" class="white pointer"></div>
+        <div id="innerFrame" class="white">
+          <div id="redBall"></div>
+        </div>
+      </div>
+    </div>
+    <template is="dom-if" if="false">
+      <div id="view2">
+      </div>
+    </template>
+  </template>
+
+  <script>
+    class DroppadHistoryObject {
+      constructor(history) {
+        if (history = null) {
+          //make an empty history object
+        }
+
+        this.entries = [];
+        //todo I should have a double map here that at any position has 1) time, 2) the action, 3) previous full state, and 4) current full state.
+        //todo, if I don't have a full state, I can make a full state by performing all the actions between the previous full state and this point, to get the full state.
+      }
+
+      getLastPosition() {
+        //todo return the last position in the History object
+      }
+
+      //simply pushes a new state to the entries
+      pushChange() {
+
+      }
+
+      //pushes a whole new state object to the entries
+      setNewState() {
+
+      }
+
+      //returns a whole new state from the current position
+      recreate() {
+
+      }
+    }
+
+    class DroppadHistory extends Polymer.Element {
+      static get is() {
+        return "droppad-history";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            history: {
+              type: DroppadHistoryObject,
+              notify: true
+            },
+            currentPosition: Number, //todo when to set the currentPosition to be
+          }
+        }
+      }
+
+      //can be called from the outside when the
+      loadHistoryObject(history) {
+        this.set("history", new History(history));
+        this.set("currentPosition", this.history.getLastPosition());
+      }
+
+      push(change) {
+        this.history.pushChange(change);
+        this.notifyPath("history");
+      }
+
+      setState(state) {
+        this.history.setNewState(state);
+        this.notifyPath("history");
+      }
+
+      connectedCallback() {
+        this.addEventListener("wheel", this._scroll.bind(this));
+        this.$.scrollbar.addEventListener("pointerover", this._hover.bind(this));
+        this.pointerout = this._unHover.bind(this);
+      }
+
+      _hover(e) {
+        this.addEventListener("pointerout", this.pointerout);
+        this.setPointerCapture(e.pointerId);
+        DroppadHistory._cancelPropDefault(e);
+        this.notifyPath("history.hover");
+      }
+
+      _unHover(e) {
+        this.removeEventListener("pointerout", this.pointerout);
+        this.releasePointerCapture(e.pointerId);
+        DroppadHistory._cancelPropDefault(e);
+        this.notifyPath("history.hover");
+      }
+
+      _scroll(e) {
+        //todo translate the top of the scrollbar?
+      }
+
+      static _cancelPropDefault(e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    }
+    customElements.define(DroppadHistory.is, DroppadHistory);
+  </script>
+</dom-module>

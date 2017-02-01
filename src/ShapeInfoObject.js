@@ -80,19 +80,27 @@ class ShapeInfoObject {
   }
 
   mirror() {
-    this.w *= -1;
+    let c = this.clone();
+    c.w *= -1;
+    return c;
   }
 
   center() {
-    this.centered = !this.centered;
+    let c = this.clone();
+    c.centered = !c.centered;
+    return c;
   }
 
   zUp() {
-    this.zIndex += 1;
+    let c = this.clone();
+    c.zIndex += 1;
+    return c;
   }
 
   zDown() {
-    this.zIndex -= 1;
+    let c = this.clone();
+    c.zIndex -= 1;
+    return c;
   }
 
   setStyle(styleName) {
@@ -129,12 +137,6 @@ class ShapeInfoObject {
 ShapeInfoObject.__sessionID = new Date().getTime();
 
 class ImmutableArrayFunctions {
-  static push(array, obj) {
-    array = array.slice();
-    array.push(obj);
-    return array;
-  }
-
   static filter(array, numbers) {
     return array.filter(function (item) {
       return numbers.indexOf(item.number) == -1;

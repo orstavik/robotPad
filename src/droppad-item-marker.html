@@ -222,6 +222,15 @@
         this.action = action;
       }
 
+      makeACopy(infos){
+        let clone = new GroupOfShapes([], 0);
+        clone = Object.assign(clone, this);//transfer dimensions
+        clone.cDims = Object.assign({}, this.cDims);//transfer cDims
+        clone.originals = this.originals.map(info => info.makeCopy(0,0));
+        clone.infos = clone.originals.map(info => info.clone());
+      }
+
+
       move(xMove, yMove, angle) {
         let percentX = xMove / this.width;
         let percentY = yMove / this.height;
@@ -291,6 +300,7 @@
         this.$.marker.addEventListener("pointerdown", this._pointerDown.bind(this));
         this.pointermoveListener = this._pointerMove.bind(this);
         this.pointerupListener = this._pointerUp.bind(this);
+        this._pastePointerDownListener = this._pastePointerDown.bind(this);
       }
 
       _pointerDown(e) {
@@ -350,6 +360,55 @@
         else if (e.target.id == "move")
           action = "move";
         return {method: action, direction: direction};
+      }
+
+      mirror() {
+        let infos = this.items.map(el => el.info.mirror());
+        this.dispatchEvent(new CustomEvent("changed", {detail: infos}));
+        this.notifyPath("groupOfShapes");
+      }
+
+      center() {
+        let infos = this.items.map(el => el.info.center());
+        this.dispatchEvent(new CustomEvent("changed", {detail: infos}));
+        this.notifyPath("groupOfShapes");
+      }
+
+      zDown() {
+        let infos = this.items.map(el => el.info.zDown());
+        this.dispatchEvent(new CustomEvent("changed", {detail: infos}));
+        this.notifyPath("groupOfShapes");
+      }
+
+      zUp() {
+        let infos = this.items.map(el => el.info.zUp());
+        this.dispatchEvent(new CustomEvent("changed", {detail: infos}));
+        this.notifyPath("groupOfShapes");
+      }
+
+      copy() {
+        this.groupOfShapes.start({method: "move", direction: "c"}, this.items.map(el => el.info));
+        //todo make a copy, not a clone, so that all the id's of the elements are unique..
+        this.groupOfShapes.makeACopy();
+      }
+
+      paste() {
+        this.start = this.groupCenter = DroppadItemMarker.getScreenCenter(this.$.marker);
+        this.parentNode.addEventListener("pointermove", this.pointermoveListener);
+        this.parentNode.addEventListener("pointerdown", this._pastePointerDownListener);
+      }
+
+      _pastePointerDown(){
+        this.parentNode.removeEventListener("pointermove", this.pointermoveListener);
+        this.parentNode.removeEventListener("pointerdown", this._pastePointerDownListener);
+        this.dispatchEvent(new CustomEvent("new-shapes", {detail: this.groupOfShapes.infos}));
+        this.start = this.groupCenter = null;//not strictly necessary
+        this.groupOfShapes.show = true;
+        this.notifyPath("groupOfShapes");
+      }
+
+      abort() {
+        //todo make a function that aborts changes while altering or copying.
       }
 
       static getScreenCenter(elem) {

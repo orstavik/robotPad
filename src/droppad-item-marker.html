@@ -189,10 +189,11 @@
         return {
           properties: {
             items: Array,
-            infos: {
-              type: Array,
-              computed: "_getInfos(items)"
-            },
+            infos: Array,
+//              {
+//              type: Array,
+//              computed: "_getInfos(items)"
+//            },
             groupOfShapes: {
               type: Object,
               computed: "_itemsChanged(items, p2p)"
@@ -207,12 +208,12 @@
         }
       }
 
-      _getInfos(items) {
-        if (!items || items.length == 0)
-          return null;
-        return items.map(el => el.info);
-      }
-
+//      _getInfos(items) {
+//        if (!items || items.length == 0)
+//          return null;
+//        return items.map(el => el.info);
+//      }
+//
       _itemsChanged(items, p2p) {
         if (!items || items.length == 0)
           return null;
@@ -329,30 +330,6 @@
         else if (e.target.id == "move")
           action = "move";
         return {method: action, direction: direction};
-      }
-
-      mirror() {
-        let infos = this.infos.map(el => el.mirror());
-        this.dispatchEvent(new CustomEvent("changed", {detail: infos}));
-        this._refreshItems();
-      }
-
-      center() {
-        let infos = this.infos.map(el => el.center());
-        this.dispatchEvent(new CustomEvent("changed", {detail: infos}));
-        this._refreshItems();
-      }
-
-      zDown() {
-        let infos = this.infos.map(el => el.zDown());
-        this.dispatchEvent(new CustomEvent("changed", {detail: infos}));
-        this._refreshItems();
-      }
-
-      zUp() {
-        let infos = this.infos.map(el => el.zUp());
-        this.dispatchEvent(new CustomEvent("changed", {detail: infos}));
-        this._refreshItems();
       }
 
       copy() {

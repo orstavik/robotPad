@@ -27,7 +27,7 @@
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
         </template>
       </droppad-selector>
-      <droppad-item-marker id="square" items="[[selectedDrops]]" on-changed="_selectedChanged"
+      <droppad-item-marker id="square" items="[[selectedDrops]]" on-changed="_selectedChanged" infos="[[selectedInfos]]"
                            on-new-shapes="_copyShapes" held-keys="[[heldKeys]]" p2p="[[p2p]]"></droppad-item-marker>
     </droppad-canvas-canvas>
   </template>
@@ -48,6 +48,10 @@
             selectedDrops: {
               type: Array,
               notify: true
+            },
+            selectedInfos: {
+              type: Array,
+              computed: "_setSelectedInfos(selectedDrops)"
             },
             selectedIds: {
               type: Array,
@@ -70,6 +74,10 @@
         return elems.map(item => item.info.number);
       }
 
+      _setSelectedInfos(elems) {
+        return elems.map(item => item.info);
+      }
+
       handleKeyPress(e) {
         if (e.code === "Escape")
           this.$.dropSelector.deselectAll(); // also do this.$.square.abort();
@@ -82,18 +90,34 @@
         else if (e.code === "KeyV")
           this.$.square.paste();
         else if (e.code == "KeyM")
-          this.$.square.mirror();
+          this.replaceWithChanges(this.selectedInfos.map(el => el.mirror()));
         else if (e.code == "KeyN")
-          this.$.square.center();
+          this.replaceWithChanges(this.selectedInfos.map(el => el.center()));
         else if (e.code == "PageUp")
-          this.$.square.zUp();
+          this.replaceWithChanges(this.selectedInfos.map(el => el.zUp()));
         else if (e.code == "PageDown")
-          this.$.square.zDown();
+          this.replaceWithChanges(this.selectedInfos.map(el => el.zDown()));
       }
 
       _selectedChanged(e) {
+        this.replaceWithChanges(e.detail);
+      }
+
+      replaceWithChanges(changedCopies) {
         this.history.push(this.drops);
-        this.set("drops", ImmutableArrayFunctions.replaceEqualNumber(this.drops, e.detail));
+        this.set("drops", ImmutableArrayFunctions.replaceEqualNumber(this.drops, changedCopies));
+        this._refreshItems();
+      }
+
+      //att! The setTimout(func, 0) makes the notifyPath("items") wait until Polymer has updated the selected items so that
+      //     the groupOfShapes and its bounding box is updated with the new position info, and not the current one in the objects..
+      //     This is a cascading problem..
+      //todo this is a hack..
+      _refreshItems() {
+        setTimeout(function () {//todo testing without
+          this.notifyPath("selectedInfos");
+          this.notifyPath("selectedDrops");
+        }.bind(this), 0);
       }
 
       addStyleToSelected(styleName) {

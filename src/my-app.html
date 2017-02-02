@@ -106,7 +106,12 @@
       }
     </style>
 
-    <droppad-canvas id="shapeSelector" drops="{{letters}}" held-keys="[[heldKeys]]" on-oldstate="_pushToHistory"></droppad-canvas>
+    <droppad-canvas id="shapeSelector" drops="{{letters}}" held-keys="[[heldKeys]]"
+                    on-oldstate="_pushToHistory"
+                    on-addshapes="_addShapes"
+                    on-removeshapes="_removeShapes"
+                    on-changeshapes="_changeShapes"
+    ></droppad-canvas>
 
     <div id="toolbar">
       <div class="button spacer"></div>
@@ -184,7 +189,8 @@
             colors: Array,
             letters: {
               type: Array,
-              computed: "_lastOfHistory(history)"
+              computed: "_lastOfHistory(history)",
+              notify: true
             },
             coloredScale: {
               type: Array,
@@ -208,6 +214,22 @@
 
       _lastOfHistory(history){
         return history[history.length-1]
+      }
+
+      _addShapes(e){
+        let current = this.letters.concat(e.detail);          //Immutable .concat() makes a new array object instance
+        this.pushToHistory(current);
+      }
+
+      _removeShapes(e){
+        let current = this.letters.filter(info => e.detail.indexOf(info) == -1); //Immutable filter is immutable, returns a new array
+        this.pushToHistory(current);
+      }
+
+      _changeShapes(e){
+        let current = ImmutableArrayFunctions.replaceEqualNumber(this.letters, e.detail);
+        this.pushToHistory(current);
+        this.$.shapeSelector.updateSelected();
       }
 
       _pushToHistory(e){

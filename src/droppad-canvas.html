@@ -119,6 +119,7 @@
       }
 
       _copyPlacer(e){
+        DroppadItemMarker._cancelPropDefault(e);
         this.removeEventListener("pointermove", this._copyMoverListener);
         this.removeEventListener("pointerdown", this._copyPlacerListener);
         this.$.dropSelector.deselectAll();
@@ -135,6 +136,7 @@
       paste() {
         this.set("visualCopy", this.hiddenCopy);
         this.$.ghostCopy.start("move");
+        this.$.canvas.abort();      //need to do this because i don't have the capture of the pointer and so must override the capture of the canvas-canvas
         this.addEventListener("pointermove", this._copyMoverListener);
         this.addEventListener("pointerdown", this._copyPlacerListener);
       }

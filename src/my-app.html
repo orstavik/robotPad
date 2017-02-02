@@ -145,9 +145,9 @@
     <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower>
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
-    <app-ui></app-ui>
+    <app-ui app-name="[[sketchName]]"></app-ui>
 
-    <iron-selector attr-for-selected="select" multi>
+    <!--<iron-selector attr-for-selected="select" multi>
       <tab-wrapper title="JSON" select="1">
         <template is="dom-repeat" items="[[letters]]">
           <json-object key="[[item.number]]" obj="[[item]]" on-writeop="writeInChanges"></json-object>
@@ -161,11 +161,9 @@
       </tab-wrapper>
       <tab-wrapper title="History" select="4">
         <droppad-history></droppad-history>
-        <!--History: <input type="range" min="0" max="10000" value="0" id="h" on-input="timeTravel"/> <br>-->
+        History: <input type="range" min="0" max="10000" value="0" id="h" on-input="timeTravel"/> <br>
       </tab-wrapper>
-    </iron-selector>
-
-    <div id="title" style="position: fixed; right: 0">[[sketchName]]</div>
+    </iron-selector>-->
 
     <keyboard-listener on-key-down="_checkKey" held-keys="{{heldKeys}}"></keyboard-listener>
 

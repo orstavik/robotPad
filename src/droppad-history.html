@@ -80,37 +80,37 @@
   </template>
 
   <script>
-    class DroppadHistoryObject {
-      constructor(history) {
-        if (history = null) {
-          //make an empty history object
-        }
-
-        this.entries = [];
-        //todo I should have a double map here that at any position has 1) time, 2) the action, 3) previous full state, and 4) current full state.
-        //todo, if I don't have a full state, I can make a full state by performing all the actions between the previous full state and this point, to get the full state.
-      }
-
-      getLastPosition() {
-        //todo return the last position in the History object
-      }
-
-      //simply pushes a new state to the entries
-      pushChange() {
-
-      }
-
-      //pushes a whole new state object to the entries
-      setNewState() {
-
-      }
-
-      //returns a whole new state from the current position
-      recreate() {
-
-      }
-    }
-
+//    class DroppadHistoryObject {
+//      constructor(history) {
+//        if (history = null) {
+//          //make an empty history object
+//        }
+//
+//        this.entries = [];
+//        //todo I should have a double map here that at any position has 1) time, 2) the action, 3) previous full state, and 4) current full state.
+//        //todo, if I don't have a full state, I can make a full state by performing all the actions between the previous full state and this point, to get the full state.
+//      }
+//
+//      getLastPosition() {
+//        //todo return the last position in the History object
+//      }
+//
+//      //simply pushes a new state to the entries
+//      pushChange() {
+//
+//      }
+//
+//      //pushes a whole new state object to the entries
+//      setNewState() {
+//
+//      }
+//
+//      //returns a whole new state from the current position
+//      recreate() {
+//
+//      }
+//    }
+//
     class DroppadHistory extends Polymer.Element {
       static get is() {
         return "droppad-history";
@@ -120,58 +120,77 @@
         return {
           properties: {
             history: {
-              type: DroppadHistoryObject,
-              notify: true
-            },
-            currentPosition: Number, //todo when to set the currentPosition to be
+              type: Array, //DroppadHistoryObject,
+              observer: "historyChanged",
+              value: function(){
+                return [[]];
+              }
+            }
           }
         }
       }
-
-      //can be called from the outside when the
-      loadHistoryObject(history) {
-        this.set("history", new History(history));
-        this.set("currentPosition", this.history.getLastPosition());
+      historyChanged(history){
+        let newState = this.history[this.history.length-1];
+        this.dispatchEvent(new CustomEvent("new-state", {detail: newState}));
       }
 
-      push(change) {
-        this.history.pushChange(change);
-        this.notifyPath("history");
+      loadHistory(newHistory){
+        this.set("history", newHistory);
       }
 
-      setState(state) {
-        this.history.setNewState(state);
-        this.notifyPath("history");
+      getLastState(){
+        return this.history[this.history.length-1];
       }
 
-      connectedCallback() {
-        this.addEventListener("wheel", this._scroll.bind(this));
-        this.$.scrollbar.addEventListener("pointerover", this._hover.bind(this));
-        this.pointerout = this._unHover.bind(this);
+      timeTravel(e) {
+        if (e.target.valueAsNumber >= this.history.length)
+          e.target.valueAsNumber = this.history.length;
+        return this.history[e.target.valueAsNumber];
       }
 
-      _hover(e) {
-        this.addEventListener("pointerout", this.pointerout);
-        this.setPointerCapture(e.pointerId);
-        DroppadHistory._cancelPropDefault(e);
-        this.notifyPath("history.hover");
+      pushUp(addUs) {
+        this.push("history", this.getLastState().concat(addUs));
       }
-
-      _unHover(e) {
-        this.removeEventListener("pointerout", this.pointerout);
-        this.releasePointerCapture(e.pointerId);
-        DroppadHistory._cancelPropDefault(e);
-        this.notifyPath("history.hover");
+      filter(removeUs) {
+        this.push("history", this.getLastState().filter(info => removeUs.indexOf(info) == -1));         //Immutable filter is immutable, returns a new array
       }
-
-      _scroll(e) {
-        //todo translate the top of the scrollbar?
+      alter(array) {
+        this.push("history", ImmutableArrayFunctions.replaceEqualNumber(this.getLastState(), array));
       }
-
-      static _cancelPropDefault(e) {
-        e.stopPropagation();
-        e.preventDefault();
-      }
+//
+//      setState(state) {
+//        this.history.setNewState(state);
+//        this.notifyPath("history");
+//      }
+//
+//      connectedCallback() {
+//        this.addEventListener("wheel", this._scroll.bind(this));
+//        this.$.scrollbar.addEventListener("pointerover", this._hover.bind(this));
+//        this.pointerout = this._unHover.bind(this);
+//      }
+//
+//      _hover(e) {
+//        this.addEventListener("pointerout", this.pointerout);
+//        this.setPointerCapture(e.pointerId);
+//        DroppadHistory._cancelPropDefault(e);
+//        this.notifyPath("history.hover");
+//      }
+//
+//      _unHover(e) {
+//        this.removeEventListener("pointerout", this.pointerout);
+//        this.releasePointerCapture(e.pointerId);
+//        DroppadHistory._cancelPropDefault(e);
+//        this.notifyPath("history.hover");
+//      }
+//
+//      _scroll(e) {
+//        //todo translate the top of the scrollbar?
+//      }
+//
+//      static _cancelPropDefault(e) {
+//        e.stopPropagation();
+//        e.preventDefault();
+//      }
     }
     customElements.define(DroppadHistory.is, DroppadHistory);
   </script>

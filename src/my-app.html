@@ -106,7 +106,7 @@
       }
     </style>
 
-    <droppad-canvas id="shapeSelector" drops="{{letters}}" held-keys="[[heldKeys]]"
+    <droppad-canvas id="shapeSelector" drops="[[letters]]" held-keys="[[heldKeys]]"
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
                     on-changeshapes="_changeShapes"
@@ -164,7 +164,7 @@
         <json-saver input="[[letters]]" on-sketchload="loadSketch" json-name="{{sketchName}}"></json-saver>
       </tab-wrapper>
       <tab-wrapper title="History" select="4">
-        <droppad-history></droppad-history>
+        <droppad-history id="history" on-new-state="_newState"></droppad-history>
         <!--History: <input type="range" min="0" max="10000" value="0" id="h" on-input="timeTravel"/> <br>-->
       </tab-wrapper>
     </iron-selector>
@@ -186,61 +186,45 @@
         return {
           properties: {
             colors: Array,
-            letters: {
-              type: Array,
-              computed: "_lastOfHistory(history)"
-            },
+            letters: Array,
             coloredScale: {
               type: Array,
               observer: "colorScaleChanged"
             },
             heldKeys: Array,
             sketchName: String,
-            history: Array
           }
         }
       }
 
       connectedCallback() {
         super.connectedCallback();
-        this.newSketch();
       }
 
-      _lastOfHistory(history){
-        return history[history.length-1]
+      _newState(e){
+        this.set("letters", e.detail);
       }
 
       _addShapes(e){
-        if (this.letters != this.history[this.history.length-1])
-          throw new Error("wtf");
-        this.push("history", this.letters.concat(e.detail));                  //Immutable .concat() makes a new array object instance
+        this.$.history.pushUp(e.detail);
       }
 
       _removeShapes(e){
-        if (this.letters != this.history[this.history.length-1])
-          throw new Error("wtf");
-        this.push("history", this.letters.filter(info => e.detail.indexOf(info) == -1));         //Immutable filter is immutable, returns a new array
+        this.$.history.filter(e.detail);
       }
 
       _changeShapes(e){
-        if (this.letters != this.history[this.history.length-1])
-          throw new Error("wtf");
-        this.push("history", ImmutableArrayFunctions.replaceEqualNumber(this.letters, e.detail));
-        this.$.shapeSelector.updateSelected();    //todo this is the problem of updating the selecteds..
-      }
-
-      timeTravel(e) {
-        if (e.target.valueAsNumber >= this.history.length)
-          e.target.valueAsNumber = this.history.length;
-        return this.history[e.target.valueAsNumber];
+        this.$.history.alter(e.detail);
+        this.$.shapeSelector.updateSelected();
+        //todo this is the problem of updating the selecteds..
       }
 
       loadSketch(e) {
-        this.set("history", [e.detail.json]);
+        this.$.history.loadHistory([e.detail.json]);
       }
 
       newSketch(){
-        this.set("history", [[]]);
+        this.$.history.loadHistory([[]]);
       }
 
       writeInChanges(e) {

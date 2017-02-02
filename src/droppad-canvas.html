@@ -45,10 +45,7 @@
       static get config() {
         return {
           properties: {
-            drops: {
-              type: Array,
-              notify: true
-            },
+            drops: Array,
             selectedDrops: {
               type: Array,
               notify: true
@@ -58,13 +55,6 @@
               computed: "_setSelectedInfos(selectedDrops)"
             },
             heldKeys: Array,
-            history: {
-              type: Array,
-              value: function () {
-                return [];
-              },
-              notify: true
-            }
           }
         }
       }
@@ -190,15 +180,11 @@
         }.bind(this), 0);
       }
 
-      loadSketch(drops) {
-        this.set("drops", drops);
-      }
-
       //att! The setTimout(func, 0) makes the notifyPath("selection") wait until Polymer has updated the selected items so that
       //     the groupOfShapes and its bounding box is updated with the new position info, and not the current one in the objects..
       //     This is a cascading problem..
       replaceChanges(changedCopies) {
-        this.history.push(this.drops);
+        this.dispatchEvent(new CustomEvent("oldstate", {detail: this.drops}));
         this.set("drops", ImmutableArrayFunctions.replaceEqualNumber(this.drops, changedCopies));
         setTimeout(function () {
           this.notifyPath("selectedDrops");
@@ -206,13 +192,13 @@
       }
 
       _deleteElem() {
-        this.history.push(this.drops);
+        this.dispatchEvent(new CustomEvent("oldstate", {detail: this.drops}));
         this.set("drops", this.drops.filter(item => this.selectedInfos.indexOf(item) == -1)); //Immutable filter is immutable, returns a new array
         this.$.dropSelector.deselectAll();    //todo maybe move this as a listener to changes on drops in the selector?
       }
 
       _addElements(newShapes) {
-        this.history.push(this.drops);
+        this.dispatchEvent(new CustomEvent("oldstate", {detail: this.drops}));
         this.set("drops", this.drops.concat(newShapes));//Immutable .concat() makes a new array object instance
       }
     }

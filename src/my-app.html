@@ -106,7 +106,7 @@
       }
     </style>
 
-    <droppad-canvas id="shapeSelector" drops="{{letters}}" held-keys="[[heldKeys]]" history="{{history}}"></droppad-canvas>
+    <droppad-canvas id="shapeSelector" drops="{{letters}}" held-keys="[[heldKeys]]" on-oldstate="_pushToHistory"></droppad-canvas>
 
     <div id="toolbar">
       <div class="button spacer"></div>
@@ -182,36 +182,55 @@
         return {
           properties: {
             colors: Array,
-            letters: Array,
+            letters: {
+              type: Array,
+              computed: "_lastOfHistory(history)"
+            },
             coloredScale: {
               type: Array,
               observer: "colorScaleChanged"
             },
             heldKeys: Array,
             sketchName: String,
-            history: Array
+            history: {
+              type: Array,
+              value: function(){
+                return [[]];
+              }
+            }
           }
         }
       }
 
       connectedCallback() {
         super.connectedCallback();
-        this.newSketch();
+      }
+
+      _lastOfHistory(history){
+        return history[history.length-1]
+      }
+
+      _pushToHistory(e){
+        this.pushToHistory(e.detail);
       }
 
       timeTravel(e) {
         if (e.target.valueAsNumber >= this.history.length)
           e.target.valueAsNumber = this.history.length;
         let x = this.history[e.target.valueAsNumber];
-        this.$.shapeSelector.loadSketch(x);
+        this.pushToHistory(x);
       }
 
       loadSketch(e) {
-        this.$.shapeSelector.loadSketch(e.detail.json);
+        this.pushToHistory(e.detail.json);
       }
 
       newSketch(){
-        this.$.shapeSelector.loadSketch([]);
+        this.pushToHistory([]);
+      }
+
+      pushToHistory(ar) {
+        this.push("history", ar);
       }
 
       writeInChanges(e) {

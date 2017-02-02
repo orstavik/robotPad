@@ -31,7 +31,7 @@
                            on-track-start="_startMovingMarker"
                            on-track-move="_movingMarker"
                            on-track-end="_stopMovingMarker"></droppad-item-marker>
-      <group-of-shapes id="ghost"></group-of-shapes>
+      <group-of-shapes id="ghost" class="copy" ></group-of-shapes>
       <group-of-shapes id="ghostCopy"></group-of-shapes>
       <group-of-shapes id="historyPreview"></group-of-shapes>
     </droppad-canvas-canvas>
@@ -76,6 +76,7 @@
         this._copyPlacerListener = this._copyPlacer.bind(this);
       }
 
+      //todo the issue with updating the selected is "solved" here.. But maybe it should be solved in the selector? I'm not sure it can, because the selector does not know which elements disconnected due to deletion or changes..
       //att! The setTimout(func, 0) makes the notifyPath("selection") wait until Polymer has updated the selected items so that
       //     the groupOfShapes and its bounding box is updated with the new position info, and not the current one in the objects..
       //     This is a cascading problem..
@@ -85,6 +86,7 @@
         }.bind(this), 0);
       }
 
+      //todo there is a bug in the selector..
       _setSelectedInfos(elems, drops) {
         if (!elems || !drops)
           return null;

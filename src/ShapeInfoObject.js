@@ -124,11 +124,13 @@ class ShapeInfoObject {
   }
 
   setStyle(styleName) {
-    this.style = styleName;
+    let c = this.clone();
+    c.style = styleName;
+    return c;
   }
 
   update(value) {
-    Object.assign(this, value);
+    return Object.assign(this.clone(), value);
   }
 
   getAngle() {
@@ -167,21 +169,21 @@ class ImmutableArrayFunctions {
     return array;
   }
 
-  static alter(array, numbers, func, arg1, arg2) {
-    let toBeAltered = [];
-    array = array.map(function (item) {
-      if (numbers.indexOf(item.number) == -1)
-        return item;
-      item = item.clone();
-      toBeAltered.push(item);
-      return item;
-    });
-    toBeAltered.map(function (item) {
-      return func.call(item, arg1, arg2);
-    });
-    return array;
-  }
-
+  // static alter(array, numbers, func, arg1, arg2) {
+  //   let toBeAltered = [];
+  //   array = array.map(function (item) {
+  //     if (numbers.indexOf(item.number) == -1)
+  //       return item;
+  //     item = item.clone();
+  //     toBeAltered.push(item);
+  //     return item;
+  //   });
+  //   toBeAltered.map(function (item) {
+  //     return func.call(item, arg1, arg2);
+  //   });
+  //   return array;
+  // }
+  //
   static replaceEqualNumber(original, replacements) {
     let listOfNumbers = replacements.map(function (item) {
       return item.number;

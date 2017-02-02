@@ -21,8 +21,7 @@
       }
 
     </style>
-    <droppad-canvas-canvas id="canvas" center="{{position}}" p2p="{{p2p}}" on-new-shape="_newShape"
-                           on-deselect="_deselectAll">
+    <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-new-shape="_newShape" on-deselect="_deselectAll">
       <droppad-selector id="dropSelector" selected-elements="{{selectedDrops}}">
         <template is="dom-repeat" items="[[drops]]">
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
@@ -58,11 +57,6 @@
               type: Array,
               computed: "_setSelectedInfos(selectedDrops)"
             },
-            selectedIds: {
-              type: Array,
-              notify: true,
-              computed: "_setSelectedIds(selectedDrops)"
-            },
             heldKeys: Array,
             history: {
               type: Array,
@@ -78,10 +72,6 @@
       connectedCallback(){
         this._copyMoverListener = this._copyMover.bind(this);
         this._copyPlacerListener = this._copyPlacer.bind(this);
-      }
-
-      _setSelectedIds(elems) {
-        return elems.map(item => item.info.number);
       }
 
       _setSelectedInfos(elems) {
@@ -118,7 +108,7 @@
       }
 
       _stopMovingMarker(e) {
-        this.replaceWithChanges(this.$.ghost.end());
+        this.replaceChanges(this.$.ghost.end());
       }
 
       _copyMover(e){
@@ -161,44 +151,23 @@
         else if (e.code === "KeyV")
           this.paste();
         else if (e.code == "KeyM")
-          this.replaceWithChanges(this.selectedInfos.map(el => el.mirror()));
+          this.replaceChanges(this.selectedInfos.map(el => el.mirror()));
         else if (e.code == "KeyN")
-          this.replaceWithChanges(this.selectedInfos.map(el => el.center()));
+          this.replaceChanges(this.selectedInfos.map(el => el.center()));
         else if (e.code == "PageUp")
-          this.replaceWithChanges(this.selectedInfos.map(el => el.zUp()));
+          this.replaceChanges(this.selectedInfos.map(el => el.zUp()));
         else if (e.code == "PageDown")
-          this.replaceWithChanges(this.selectedInfos.map(el => el.zDown()));
-      }
-
-//      _selectedChanged(e) {
-//        this.replaceWithChanges(e.detail);
-//      }
-//
-      replaceWithChanges(changedCopies) {
-        this.history.push(this.drops);
-        this.set("drops", ImmutableArrayFunctions.replaceEqualNumber(this.drops, changedCopies));
-        this._refreshItems();
-      }
-
-      //att! The setTimout(func, 0) makes the notifyPath("items") wait until Polymer has updated the selected items so that
-      //     the groupOfShapes and its bounding box is updated with the new position info, and not the current one in the objects..
-      //     This is a cascading problem..
-      //todo this is a hack..
-      _refreshItems() {
-        setTimeout(function () {//todo test this better
-          this.notifyPath("selectedInfos");
-          this.notifyPath("selectedDrops");
-        }.bind(this), 0);
+          this.replaceChanges(this.selectedInfos.map(el => el.zDown()));
       }
 
       addStyleToSelected(styleName) {
-        this.alterSelected(ShapeInfoObject.prototype.setStyle, styleName);
+        this.replaceChanges(this.selectedInfos.map(el => el.setStyle(styleName)));
       }
 
       updateShape(id, value) {
         this.$.dropSelector.deselectAll();
         this.select(id);
-        this.alterSelected(ShapeInfoObject.prototype.update, value);
+        this.replaceChanges(this.selectedInfos.map(el => el.update(value)));
       }
 
       select(id) {
@@ -223,19 +192,21 @@
         this.set("drops", drops);
       }
 
-      alterSelected(func, arg1, arg2) {
+      //att! The setTimout(func, 0) makes the notifyPath("selection") wait until Polymer has updated the selected items so that
+      //     the groupOfShapes and its bounding box is updated with the new position info, and not the current one in the objects..
+      //     This is a cascading problem..
+      replaceChanges(changedCopies) {
         this.history.push(this.drops);
-        this.$.dropSelector.abort();
-        this.set("drops", ImmutableArrayFunctions.alter(this.drops, this.selectedIds, func, arg1, arg2));
-        setTimeout(function () {      //todo hack hack hack
+        this.set("drops", ImmutableArrayFunctions.replaceEqualNumber(this.drops, changedCopies));
+        setTimeout(function () {
           this.notifyPath("selectedDrops");
         }.bind(this), 0);
       }
 
       _deleteElem() {
         this.history.push(this.drops);
-        this.set("drops", this.drops.filter(item => this.selectedIds.indexOf(item.number) == -1)); //Immutable filter is immutable, returns a new array
-        this.$.dropSelector.deselectAll(); //todo, is this necessary?? //todo should this be moved into the selectors listening on the drops
+        this.set("drops", this.drops.filter(item => this.selectedInfos.indexOf(item) == -1)); //Immutable filter is immutable, returns a new array
+        this.$.dropSelector.deselectAll();    //todo maybe move this as a listener to changes on drops in the selector?
       }
 
       _addElements(newShapes) {

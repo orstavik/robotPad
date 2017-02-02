@@ -74,7 +74,7 @@
       }
 
       _setSelectedInfos(elems, drops) {
-        if (!elems)
+        if (!elems || !drops)
           return null;
         let fromTheDom = elems.map(item => item.info.number);
         let fromTheData = drops.filter(info => fromTheDom.indexOf(info.number) != -1);

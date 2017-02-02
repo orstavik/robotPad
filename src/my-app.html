@@ -107,7 +107,6 @@
     </style>
 
     <droppad-canvas id="shapeSelector" drops="{{letters}}" held-keys="[[heldKeys]]"
-                    on-oldstate="_pushToHistory"
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
                     on-changeshapes="_changeShapes"
@@ -189,8 +188,7 @@
             colors: Array,
             letters: {
               type: Array,
-              computed: "_lastOfHistory(history)",
-              notify: true
+              computed: "_lastOfHistory(history)"
             },
             coloredScale: {
               type: Array,
@@ -198,18 +196,14 @@
             },
             heldKeys: Array,
             sketchName: String,
-            history: {
-              type: Array,
-              value: function(){
-                return [[]];
-              }
-            }
+            history: Array
           }
         }
       }
 
       connectedCallback() {
         super.connectedCallback();
+        this.newSketch();
       }
 
       _lastOfHistory(history){
@@ -217,42 +211,36 @@
       }
 
       _addShapes(e){
-        let current = this.letters.concat(e.detail);          //Immutable .concat() makes a new array object instance
-        this.pushToHistory(current);
+        if (this.letters != this.history[this.history.length-1])
+          throw new Error("wtf");
+        this.push("history", this.letters.concat(e.detail));                  //Immutable .concat() makes a new array object instance
       }
 
       _removeShapes(e){
-        let current = this.letters.filter(info => e.detail.indexOf(info) == -1); //Immutable filter is immutable, returns a new array
-        this.pushToHistory(current);
+        if (this.letters != this.history[this.history.length-1])
+          throw new Error("wtf");
+        this.push("history", this.letters.filter(info => e.detail.indexOf(info) == -1));         //Immutable filter is immutable, returns a new array
       }
 
       _changeShapes(e){
-        let current = ImmutableArrayFunctions.replaceEqualNumber(this.letters, e.detail);
-        this.pushToHistory(current);
-        this.$.shapeSelector.updateSelected();
-      }
-
-      _pushToHistory(e){
-        this.pushToHistory(e.detail);
+        if (this.letters != this.history[this.history.length-1])
+          throw new Error("wtf");
+        this.push("history", ImmutableArrayFunctions.replaceEqualNumber(this.letters, e.detail));
+        this.$.shapeSelector.updateSelected();    //todo this is the problem of updating the selecteds..
       }
 
       timeTravel(e) {
         if (e.target.valueAsNumber >= this.history.length)
           e.target.valueAsNumber = this.history.length;
-        let x = this.history[e.target.valueAsNumber];
-        this.pushToHistory(x);
+        return this.history[e.target.valueAsNumber];
       }
 
       loadSketch(e) {
-        this.pushToHistory(e.detail.json);
+        this.set("history", [e.detail.json]);
       }
 
       newSketch(){
-        this.pushToHistory([]);
-      }
-
-      pushToHistory(ar) {
-        this.push("history", ar);
+        this.set("history", [[]]);
       }
 
       writeInChanges(e) {

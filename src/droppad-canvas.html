@@ -21,7 +21,7 @@
       }
 
     </style>
-    <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-new-shape="_newShape" on-deselect="_deselectAll">
+    <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-dbltap="_newShape" on-singletap="_deselectAll">
       <droppad-selector id="dropSelector" selected-elements="{{selectedDrops}}">
         <template is="dom-repeat" items="[[drops]]">
           <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>

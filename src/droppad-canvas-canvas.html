@@ -144,10 +144,10 @@
         this.pointDown = e;
         if ((this.pointDown.timeStamp - lastTime) < 300) {
           this.removeFireDeselect();
-          this.dispatchEvent(new CustomEvent("new-shape", {detail: this.p2p.calcLogicPoint(e.clientX, e.clientY)}));
+          this.dispatchEvent(new CustomEvent("dbltap", {detail: this.p2p.calcLogicPoint(e.clientX, e.clientY)}));
         } else {
           this.fireDeselect = setTimeout(function () {
-            this.dispatchEvent(new CustomEvent("deselect"), null);
+            this.dispatchEvent(new CustomEvent("singletap"), null);
           }.bind(this), 300);
           this.setPointerCapture(e.pointerId);
           this.addEventListener("pointermove", this.mouseMoveListener);

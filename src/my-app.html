@@ -206,25 +206,25 @@
       }
 
       _addShapes(e){
-        this.$.history.pushUp(e.detail);
+        this.$.history.add(e.detail);
       }
 
       _removeShapes(e){
-        this.$.history.filter(e.detail);
+        this.$.history.remove(e.detail);
       }
 
       _changeShapes(e){
-        this.$.history.alter(e.detail);
+        this.$.history.update(e.detail);
         this.$.shapeSelector.updateSelected();
         //todo this is the problem of updating the selecteds..
       }
 
       loadSketch(e) {
-        this.$.history.loadHistory([e.detail.json]);
+        this.$.history.setState(e.detail.json);
       }
 
       newSketch(){
-        this.$.history.loadHistory([[]]);
+        this.$.history.setState([]);
       }
 
       writeInChanges(e) {

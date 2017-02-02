@@ -5,8 +5,8 @@
   ],
   "private": true,
   "dependencies": {
-    "polymer": "polymer/Polymer#2.0-preview",
     "webcomponentsjs": "^0.7.22",
+    "polymer": "polymer/Polymer#2.0-preview",
     "polymerfire": "^0.10.0",
     "iron-selector": "PolymerElements/iron-selector#2.0-preview",
     "paper-fab": "PolymerElements/paper-fab#2.0-preview",

@@ -128,7 +128,7 @@
       }
 
       copy() {
-        this.hiddenCopy = this.selectedInfos.map(el => el.makeCopy(0,0));
+        this.hiddenCopy = this.selectedInfos.map(el => el.makeCopy());
         this.copyCenter = this.$.square.getCenter();
       }
 
@@ -151,17 +151,17 @@
         else if (e.code === "KeyV")
           this.paste();
         else if (e.code == "KeyM")
-          this.replaceChanges(this.selectedInfos.map(el => el.mirror()));
+          this.replaceChanges(this.selectedInfos.map(info => info.mirror()));
         else if (e.code == "KeyN")
-          this.replaceChanges(this.selectedInfos.map(el => el.center()));
+          this.replaceChanges(this.selectedInfos.map(info => info.center()));
         else if (e.code == "PageUp")
-          this.replaceChanges(this.selectedInfos.map(el => el.zUp()));
+          this.replaceChanges(this.selectedInfos.map(info => info.zUp()));
         else if (e.code == "PageDown")
-          this.replaceChanges(this.selectedInfos.map(el => el.zDown()));
+          this.replaceChanges(this.selectedInfos.map(info => info.zDown()));
       }
 
       addStyleToSelected(styleName) {
-        this.replaceChanges(this.selectedInfos.map(el => el.setStyle(styleName)));
+        this.replaceChanges(this.selectedInfos.map(info => info.setStyle(styleName)));
       }
 
       updateShape(id, value) {

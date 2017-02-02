@@ -12,40 +12,38 @@ class ShapeInfoObject {
   }
 
   clone() {
-    return Object.assign(new ShapeInfoObject(0, 0), this); //this correctly overwrite the new number, as it should do.
+    return Object.assign(new ShapeInfoObject(0, 0), this);
   }
 
-  makeCopy(x, y) {
-    let c = this.clone();
+  makeCopy() {
+    const c = this.clone();
     c.number = ShapeInfoObject.generateId();
-    c.x += x;
-    c.y += y;
     return c;
   }
 
   //2*PI = 360gr
   rotate(radian) {
-    let c = this.clone();
+    const c = this.clone();
     c.angle += radian;
     return c;
   }
 
   move(x, y) {
-    let c = this.clone();
+    const c = this.clone();
     c.x += x;
     c.y += y;
     return c;
   }
 
   rotatePositionFromExternalPoint(center, angle) {
-    let newPos = this.rotatePosition(center, angle);
-    let c = this.rotate(angle);
+    const newPos = this.calcNewSatelitePosition(center, angle);
+    const c = this.rotate(angle);
     c.x = newPos.x;
     c.y = newPos.y;
     return c;
   }
 
-  rotatePosition(center, angleChange) {
+  calcNewSatelitePosition(center, angleChange) {
     const x = this.x - center.x;           //the center of this group = {0,0}. The position of the shape from this center = {x,y}.
     const y = this.y - center.y;
     const radius = Math.sqrt(x * x + y * y);    //the length of the radius from the center of the group to the center of the shape.
@@ -57,7 +55,7 @@ class ShapeInfoObject {
   }
 
   scaleDirection(xPercent, yPercent, topDistance, rightDistance, bottomDistance, leftDistance, direction) {
-    let c = this.clone();
+    const c = this.clone();
     if (direction.indexOf("s") >= 0) {
       c.y -= topDistance * yPercent;
       c.h *= (1+yPercent);
@@ -77,54 +75,32 @@ class ShapeInfoObject {
     return c;
   }
 
-  getLeft(widthCount) {
-    let normal = this.x - (widthCount * (this.w - 1) / 2);
-    return this.w < 0 ? normal + widthCount * this.w : normal;
-  }
-
-  getTop(heightCount) {
-    let normal = this.y - (heightCount * (this.h - 1) / 2);
-    return this.h < 0 ? normal + heightCount * this.h : normal;
-  }
-
-  getBoundingRect(factor) {
-    let square = {
-      left: this.getLeft(factor),
-      top: this.getTop(factor),
-      width: Math.abs(this.w) * factor,
-      height: Math.abs(this.h) * factor
-    };
-    square.right = square.left + square.width;
-    square.bottom = square.top + square.height;
-    return square;
-  }
-
   mirror() {
-    let c = this.clone();
+    const c = this.clone();
     c.w *= -1;
     return c;
   }
 
   center() {
-    let c = this.clone();
+    const c = this.clone();
     c.centered = !c.centered;
     return c;
   }
 
   zUp() {
-    let c = this.clone();
+    const c = this.clone();
     c.zIndex += 1;
     return c;
   }
 
   zDown() {
-    let c = this.clone();
+    const c = this.clone();
     c.zIndex -= 1;
     return c;
   }
 
   setStyle(styleName) {
-    let c = this.clone();
+    const c = this.clone();
     c.style = styleName;
     return c;
   }
@@ -133,16 +109,9 @@ class ShapeInfoObject {
     return Object.assign(this.clone(), value);
   }
 
-  getAngle() {
-    let angle = this.angle;
-    if (this.style.startsWith("tone"))
-      angle = 0;
-    return angle;
-  }
-
   cssMatrix() {
-    let angle = this.getAngle();
-    let matrix = [
+    const angle = this.style.startsWith("tone") ? 0 : this.angle;
+    const matrix = [
       this.w * Math.cos(angle),
       this.w * Math.sin(angle),
       -this.h * Math.sin(angle),

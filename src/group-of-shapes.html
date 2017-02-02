@@ -8,11 +8,11 @@
         display: block;
       }
     </style>
-    <template is="dom-if" if="[[action]]">
+    <!--<template is="dom-if" if="[[action]]">-->
       <template is="dom-repeat" items="[[infos]]">
         <drop-shape id="copy[[item.number]]" class="copy" info="[[item]]"></drop-shape>
       </template>
-    </template>
+    <!--</template>-->
   </template>
 
   <script>
@@ -33,25 +33,20 @@
               type: Array,
               value: []
             },
-            action: {
-              type: Boolean,
-              value: false
-            }
           }
         }
       }
 
-      updateInfos(originals){
-        this.set("infos", this.originals.map(info => info.clone()));
-      }
-
-      start(action) {
-        this.set("action", action);
+      start(infos) {
+        this.set("originals", infos);
+        this.set("infos", infos);
       }
 
       end() {
-        this.set("action", null);
-        return this.infos;
+        let infos = this.infos;
+        this.set("infos", []);
+        this.set("originals", null);
+        return infos;
       }
 
       _updateGroupOfShapes(infos) {

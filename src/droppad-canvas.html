@@ -31,9 +31,9 @@
                            on-track-start="_startMovingMarker"
                            on-track-move="_movingMarker"
                            on-track-end="_stopMovingMarker"></droppad-item-marker>
-      <group-of-shapes id="ghost" originals="[[selectedInfos]]"></group-of-shapes>
-      <group-of-shapes id="ghostCopy" originals="[[visualCopy]]"></group-of-shapes>
-      <group-of-shapes id="historyPreview" originals="[[preview]]"></group-of-shapes>
+      <group-of-shapes id="ghost"></group-of-shapes>
+      <group-of-shapes id="ghostCopy"></group-of-shapes>
+      <group-of-shapes id="historyPreview"></group-of-shapes>
     </droppad-canvas-canvas>
   </template>
 
@@ -58,24 +58,20 @@
             heldKeys: Array,
             preview: {
               type: Array,
-              observer: "debug"
+              observer: "showPreview"
             }
           }
         }
       }
 
-      debug(e){
-        if (e){
-          setTimeout(function(){
-            this.$.historyPreview.start({action: "acccccttion"});
-            this.$.historyPreview.move(0,0);
-            this.$.historyPreview.updateInfos();
-          }.bind(this), 10);
-        }else
+      showPreview(preview) {
+        if (preview)
+          this.$.historyPreview.start(preview);
+        else
           this.$.historyPreview.end();
-        console.log(e);
       }
-      connectedCallback(){
+
+      connectedCallback() {
         this._copyMoverListener = this._copyMover.bind(this);
         this._copyPlacerListener = this._copyPlacer.bind(this);
       }
@@ -83,7 +79,7 @@
       //att! The setTimout(func, 0) makes the notifyPath("selection") wait until Polymer has updated the selected items so that
       //     the groupOfShapes and its bounding box is updated with the new position info, and not the current one in the objects..
       //     This is a cascading problem..
-      updateSelected(){
+      updateSelected() {
         setTimeout(function () {
           this.notifyPath("selectedDrops");
         }.bind(this), 0);
@@ -92,26 +88,25 @@
       _setSelectedInfos(elems, drops) {
         if (!elems || !drops)
           return null;
-        let fromTheDom = elems.map(item => item.info.number);
-        let fromTheData = drops.filter(info => fromTheDom.indexOf(info.number) != -1);
-        return fromTheData;
+        let fromTheDomSelectedNumbers = elems.map(item => item.info.number);
+        return drops.filter(info => fromTheDomSelectedNumbers.indexOf(info.number) != -1);
       }
 
       _startMovingMarker(e) {
-        let action = e.detail;
+        this.action = e.detail;
         if (this.heldKeys["KeyR"])
-          action.method = "rotate";
+          this.action.method = "rotate";
         else if (this.heldKeys["KeyE"])
-          action.method = "scale";
-        this.$.ghost.start(action);
+          this.action.method = "scale";
+        this.$.ghost.start(this.selectedInfos);
       }
 
       _movingMarker(e) {
         let ms = e.detail;
         this.doSnapping(ms);
-        switch (this.$.ghost.action.method) {
+        switch (this.action.method) {
           case "scale":
-            return this.$.ghost.scaleDirection(ms.xMove, ms.yMove, ms.percentX, ms.percentY, this.$.ghost.action.direction);
+            return this.$.ghost.scaleDirection(ms.xMove, ms.yMove, ms.percentX, ms.percentY, this.action.direction);
           case "rotate":
             return this.$.ghost.rotate(ms.angle);
           case "move":
@@ -122,39 +117,41 @@
       doSnapping(ms) {
         if (Math.abs(ms.xMove) < 6 && Math.abs(ms.yMove) < 6)
           ms.xMove = ms.yMove = 0;
-        else if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"])
+        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"]) {
           ms.xMove = ms.yMove;
+          ms.percentX = ms.percentY;
+        }
       }
 
       _stopMovingMarker(e) {
+        this.action = null;
         this.replaceChanges(this.$.ghost.end());
       }
 
-      _copyMover(e){
+      _copyMover(e) {
         DroppadItemMarker._cancelPropDefault(e);
         let xMove = this.p2p.addZoom(e.clientX - this.copyCenter.x);
         let yMove = this.p2p.addZoom(e.clientY - this.copyCenter.y);
         this.$.ghostCopy.move(xMove, yMove);
       }
 
-      _copyPlacer(e){
+      _copyPlacer(e) {
         DroppadItemMarker._cancelPropDefault(e);
         this.removeEventListener("pointermove", this._copyMoverListener);
         this.removeEventListener("pointerdown", this._copyPlacerListener);
         this.$.dropSelector.deselectAll();
         this.dispatchEvent(new CustomEvent("addshapes", {detail: this.$.ghostCopy.end()}));
-        this.set("visualCopy", null);
-        this.set("copyCenter", null);
+        this.copyCenter = null;
+        this.copyData = null;
       }
 
       copy() {
-        this.hiddenCopy = this.selectedInfos.map(el => el.makeCopy());
+        this.copyData = this.selectedInfos.map(el => el.makeCopy());
         this.copyCenter = this.$.square.getCenter();
       }
 
       paste() {
-        this.set("visualCopy", this.hiddenCopy);
-        this.$.ghostCopy.start("move");
+        this.$.ghostCopy.start(this.copyData);
         this.$.canvas.abort();      //need to do this because i don't have the capture of the pointer and so must override the capture of the canvas-canvas
         this.addEventListener("pointermove", this._copyMoverListener);
         this.addEventListener("pointerdown", this._copyPlacerListener);

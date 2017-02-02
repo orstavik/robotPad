@@ -68,6 +68,7 @@
       }
 
       _pointerDown(e) {
+        DroppadSelector._cancelPropDefault(e);
         this.addEventListener("mouseup", this.pointerUpListener);
         let el = e.target;
         this.actions = {shift: e.shiftKey, el: el, wasSelectedAlready: el.dataset.selected};
@@ -75,9 +76,11 @@
       }
 
       _mouseUp(e) {
-        if (!this.actions) {
-          //something has triggered this while it shouldnt..
-        } else if (this.actions.abort) {
+        DroppadSelector._cancelPropDefault(e);
+//        if (!this.actions) {
+//          something has triggered this while it shouldnt..
+//        } else
+        if (this.actions.abort) {
 
         } else if (this.actions.shift && !this.actions.wasSelectedAlready) {
 
@@ -87,6 +90,11 @@
         } else {
           this.deselect(this.actions.el);
         }
+      }
+
+      static _cancelPropDefault(e) {
+        e.stopPropagation();
+        e.preventDefault();
       }
     }
     customElements.define(DroppadSelector.is, DroppadSelector);

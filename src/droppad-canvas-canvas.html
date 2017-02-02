@@ -131,6 +131,7 @@
         this.addEventListener("pointerdown", this._pointerdown.bind(this));
         this.mouseMoveListener = this._pointermove.bind(this);
         this.mouseUpListener = this._pointerup.bind(this);
+        this.fireSingletap = this._fireSingleTap.bind(this);
       }
 
       reset() {
@@ -138,34 +139,32 @@
       }
 
       _pointerdown(e) {
+        this.wasDblTap = false;
+        if(this._delayedFire){
+          this._removeSingleTap();
+          this.dispatchEvent(new CustomEvent("dbltap", {detail: this.p2p.calcLogicPoint(e.clientX, e.clientY)}));
+          this.wasDblTap = true;
+          return;
+        }
         if (e.path[0] != this)
           return;
-        let lastPointDown = this.pointDown;
-        let lastTime = Number(lastPointDown ? lastPointDown.timeStamp : 0);
-        this.pointDown2 = this.pointDown;
+        this.setPointerCapture(e.pointerId);
+        this.addEventListener("pointermove", this.mouseMoveListener);
+        this.addEventListener("pointerup", this.mouseUpListener);
         this.pointDown = e;
-        if ((this.pointDown.timeStamp - lastTime) < 300) {
-          this.removeFireDeselect();
-          this.dispatchEvent(new CustomEvent("dbltap", {detail: this.p2p.calcLogicPoint(e.clientX, e.clientY)}));
-        } else {
-          this.fireDeselect = setTimeout(function () {
-            this.dispatchEvent(new CustomEvent("singletap"), null);
-          }.bind(this), 300);
-          this.setPointerCapture(e.pointerId);
-          this.addEventListener("pointermove", this.mouseMoveListener);
-          this.addEventListener("pointerup", this.mouseUpListener);
-        }
       }
 
       _pointermove(e) {
-        if (this.fireDeselect)
-          this.removeFireDeselect();
+        if (this._delayedFire)
+          this._removeSingleTap();
         this.p2p.moveScreen(e.clientX - this.pointDown.clientX, e.clientY - this.pointDown.clientY);
-        this.notifyPath("p2p"); //todo delay this using requestAnimationFrame??
+        this.notifyPath("p2p"); //todo delay this using requestAnimationFrame?? or does Polymer do this for me??
         this.pointDown = e;
       }
 
       _pointerup(e) {
+        if(!this.wasDblTap)
+          this._delayedFire = setTimeout(this.fireSingletap, 300);
         this.releasePointerCapture(e.pointerId);
         this.removeEventListener("pointermove", this.mouseMoveListener);
         this.removeEventListener("pointerup", this.mouseMoveListener);
@@ -176,9 +175,14 @@
         this.notifyPath("p2p");
       }
 
-      removeFireDeselect() {
-        clearTimeout(this.fireDeselect);
-        this.fireDeselect = null;
+      _removeSingleTap() {
+        clearTimeout(this._delayedFire);
+        this._delayedFire = null;
+      }
+
+      _fireSingleTap(){
+        this.dispatchEvent(new CustomEvent("singletap"), null);
+        this._delayedFire = null;
       }
     }
     customElements.define(DroppadCanvasCanvas.is, DroppadCanvasCanvas);

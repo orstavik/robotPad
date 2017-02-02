@@ -114,6 +114,7 @@
         return {
           properties: {
             pointDown: Object,
+            pointDown2: Object,
             p2p: {
               type: PointToPoint,
               value: function () {
@@ -127,20 +128,21 @@
 
       connectedCallback() {
         this.addEventListener("wheel", this._mouseScroll.bind(this));
-        this.addEventListener("pointerdown", this._mouseDown.bind(this));
-        this.mouseMoveListener = this._mouseMove.bind(this);
-        this.mouseUpListener = this._mouseUp.bind(this);
+        this.addEventListener("pointerdown", this._pointerdown.bind(this));
+        this.mouseMoveListener = this._pointermove.bind(this);
+        this.mouseUpListener = this._pointerup.bind(this);
       }
 
       reset() {
         this.set("p2p", new PointToPoint(window.innerWidth / 2, window.innerHeight / 2));
       }
 
-      _mouseDown(e) {
+      _pointerdown(e) {
         if (e.path[0] != this)
           return;
         let lastPointDown = this.pointDown;
         let lastTime = Number(lastPointDown ? lastPointDown.timeStamp : 0);
+        this.pointDown2 = this.pointDown;
         this.pointDown = e;
         if ((this.pointDown.timeStamp - lastTime) < 300) {
           this.removeFireDeselect();
@@ -155,18 +157,7 @@
         }
       }
 
-      removeFireDeselect() {
-        clearTimeout(this.fireDeselect);
-        this.fireDeselect = null;
-      }
-
-      _mouseUp(e) {
-        this.releasePointerCapture(e.pointerId);
-        this.removeEventListener("pointermove", this.mouseMoveListener);
-        this.removeEventListener("pointerup", this.mouseMoveListener);
-      }
-
-      _mouseMove(e) {
+      _pointermove(e) {
         if (this.fireDeselect)
           this.removeFireDeselect();
         this.p2p.moveScreen(e.clientX - this.pointDown.clientX, e.clientY - this.pointDown.clientY);
@@ -174,9 +165,20 @@
         this.pointDown = e;
       }
 
+      _pointerup(e) {
+        this.releasePointerCapture(e.pointerId);
+        this.removeEventListener("pointermove", this.mouseMoveListener);
+        this.removeEventListener("pointerup", this.mouseMoveListener);
+      }
+
       _mouseScroll(e) {
         this.p2p.setZoom(e.deltaY / 500, e.clientX, e.clientY);
         this.notifyPath("p2p");
+      }
+
+      removeFireDeselect() {
+        clearTimeout(this.fireDeselect);
+        this.fireDeselect = null;
       }
     }
     customElements.define(DroppadCanvasCanvas.is, DroppadCanvasCanvas);

@@ -41,6 +41,10 @@
         }
       }
 
+      updateInfos(originals){
+        this.set("infos", this.originals.map(info => info.clone()));
+      }
+
       start(action) {
         this.set("action", action);
       }

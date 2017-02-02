@@ -1,5 +1,5 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="drop-shape.html">
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../drop-shape.html">
 
 <dom-module id="droppad-history">
   <template>
@@ -8,15 +8,76 @@
         display: block;
         padding: 10%;
       }
-      #scrollbar {
-        border: 2px solid red;
+
+      #view1 {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 200px;
+        height: 200px;
       }
+
+      .grey {
+        background-color: grey;
+      }
+      .white {
+        background-color: white;
+      }
+
+      .pointer {
+        transform: rotate(36deg);
+        width: 20%;
+        height: 20%;
+      }
+
+      #outerFrame {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 80%;
+        height: 80%;
+      }
+
+      #innerFrame, .pointer {
+        position: absolute;
+      }
+
+      #innerFrame {
+        top: 10%;
+        left: 10%;
+        width: 80%;
+        height: 80%;
+      }
+
+      #outerFramePointer {
+        top: 50%;
+        left: -6%;
+      }
+
+      #innerFramePointer {
+        top: 49%;
+        left: 5%;
+      }
+
     </style>
     <div id="scrollbar">
       <template is="dom-repeat" items="[[history.actions]]">
-        <div data-num$="[[index]]" on-pointerenter="_hoverTime" on-pointerout="_hoverTimeOff">[[item.date.toDateString]]</div>
+        <div id="entry[[index]]">[[item.timestamp]] :: [[item.state]]</div>
       </template>
     </div>
+    <div id="view1">
+      <div id="outerFrame" class="grey">
+        <div id="outerFramePointer" class="grey pointer"></div>
+        <div id="innerFramePointer" class="white pointer"></div>
+        <div id="innerFrame" class="white">
+          <div id="redBall"></div>
+        </div>
+      </div>
+    </div>
+    <template is="dom-if" if="false">
+      <div id="view2">
+      </div>
+    </template>
   </template>
 
   <script>
@@ -42,17 +103,13 @@
       }
 
       set(action, elements, newState) {
-        this.actions.push({action: action, elements: elements, state: newState, date: new Date()});
+        this.actions.push({action: action, elements: elements, state: newState, timestamp: new Date().getTime()});
         return this.currentState = newState;
       }
 
       timeTravel(date) {
         //todo run a reduce function that takes the one that is closest in time to the date queried
-        //this.getByDate(date);
-      }
-
-      getState(number) {
-        return this.actions[number].state;
+        this.getByDate(date);
       }
 
       //negative numbers queries from lasts in reverse, positive from start normal
@@ -88,11 +145,6 @@
               value: function () {
                 return new StateMachine();
               }
-            },
-            preview: {
-              type: Array,
-              notify: true,
-              value: null
             }
           }
         }
@@ -102,7 +154,6 @@
         if (!newState)
           newState = [];
         this.dispatchEvent(new CustomEvent("new-state", {detail: this.history.set("set", null, newState)}));
-        this.notifyPath("history");
       }
 
       timeTravel(date) {
@@ -111,17 +162,14 @@
 
       add(addUs) {
         this.dispatchEvent(new CustomEvent("new-state", {detail: this.history.add(addUs)}));
-        this.notifyPath("history");
       }
 
       remove(removeUs) {
         this.dispatchEvent(new CustomEvent("new-state", {detail: this.history.remove(removeUs)}));
-        this.notifyPath("history");
       }
 
       update(array) {
         this.dispatchEvent(new CustomEvent("new-state", {detail: this.history.update(array)}));
-        this.notifyPath("history");
       }
 
 //
@@ -131,15 +179,12 @@
 //        this.pointerout = this._unHover.bind(this);
 //      }
 //
-      _hoverTime(e) {
-//        debugger;
-        this.set("preview", this.history.getState(Number(e.target.dataset.num)));
-//        this.dispatchEvent(new CustomEvent("timetravel", {detail: this.history.getState(Number(e.target.id.substr(5)))}));
-      }
-      _hoverTimeOff(e) {
-        this.set("preview", null);
-//        this.dispatchEvent(new CustomEvent("timetravel", {detail: this.history.getState(Number(e.target.id.substr(5)))}));
-      }
+//      _hover(e) {
+//        this.addEventListener("pointerout", this.pointerout);
+//        this.setPointerCapture(e.pointerId);
+//        DroppadHistory._cancelPropDefault(e);
+//        this.notifyPath("history.hover");
+//      }
 //
 //      _unHover(e) {
 //        this.removeEventListener("pointerout", this.pointerout);

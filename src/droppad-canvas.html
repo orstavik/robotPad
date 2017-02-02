@@ -33,6 +33,7 @@
                            on-track-end="_stopMovingMarker"></droppad-item-marker>
       <group-of-shapes id="ghost" originals="[[selectedInfos]]"></group-of-shapes>
       <group-of-shapes id="ghostCopy" originals="[[visualCopy]]"></group-of-shapes>
+      <group-of-shapes id="historyPreview" originals="[[preview]]"></group-of-shapes>
     </droppad-canvas-canvas>
   </template>
 
@@ -55,10 +56,25 @@
               computed: "_setSelectedInfos(selectedDrops, drops)"
             },
             heldKeys: Array,
+            preview: {
+              type: Array,
+              observer: "debug"
+            }
           }
         }
       }
 
+      debug(e){
+        if (e){
+          setTimeout(function(){
+            this.$.historyPreview.start({action: "acccccttion"});
+            this.$.historyPreview.move(0,0);
+            this.$.historyPreview.updateInfos();
+          }.bind(this), 10);
+        }else
+          this.$.historyPreview.end();
+        console.log(e);
+      }
       connectedCallback(){
         this._copyMoverListener = this._copyMover.bind(this);
         this._copyPlacerListener = this._copyPlacer.bind(this);

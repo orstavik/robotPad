@@ -106,7 +106,7 @@
       }
     </style>
 
-    <droppad-canvas id="shapeSelector" drops="[[letters]]" held-keys="[[heldKeys]]"
+    <droppad-canvas id="shapeSelector" drops="[[letters]]" held-keys="[[heldKeys]]" preview="[[preview]]"
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
                     on-changeshapes="_changeShapes"
@@ -164,7 +164,7 @@
         <json-saver input="[[letters]]" on-sketchload="loadSketch" json-name="{{sketchName}}"></json-saver>
       </tab-wrapper>
       <tab-wrapper title="History" select="4">
-        <droppad-history id="history" on-new-state="_newState"></droppad-history>
+        <droppad-history id="history" on-new-state="_newState" preview="{{preview}}"></droppad-history>
         <!--History: <input type="range" min="0" max="10000" value="0" id="h" on-input="timeTravel"/> <br>-->
       </tab-wrapper>
     </iron-selector>
@@ -193,6 +193,7 @@
             },
             heldKeys: Array,
             sketchName: String,
+            preview: Object
           }
         }
       }

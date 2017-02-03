@@ -1,4 +1,5 @@
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 
 <dom-module id="grow-button">
@@ -17,7 +18,8 @@
                 background-color: var(--grow-button-color);
                 border-radius: 50%;
                 cursor: pointer;
-                transition: box-shadow 0.2s;
+                opacity: 1;
+                transition: box-shadow 0.2s, opacity 0.2s;
             }
             #mainCircle[hidden]{
                 opacity: 0;
@@ -33,26 +35,20 @@
                 justify-content: center;
                 box-sizing: border-box;
                 width: 300px;
+                max-height: 600px;
                 padding: 12px;
                 position: absolute;
                 top: 0;
                 left: calc(-150px + var(--mother-button-size)/2);
-                /*left: calc(var(--mother-button-size) * 1.2 + 6px);*/
                 border-radius: 3px;
-                opacity: 1;
-                pointer-events: auto;
-                z-index: 10;
-                transform: translateX(194px);
-                overflow: hidden;
-                transition: transform 0.3s, box-shadow 0.5s;
-                will-change: transform, box-shadow; 
-            }
-            #outerBox[hidden] {
-                opacity: 0;
                 pointer-events: none;
-                transform: translateX(0);
-                box-shadow: none;
-                transition: none;
+                opacity: 0;
+                overflow: hidden;
+                z-index: 10;
+            }
+            #outerBox[expanded] {
+                pointer-events: auto;
+                z-index: 1000;
             }
             #shadyCircle {
                 width: var(--grow-button-size);
@@ -60,23 +56,28 @@
                 position: absolute;
                 border-radius: 50%;
                 background-color: white;
-                transform: scale(1);
-                transition: transform 0.4s;
-                will-change: transform; 
+                will-change: transform;
+                pointer-events: none;
                 z-index: -1;
             }
-            #shadyCircle[expanded] {
-                transform: scale(17);
+            #closeButton {
+                position: absolute;
+                top: 2px;
+                right: 2px;
+                z-index: 10;
             }
         </style>
 
-        <paper-material id="outerBox" elevation=2 hidden$="[[!active]]">
-            <paper-material id="shadyCircle" expanded$="[[active]]"></paper-material>
-            <slot></slot>
+        <paper-material id="mainCircle" on-click="_toggleState" hidden="[[active]]">
+            <iron-icon icon="[[icon]]"></iron-icon>
         </paper-material>
 
-        <paper-material id="mainCircle" elevation=1 on-click="_toggleState" hidden="[[active]]">
-            <iron-icon icon="[[icon]]"></iron-icon>
+        <paper-material id="outerBox" elevation=0 expanded$="[[active]]">
+            <paper-material id="shadyCircle" expanded$="[[active]]"></paper-material>
+            <div id="boxContent">
+                <paper-icon-button id="closeButton" icon="clear" on-tap="_disActive"></paper-icon-button>
+                <slot></slot>
+            </div>
         </paper-material>
     
     </template>
@@ -104,32 +105,78 @@
                 this.active = !this.active;
             }
 
+            _disActive() {
+                this.active = false;
+            }
+
             _applyState(active) {
                 if (active) {
                     this.$.mainCircle.elevation = 2;
-                    this._expandCard();
+                    if (!this.boxSet)
+                        this._positionOuterBox()
+                    this._expandCard(300);
                 } else {
                     this.$.mainCircle.elevation = 1;
-                    this._collapseCard();
+                        this._collapseCard(300);
                 }
             }
 
             _positionOuterBox() {
-                if (!this.$.outerBox.hasAttribute("set")) {
-                    let rectB = this.$.outerBox.getBoundingClientRect();
-                    let rectC = this.$.mainCircle.getBoundingClientRect();
-                    this.$.outerBox.style.marginTop = (16-rectB.top)+"px";
-                    this.$.outerBox.setAttribute("set", "");
-                    this.$.shadyCircle.style.top = (rectC.top-16)+"px";
-                }
+                let box = this.$.outerBox;
+                let rectB = box.getBoundingClientRect();
+                let rectC = this.$.mainCircle.getBoundingClientRect();
+                box.style.marginTop = (16-rectB.top)+"px";
+                this.boxSet = true;
+                this.$.shadyCircle.style.top = (rectC.top-16)+"px";
             }
 
-            _expandCard() {
-                this._positionOuterBox();
+            _expandCard(dur) {
+                let box = this.$.outerBox;
+                let circle = this.$.shadyCircle;
+                if (!this.topShift) {
+                    var bRect = box.getBoundingClientRect();
+                    var cRect = circle.getBoundingClientRect();
+                    this.topShift = (bRect.height-cRect.height)/2 - (cRect.top-16);
+                };
+                if (!this.scale) {
+                    let diagonal = Math.sqrt(bRect.height*bRect.height+bRect.width*bRect.width)
+                    this.scale = diagonal/cRect.width;
+                };
+
+                this.boxMove = box.animate({transform: ["translateX(0)", "translateX(194px)"]}, {
+                    duration: dur,
+                    fill: "forwards",
+                    easing: "cubic-bezier(0.4, 0, 0.2, 1)"
+                });
+                this.boxAppear = box.animate({opacity: [0, 1]}, {
+                    duration: 0,
+                    fill: "forwards"
+                });
+                // circle.style.opacity = 1;
+                this.circleGrow = circle.animate({transform: ["translateY(0) scale(1)", "translateY("+this.topShift+"px) scale("+this.scale+")"]}, {
+                    duration: dur,
+                    fill: "forwards",
+                    easing: "cubic-bezier(0.4, 0, 0.2, 1)"
+                });
+                setTimeout(function() {
+                    box.elevation = 2;
+                }.bind(this), dur/2);
             }
 
-            _collapseCard() {
-                
+            _collapseCard(dur) {
+                // if (this.boxSet) {
+                //     this.boxMove.reverse();
+                //     this.boxAppear.reverse();
+                //     this.circleGrow.reverse();
+                //     this.circleGrow.onfinish = function() {
+                //         this.$.shadyCircle.style.opacity = 0;
+                //     }.bind(this);
+                // }
+                this.$.outerBox.animate({opacity: [1, 0]}, {
+                    duration: dur/3,
+                    fill: "forwards"
+                })
+                this.$.outerBox.elevation = 0;
             }
         }
         customElements.define(GrowButton.is, GrowButton);

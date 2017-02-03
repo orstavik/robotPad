@@ -29,19 +29,23 @@
                 position: absolute;
                 top: 16px;
                 left: 50vw;
-                transform: translateX(-50%);
+                transform: translate(-50%, 0px);
                 background-color: white;
                 border-radius: 3px;
                 opacity: 1;
                 pointer-events: none;
-                transition: opacity 0.5s;
+                transition: opacity 0.5s, transform 0.4s;
             }
             #appName[hidden] {
+                transform: translate(-50%, -3px);
                 opacity: 0;
             }
             #appName span {
                 margin: 4px 12px;
                 font-weight: bold;
+            }
+            #testingOne {
+                opacity: 0;
             }
         </style>
 

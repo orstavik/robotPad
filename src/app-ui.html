@@ -5,8 +5,9 @@
 <link rel="import" href="../bower_components/iron-icons/image-icons.html">
 <link rel="import" href="app-login.html">
 <link rel="import" href="tools-button.html">
-<link rel="import" href="account-button.html">
 <link rel="import" href="grow-button.html">
+<link rel="import" href="grow-child-button.html">
+<!--<link rel="import" href="grow-button.html">-->
 
 <dom-module id="app-ui">
     <template>
@@ -40,22 +41,31 @@
                 left: 6px;
                 z-index: 100;
             }
-            grow-button {
-                --grow-button-size: 36px;
+            grow-child-button {
+                --grow-child-button-size: 36px;
+                --grow-child-button-color: white;
+                --grow-child-button-icon-color: black;
+            }
+            grow-button#account {
+                --grow-button-size: 50px;
                 --grow-button-color: white;
                 --grow-button-icon-color: black;
-            }
-            account-button {
-                --account-button-size: 50px;
-                --account-button-color: white;
-                --account-button-icon-color: black;
                 position: absolute;
                 top: 6px;
                 right: 6px;
                 z-index: 100;
             }
-            account-button[signed] {
-                --account-button-color: var(--paper-light-blue-200);
+            grow-button#account[signed] {
+                --grow-button-color: var(--paper-light-blue-200);
+            }
+            grow-button#help {
+                --grow-button-size: 36px;
+                --grow-button-color: white;
+                --grow-button-icon-color: black;
+                position: absolute;
+                bottom: 6px;
+                left: 6px;
+                z-index: 100;
             }
             #testingOne {
                 box-sizing: border-box;
@@ -69,27 +79,33 @@
         </paper-material>
 
         <tools-button icon="icons:build" active="{{toolsOpen}}">
-            <grow-button id="jsonButton" child-button icon="icons:settings-ethernet">
+            <grow-child-button id="jsonButton" child-button icon="icons:settings-ethernet">
                 <div id="testingOne">
                     0Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
                 </div>
-            </grow-button>
-            <grow-button id="paletteButton" child-button icon="image:color-lens">
+            </grow-child-button>
+            <grow-child-button id="paletteButton" child-button icon="image:color-lens">
                 <div id="testingOne">
                     1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
                 </div>
-            </grow-button>
-            <grow-button id="historyButton" child-button icon="icons:restore">
+            </grow-child-button>
+            <grow-child-button id="historyButton" child-button icon="icons:restore">
                 <div id="testingOne">
                     2Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
                     1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
                 </div>
-            </grow-button>
+            </grow-child-button>
         </tools-button>
 
-        <account-button icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
+        <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
             <app-login signed="{{signed}}"></app-login>
-        </account-button>
+        </grow-button>
+
+        <grow-button id="help" icon="help-outline">
+            <div id="testingOne">
+                1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            </div>
+        </grow-button>
     
     </template>
     <script>

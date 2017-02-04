@@ -1,4 +1,4 @@
-<dom-module id="mother-button">
+<dom-module id="tools-button">
     <template>
         <style>
             :host {
@@ -33,14 +33,10 @@
 
             :host ::slotted([child-button]) {
                 opacity: 0;
-                transform: scale(0.95);
                 pointer-events: none;
-                transition: opacity 0.2s ease-out, transform 0.2s ease-out;
             }
             
             :host ::slotted([child-button][revealed]) {
-                opacity: 1;
-                transform: scale(1);
                 pointer-events: auto;
             }
         </style>
@@ -58,9 +54,9 @@
     
     </template>
     <script>
-        class MotherButton extends Polymer.Element {
+        class ToolsButton extends Polymer.Element {
             static get is() {
-                return "mother-button";
+                return "tools-button";
             }
 
             static get config() {
@@ -101,19 +97,26 @@
             _revealChilds() {
                 let length = this.childs.length;
                 this.childs.forEach(function(child,i) {
-                    setTimeout(function() {
-                        child.setAttribute("revealed", "");
-                    }, (i/length)*(2-i/length)*150);
+                    child.animate({opacity: [0, 1], transform: ["scale(0.95)", "scale(1)"]}, {
+                        duration: 150,
+                        delay: (i/length)*(2-i/length)*100,
+                        fill: "forwards"
+                    });
+                    child.setAttribute("revealed", "");
                 });
             }
 
             _hideChilds() {
                 if (this.childs)
                     this.childs.forEach(function(child) {
+                        child.animate({opacity: [1,0], transform: ["scale(1)", "scale(0.95)"]}, {
+                            duration: 150,
+                            fill: "forwards"
+                        });
                         child.removeAttribute("revealed");
                     });
             }
         }
-        customElements.define(MotherButton.is, MotherButton);
+        customElements.define(ToolsButton.is, ToolsButton);
     </script>
 </dom-module>

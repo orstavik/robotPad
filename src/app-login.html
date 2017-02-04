@@ -1,0 +1,107 @@
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<dom-module id="app-login">
+    <template>
+        <style>
+            :host {
+                display: flex;
+                box-sizing: border-box;
+                width: 200px;
+                padding: 25px;
+                flex-direction: column;
+                align-items: center;
+            }
+            #accountImage {
+                display: flex;
+                box-sizing: border-box;
+                align-items: center;
+                justify-content: center;
+                width: 100px;
+                height: 100px;
+                margin-bottom: 10px;
+            }
+            #accountImage img {
+                width: 100%;
+                border-radius: 50%;
+                border: 1px solid #cccccc;
+            }
+            .accountName {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+            *[hidden] {
+                visibility: hidden;
+            }
+            paper-button {
+                font-size: 12px;
+            }
+            paper-button#signIn {
+                background-color: var(--paper-indigo-a200);
+                color: white;
+            }
+        </style>
+
+        <firebase-auth
+            id="auth"
+            app-name="droppad"
+            user="{{user}}"
+            provider="google">
+        </firebase-auth>
+
+        <div id="accountImage">
+            <img src="[[_setUserImage(signed)]]" alt="anonymous">
+        </div>
+
+        <div class="accountName">[[_setUserName(signed)]]</div>
+        
+        <paper-button id="signIn" raised on-click="_signIn" hidden$="[[signed]]">Sign in with Google</paper-button>
+        <paper-button raised on-click="_signOut" hidden$="[[!signed]]">Sign out</paper-button>
+    
+    </template>
+    <script>
+        class AppLogin extends Polymer.Element {
+            static get is() {
+                return "app-login";
+            }
+
+            static get config() {
+                return {
+                    properties: {
+                        user: Object,
+                        signed: {
+                            type: Boolean,
+                            computed: "_checkSigned(user)",
+                            reflectToAttribute: true,
+                            notify: true
+                        }
+                    }
+                }
+            }
+
+            _signIn() {
+                return this.$.auth.signInWithPopup();
+            }
+
+            _signOut() {
+                return this.$.auth.signOut();
+            }
+
+            _checkSigned(user) {
+                if (user) return true
+                else return false;
+            }
+
+            _setUserName(signed) {
+                if (signed) return this.user.displayName
+                else return "Anonymous";
+            }
+
+            _setUserImage(signed) {
+                if (signed) return this.user.photoURL
+                else return "./images/anonymous.png";
+            }
+        }
+        customElements.define(AppLogin.is, AppLogin);
+    </script>
+</dom-module>

@@ -1,5 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="color-palette.html">
 <link rel="import" href="json-object.html">
 <link rel="import" href="droppad-history.html">
@@ -106,9 +107,15 @@
       }
     </style>
 
+    <firebase-app auth-domain="robotpad-762de.firebaseapp.com"
+                  database-url="https://robotpad-762de.firebaseio.com/"
+                  api-key="AIzaSyAJ0HCTXnEXoG_aJ5AcN8d1VLbugeHF-Bo"
+                  name="droppad">
+    </firebase-app>
+
     <droppad-canvas id="shapeSelector" drops="{{letters}}" held-keys="[[heldKeys]]" history="{{history}}"></droppad-canvas>
 
-    <div id="toolbar">
+    <!--<div id="toolbar">
       <div class="button spacer"></div>
       <template is="dom-repeat" items="[[coloredScale]]">
         <div id="tone[[index]]" class="button" on-click="setStyleName"
@@ -140,10 +147,10 @@
       <div class="button" title="Resize the shape (normalized): hold 'e'+'w' + drag it."> e+w</div>
       <div class="button" title="Mirror the shape: press 'm', coming different mirror modes."> m </div>
       <div class="button" title="Skew the shape: press 'n'"> n</div>
-    </div>
+    </div>-->
 
-    <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower>
-    <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
+    <!--<key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower>-->
+    <!--<music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>-->
 
     <app-ui app-name="[[sketchName]]"></app-ui>
 

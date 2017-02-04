@@ -3,27 +3,14 @@
 <link rel="import" href="../bower_components/paper-styles/paper-styles.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icons/image-icons.html">
-<link rel="import" href="mother-button.html">
+<link rel="import" href="app-login.html">
+<link rel="import" href="tools-button.html">
+<link rel="import" href="account-button.html">
 <link rel="import" href="grow-button.html">
 
 <dom-module id="app-ui">
     <template>
         <style>
-            mother-button {
-                --mother-button-size: 50px;
-                --mother-button-color: var(--paper-light-blue-200);
-                --mother-button-icon-color: black;
-                position: absolute;
-                top: 6px;
-                left: 6px;
-                z-index: 100;
-            }
-            grow-button {
-                --grow-button-size: 36px;
-                --grow-button-color: white;
-                --grow-button-icon-color: black;
-            }
-
             #appName {
                 display: flex;
                 position: absolute;
@@ -44,8 +31,36 @@
                 margin: 4px 12px;
                 font-weight: bold;
             }
+            tools-button {
+                --mother-button-size: 50px;
+                --mother-button-color: var(--paper-light-blue-200);
+                --mother-button-icon-color: black;
+                position: absolute;
+                top: 6px;
+                left: 6px;
+                z-index: 100;
+            }
+            grow-button {
+                --grow-button-size: 36px;
+                --grow-button-color: white;
+                --grow-button-icon-color: black;
+            }
+            account-button {
+                --account-button-size: 50px;
+                --account-button-color: white;
+                --account-button-icon-color: black;
+                position: absolute;
+                top: 6px;
+                right: 6px;
+                z-index: 100;
+            }
+            account-button[signed] {
+                --account-button-color: var(--paper-light-blue-200);
+            }
             #testingOne {
-                opacity: 0;
+                box-sizing: border-box;
+                width: 300px;
+                padding: 12px;
             }
         </style>
 
@@ -53,10 +68,10 @@
             <span>Sketch Name</span>
         </paper-material>
 
-        <mother-button icon="icons:build" active="{{showName}}">
+        <tools-button icon="icons:build" active="{{toolsOpen}}">
             <grow-button id="jsonButton" child-button icon="icons:settings-ethernet">
                 <div id="testingOne">
-                    0Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    0Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
                 </div>
             </grow-button>
             <grow-button id="paletteButton" child-button icon="image:color-lens">
@@ -67,9 +82,14 @@
             <grow-button id="historyButton" child-button icon="icons:restore">
                 <div id="testingOne">
                     2Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
                 </div>
             </grow-button>
-        </mother-button>
+        </tools-button>
+
+        <account-button icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
+            <app-login signed="{{signed}}"></app-login>
+        </account-button>
     
     </template>
     <script>
@@ -81,9 +101,19 @@
             static get config() {
                 return {
                     properties: {
-                        appName: String
+                        appName: String,
+                        toolsOpen: Boolean,
+                        accountOpen: Boolean,
+                        showName: {
+                            type: Boolean,
+                            computed: "_showName(toolsOpen, accountOpen)"
+                        }
                     }
                 }
+            }
+
+            _showName(tools, account) {
+                return tools || account;
             }
         }
         customElements.define(AppUi.is, AppUi);

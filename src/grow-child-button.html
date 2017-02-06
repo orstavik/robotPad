@@ -158,7 +158,7 @@
                 this.boxMove = box.animate({transform: ["translateX(0)", "translateX(194px)"]}, {
                     duration: dur,
                     fill: "forwards",
-                    easing: "cubic-bezier(0.4, 0, 0.2, 1)"
+                    easing: /*"cubic-bezier(0.4, 0, 0.2, 1)"*/"cubic-bezier(0.25, 0.46, 0.45, 0.94)"
                 });
                 this.circleGrow = circle.animate({transform: ["translateY(0) scale(1)", "translateY("+this.topShift+"px) scale("+this.scale+")"]}, {
                     duration: dur,

@@ -24,14 +24,17 @@
                 pointer-events: none;
                 transition: opacity 0.5s, transform 0.4s;
             }
+            
             #appName[hidden] {
                 transform: translate(-50%, -3px);
                 opacity: 0;
             }
+            
             #appName span {
                 margin: 4px 12px;
                 font-weight: bold;
             }
+            
             tools-button {
                 --mother-button-size: 50px;
                 --mother-button-color: var(--paper-light-blue-200);
@@ -41,11 +44,13 @@
                 left: 6px;
                 z-index: 100;
             }
+            
             grow-child-button {
                 --grow-child-button-size: 36px;
                 --grow-child-button-color: white;
                 --grow-child-button-icon-color: black;
             }
+            
             grow-button#account {
                 --grow-button-size: 50px;
                 --grow-button-color: white;
@@ -55,9 +60,11 @@
                 right: 6px;
                 z-index: 100;
             }
+            
             grow-button#account[signed] {
                 --grow-button-color: var(--paper-light-blue-200);
             }
+            
             grow-button#help {
                 --grow-button-size: 36px;
                 --grow-button-color: white;
@@ -67,6 +74,7 @@
                 left: 6px;
                 z-index: 100;
             }
+            
             #testingOne {
                 box-sizing: border-box;
                 width: 300px;
@@ -81,18 +89,30 @@
         <tools-button icon="icons:build" active="{{toolsOpen}}">
             <grow-child-button id="jsonButton" child-button icon="icons:settings-ethernet">
                 <div id="testingOne">
-                    0Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                    0Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
                 </div>
             </grow-child-button>
             <grow-child-button id="paletteButton" child-button icon="image:color-lens">
                 <div id="testingOne">
-                    1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
+                    laborum.
                 </div>
             </grow-child-button>
             <grow-child-button id="historyButton" child-button icon="icons:restore">
                 <div id="testingOne">
-                    2Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                    1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    2Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
+                    laborum. 1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                    labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+                    ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+                    dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                    deserunt mollit anim id est laborum.
                 </div>
             </grow-child-button>
         </tools-button>
@@ -103,10 +123,13 @@
 
         <grow-button id="help" icon="help-outline">
             <div id="testingOne">
-                1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
+                sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
             </div>
         </grow-button>
-    
+
     </template>
     <script>
         class AppUi extends Polymer.Element {
@@ -132,6 +155,6 @@
                 return tools || account;
             }
         }
-        customElements.define(AppUi.is, AppUi);
+    customElements.define(AppUi.is, AppUi);
     </script>
 </dom-module>

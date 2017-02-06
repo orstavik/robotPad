@@ -158,7 +158,7 @@
         display: block;
       }
     </style>
-    <div id="marker" hidden$="[[!groupOfShapes.left]]"
+    <div id="marker" hidden$="[[hidden]]"
          style$="left: [[groupOfShapes.left]]px; top: [[groupOfShapes.top]]px; width:  [[groupOfShapes.width]]px; height: [[groupOfShapes.height]]px;">
       <div id="nw" class="scale corner"></div>
       <div id="ne" class="scale corner"></div>
@@ -186,11 +186,26 @@
       static get config() {
         return {
           properties: {
-            items: Array,
+            items: {
+              type: Array,
+              value: function () {
+                return [];
+              }
+            },
+            mutationObservers: {
+              type: Object,
+              value: function(){
+                return {};
+              }
+            },
             p2p: PointToPoint,
             groupOfShapes: {
               type: Object,
               computed: "_calcRectangle(items, p2p)"
+            },
+            hidden: {
+              type: Boolean,
+              value: false
             }
           }
         }
@@ -213,9 +228,56 @@
       }
 
       connectedCallback() {
+        let selector = this.parentNode.querySelector("#dropSelector");
+        var addRemoveFromSelectorObserver = new MutationObserver(function (mutations) {
+          for (let mutation of mutations) {
+            for (let node of mutation.addedNodes) {
+              if (node instanceof HTMLElement && node.hasAttribute("data-selectable"))
+                this.addToObservableList(node);
+            }
+            for (let node of mutation.removedNodes) {
+              if (node instanceof HTMLElement && node.hasAttribute("data-selectable"))
+                this.removeFromObservableList(node);
+            }
+          }
+        }.bind(this));
+        addRemoveFromSelectorObserver.observe(selector, {childList: true});
+
         this.$.marker.addEventListener("pointerdown", this._pointerDown.bind(this));
         this.pointermoveListener = this._pointerMove.bind(this);
         this.pointerupListener = this._pointerUp.bind(this);
+      }
+
+      addToObservableList(node) {
+        this.mutationObservers[node] = new MutationObserver(this.toggleSelected.bind(this));
+        this.mutationObservers[node].observe(node, {attributes: true, attributeOldValue: true});
+      }
+
+      removeFromObservableList(node) {
+        this.mutationObservers[node].disconnect();
+        delete this.mutationObservers[node];
+      }
+
+      toggleSelected(mutations) {
+        for (let mutation of mutations) {
+          let targetAttribute = mutation.target.attributes[mutation.attributeName];
+          if (mutation.attributeName == "data-selected") {
+            if (!targetAttribute || targetAttribute.value != "true")
+              this.splice("items", this.items.indexOf(mutation.target), 1);
+            else
+              this.push("items", mutation.target);
+          }
+          else if (mutation.attributeName == "style" || mutation.attributeName == "centered")
+            this.notifyPath("items");
+        }
+      }
+
+      show() {
+        this.set("hidden", false);
+      }
+
+      hide() {
+        this.set("hidden", true);
       }
 
       _pointerDown(e) {
@@ -231,7 +293,7 @@
 
       _pointerMove(e) {
         DroppadItemMarker._cancelPropDefault(e);
-        this.dispatchEvent(new CustomEvent("track-move", { detail: this.calculateTrackMovements(e)}));
+        this.dispatchEvent(new CustomEvent("track-move", {detail: this.calculateTrackMovements(e)}));
       }
 
       _pointerUp(e) {
@@ -265,7 +327,7 @@
         const scaleX = movX / this.groupOfShapes.width;
         const scaleY = movY / this.groupOfShapes.height;
         const angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
-        return { xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle};
+        return {xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle};
       }
 
       static getScreenCenter(elem) {

@@ -24,10 +24,10 @@
     <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-dbltap="_newShape" on-singletap="_deselectAll">
       <droppad-selector id="dropSelector" selected-elements="{{selectedDrops}}">
         <template is="dom-repeat" items="[[drops]]">
-          <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
+          <drop-shape id="drop[[item.number]]" info="[[item]]" data-select-value="[[item.number]]" data-selectable></drop-shape>
         </template>
       </droppad-selector>
-      <droppad-item-marker id="square" items="[[selectedDrops]]" p2p="[[p2p]]"
+      <droppad-item-marker id="square" p2p="[[p2p]]"
                            on-track-start="_startMovingMarker"
                            on-track-move="_movingMarker"
                            on-track-end="_stopMovingMarker"></droppad-item-marker>
@@ -51,9 +51,13 @@
               type: Array,
               notify: true
             },
+            selectedNumbers: {
+              type: Array,
+              computed: "_makeSelectedNumbers(selectedDrops)"
+            },
             selectedInfos: {
               type: Array,
-              computed: "_setSelectedInfos(selectedDrops, drops)"
+              computed: "_makeSelectedInfos(selectedNumbers, drops)"
             },
             heldKeys: Array,
             preview: {
@@ -62,6 +66,14 @@
             }
           }
         }
+      }
+
+      _makeSelectedNumbers(selectedDrops){
+        return selectedDrops ? selectedDrops.map(el => el.info.number) : [];
+      }
+
+      _makeSelectedInfos(numbers, drops) {
+        return drops ? drops.filter(info => numbers.indexOf(info.number) != -1) : [];
       }
 
       showPreview(preview) {
@@ -76,24 +88,6 @@
         this._copyPlacerListener = this._copyPlacer.bind(this);
       }
 
-      //todo the issue with updating the selected is "solved" here.. But maybe it should be solved in the selector? I'm not sure it can, because the selector does not know which elements disconnected due to deletion or changes..
-      //att! The setTimout(func, 0) makes the notifyPath("selection") wait until Polymer has updated the selected items so that
-      //     the groupOfShapes and its bounding box is updated with the new position info, and not the current one in the objects..
-      //     This is a cascading problem..
-      updateSelected() {
-        setTimeout(function () {
-          this.notifyPath("selectedDrops");
-        }.bind(this), 0);
-      }
-
-      //todo there is a bug in the selector..
-      _setSelectedInfos(elems, drops) {
-        if (!elems || !drops)
-          return null;
-        let fromTheDomSelectedNumbers = elems.map(item => item.info.number);
-        return drops.filter(info => fromTheDomSelectedNumbers.indexOf(info.number) != -1);
-      }
-
       _startMovingMarker(e) {
         this.action = e.detail;
         if (this.heldKeys["KeyR"])
@@ -101,6 +95,7 @@
         else if (this.heldKeys["KeyE"])
           this.action.method = "scale";
         this.$.ghost.start(this.selectedInfos);
+        this.$.square.hide();
       }
 
       _movingMarker(e) {
@@ -128,6 +123,7 @@
       _stopMovingMarker(e) {
         this.action = null;
         this.replaceChanges(this.$.ghost.end());
+        this.$.square.show();
       }
 
       _copyMover(e) {
@@ -204,7 +200,7 @@
         if (!e.shiftKey)
           this.$.dropSelector.deselectAll();
         setTimeout(function () {
-          this.select(shape.number);
+          this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + shape.number));        //todo here the work starts to update the selector. The problem is that the dom is not updated for the selector to kick into action.
         }.bind(this), 0);
       }
 
@@ -214,7 +210,7 @@
 
       _deleteElem() {
         this.dispatchEvent(new CustomEvent("removeshapes", {detail: this.selectedInfos}));
-        this.$.dropSelector.deselectAll();    //todo maybe move this as a listener to changes on drops in the selector?
+        this.$.dropSelector.deselectAll();
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

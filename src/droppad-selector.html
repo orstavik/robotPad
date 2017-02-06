@@ -36,8 +36,7 @@
       }
 
       deselectAll() {
-        let selected = this.querySelectorAll("[data-selected]");
-        for(let item of selected)
+        for(let item of this.querySelectorAll("drop-shape[data-selected]"))
           item.removeAttribute("data-selected");
       }
 

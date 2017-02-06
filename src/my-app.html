@@ -1,5 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="color-palette.html">
 <link rel="import" href="json-object.html">
 <link rel="import" href="droppad-history.html">
@@ -106,6 +107,12 @@
       }
     </style>
 
+    <firebase-app auth-domain="robotpad-762de.firebaseapp.com"
+                  database-url="https://robotpad-762de.firebaseio.com/"
+                  api-key="AIzaSyAJ0HCTXnEXoG_aJ5AcN8d1VLbugeHF-Bo"
+                  name="droppad">
+    </firebase-app>
+
     <droppad-canvas id="shapeSelector" drops="[[letters]]" held-keys="[[heldKeys]]" preview="[[preview]]"
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
@@ -149,7 +156,7 @@
     <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower>
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
-    <app-ui></app-ui>
+    <!--<app-ui app-name="[[sketchName]]"></app-ui>-->
 
     <iron-selector attr-for-selected="select" multi>
       <tab-wrapper title="JSON" select="1">
@@ -168,8 +175,6 @@
         <!--History: <input type="range" min="0" max="10000" value="0" id="h" on-input="timeTravel"/> <br>-->
       </tab-wrapper>
     </iron-selector>
-
-    <div id="title" style="position: fixed; right: 0">[[sketchName]]</div>
 
     <keyboard-listener on-key-down="_checkKey" held-keys="{{heldKeys}}"></keyboard-listener>
 

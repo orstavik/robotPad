@@ -1,0 +1,122 @@
+<dom-module id="tools-button">
+    <template>
+        <style>
+            :host {
+                display: inline-block;
+                pointer-events: none;
+            }
+            #mainCircle {
+                display: flex;
+                width: var(--mother-button-size);
+                height: var(--mother-button-size);
+                margin: 10px;
+                align-items: center;
+                justify-content: center;
+                background-color: var(--mother-button-color);
+                border-radius: 50%;
+                cursor: pointer;
+                pointer-events: auto;
+                transition: box-shadow 0.2s;
+            }
+            #mainCircle > iron-icon {
+                --iron-icon-width: calc(var(--mother-button-size) * 0.5);
+                --iron-icon-height: calc(var(--mother-button-size) * 0.5);
+                --iron-icon-fill-color: var(--mother-button-icon-color);
+            }
+            .childs-wrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                pointer-events: none;
+            }
+
+            :host ::slotted([child-button]) {
+                opacity: 0;
+                pointer-events: none;
+            }
+            
+            :host ::slotted([child-button][revealed]) {
+                pointer-events: auto;
+            }
+        </style>
+
+        <paper-material id="mainCircle" elevation=1 on-click="_toggleState">
+            <paper-ripple></paper-ripple>
+            <iron-icon icon="[[icon]]"></iron-icon>
+        </paper-material>
+        
+        <div class="childs-wrapper">
+            <iron-selector id="selector" class="childs-wrapper" selected-attribute="active" selected-class="" selected="{{selected}}">
+                <slot></slot>
+            </iron-selector>
+        </div>
+    
+    </template>
+    <script>
+        class ToolsButton extends Polymer.Element {
+            static get is() {
+                return "tools-button";
+            }
+
+            static get config() {
+                return {
+                    properties: {
+                        active: {
+                            type: Boolean,
+                            value: false,
+                            reflectToAttribute: true,
+                            notify: true,
+                            observer: "_applyState"
+                        },
+                        icon: String,
+                        childs: Array,
+                        selected: Number
+                    }
+                }
+            }
+
+            connectedCallback() {
+                this.childs = this.querySelectorAll("[child-button]");
+            }
+
+            _toggleState(e) {
+                this.active = !this.active;
+            }
+
+            _applyState(active) {
+                if (active) {
+                    this.$.mainCircle.elevation = 2;
+                    this._revealChilds();
+                } else {
+                    this.$.mainCircle.elevation = 1;
+                    this._hideChilds();
+                }
+            }
+
+            _revealChilds() {
+                let length = this.childs.length;
+                this.childs.forEach(function(child,i) {
+                    child.animate({opacity: [0, 1], transform: ["scale(0.95)", "scale(1)"]}, {
+                        duration: 150,
+                        delay: (i/length)*(2-i/length)*100,
+                        fill: "forwards"
+                    });
+                    child.setAttribute("revealed", "");
+                });
+            }
+
+            _hideChilds() {
+                if (this.childs)
+                    this.childs.forEach(function(child) {
+                        child.animate({opacity: [1,0], transform: ["scale(1)", "scale(0.95)"]}, {
+                            duration: 150,
+                            fill: "forwards"
+                        });
+                        child.removeAttribute("revealed");
+                    });
+            }
+        }
+        customElements.define(ToolsButton.is, ToolsButton);
+    </script>
+</dom-module>

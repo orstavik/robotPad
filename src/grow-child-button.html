@@ -1,0 +1,189 @@
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+
+<dom-module id="grow-child-button">
+    <template>
+        <style>
+            :host {
+                display: inline-block;
+            }
+            #mainCircle {
+                display: flex;
+                width: var(--grow-child-button-size);
+                height: var(--grow-child-button-size);
+                margin: calc(var(--grow-child-button-size) * 0.2);
+                align-items: center;
+                justify-content: center;
+                background-color: var(--grow-child-button-color);
+                border-radius: 50%;
+                cursor: pointer;
+                opacity: 1;
+                transition: box-shadow 0.2s opacity 0.2s;
+            }
+            #mainCircle[hidden]{
+                opacity: 0;
+                pointer-events: none;
+                transition: none;
+            }
+            #mainCircle > iron-icon {
+                --iron-icon-width: calc(var(--grow-child-button-size) * 0.5);
+                --iron-icon-height: calc(var(--grow-child-button-size) * 0.5);
+                --iron-icon-fill-color: var(--grow-child-button-icon-color);
+            }
+            #outerBox {
+                display: flex;
+                justify-content: center;
+                box-sizing: border-box;
+                max-height: 600px;
+                position: absolute;
+                top: 0;
+                left: calc(-150px + var(--mother-button-size)/2);
+                border-radius: 3px;
+                pointer-events: none;
+                opacity: 0;
+                overflow: hidden;
+                z-index: 10;
+            }
+            #outerBox[expanded] {
+                opacity: 1;
+                pointer-events: auto;
+                z-index: 1000;
+            }
+            #shadyCircle {
+                width: var(--grow-child-button-size);
+                height: var(--grow-child-button-size);
+                position: absolute;
+                border-radius: 50%;
+                background-color: white;
+                will-change: transform;
+                pointer-events: none;
+                z-index: -1;
+            }
+            #boxContent {
+                opacity: 0;
+            }
+            #closeButton {
+                position: absolute;
+                top: 0;
+                right: 0;
+                z-index: 10;
+            }
+        </style>
+
+        <paper-material id="mainCircle" on-click="_toggleState" hidden="[[active]]">
+            <iron-icon icon="[[icon]]"></iron-icon>
+        </paper-material>
+
+        <paper-material id="outerBox" elevation=0 expanded$="[[active]]">
+            <paper-material id="shadyCircle" expanded$="[[active]]"></paper-material>
+            <div id="boxContent">
+                <paper-icon-button id="closeButton" icon="clear" on-tap="_disActive"></paper-icon-button>
+                <slot></slot>
+            </div>
+        </paper-material>
+    
+    </template>
+    <script>
+        class GrowChildButton extends Polymer.Element {
+            static get is() {
+                return "grow-child-button";
+            }
+
+            static get config() {
+                return {
+                    properties: {
+                        active: {
+                            type: Boolean,
+                            value: false,
+                            reflectToAttribute: true,
+                            observer: "_applyState"
+                        },
+                        icon: String,
+                        revealed: {
+                            type: Boolean,
+                            observer: "_setFromRevealed"
+                        }
+                    }
+                }
+            }
+
+            _toggleState(e) {
+                this.active = !this.active;
+            }
+
+            _disActive() {
+                this.active = false;
+            }
+
+            _setFromRevealed() {
+                if (!this.revealed) this.active = false;
+            }
+
+            _applyState(active) {
+                if (active) {
+                    this.$.mainCircle.elevation = 2;
+                    if (!this.boxSet)
+                        this._positionOuterBox()
+                    this._expandCard(300);
+                } else {
+                    this.$.mainCircle.elevation = 1;
+                        this._collapseCard(300);
+                }
+            }
+
+            _positionOuterBox() {
+                let box = this.$.outerBox;
+                let rectB = box.getBoundingClientRect();
+                let rectC = this.$.mainCircle.getBoundingClientRect();
+                box.style.marginTop = (16-rectB.top)+"px";
+                this.boxSet = true;
+                this.$.shadyCircle.style.top = (rectC.top-16)+"px";
+            }
+
+            _expandCard(dur) {
+                let box = this.$.outerBox;
+                let circle = this.$.shadyCircle;
+                let content = this.$.boxContent;
+                if (!this.topShift) {
+                    var bRect = box.getBoundingClientRect();
+                    var cRect = circle.getBoundingClientRect();
+                    this.topShift = (bRect.height-cRect.height)/2 - (cRect.top-16);
+                };
+                if (!this.scale) {
+                    let diagonal = Math.sqrt(bRect.height*bRect.height+bRect.width*bRect.width)
+                    this.scale = diagonal/cRect.width;
+                };
+
+                this.boxMove = box.animate({transform: ["translateX(0)", "translateX(194px)"]}, {
+                    duration: dur,
+                    fill: "forwards",
+                    easing: /*"cubic-bezier(0.4, 0, 0.2, 1)"*/"cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                });
+                this.circleGrow = circle.animate({transform: ["translateY(0) scale(1)", "translateY("+this.topShift+"px) scale("+this.scale+")"]}, {
+                    duration: dur,
+                    fill: "forwards",
+                    easing: "linear"
+                });
+                this.contentShow = content.animate({opacity: [0,1], transform: ["translateY(-6px)", "translateY(0)"]}, {
+                    delay: dur/2,
+                    duration: dur,
+                    fill: "forwards",
+                    easing: "ease-out"
+                });
+                setTimeout(function() {
+                    box.elevation = 2;
+                }.bind(this), dur/3*2);
+            }
+
+            _collapseCard(dur) {
+                this.$.boxContent.animate({opacity: [1,0]}, {
+                    duration: 0,
+                    fill: "forwards"
+                });
+                this.$.outerBox.elevation = 0;
+            }
+        }
+        customElements.define(GrowChildButton.is, GrowChildButton);
+    </script>
+</dom-module>

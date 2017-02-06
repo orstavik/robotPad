@@ -1,92 +1,135 @@
-<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icons/image-icons.html">
+<link rel="import" href="app-login.html">
+<link rel="import" href="tools-button.html">
+<link rel="import" href="grow-button.html">
+<link rel="import" href="grow-child-button.html">
+<!--<link rel="import" href="grow-button.html">-->
 
 <dom-module id="app-ui">
     <template>
         <style>
-            .fab-wrapper {
-                display: inline-block;
+            #appName {
+                display: flex;
+                position: absolute;
+                top: 16px;
+                left: 50vw;
+                transform: translate(-50%, 0px);
+                background-color: white;
+                border-radius: 3px;
+                opacity: 1;
+                pointer-events: none;
+                transition: opacity 0.5s, transform 0.4s;
+            }
+            
+            #appName[hidden] {
+                transform: translate(-50%, -3px);
+                opacity: 0;
+            }
+            
+            #appName span {
+                margin: 4px 12px;
+                font-weight: bold;
+            }
+            
+            tools-button {
+                --mother-button-size: 50px;
+                --mother-button-color: var(--paper-light-blue-200);
+                --mother-button-icon-color: black;
                 position: absolute;
                 top: 6px;
                 left: 6px;
                 z-index: 100;
             }
-
-            .minifab-wrapper {
-                margin-top: 20px;
+            
+            grow-child-button {
+                --grow-child-button-size: 36px;
+                --grow-child-button-color: white;
+                --grow-child-button-icon-color: black;
             }
             
-            #tools-fab {
-                margin: 10px;
-                --paper-fab-background: var(--paper-light-blue-200);
-                --iron-icon-fill-color: black;
-                transition-duration: 0.3s;
-            }
-
-            #tools-fab:not([active])+.minifab-wrapper paper-fab {
-                opacity: 0;
-                transform: scale(0.9);
-                pointer-events: none;
-                transition-delay: 0s !important;
-            }
-
-            #account-fab {
+            grow-button#account {
+                --grow-button-size: 50px;
+                --grow-button-color: white;
+                --grow-button-icon-color: black;
                 position: absolute;
                 top: 6px;
                 right: 6px;
-                margin: 10px;
-                --paper-fab-background: white;
-                --iron-icon-fill-color: black;
                 z-index: 100;
             }
-
-            paper-fab[mini] {
-                margin: 10px auto;
-                --paper-fab-background: white;
-                --iron-icon-fill-color: black;
-                transform: scale(1);
-                transition-duration: 0.2s;
-                transition-timing-function: ease-in-out;
-            }
-
-            #ivar {
-                color: darkred;
+            
+            grow-button#account[signed] {
+                --grow-button-color: var(--paper-light-blue-200);
             }
             
-            #help-fab {
+            grow-button#help {
+                --grow-button-size: 36px;
+                --grow-button-color: white;
+                --grow-button-icon-color: black;
                 position: absolute;
                 bottom: 6px;
                 left: 6px;
-                margin: 10px;
-                --paper-fab-background: white;
-                --iron-icon-fill-color: black;
                 z-index: 100;
+            }
+            
+            #testingOne {
+                box-sizing: border-box;
+                width: 300px;
+                padding: 12px;
             }
         </style>
 
-        <div class="fab-wrapper">
-            <paper-fab id="tools-fab" icon="icons:build" toggles></paper-fab>
+        <paper-material id="appName" elevation=1 hidden="[[!showName]]">
+            <span>Sketch Name</span>
+        </paper-material>
 
-            <div class="minifab-wrapper">
-                <iron-selector id="selector" selected-attribute="active" selected="{{selected}}">
-                    <paper-fab mini id="json-fab" icon="icons:settings-ethernet" style="transition-delay: 0s">
-                        <paper-material class="tools-paper" elevation="1"></paper-material>
-                    </paper-fab>
-                    <paper-fab mini id="palette-fab" icon="image:color-lens" style="transition-delay: 0.08s">
-                        <paper-material class="tools-paper" elevation="1"></paper-material>
-                    </paper-fab>
-                    <paper-fab mini id="history-fab" icon="icons:restore" style="transition-delay: 0.14s">
-                        <paper-material class="tools-paper" elevation="1"></paper-material>
-                    </paper-fab>
-                </iron-selector>
+        <tools-button icon="icons:build" active="{{toolsOpen}}">
+            <grow-child-button id="jsonButton" child-button icon="icons:settings-ethernet">
+                <div id="testingOne">
+                    0Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                </div>
+            </grow-child-button>
+            <grow-child-button id="paletteButton" child-button icon="image:color-lens">
+                <div id="testingOne">
+                    1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
+                    laborum.
+                </div>
+            </grow-child-button>
+            <grow-child-button id="historyButton" child-button icon="icons:restore">
+                <div id="testingOne">
+                    2Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
+                    laborum. 1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                    labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+                    ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+                    dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+                    deserunt mollit anim id est laborum.
+                </div>
+            </grow-child-button>
+        </tools-button>
+
+        <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
+            <app-login signed="{{signed}}"></app-login>
+        </grow-button>
+
+        <grow-button id="help" icon="help-outline">
+            <div id="testingOne">
+                1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
+                sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
             </div>
-        </div>
+        </grow-button>
 
-        <paper-fab id="account-fab" icon="icons:account-circle"></paper-fab>
-        <paper-fab id="help-fab" icon="icons:help-outline"></paper-fab>
-    
     </template>
     <script>
         class AppUi extends Polymer.Element {
@@ -97,18 +140,21 @@
             static get config() {
                 return {
                     properties: {
-                        selected: {
-                            type: Number,
-                            observer: "selectedChange"
+                        appName: String,
+                        toolsOpen: Boolean,
+                        accountOpen: Boolean,
+                        showName: {
+                            type: Boolean,
+                            computed: "_showName(toolsOpen, accountOpen)"
                         }
                     }
                 }
             }
 
-            selectedChange() {
-                
+            _showName(tools, account) {
+                return tools || account;
             }
         }
-        customElements.define(AppUi.is, AppUi);
+    customElements.define(AppUi.is, AppUi);
     </script>
 </dom-module>

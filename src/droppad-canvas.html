@@ -51,14 +51,6 @@
               type: Array,
               notify: true
             },
-            selectedNumbers: {
-              type: Array,
-              computed: "_makeSelectedNumbers(selectedDrops)"
-            },
-            selectedInfos: {
-              type: Array,
-              computed: "_makeSelectedInfos(selectedNumbers, drops)"
-            },
             heldKeys: Array,
             preview: {
               type: Array,
@@ -68,14 +60,14 @@
         }
       }
 
-      _makeSelectedNumbers(selectedDrops){
-        return selectedDrops ? selectedDrops.map(el => el.info.number) : [];
-      }
-
-      _makeSelectedInfos(numbers, drops) {
-        return drops ? drops.filter(info => numbers.indexOf(info.number) != -1) : [];
-      }
-
+//      _makeSelectedNumbers(selectedDrops){
+//        return selectedDrops ? selectedDrops.map(el => el.info.number) : [];
+//      }
+//
+//      _makeSelectedInfos(numbers, drops) {
+//        return drops ? drops.filter(info => numbers.indexOf(info.number) != -1) : [];
+//      }
+//
       showPreview(preview) {
         if (preview)
           this.$.historyPreview.start(preview);
@@ -94,8 +86,18 @@
           this.action.method = "rotate";
         else if (this.heldKeys["KeyE"])
           this.action.method = "scale";
-        this.$.ghost.start(this.selectedInfos);
+        this.$.ghost.start(this.getSelectedInfos());
         this.$.square.hide();
+      }
+
+      getSelectedInfos() {
+        if (!this.drops)
+          return[];
+        let all = this.$.dropSelector.querySelectorAll("drop-shape[data-selected]");
+        const numbers = [];
+        for(let el of all)
+          numbers.push(el.info.number);
+        return this.drops.filter(info => numbers.indexOf(info.number) != -1);
       }
 
       _movingMarker(e) {
@@ -144,7 +146,7 @@
       }
 
       copy() {
-        this.copyData = this.selectedInfos.map(el => el.makeCopy());
+        this.copyData = this.getSelectedInfos().map(el => el.makeCopy());
         this.copyCenter = this.$.square.getCenter();
       }
 
@@ -167,23 +169,23 @@
         else if (e.code === "KeyV")
           this.paste();
         else if (e.code == "KeyM")
-          this.replaceChanges(this.selectedInfos.map(info => info.mirror()));
+          this.replaceChanges(this.getSelectedInfos().map(info => info.mirror()));
         else if (e.code == "KeyN")
-          this.replaceChanges(this.selectedInfos.map(info => info.center()));
+          this.replaceChanges(this.getSelectedInfos().map(info => info.center()));
         else if (e.code == "PageUp")
-          this.replaceChanges(this.selectedInfos.map(info => info.zUp()));
+          this.replaceChanges(this.getSelectedInfos().map(info => info.zUp()));
         else if (e.code == "PageDown")
-          this.replaceChanges(this.selectedInfos.map(info => info.zDown()));
+          this.replaceChanges(this.getSelectedInfos().map(info => info.zDown()));
       }
 
       addStyleToSelected(styleName) {
-        this.replaceChanges(this.selectedInfos.map(info => info.setStyle(styleName)));
+        this.replaceChanges(this.getSelectedInfos().map(info => info.setStyle(styleName)));
       }
 
       updateShape(id, value) {
         this.$.dropSelector.deselectAll();
         this.select(id);
-        this.replaceChanges(this.selectedInfos.map(el => el.update(value)));
+        this.replaceChanges(this.getSelectedInfos().map(el => el.update(value)));
       }
 
       select(id) {
@@ -200,6 +202,7 @@
         if (!e.shiftKey)
           this.$.dropSelector.deselectAll();
         setTimeout(function () {
+//          this.shadowRoot.querySelector("#drop" + shape.number).click();
           this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + shape.number));        //todo here the work starts to update the selector. The problem is that the dom is not updated for the selector to kick into action.
         }.bind(this), 0);
       }
@@ -209,8 +212,8 @@
       }
 
       _deleteElem() {
-        this.dispatchEvent(new CustomEvent("removeshapes", {detail: this.selectedInfos}));
-        this.$.dropSelector.deselectAll();
+        this.dispatchEvent(new CustomEvent("removeshapes", {detail: this.getSelectedInfos()}));
+//        this.$.dropSelector.deselectAll();
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

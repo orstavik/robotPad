@@ -19,43 +19,26 @@
       static get config() {
         return {
           properties: {
-            selectedElements: {
-              type: Array,
-              notify: true
-            }
+            selectedElements: Array
           }
         }
       }
 
       connectedCallback() {
-        this.selectedElements = [];
         this.addEventListener("pointerdown", this._pointerDown.bind(this));
-        this.pointerUpListener = this._mouseUp.bind(this);
+        this.pointerUpListener = this._pointerUp.bind(this);
       }
 
       select(el) {
         if (el.dataset.selected)
           return;
         el.setAttribute("data-selected", true);
-        this.selectedElements.push(el);
-        this.notifyPath("selectedElements");
-      }
-
-      deselect(el) {
-        let pos = this.selectedElements.indexOf(el);
-        if (pos == -1)
-          throw new Error("wtf, should not happen");
-        let item = this.selectedElements.splice(pos, 1); //obs: alters the array of this.selectedElements
-        item[0].removeAttribute("data-selected");
-        this.notifyPath("selectedElements");
       }
 
       deselectAll() {
-        this.selectedElements.map(function (item) {
+        let selected = this.querySelectorAll("[data-selected]");
+        for(let item of selected)
           item.removeAttribute("data-selected");
-        });
-        this.selectedElements = [];
-        this.notifyPath("selectedElements");
       }
 
 //      toggleSelect(el) {
@@ -63,33 +46,28 @@
 //      }
 
       abort() {
-        if (this.actions)
-          this.actions.abort = true;
+        this.removeEventListener("pointerup", this.pointerUpListener);
       }
 
       _pointerDown(e) {
         DroppadSelector._cancelPropDefault(e);
-        this.addEventListener("mouseup", this.pointerUpListener);
+        this.addEventListener("pointerup", this.pointerUpListener);
         let el = e.target;
         this.actions = {shift: e.shiftKey, el: el, wasSelectedAlready: el.dataset.selected};
         this.select(el);
       }
 
-      _mouseUp(e) {
+      _pointerUp(e) {
         DroppadSelector._cancelPropDefault(e);
-//        if (!this.actions) {
-//          something has triggered this while it shouldnt..
-//        } else
-        if (this.actions.abort) {
-
-        } else if (this.actions.shift && !this.actions.wasSelectedAlready) {
-
+        if (this.actions.shift && !this.actions.wasSelectedAlready) {
+          //do no new select action
         } else if (!this.actions.wasSelectedAlready) {
           this.deselectAll();
           this.select(this.actions.el);
         } else {
-          this.deselect(this.actions.el);
+          this.actions.el.removeAttribute("data-selected");
         }
+        this.removeEventListener("pointerup", this.pointerUpListener);
       }
 
       static _cancelPropDefault(e) {

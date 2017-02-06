@@ -231,7 +231,7 @@
       }
 
       connectedCallback() {
-        let selector = this.parentNode.querySelector("#dropSelector");
+        this.selector = this.parentNode.querySelector("#dropSelector");
         var addRemoveFromSelectorObserver = new MutationObserver(function (mutations) {
           for (let mutation of mutations) {
             for (let node of mutation.addedNodes) {
@@ -245,7 +245,7 @@
             }
           }
         }.bind(this));
-        addRemoveFromSelectorObserver.observe(selector, {childList: true});
+        addRemoveFromSelectorObserver.observe(this.selector, {childList: true});
 
         this.$.marker.addEventListener("pointerdown", this._pointerDown.bind(this));
         this.pointermoveListener = this._pointerMove.bind(this);
@@ -269,7 +269,7 @@
             newSearch = true;
         }
         if (newSearch)
-          this.items = this.parentNode.querySelector("#dropSelector").querySelectorAll("drop-shape[data-selected]");
+          this.items = this.selector.querySelectorAll("drop-shape[data-selected]");
         this.notifyPath("items");
       }
 

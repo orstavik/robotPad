@@ -22,16 +22,17 @@
 
     </style>
     <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-dbltap="_newShape" on-singletap="_deselectAll">
-      <droppad-selector id="dropSelector" selected-elements="{{selectedDrops}}">
+      <droppad-selector id="dropSelector">
         <template is="dom-repeat" items="[[drops]]">
-          <drop-shape id="drop[[item.number]]" info="[[item]]" data-select-value="[[item.number]]" data-selectable></drop-shape>
+          <drop-shape id="drop[[item.number]]" info="[[item]]" data-select-value="[[item.number]]"
+                      data-selectable></drop-shape>
         </template>
       </droppad-selector>
       <droppad-item-marker id="square" p2p="[[p2p]]"
                            on-track-start="_startMovingMarker"
                            on-track-move="_movingMarker"
                            on-track-end="_stopMovingMarker"></droppad-item-marker>
-      <group-of-shapes id="ghost" class="copy" ></group-of-shapes>
+      <group-of-shapes id="ghost" class="copy"></group-of-shapes>
       <group-of-shapes id="ghostCopy"></group-of-shapes>
       <group-of-shapes id="historyPreview"></group-of-shapes>
     </droppad-canvas-canvas>
@@ -60,21 +61,6 @@
         }
       }
 
-//      _makeSelectedNumbers(selectedDrops){
-//        return selectedDrops ? selectedDrops.map(el => el.info.number) : [];
-//      }
-//
-//      _makeSelectedInfos(numbers, drops) {
-//        return drops ? drops.filter(info => numbers.indexOf(info.number) != -1) : [];
-//      }
-//
-      showPreview(preview) {
-        if (preview)
-          this.$.historyPreview.start(preview);
-        else
-          this.$.historyPreview.end();
-      }
-
       connectedCallback() {
         this._copyMoverListener = this._copyMover.bind(this);
         this._copyPlacerListener = this._copyPlacer.bind(this);
@@ -92,10 +78,9 @@
 
       getSelectedInfos() {
         if (!this.drops)
-          return[];
-        let all = this.$.dropSelector.querySelectorAll("drop-shape[data-selected]");
+          return [];
         const numbers = [];
-        for(let el of all)
+        for (let el of this.$.dropSelector.querySelectorAll("drop-shape[data-selected]"))
           numbers.push(el.info.number);
         return this.drops.filter(info => numbers.indexOf(info.number) != -1);
       }
@@ -130,8 +115,9 @@
 
       _copyMover(e) {
         DroppadItemMarker._cancelPropDefault(e);
-        let xMove = this.p2p.addZoom(e.clientX - this.copyCenter.x);
-        let yMove = this.p2p.addZoom(e.clientY - this.copyCenter.y);
+        let copyCenter = this.$.square.getCenter();
+        let xMove = this.p2p.addZoom(e.clientX - copyCenter.x);
+        let yMove = this.p2p.addZoom(e.clientY - copyCenter.y);
         this.$.ghostCopy.move(xMove, yMove);
       }
 
@@ -141,18 +127,16 @@
         this.removeEventListener("pointerdown", this._copyPlacerListener);
         this.$.dropSelector.deselectAll();
         this.dispatchEvent(new CustomEvent("addshapes", {detail: this.$.ghostCopy.end()}));
-        this.copyCenter = null;
         this.copyData = null;
       }
 
       copy() {
-        this.copyData = this.getSelectedInfos().map(el => el.makeCopy());
-        this.copyCenter = this.$.square.getCenter();
+        this.copyData = this.getSelectedInfos().map(info => info.makeCopy());
       }
 
       paste() {
         this.$.ghostCopy.start(this.copyData);
-        this.$.canvas.abort();      //need to do this because i don't have the capture of the pointer and so must override the capture of the canvas-canvas
+        this.$.canvas.abort();      //remove the listener for the canvas-canvas
         this.addEventListener("pointermove", this._copyMoverListener);
         this.addEventListener("pointerdown", this._copyPlacerListener);
       }
@@ -178,6 +162,13 @@
           this.replaceChanges(this.getSelectedInfos().map(info => info.zDown()));
       }
 
+      showPreview(preview) {
+        if (preview)
+          this.$.historyPreview.start(preview);
+        else
+          this.$.historyPreview.end();
+      }
+
       addStyleToSelected(styleName) {
         this.replaceChanges(this.getSelectedInfos().map(info => info.setStyle(styleName)));
       }
@@ -201,9 +192,8 @@
         this.dispatchEvent(new CustomEvent("addshapes", {detail: [shape]}));
         if (!e.shiftKey)
           this.$.dropSelector.deselectAll();
-        setTimeout(function () {
-//          this.shadowRoot.querySelector("#drop" + shape.number).click();
-          this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + shape.number));        //todo here the work starts to update the selector. The problem is that the dom is not updated for the selector to kick into action.
+        setTimeout(function () { //must wait for the element to appear in the dom.
+          this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + shape.number));
         }.bind(this), 0);
       }
 
@@ -213,7 +203,6 @@
 
       _deleteElem() {
         this.dispatchEvent(new CustomEvent("removeshapes", {detail: this.getSelectedInfos()}));
-//        this.$.dropSelector.deselectAll();
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

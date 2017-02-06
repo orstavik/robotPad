@@ -16,17 +16,32 @@
         return "droppad-selector";
       }
 
-      static get config() {
-        return {
-          properties: {
-            selectedElements: Array
-          }
-        }
-      }
-
       connectedCallback() {
         this.addEventListener("pointerdown", this._pointerDown.bind(this));
         this.pointerUpListener = this._pointerUp.bind(this);
+      }
+
+      _pointerDown(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.addEventListener("pointerup", this.pointerUpListener);
+        let el = e.target;
+        this.actions = {shift: e.shiftKey, el: el, wasSelectedAlready: el.dataset.selected};
+        this.select(el);
+      }
+
+      _pointerUp(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.actions.shift && !this.actions.wasSelectedAlready) {
+          //do no new select action
+        } else if (!this.actions.wasSelectedAlready) {
+          this.deselectAll();
+          this.select(this.actions.el);
+        } else {
+          this.actions.el.removeAttribute("data-selected");
+        }
+        this.removeEventListener("pointerup", this.pointerUpListener);
       }
 
       select(el) {
@@ -40,38 +55,8 @@
           item.removeAttribute("data-selected");
       }
 
-//      toggleSelect(el) {
-//        return el.dataset.selected ? this.deselect(el) : this.select(el);
-//      }
-
       abort() {
         this.removeEventListener("pointerup", this.pointerUpListener);
-      }
-
-      _pointerDown(e) {
-        DroppadSelector._cancelPropDefault(e);
-        this.addEventListener("pointerup", this.pointerUpListener);
-        let el = e.target;
-        this.actions = {shift: e.shiftKey, el: el, wasSelectedAlready: el.dataset.selected};
-        this.select(el);
-      }
-
-      _pointerUp(e) {
-        DroppadSelector._cancelPropDefault(e);
-        if (this.actions.shift && !this.actions.wasSelectedAlready) {
-          //do no new select action
-        } else if (!this.actions.wasSelectedAlready) {
-          this.deselectAll();
-          this.select(this.actions.el);
-        } else {
-          this.actions.el.removeAttribute("data-selected");
-        }
-        this.removeEventListener("pointerup", this.pointerUpListener);
-      }
-
-      static _cancelPropDefault(e) {
-        e.stopPropagation();
-        e.preventDefault();
       }
     }
     customElements.define(DroppadSelector.is, DroppadSelector);

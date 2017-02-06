@@ -239,11 +239,9 @@
                 this.addToObservableList(node);
             }
             for (let node of mutation.removedNodes) {
-              if (node instanceof HTMLElement && node.hasAttribute("data-selectable")){
-                this.items.splice(this.items.indexOf(node), 1);
+              if (node instanceof HTMLElement && node.hasAttribute("data-selectable"))
                 this.removeFromObservableList(node);
-              }
-              this.notifyPath("items");
+              this.set("items", selector.querySelectorAll("drop-shape[data-selected]"));
             }
           }
         }.bind(this));
@@ -265,18 +263,14 @@
       }
 
       toggleSelected(mutations) {
+        let newSearch = false;
         for (let mutation of mutations) {
-          let targetAttribute = mutation.target.attributes[mutation.attributeName];
-          if (mutation.attributeName == "data-selected") {
-            if (targetAttribute && targetAttribute.value == "true"){
-              if (this.items.indexOf(mutation.target)<0)
-                this.push("items", mutation.target);
-            } else
-              this.splice("items", this.items.indexOf(mutation.target), 1);
-          }
-          else if (mutation.attributeName == "style" || mutation.attributeName == "centered")
-            this.notifyPath("items");
+          if (mutation.attributeName == "data-selected")
+            newSearch = true;
         }
+        if (newSearch)
+          this.items = this.parentNode.querySelector("#dropSelector").querySelectorAll("drop-shape[data-selected]");
+        this.notifyPath("items");
       }
 
       show() {

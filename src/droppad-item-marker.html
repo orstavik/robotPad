@@ -158,7 +158,7 @@
         display: block;
       }
     </style>
-    <div id="marker" hidden$="[[!groupOfShapes.left]]"
+    <div id="marker" hidden$="[[hidden]]"
          style$="left: [[groupOfShapes.left]]px; top: [[groupOfShapes.top]]px; width:  [[groupOfShapes.width]]px; height: [[groupOfShapes.height]]px;">
       <div id="nw" class="scale corner"></div>
       <div id="ne" class="scale corner"></div>
@@ -186,19 +186,37 @@
       static get config() {
         return {
           properties: {
-            items: Array,
+            items: {
+              type: Array,
+              value: function () {
+                return [];
+              }
+            },
+            mutationObservers: {    //todo I don't know if we need this one, it might be garbagecollected by default if the target element of the mutation observer is removed from the dom.
+              type: Object,
+              value: function(){
+                return {};
+              }
+            },
             p2p: PointToPoint,
             groupOfShapes: {
               type: Object,
               computed: "_calcRectangle(items, p2p)"
+            },
+            hidden: {
+              type: Boolean,
+              value: false
             }
           }
         }
       }
 
       _calcRectangle(items, p2p) {
-        if (!items || items.length == 0)
+        if (!items || items.length == 0){
+          this.set("hidden", true);
           return null;
+        }
+        this.set("hidden", false);
         let dims = {};
         for (let item of items) {
           let next = item.getBoundingClientRect();
@@ -213,9 +231,54 @@
       }
 
       connectedCallback() {
+        let selector = this.parentNode.querySelector("#dropSelector");
+        var addRemoveFromSelectorObserver = new MutationObserver(function (mutations) {
+          for (let mutation of mutations) {
+            for (let node of mutation.addedNodes) {
+              if (node instanceof HTMLElement && node.hasAttribute("data-selectable"))
+                this.addToObservableList(node);
+            }
+            for (let node of mutation.removedNodes) {
+              if (node instanceof HTMLElement && node.hasAttribute("data-selectable"))
+                this.removeFromObservableList(node);
+              this.set("items", selector.querySelectorAll("drop-shape[data-selected]"));
+            }
+          }
+        }.bind(this));
+        addRemoveFromSelectorObserver.observe(selector, {childList: true});
+
         this.$.marker.addEventListener("pointerdown", this._pointerDown.bind(this));
         this.pointermoveListener = this._pointerMove.bind(this);
         this.pointerupListener = this._pointerUp.bind(this);
+      }
+
+      addToObservableList(node) {
+        this.mutationObservers[node.id] = new MutationObserver(this.toggleSelected.bind(this));
+        this.mutationObservers[node.id].observe(node, {attributes: true, attributeOldValue: true});
+      }
+
+      removeFromObservableList(node) {//todo not sure i need to clean this up??
+        this.mutationObservers[node.id].disconnect();
+        delete this.mutationObservers[node.id];
+      }
+
+      toggleSelected(mutations) {
+        let newSearch = false;
+        for (let mutation of mutations) {
+          if (mutation.attributeName == "data-selected")
+            newSearch = true;
+        }
+        if (newSearch)
+          this.items = this.parentNode.querySelector("#dropSelector").querySelectorAll("drop-shape[data-selected]");
+        this.notifyPath("items");
+      }
+
+      show() {
+        this.set("hidden", false);
+      }
+
+      hide() {
+        this.set("hidden", true);
       }
 
       _pointerDown(e) {
@@ -231,7 +294,7 @@
 
       _pointerMove(e) {
         DroppadItemMarker._cancelPropDefault(e);
-        this.dispatchEvent(new CustomEvent("track-move", { detail: this.calculateTrackMovements(e)}));
+        this.dispatchEvent(new CustomEvent("track-move", {detail: this.calculateTrackMovements(e)}));
       }
 
       _pointerUp(e) {
@@ -265,7 +328,7 @@
         const scaleX = movX / this.groupOfShapes.width;
         const scaleY = movY / this.groupOfShapes.height;
         const angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
-        return { xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle};
+        return {xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle};
       }
 
       static getScreenCenter(elem) {

@@ -113,7 +113,11 @@
                   name="droppad">
     </firebase-app>
 
-    <droppad-canvas id="shapeSelector" drops="{{letters}}" held-keys="[[heldKeys]]" history="{{history}}"></droppad-canvas>
+    <droppad-canvas id="shapeSelector" drops="[[letters]]" held-keys="[[heldKeys]]" preview="[[preview]]"
+                    on-addshapes="_addShapes"
+                    on-removeshapes="_removeShapes"
+                    on-changeshapes="_changeShapes"
+    ></droppad-canvas>
 
     <div id="toolbar">
       <div class="button spacer"></div>
@@ -149,7 +153,7 @@
       <div class="button" title="Skew the shape: press 'n'"> n</div>
     </div>
 
-    <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower>-->
+    <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower>
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
     <!--<app-ui app-name="[[sketchName]]"></app-ui>-->
@@ -167,7 +171,7 @@
         <json-saver input="[[letters]]" on-sketchload="loadSketch" json-name="{{sketchName}}"></json-saver>
       </tab-wrapper>
       <tab-wrapper title="History" select="4">
-        <droppad-history></droppad-history>
+        <droppad-history id="history" on-new-state="_newState" preview="{{preview}}"></droppad-history>
         <!--History: <input type="range" min="0" max="10000" value="0" id="h" on-input="timeTravel"/> <br>-->
       </tab-wrapper>
     </iron-selector>
@@ -194,29 +198,37 @@
             },
             heldKeys: Array,
             sketchName: String,
-            history: Array
+            preview: Object
           }
         }
       }
 
       connectedCallback() {
         super.connectedCallback();
-        this.newSketch();
       }
 
-      timeTravel(e) {
-        if (e.target.valueAsNumber >= this.history.length)
-          e.target.valueAsNumber = this.history.length;
-        let x = this.history[e.target.valueAsNumber];
-        this.$.shapeSelector.loadSketch(x);
+      _newState(e){
+        this.set("letters", e.detail);
+      }
+
+      _addShapes(e){
+        this.$.history.add(e.detail);
+      }
+
+      _removeShapes(e){
+        this.$.history.remove(e.detail);
+      }
+
+      _changeShapes(e){
+        this.$.history.update(e.detail);
       }
 
       loadSketch(e) {
-        this.$.shapeSelector.loadSketch(e.detail.json);
+        this.$.history.setState(e.detail.json);
       }
 
       newSketch(){
-        this.$.shapeSelector.loadSketch([]);
+        this.$.history.setState([]);
       }
 
       writeInChanges(e) {

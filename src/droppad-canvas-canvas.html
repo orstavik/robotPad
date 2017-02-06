@@ -114,6 +114,7 @@
         return {
           properties: {
             pointDown: Object,
+            pointDown2: Object,
             p2p: {
               type: PointToPoint,
               value: function () {
@@ -127,56 +128,60 @@
 
       connectedCallback() {
         this.addEventListener("wheel", this._mouseScroll.bind(this));
-        this.addEventListener("pointerdown", this._mouseDown.bind(this));
-        this.mouseMoveListener = this._mouseMove.bind(this);
-        this.mouseUpListener = this._mouseUp.bind(this);
+        this.addEventListener("pointerdown", this._pointerdown.bind(this));
+        this.mouseMoveListener = this._pointermove.bind(this);
+        this.mouseUpListener = this._pointerup.bind(this);
+        this.fireSingletap = function () {
+          this.dispatchEvent(new CustomEvent("singletap"), null);
+          this._delayedFire = null;
+        }.bind(this);
       }
 
       reset() {
         this.set("p2p", new PointToPoint(window.innerWidth / 2, window.innerHeight / 2));
       }
 
-      _mouseDown(e) {
-        if (e.path[0] != this)
+      _pointerdown(e) {
+        if (this.aborted) {
+          this.aborted = !this.aborted;
           return;
-        let lastPointDown = this.pointDown;
-        let lastTime = Number(lastPointDown ? lastPointDown.timeStamp : 0);
-        this.pointDown = e;
-        if ((this.pointDown.timeStamp - lastTime) < 300) {
-          this.removeFireDeselect();
-          this.dispatchEvent(new CustomEvent("new-shape", {detail: this.p2p.calcLogicPoint(e.clientX, e.clientY)}));
-        } else {
-          this.fireDeselect = setTimeout(function () {
-            this.dispatchEvent(new CustomEvent("deselect"), null);
-          }.bind(this), 300);
-          this.setPointerCapture(e.pointerId);
-          this.addEventListener("pointermove", this.mouseMoveListener);
-          this.addEventListener("pointerup", this.mouseUpListener);
         }
+        this.doSingleTap = true;
+        if (this._delayedFire) {
+          clearTimeout(this._delayedFire);
+          this._delayedFire = null;
+          this.dispatchEvent(new CustomEvent("dbltap", {detail: this.p2p.calcLogicPoint(e.clientX, e.clientY)}));
+          this.doSingleTap = false;
+          return;
+        }
+        this.setPointerCapture(e.pointerId);
+        this.addEventListener("pointermove", this.mouseMoveListener);
+        this.addEventListener("pointerup", this.mouseUpListener);
+        this.pointDown = e;
       }
 
-      removeFireDeselect() {
-        clearTimeout(this.fireDeselect);
-        this.fireDeselect = null;
+      _pointermove(e) {
+        this.doSingleTap = false;
+        this.p2p.moveScreen(e.clientX - this.pointDown.clientX, e.clientY - this.pointDown.clientY);
+        this.notifyPath("p2p"); //todo delay this using requestAnimationFrame?? or does Polymer do this for us??
+        this.pointDown = e;
       }
 
-      _mouseUp(e) {
+      _pointerup(e) {
+        if (this.doSingleTap)
+          this._delayedFire = setTimeout(this.fireSingletap, 300);
         this.releasePointerCapture(e.pointerId);
         this.removeEventListener("pointermove", this.mouseMoveListener);
         this.removeEventListener("pointerup", this.mouseMoveListener);
       }
 
-      _mouseMove(e) {
-        if (this.fireDeselect)
-          this.removeFireDeselect();
-        this.p2p.moveScreen(e.clientX - this.pointDown.clientX, e.clientY - this.pointDown.clientY);
-        this.notifyPath("p2p"); //todo delay this using requestAnimationFrame??
-        this.pointDown = e;
-      }
-
       _mouseScroll(e) {
         this.p2p.setZoom(e.deltaY / 500, e.clientX, e.clientY);
         this.notifyPath("p2p");
+      }
+
+      abort() {
+        this.aborted = true;
       }
     }
     customElements.define(DroppadCanvasCanvas.is, DroppadCanvasCanvas);

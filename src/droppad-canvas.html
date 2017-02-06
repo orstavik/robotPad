@@ -21,18 +21,20 @@
       }
 
     </style>
-    <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-new-shape="_newShape" on-deselect="_deselectAll">
-      <droppad-selector id="dropSelector" selected-elements="{{selectedDrops}}">
+    <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-dbltap="_newShape" on-singletap="_deselectAll">
+      <droppad-selector id="dropSelector">
         <template is="dom-repeat" items="[[drops]]">
-          <drop-shape id="drop[[item.number]]" info="[[item]]"></drop-shape>
+          <drop-shape id="drop[[item.number]]" info="[[item]]" data-select-value="[[item.number]]"
+                      data-selectable></drop-shape>
         </template>
       </droppad-selector>
-      <droppad-item-marker id="square" items="[[selectedDrops]]" p2p="[[p2p]]"
+      <droppad-item-marker id="square" p2p="[[p2p]]"
                            on-track-start="_startMovingMarker"
                            on-track-move="_movingMarker"
                            on-track-end="_stopMovingMarker"></droppad-item-marker>
-      <group-of-shapes id="ghost" originals="[[selectedInfos]]"></group-of-shapes>
-      <group-of-shapes id="ghostCopy" originals="[[visualCopy]]"></group-of-shapes>
+      <group-of-shapes id="ghost" class="copy"></group-of-shapes>
+      <group-of-shapes id="ghostCopy"></group-of-shapes>
+      <group-of-shapes id="historyPreview"></group-of-shapes>
     </droppad-canvas-canvas>
   </template>
 
@@ -45,54 +47,50 @@
       static get config() {
         return {
           properties: {
-            drops: {
-              type: Array,
-              notify: true
-            },
+            drops: Array,
             selectedDrops: {
               type: Array,
               notify: true
             },
-            selectedInfos: {
-              type: Array,
-              computed: "_setSelectedInfos(selectedDrops)"
-            },
             heldKeys: Array,
-            history: {
+            preview: {
               type: Array,
-              value: function () {
-                return [];
-              },
-              notify: true
+              observer: "showPreview"
             }
           }
         }
       }
 
-      connectedCallback(){
+      connectedCallback() {
         this._copyMoverListener = this._copyMover.bind(this);
         this._copyPlacerListener = this._copyPlacer.bind(this);
       }
 
-      _setSelectedInfos(elems) {
-        return elems.map(item => item.info);
+      _startMovingMarker(e) {
+        this.action = e.detail;
+        if (this.heldKeys["KeyR"])
+          this.action.method = "rotate";
+        else if (this.heldKeys["KeyE"])
+          this.action.method = "scale";
+        this.$.ghost.start(this.getSelectedInfos());
+        this.$.square.hide();
       }
 
-      _startMovingMarker(e) {
-        let action = e.detail;
-        if (this.heldKeys["KeyR"])
-          action.method = "rotate";
-        else if (this.heldKeys["KeyE"])
-          action.method = "scale";
-        this.$.ghost.start(action);
+      getSelectedInfos() {
+        if (!this.drops)
+          return [];
+        const numbers = [];
+        for (let el of this.$.dropSelector.querySelectorAll("drop-shape[data-selected]"))
+          numbers.push(el.info.number);
+        return this.drops.filter(info => numbers.indexOf(info.number) != -1);
       }
 
       _movingMarker(e) {
         let ms = e.detail;
         this.doSnapping(ms);
-        switch (this.$.ghost.action.method) {
+        switch (this.action.method) {
           case "scale":
-            return this.$.ghost.scaleDirection(ms.xMove, ms.yMove, ms.percentX, ms.percentY, this.$.ghost.action.direction);
+            return this.$.ghost.scaleDirection(ms.xMove, ms.yMove, ms.percentX, ms.percentY, this.action.direction);
           case "rotate":
             return this.$.ghost.rotate(ms.angle);
           case "move":
@@ -103,38 +101,42 @@
       doSnapping(ms) {
         if (Math.abs(ms.xMove) < 6 && Math.abs(ms.yMove) < 6)
           ms.xMove = ms.yMove = 0;
-        else if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"])
+        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"]) {
           ms.xMove = ms.yMove;
+          ms.percentX = ms.percentY;
+        }
       }
 
       _stopMovingMarker(e) {
+        this.action = null;
         this.replaceChanges(this.$.ghost.end());
+        this.$.square.show();
       }
 
-      _copyMover(e){
+      _copyMover(e) {
         DroppadItemMarker._cancelPropDefault(e);
-        let xMove = this.p2p.addZoom(e.clientX - this.copyCenter.x);
-        let yMove = this.p2p.addZoom(e.clientY - this.copyCenter.y);
+        let copyCenter = this.$.square.getCenter();
+        let xMove = this.p2p.addZoom(e.clientX - copyCenter.x);
+        let yMove = this.p2p.addZoom(e.clientY - copyCenter.y);
         this.$.ghostCopy.move(xMove, yMove);
       }
 
-      _copyPlacer(e){
+      _copyPlacer(e) {
+        DroppadItemMarker._cancelPropDefault(e);
         this.removeEventListener("pointermove", this._copyMoverListener);
         this.removeEventListener("pointerdown", this._copyPlacerListener);
         this.$.dropSelector.deselectAll();
-        this._addElements(this.$.ghostCopy.end());
-        this.set("visualCopy", null);
-        this.set("copyCenter", null);
+        this.dispatchEvent(new CustomEvent("addshapes", {detail: this.$.ghostCopy.end()}));
+        this.copyData = null;
       }
 
       copy() {
-        this.hiddenCopy = this.selectedInfos.map(el => el.makeCopy(0,0));
-        this.copyCenter = this.$.square.getCenter();
+        this.copyData = this.getSelectedInfos().map(info => info.makeCopy());
       }
 
       paste() {
-        this.set("visualCopy", this.hiddenCopy);
-        this.$.ghostCopy.start("move");
+        this.$.ghostCopy.start(this.copyData);
+        this.$.canvas.abort();      //remove the listener for the canvas-canvas
         this.addEventListener("pointermove", this._copyMoverListener);
         this.addEventListener("pointerdown", this._copyPlacerListener);
       }
@@ -151,23 +153,30 @@
         else if (e.code === "KeyV")
           this.paste();
         else if (e.code == "KeyM")
-          this.replaceChanges(this.selectedInfos.map(el => el.mirror()));
+          this.replaceChanges(this.getSelectedInfos().map(info => info.mirror()));
         else if (e.code == "KeyN")
-          this.replaceChanges(this.selectedInfos.map(el => el.center()));
+          this.replaceChanges(this.getSelectedInfos().map(info => info.center()));
         else if (e.code == "PageUp")
-          this.replaceChanges(this.selectedInfos.map(el => el.zUp()));
+          this.replaceChanges(this.getSelectedInfos().map(info => info.zUp()));
         else if (e.code == "PageDown")
-          this.replaceChanges(this.selectedInfos.map(el => el.zDown()));
+          this.replaceChanges(this.getSelectedInfos().map(info => info.zDown()));
+      }
+
+      showPreview(preview) {
+        if (preview)
+          this.$.historyPreview.start(preview);
+        else
+          this.$.historyPreview.end();
       }
 
       addStyleToSelected(styleName) {
-        this.replaceChanges(this.selectedInfos.map(el => el.setStyle(styleName)));
+        this.replaceChanges(this.getSelectedInfos().map(info => info.setStyle(styleName)));
       }
 
       updateShape(id, value) {
         this.$.dropSelector.deselectAll();
         this.select(id);
-        this.replaceChanges(this.selectedInfos.map(el => el.update(value)));
+        this.replaceChanges(this.getSelectedInfos().map(el => el.update(value)));
       }
 
       select(id) {
@@ -180,38 +189,20 @@
 
       _newShape(e) {
         let shape = new ShapeInfoObject(e.detail.x, e.detail.y);
-        this._addElements([shape]);
+        this.dispatchEvent(new CustomEvent("addshapes", {detail: [shape]}));
         if (!e.shiftKey)
           this.$.dropSelector.deselectAll();
-        setTimeout(function () {
-          this.select(shape.number);
+        setTimeout(function () { //must wait for the element to appear in the dom.
+          this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + shape.number));
         }.bind(this), 0);
       }
 
-      loadSketch(drops) {
-        this.set("drops", drops);
-      }
-
-      //att! The setTimout(func, 0) makes the notifyPath("selection") wait until Polymer has updated the selected items so that
-      //     the groupOfShapes and its bounding box is updated with the new position info, and not the current one in the objects..
-      //     This is a cascading problem..
       replaceChanges(changedCopies) {
-        this.history.push(this.drops);
-        this.set("drops", ImmutableArrayFunctions.replaceEqualNumber(this.drops, changedCopies));
-        setTimeout(function () {
-          this.notifyPath("selectedDrops");
-        }.bind(this), 0);
+        this.dispatchEvent(new CustomEvent("changeshapes", {detail: changedCopies}));
       }
 
       _deleteElem() {
-        this.history.push(this.drops);
-        this.set("drops", this.drops.filter(item => this.selectedInfos.indexOf(item) == -1)); //Immutable filter is immutable, returns a new array
-        this.$.dropSelector.deselectAll();    //todo maybe move this as a listener to changes on drops in the selector?
-      }
-
-      _addElements(newShapes) {
-        this.history.push(this.drops);
-        this.set("drops", this.drops.concat(newShapes));//Immutable .concat() makes a new array object instance
+        this.dispatchEvent(new CustomEvent("removeshapes", {detail: this.getSelectedInfos()}));
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

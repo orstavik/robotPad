@@ -7,11 +7,13 @@
       :host {
         display: block;
       }
+      :host(.copy) drop-shape{
+        opacity: 0.5;
+        border: 2px dotted red;
+      }
     </style>
-    <template is="dom-if" if="[[action]]">
-      <template is="dom-repeat" items="[[infos]]">
-        <drop-shape id="copy[[item.number]]" class="copy" info="[[item]]"></drop-shape>
-      </template>
+    <template is="dom-repeat" items="[[infos]]">
+      <drop-shape id="copy[[item.number]]" info="[[item]]"></drop-shape>
     </template>
   </template>
 
@@ -33,21 +35,20 @@
               type: Array,
               value: []
             },
-            action: {
-              type: Boolean,
-              value: false
-            }
           }
         }
       }
 
-      start(action) {
-        this.set("action", action);
+      start(infos) {
+        this.set("originals", infos);
+        this.set("infos", infos);
       }
 
       end() {
-        this.set("action", null);
-        return this.infos;
+        let infos = this.infos;
+        this.set("infos", []);
+        this.set("originals", null);
+        return infos;
       }
 
       _updateGroupOfShapes(infos) {
@@ -85,7 +86,9 @@
 
       scaleDirection(xMove, yMove, percentX, percentY, direction) {
         this.set("infos", this.originals.map(function(info){
-          return info.scaleDirection(percentX, percentY,
+          return info.scaleDirection(
+            percentX,
+            percentY,
             this.box.top - info.y,
             this.box.right - info.x,
             info.y - this.box.bottom,

@@ -61,12 +61,28 @@
                 z-index: -1;
             }
             #boxContent {
+                display: flex;
+                flex-direction: column;
                 opacity: 0;
+            }
+            #boxContent .header {
+                background-color: white;
+            }
+            #boxContent .header > iron-icon {
+                position: absolute;
+                --iron-icon-width: 27px;
+                --iron-icon-height: 27px;
+                margin: 10px 20px;
+            }
+            .header > h3 {
+                margin: 10px 60px;
+                font-size: 18px;
+                font-weight: 500;
             }
             #closeButton {
                 position: absolute;
-                top: 0;
-                right: 0;
+                top: 4px;
+                right: 6px;
                 z-index: 10;
             }
         </style>
@@ -78,7 +94,11 @@
         <paper-material id="outerBox" elevation=0 expanded$="[[active]]">
             <paper-material id="shadyCircle" expanded$="[[active]]"></paper-material>
             <div id="boxContent">
-                <paper-icon-button id="closeButton" icon="clear" on-tap="_disActive"></paper-icon-button>
+                <div class="header">
+                    <iron-icon icon="[[icon]]"></iron-icon>
+                    <h3>[[menu]]</h3>
+                    <paper-icon-button id="closeButton" icon="clear" on-tap="_disActive"></paper-icon-button>
+                </div>
                 <slot></slot>
             </div>
         </paper-material>
@@ -99,6 +119,7 @@
                             reflectToAttribute: true,
                             observer: "_applyState"
                         },
+                        menu: String,
                         icon: String,
                         revealed: {
                             type: Boolean,
@@ -165,9 +186,9 @@
                     fill: "forwards",
                     easing: "linear"
                 });
-                this.contentShow = content.animate({opacity: [0,1], transform: ["translateY(-6px)", "translateY(0)"]}, {
-                    delay: dur/2,
-                    duration: dur,
+                this.contentShow = content.animate({opacity: [0,1], transform: ["translateX(-2px)", "translateX(0)"]}, {
+                    delay: dur/3*2,
+                    duration: dur/3,
                     fill: "forwards",
                     easing: "ease-out"
                 });

@@ -24,8 +24,7 @@
     <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-dbltap="_newShape" on-singletap="_deselectAll">
       <droppad-selector id="dropSelector">
         <template is="dom-repeat" items="[[drops]]">
-          <drop-shape id="drop[[item.number]]" info="[[item]]" data-select-value="[[item.number]]"
-                      data-selectable></drop-shape>
+          <drop-shape id="drop[[item.number]]" info="[[item]]" data-selectable></drop-shape>
         </template>
       </droppad-selector>
       <droppad-item-marker id="square" p2p="[[p2p]]"
@@ -48,15 +47,7 @@
         return {
           properties: {
             drops: Array,
-            selectedDrops: {
-              type: Array,
-              notify: true
-            },
-            heldKeys: Array,
-            preview: {
-              type: Array,
-              observer: "showPreview"
-            }
+            heldKeys: Array
           }
         }
       }
@@ -162,9 +153,9 @@
           this.replaceChanges(this.getSelectedInfos().map(info => info.zDown()));
       }
 
-      showPreview(preview) {
-        if (preview)
-          this.$.historyPreview.start(preview);
+      timeTravel(historicState) {
+        if (historicState)
+          this.$.historyPreview.start(historicState);
         else
           this.$.historyPreview.end();
       }

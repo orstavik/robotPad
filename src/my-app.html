@@ -156,7 +156,7 @@
     <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower>
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
-    <!--<app-ui app-name="[[sketchName]]"></app-ui>-->
+    <app-ui app-name="[[sketchName]]"></app-ui>
 
     <iron-selector attr-for-selected="select" multi>
       <tab-wrapper title="JSON" select="1">
@@ -171,8 +171,7 @@
         <json-saver input="[[letters]]" on-sketchload="loadSketch" json-name="{{sketchName}}"></json-saver>
       </tab-wrapper>
       <tab-wrapper title="History" select="4">
-        <droppad-history id="history" on-new-state="_newState" preview="{{preview}}"></droppad-history>
-        <!--History: <input type="range" min="0" max="10000" value="0" id="h" on-input="timeTravel"/> <br>-->
+        <droppad-history id="history" on-new-state="_newState" on-timetravel="_timetravel"></droppad-history>
       </tab-wrapper>
     </iron-selector>
 
@@ -197,8 +196,7 @@
               observer: "colorScaleChanged"
             },
             heldKeys: Array,
-            sketchName: String,
-            preview: Object
+            sketchName: String
           }
         }
       }
@@ -221,6 +219,10 @@
 
       _changeShapes(e){
         this.$.history.update(e.detail);
+      }
+
+      _timetravel(e){
+        this.$.shapeSelector.timeTravel(e.detail);
       }
 
       loadSketch(e) {

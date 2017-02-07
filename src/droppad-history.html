@@ -124,37 +124,23 @@
         this.notifyPath("history");
       }
 
+      _hoverTime(e) {
+        let historicState = this.history.getState(Number(e.target.dataset.num));
+//        this.set("preview", historicState);
+        this.dispatchEvent(new CustomEvent("timetravel", {detail: historicState}));
+      }
+      _hoverTimeOff(e) {
+//        this.set("preview", null);
+        this.dispatchEvent(new CustomEvent("timetravel", {detail: null}));
+      }
 //
 //      connectedCallback() {
 //        this.addEventListener("wheel", this._scroll.bind(this));
-//        this.$.scrollbar.addEventListener("pointerover", this._hover.bind(this));
-//        this.pointerout = this._unHover.bind(this);
-//      }
-//
-      _hoverTime(e) {
-//        debugger;
-        this.set("preview", this.history.getState(Number(e.target.dataset.num)));
-//        this.dispatchEvent(new CustomEvent("timetravel", {detail: this.history.getState(Number(e.target.id.substr(5)))}));
-      }
-      _hoverTimeOff(e) {
-        this.set("preview", null);
-//        this.dispatchEvent(new CustomEvent("timetravel", {detail: this.history.getState(Number(e.target.id.substr(5)))}));
-      }
-//
-//      _unHover(e) {
-//        this.removeEventListener("pointerout", this.pointerout);
-//        this.releasePointerCapture(e.pointerId);
-//        DroppadHistory._cancelPropDefault(e);
-//        this.notifyPath("history.hover");
+//        this.$.scrollbar.addEventListener("wheel", this._scroll.bind(this));
 //      }
 //
 //      _scroll(e) {
 //        //todo translate the top of the scrollbar?
-//      }
-//
-//      static _cancelPropDefault(e) {
-//        e.stopPropagation();
-//        e.preventDefault();
 //      }
     }
     customElements.define(DroppadHistory.is, DroppadHistory);

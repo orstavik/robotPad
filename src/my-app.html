@@ -168,7 +168,7 @@
         <color-palette id="palette" css-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
       </tab-wrapper>
       <tab-wrapper title="Save/Load" select="3">
-        <json-saver input="[[letters]]" on-sketchload="loadSketch" json-name="{{sketchName}}"></json-saver>
+        <json-saver id="jsonSaver" input="[[letters]]" on-sketchload="loadSketch" json-name="{{sketchName}}"></json-saver>
       </tab-wrapper>
       <tab-wrapper title="History" select="4">
         <droppad-history id="history" on-new-state="_newState" on-timetravel="_timetravel"></droppad-history>
@@ -207,6 +207,7 @@
 
       _newState(e){
         this.set("letters", e.detail);
+        this.$.jsonSaver.saveNewState(e.detail);
       }
 
       _addShapes(e){
@@ -266,4 +267,3 @@
     customElements.define(MyApp.is, MyApp);
   </script>
 </dom-module>
-

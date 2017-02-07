@@ -1,4 +1,5 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 
 <dom-module id="json-saver">
   <template>
@@ -39,6 +40,13 @@
       }
     </style>
 
+    <firebase-query
+        id="firequery"
+        app-name="droppad"
+        path="/ivar"
+        data="{{data}}">
+    </firebase-query>
+
     <firebase-document app-name="droppad"
                        id="firedoc"
                        path="[[jsonPath]]"
@@ -52,10 +60,10 @@
     </firebase-document>
 
     <div id="saveWrapper">
-      <input id="jsonName" value="{{jsonName::input}}"></input>
+      <input id="jsonName" value="{{jsonName::input}}"/>
       <button on-click="saveToFire">Save Sketch</button>
     </div>
-
+[[data]]
     <div class="jsonWrapper">
       <template is="dom-repeat" items="[[_toArray(jsonCopy)]]" id="repeater">
         <div class="monsterWrapper">
@@ -122,6 +130,55 @@
           });
         }
         return res;
+      }
+
+      //todo when we log in, we need to get the list of all the sketches.. But we are not just getting it, we are listening for it.
+      //todo so, this we can use a document for, and then capture the events that says that the data has changed
+
+      //todo the document of the sketchlist is:
+      //todo users/uid/sketches
+
+      //todo then I need a query for the sketches that I can do a .on() call on that will get the data from that list and put that into the app
+
+      //retrieve the latest state from the db
+      getLastStoredState(sketchID){
+        this.$.firequery.child(sketchID).limit(1).once("child_added", function (snapshot) {
+          this.dispatchEvent(new CustomEvent("latest-stored-event", {detail: snapshot.val()}));
+        }.bind(this));
+      }
+
+      saveSketchState(sketchID, sketch){
+        const newSketchState = this.$.firequery.child("/sketches/"+ sketchID).push(sketch);
+      }
+
+      saveNewSketch(sketchState, name){
+        const newSketch = this.$.firequery.child("/sketches").push(sketch);
+        const newSketchID = newSketch.key;
+        let newSketchInfo = {id: newSketchID, created : firebase.database.ServerValue.TIMESTAMP, name: "name"};
+        const newSketchRef = this.$.firequery.child("/users/[[uid]]/sketches").push(newSketchInfo);
+        //todo somehow make sure that if the process succeeds, then its alerted that all is good, if not, it is not.
+        return true;//todo or dispatchEvent(new CustomEvent("success" or "failure" here?
+      }
+
+      renameSketch(sketchID, newName){
+        let res = this.$.firequery.child("/users/[[uid]]/sketches").setStoredValue(sketchID, newName);
+      }
+
+      getUserData(){
+        //get the users sketch list
+        //if there is no registered user, create a new user element with a sketch list. and then return that list
+      }
+
+      saveNewState(newState){
+        console.log("save this state here: " + newState);
+        this.$.firequery.setStoredValue("testing", "hello wurld");
+        let promise = this.$.firequery.ref.once("value");
+        promise.then(function(snap){
+          let xc = snap.val();
+          console.log(xc);
+        });
+        this.$.firequery.ref.push({time: firebase.database.ServerValue.TIMESTAMP, state: newState});
+        //todo we probably need to make a new history object from here. It might be better to do so in the history object?
       }
 
       _parseToArray(str) {

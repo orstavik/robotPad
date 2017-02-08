@@ -5,6 +5,7 @@
 <link rel="import" href="../bower_components/iron-icons/image-icons.html">
 <link rel="import" href="app-login.html">
 <link rel="import" href="app-ui-namelabel.html">
+<link rel="import" href="app-ui-sketchlist.html">
 <link rel="import" href="tools-button.html">
 <link rel="import" href="grow-button.html">
 <link rel="import" href="grow-child-button.html">
@@ -59,9 +60,10 @@
             }
         </style>
 
-        <app-ui-namelabel id="namelabel" uid="[[_user.uid]]" on-new-sketch="_madeNewSketch"></app-ui-namelabel>
+      <app-ui-namelabel id="namelabel" uid="[[_user.uid]]" on-new-sketch="_madeNewSketch"></app-ui-namelabel>
+      <app-ui-sketchlist id="sketchlist" uid="[[_user.uid]]"></app-ui-sketchlist>
 
-        <tools-button icon="icons:build" active="{{toolsOpen}}">
+      <tools-button icon="icons:build" active="{{toolsOpen}}">
             <grow-child-button menu="Json" child-button icon="icons:settings-ethernet">
                 <json-wrapper petals="[[petals]]"></json-wrapper>
             </grow-child-button>
@@ -91,9 +93,6 @@
 
         <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
             <app-login on-sign-in="_signIn" on-sign-out="_signOut" on-changed-user-data="_changedUserData"></app-login>
-            <template is="dom-repeat" items="[[_sketchList]]">
-              <div>[[item.value.name]]: [[item.value.created]]</div>
-            </template>
         </grow-button>
 
         <!--<grow-button id="help" icon="help-outline">
@@ -135,8 +134,9 @@
             let db = firebase.app("droppad").database();
             let path = "/users/" + this._user.uid + "/sketchlist/";
             this.dbListener = db.ref(path).on("value", function(snap){
-              this.set("_sketchList", Object.keys(snap.val()).map(function (key) {
-                return {key: key, value: snap.val()[key]};
+              let val = snap.val();
+              this.set("_sketchList", Object.keys(val).map(function (key) {
+                return {key: key, value: val[key]};
               }));
             }.bind(this));
           }

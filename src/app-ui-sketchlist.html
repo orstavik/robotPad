@@ -1,0 +1,51 @@
+<dom-module id="app-ui-sketchlist">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: fixed;
+        left: 50%;
+        bottom: 0;
+      }
+    </style>
+    <template is="dom-repeat" items="[[sketchList]]">
+      <div style="font-size: 5px">[[item.value.name]]: [[item.value.created]]</div>
+    </template>
+  </template>
+  <script>
+
+    class AppUiSketchlist extends Polymer.Element {
+      static get is() {
+        return "app-ui-sketchlist";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            uid: {
+              type: String,
+              observer: "_newUid"
+            },
+            sketchList: Array
+          }
+        }
+      }
+
+      _newUid(uid) {
+        if (!uid){
+          this.set("sketchList", []);
+          return;
+        }
+        let db = firebase.app("droppad").database();
+        let path = "/users/" + uid + "/sketchlist/";
+        this.dbListener = db.ref(path).on("value", function(snap){
+          let val = snap.val();
+          this.set("sketchList", Object.keys(val).map(function (key) {
+            return {key: key, value: val[key]};
+          }));
+        }.bind(this));
+      }
+    }
+    customElements.define(AppUiSketchlist.is, AppUiSketchlist);
+  </script>
+</dom-module>

@@ -7,7 +7,7 @@
 <link rel="import" href="tools-button.html">
 <link rel="import" href="grow-button.html">
 <link rel="import" href="grow-child-button.html">
-<!--<link rel="import" href="grow-button.html">-->
+<link rel="import" href="json-wrapper.html">
 
 <dom-module id="app-ui">
     <template>
@@ -15,24 +15,24 @@
             #appName {
                 display: flex;
                 position: absolute;
-                top: 16px;
-                left: 50vw;
-                transform: translate(-50%, 0px);
-                background-color: white;
+                bottom: 16px;
+                right: 16px;
+                background-color: rgba(255,255,255,0.5);
                 border-radius: 3px;
                 opacity: 1;
                 pointer-events: none;
+                transform: translateY(0);
                 transition: opacity 0.5s, transform 0.4s;
             }
             
             #appName[hidden] {
-                transform: translate(-50%, -3px);
+                transform: translateY(-3px);
                 opacity: 0;
             }
             
             #appName span {
                 margin: 4px 12px;
-                font-weight: bold;
+                font-weight: 400;
             }
             
             tools-button {
@@ -74,7 +74,6 @@
                 left: 6px;
                 z-index: 100;
             }
-            
             #testingOne {
                 box-sizing: border-box;
                 width: 300px;
@@ -87,13 +86,10 @@
         </paper-material>
 
         <tools-button icon="icons:build" active="{{toolsOpen}}">
-            <grow-child-button id="jsonButton" child-button icon="icons:settings-ethernet">
-                <div id="testingOne">
-                    0Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                </div>
+            <grow-child-button menu="Json" child-button icon="icons:settings-ethernet">
+                <json-wrapper petals="[[petals]]"></json-wrapper>
             </grow-child-button>
-            <grow-child-button id="paletteButton" child-button icon="image:color-lens">
+            <grow-child-button menu="Palette" child-button icon="image:color-lens">
                 <div id="testingOne">
                     1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
@@ -102,7 +98,7 @@
                     laborum.
                 </div>
             </grow-child-button>
-            <grow-child-button id="historyButton" child-button icon="icons:restore">
+            <grow-child-button menu="History" child-button icon="icons:restore">
                 <div id="testingOne">
                     2Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
@@ -121,14 +117,14 @@
             <app-login signed="{{signed}}"></app-login>
         </grow-button>
 
-        <grow-button id="help" icon="help-outline">
+        <!--<grow-button id="help" icon="help-outline">
             <div id="testingOne">
                 1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
                 Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
                 sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
             </div>
-        </grow-button>
+        </grow-button>-->
 
     </template>
     <script>
@@ -141,6 +137,7 @@
                 return {
                     properties: {
                         appName: String,
+                        petals: Array,
                         toolsOpen: Boolean,
                         accountOpen: Boolean,
                         showName: {

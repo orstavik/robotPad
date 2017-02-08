@@ -16,6 +16,10 @@ class ShapeInfoObject {
     return Object.assign(new ShapeInfoObject(0, 0), this);
   }
 
+  static from(pojo) {
+    return Object.assign(new ShapeInfoObject(0, 0), pojo);
+  }
+
   makeCopy() {
     const c = this.clone();
     c.number = ShapeInfoObject.generateId();

@@ -7,9 +7,12 @@
         left: 50%;
         bottom: 0;
       }
+      div {
+        font-size: 10px;
+      }
     </style>
     <template is="dom-repeat" items="[[sketchList]]">
-      <div style="font-size: 5px">[[item.value.name]]: [[item.value.created]]</div>
+      <div on-click="_loadSketch" data-key$="[[item.key]]">[[item.value.name]]: [[item.value.created]]</div>
     </template>
   </template>
   <script>
@@ -31,19 +34,32 @@
         }
       }
 
+      connectedCallback(){
+        this.updateSketchlistFunc = function(snap){
+          this.set("sketchList", AppUiSketchlist.firebaseObjectToArray(snap.val()));
+        }.bind(this);
+      }
+
       _newUid(uid) {
+        if (this.dbListener){
+          this.dbListener.off("value", this.updateSketchlistFunc);
+          this.dbListener = null;
+        }
         if (!uid){
           this.set("sketchList", []);
           return;
         }
-        let db = firebase.app("droppad").database();
         let path = "/users/" + uid + "/sketchlist/";
-        this.dbListener = db.ref(path).on("value", function(snap){
-          let val = snap.val();
-          this.set("sketchList", Object.keys(val).map(function (key) {
-            return {key: key, value: val[key]};
-          }));
-        }.bind(this));
+        this.dbListener = firebase.app("droppad").database().ref(path);
+        this.dbListener.on("value", this.updateSketchlistFunc);
+      }
+
+      _loadSketch(e){
+        this.dispatchEvent(new CustomEvent("load-sketch", {composed: true, bubbles: true, detail: e.target.dataset.key}));
+      }
+
+      static firebaseObjectToArray(val) {
+        return Object.keys(val).map(function (key) { return {key: key, value: val[key]}; });
       }
     }
     customElements.define(AppUiSketchlist.is, AppUiSketchlist);

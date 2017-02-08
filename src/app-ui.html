@@ -60,8 +60,9 @@
             }
         </style>
 
-      <app-ui-namelabel id="namelabel" uid="[[_user.uid]]" on-new-sketch="_madeNewSketch"></app-ui-namelabel>
-      <app-ui-sketchlist id="sketchlist" uid="[[_user.uid]]"></app-ui-sketchlist>
+      <!--on-new-sketch="_madeNewSketch"-->
+      <app-ui-namelabel id="namelabel" uid="[[_user.uid]]"></app-ui-namelabel>
+      <app-ui-sketchlist id="sketchlist" uid="[[_user.uid]]" on-load-sketch="_loadSketch"></app-ui-sketchlist>
 
       <tools-button icon="icons:build" active="{{toolsOpen}}">
             <grow-child-button menu="Json" child-button icon="icons:settings-ethernet">
@@ -154,12 +155,8 @@
             this.set("_sketchList", sketchList);
           }
 
-          _madeNewSketch(e){
-            //todo here we are notified about a new sketch being made
-          }
-
-          _loadSketch(newSketchID){
-            this.$.namelabel.loadSketch(newSketchID);
+          _loadSketch(e){
+            this.$.namelabel.loadSketch(e.detail);
           }
         }
     customElements.define(AppUi.is, AppUi);

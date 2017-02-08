@@ -98,6 +98,14 @@
         }
       }
 
+      load(state){
+        debugger;
+        this.history = new StateMachine();
+        state = state.map(pojo => ShapeInfoObject.from(pojo));
+        this.dispatchEvent(new CustomEvent("new-state", {detail: this.history.set("set", null, state)}));
+        this.notifyPath("history");
+      }
+
       setState(newState) {
         if (!newState)
           newState = [];

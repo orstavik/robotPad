@@ -29,7 +29,7 @@
         <paper-material id="paper" elevation=1>
           <template is="dom-if" if="[[_hasSketchObject]]">
 <!--todo set the color red when the name has not been persisted, and to green when the data is stored in the db-->
-            <div id="sketchName" contenteditable="true" on-input="_changeSketchName">[[sketchObject.name]]</div>
+            <div id="sketchName" contenteditable="true" on-pointerdown="_stopProp" on-input="_changeSketchName">[[sketchObject.name]]</div>
           </template>
           <template is="dom-if" if="[[!_hasSketchObject]]">
             <div on-click="_newSketch">click to make a new sketch</div>
@@ -116,6 +116,10 @@
       static generateSketchName() {
         let date = new Date();
         return "Sketch_" + date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
+      }
+
+      _stopProp(e){
+        e.stopPropagation();
       }
     }
     customElements.define(AppUiNamelabel.is, AppUiNamelabel);

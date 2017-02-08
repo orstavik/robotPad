@@ -2,108 +2,145 @@
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 
 <dom-module id="app-login">
-    <template>
-        <style>
-            :host {
-                display: flex;
-                box-sizing: border-box;
-                width: 200px;
-                padding: 25px;
-                flex-direction: column;
-                align-items: center;
-            }
-            #accountImage {
-                display: flex;
-                box-sizing: border-box;
-                align-items: center;
-                justify-content: center;
-                width: 100px;
-                height: 100px;
-                margin-bottom: 10px;
-            }
-            #accountImage img {
-                width: 100%;
-                height: 100%;
-                border-radius: 50%;
-                border: 1px solid #cccccc;
-            }
-            .accountName {
-                font-size: 20px;
-                font-weight: 300;
-                margin-bottom: 20px;
-            }
-            *[hidden] {
-                visibility: hidden;
-            }
-            paper-button {
-                font-size: 12px;
-            }
-            paper-button#signIn {
-                background-color: var(--paper-indigo-a200);
-                color: white;
-            }
-        </style>
+  <template>
+    <style>
+      :host {
+        display: flex;
+        box-sizing: border-box;
+        width: 200px;
+        padding: 25px;
+        flex-direction: column;
+        align-items: center;
+      }
 
-        <firebase-auth
-            id="auth"
-            app-name="droppad"
-            user="{{user}}"
-            provider="google">
-        </firebase-auth>
+      #accountImage {
+        display: flex;
+        box-sizing: border-box;
+        align-items: center;
+        justify-content: center;
+        width: 100px;
+        height: 100px;
+        margin-bottom: 10px;
+      }
 
-        <div id="accountImage">
-            <img src="[[_setUserImage(signed)]]" alt="anonymous">
-        </div>
+      #accountImage img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 1px solid #cccccc;
+      }
 
-        <div class="accountName">[[_setUserName(signed)]]</div>
-        
-        <paper-button id="signIn" raised on-click="_signIn" hidden$="[[signed]]">Sign in with Google</paper-button>
-        <paper-button raised on-click="_signOut" hidden$="[[!signed]]">Sign out</paper-button>
-    
-    </template>
-    <script>
-        class AppLogin extends Polymer.Element {
-            static get is() {
-                return "app-login";
+      .accountName {
+        font-size: 20px;
+        font-weight: 300;
+        margin-bottom: 20px;
+      }
+
+      *[hidden] {
+        visibility: hidden;
+      }
+
+      paper-button {
+        font-size: 12px;
+      }
+
+      paper-button#signIn {
+        background-color: var(--paper-indigo-a200);
+        color: white;
+      }
+    </style>
+
+    <firebase-auth id="auth" app-name="droppad" user="{{user}}" provider="google"></firebase-auth>
+    <firebase-query id="query" app-name="droppad"></firebase-query>
+
+
+    <div id="accountImage">
+      <img src="[[_userImage]]" alt="anonymous">
+    </div>
+
+    <div class="accountName">[[_userName]]</div>
+
+    <paper-button id="signIn" raised on-click="_signIn" hidden$="[[_toBool(user)]]">Sign in with Google</paper-button>
+    <paper-button raised on-click="_signOut" hidden$="[[!user]]">Sign out</paper-button>
+
+  </template>
+  <script>
+    class AppLogin extends Polymer.Element {
+      static get is() {
+        return "app-login";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            user: {
+              type: Object,
+              observer: "_signInOrOut"
+            },
+            _userImage: {
+              type: String,
+              computed: "_setUserImage(user)"
+            },
+            _userName: {
+              type: String,
+              computed: "_setUserName(user)"
+            },
+            _userData: {
+              type: String,
+              observer: "_newUserData"
             }
-
-            static get config() {
-                return {
-                    properties: {
-                        user: Object,
-                        signed: {
-                            type: Boolean,
-                            computed: "_checkSigned(user)",
-                            reflectToAttribute: true,
-                            notify: true
-                        }
-                    }
-                }
-            }
-
-            _signIn() {
-                return this.$.auth.signInWithPopup();
-            }
-
-            _signOut() {
-                return this.$.auth.signOut();
-            }
-
-            _checkSigned(user) {
-                if (user) return true
-                else return false;
-            }
-
-            _setUserName(signed) {
-                if (signed) return this.user.displayName
-                else return "Anonymous";
-            }
-
-            _setUserImage(signed) {
-                if (signed) return this.user.photoURL
-                else return "./images/anonymous.png";
-            }
+          }
         }
-        customElements.define(AppLogin.is, AppLogin);
-    </script>
+      }
+
+      _signIn() {
+        return this.$.auth.signInWithPopup();
+      }
+
+      _signOut() {
+        return this.$.auth.signOut();
+      }
+
+      _signInOrOut(user) {
+        if (!user) {
+          this.dispatchEvent(new CustomEvent("sign-out", {composed: true, bubbles: true}));
+          this.set("_userData", null);
+          return;
+        }
+
+        this.dispatchEvent(new CustomEvent("sign-in", {composed: true, bubbles: true, detail: user}));
+        const userDataInDB = firebase.app("droppad").database().ref("/users/" + user.uid);
+        userDataInDB.once("value",
+          function (success) {
+            if (success.exists()) {
+              this.set("_userData", success.val());
+            } else {
+              let startValue = {registered: firebase.database.ServerValue.TIMESTAMP};
+              userDataInDB.set(startValue);   //todo no verification that set succeeded or erred
+              this.set("_userData", startValue);
+            }
+          }.bind(this), function (error) {
+            console.log("An error occured connecting to DB");
+          });
+
+      }
+
+      _newUserData(data) {
+        this.dispatchEvent(new CustomEvent("changed-user-data", {composed: true, bubbles: true, detail: data}));
+      }
+
+      _setUserName(user) {
+        return user ? user.displayName : "Anonymous";
+      }
+
+      _setUserImage(user) {
+        return user ? user.photoURL : "./images/anonymous.png";
+      }
+
+      _toBool(obj) {
+        return !!obj;
+      }
+    }
+    customElements.define(AppLogin.is, AppLogin);
+  </script>
 </dom-module>

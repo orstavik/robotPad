@@ -4,6 +4,7 @@
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icons/image-icons.html">
 <link rel="import" href="app-login.html">
+<link rel="import" href="app-ui-namelabel.html">
 <link rel="import" href="tools-button.html">
 <link rel="import" href="grow-button.html">
 <link rel="import" href="grow-child-button.html">
@@ -12,29 +13,6 @@
 <dom-module id="app-ui">
     <template>
         <style>
-            #appName {
-                display: flex;
-                position: absolute;
-                bottom: 16px;
-                right: 16px;
-                background-color: rgba(255,255,255,0.5);
-                border-radius: 3px;
-                opacity: 1;
-                pointer-events: none;
-                transform: translateY(0);
-                transition: opacity 0.5s, transform 0.4s;
-            }
-            
-            #appName[hidden] {
-                transform: translateY(-3px);
-                opacity: 0;
-            }
-            
-            #appName span {
-                margin: 4px 12px;
-                font-weight: 400;
-            }
-            
             tools-button {
                 --mother-button-size: 50px;
                 --mother-button-color: var(--paper-light-blue-200);
@@ -44,13 +22,13 @@
                 left: 6px;
                 z-index: 100;
             }
-            
+
             grow-child-button {
                 --grow-child-button-size: 36px;
                 --grow-child-button-color: white;
                 --grow-child-button-icon-color: black;
             }
-            
+
             grow-button#account {
                 --grow-button-size: 50px;
                 --grow-button-color: white;
@@ -60,11 +38,11 @@
                 right: 6px;
                 z-index: 100;
             }
-            
+
             grow-button#account[signed] {
                 --grow-button-color: var(--paper-light-blue-200);
             }
-            
+
             grow-button#help {
                 --grow-button-size: 36px;
                 --grow-button-color: white;
@@ -81,9 +59,7 @@
             }
         </style>
 
-        <paper-material id="appName" elevation=1 hidden="[[!showName]]">
-            <span>Sketch Name</span>
-        </paper-material>
+        <app-ui-namelabel id="namelabel" uid="[[_user.uid]]" on-new-sketch="_madeNewSketch"></app-ui-namelabel>
 
         <tools-button icon="icons:build" active="{{toolsOpen}}">
             <grow-child-button menu="Json" child-button icon="icons:settings-ethernet">
@@ -114,7 +90,10 @@
         </tools-button>
 
         <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
-            <app-login signed="{{signed}}"></app-login>
+            <app-login on-sign-in="_signIn" on-sign-out="_signOut" on-changed-user-data="_changedUserData"></app-login>
+            <template is="dom-repeat" items="[[_sketchList]]">
+              <div>[[item.value.name]]: [[item.value.created]]</div>
+            </template>
         </grow-button>
 
         <!--<grow-button id="help" icon="help-outline">
@@ -140,17 +119,48 @@
                         petals: Array,
                         toolsOpen: Boolean,
                         accountOpen: Boolean,
-                        showName: {
-                            type: Boolean,
-                            computed: "_showName(toolsOpen, accountOpen)"
-                        }
+                      _sketchList: Array,
+                      _sketchListObject: {
+                          type: Object,
+                        observer: "debug"
+                      }
                     }
                 }
             }
 
-            _showName(tools, account) {
-                return tools || account;
-            }
+          _signIn(e){
+            this.set("signed", true);
+            this.set("_user", e.detail);
+
+            let db = firebase.app("droppad").database();
+            let path = "/users/" + this._user.uid + "/sketchlist/";
+            this.dbListener = db.ref(path).on("value", function(snap){
+              this.set("_sketchList", Object.keys(snap.val()).map(function (key) {
+                return {key: key, value: snap.val()[key]};
+              }));
+            }.bind(this));
+          }
+
+          _signOut(e){
+            this.set("signed", false);
+            this.set("_user", null);
+          }
+
+          _changedUserData(e){
+            const newData = e.detail;
+            let sketchList = [];
+            if (newData && newData.sketchlist && newData.sketchlist.length != 0)
+              sketchList = Object.keys(newData.sketchlist).map(function(key) { return {key: key, value: newData.sketchlist[key]};});
+            this.set("_sketchList", sketchList);
+          }
+
+          _madeNewSketch(e){
+            //todo here we are notified about a new sketch being made
+          }
+
+          _loadSketch(newSketchID){
+            this.$.namelabel.loadSketch(newSketchID);
+          }
         }
     customElements.define(AppUi.is, AppUi);
     </script>

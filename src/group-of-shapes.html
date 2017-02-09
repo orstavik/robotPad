@@ -85,17 +85,7 @@
       }
 
       scaleDirection(percentX, percentY, direction) {
-        this.set("infos", this.originals.map(function(info){
-          return info.scaleDirection(
-            percentX,
-            percentY,
-            this.box.top - info.y,
-            this.box.right - info.x,
-            info.y - this.box.bottom,
-            info.x - this.box.left,
-            direction
-          );
-        }.bind(this)));
+        this.set("infos", this.originals.map(info => info.scaleInBox(percentX, percentY, this.box, direction)));
       }
     }
     customElements.define(GroupOfShapes.is, GroupOfShapes);

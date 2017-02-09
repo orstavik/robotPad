@@ -243,7 +243,6 @@
         this.set("sketchid", e.detail);
         let path = "/sketches/" + this.sketchid;
         let dbPos = firebase.app("droppad").database().ref(path);
-        debugger;
         dbPos.limitToLast(1).once("child_added", function(snap){
           this.$.history.load(snap.val().state);
         }.bind(this));

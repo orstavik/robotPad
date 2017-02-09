@@ -35,9 +35,7 @@
       }
 
       connectedCallback(){
-        this.updateSketchlistFunc = function(snap){
-          this.set("sketchList", AppUiSketchlist.firebaseObjectToArray(snap.val()));
-        }.bind(this);
+        this.updateSketchlistFunc = this.updateSketchList.bind(this);
       }
 
       _newUid(uid) {
@@ -56,6 +54,11 @@
 
       _loadSketch(e){
         this.dispatchEvent(new CustomEvent("load-sketch", {composed: true, bubbles: true, detail: e.target.dataset.key}));
+      }
+
+      updateSketchList(snap){
+        let res = AppUiSketchlist.firebaseObjectToArray(snap.val());
+        this.set("sketchList", res);
       }
 
       static firebaseObjectToArray(val) {

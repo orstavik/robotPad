@@ -335,19 +335,19 @@
         const movY = this.p2p.addZoom(e.clientY - this.start.y);
         let scaleX = movX / this.groupOfShapes.width;
         let scaleY = movY / this.groupOfShapes.height;
-        if (this.direction.indexOf("n") >= 0)
-          scaleY = -scaleY;
-        if (this.direction.indexOf("w") >= 0)
-          scaleX = -scaleX;
-        if (this.direction.indexOf("n") < 0 && this.direction.indexOf("s") < 0)
-          scaleY = 0;
-        if (this.direction.indexOf("e") < 0 && this.direction.indexOf("w") < 0)
-          scaleX = 0;
         const angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
         return {xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle, direction: this.direction, action: this.action};
       }
 
       doSnapping(ms) {
+        if (this.direction.indexOf("n") >= 0)
+          ms.percentY= -ms.percentY;
+        if (this.direction.indexOf("w") >= 0)
+          ms.percentX = -ms.percentX;
+        if (this.direction.indexOf("n") < 0 && this.direction.indexOf("s") < 0)
+          ms.percentY= 0;
+        if (this.direction.indexOf("e") < 0 && this.direction.indexOf("w") < 0)
+          ms.percentX = 0;
         if (Math.abs(ms.xMove) < 6 && Math.abs(ms.yMove) < 6)
           ms.xMove = ms.yMove = 0;
         if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"]) {

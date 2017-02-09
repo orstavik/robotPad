@@ -81,7 +81,7 @@
         this.doSnapping(ms);
         switch (this.action.method) {
           case "scale":
-            return this.$.ghost.scaleDirection(ms.xMove, ms.yMove, ms.percentX, ms.percentY, this.action.direction);
+            return this.$.ghost.scaleDirection(ms.percentX, ms.percentY, this.action.direction);
           case "rotate":
             return this.$.ghost.rotate(ms.angle);
           case "move":

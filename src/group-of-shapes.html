@@ -84,7 +84,7 @@
           info.rotatePositionFromExternalPoint(center, angle)));
       }
 
-      scaleDirection(xMove, yMove, percentX, percentY, direction) {
+      scaleDirection(percentX, percentY, direction) {
         this.set("infos", this.originals.map(function(info){
           return info.scaleDirection(
             percentX,

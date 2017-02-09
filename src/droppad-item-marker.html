@@ -333,8 +333,8 @@
       calculateTrackMovements(e) {
         const movX = this.p2p.addZoom(e.clientX - this.start.x);
         const movY = this.p2p.addZoom(e.clientY - this.start.y);
-        let scaleX = movX / this.groupOfShapes.width;
-        let scaleY = movY / this.groupOfShapes.height;
+        const scaleX = movX / this.groupOfShapes.width;
+        const scaleY = movY / this.groupOfShapes.height;
         const angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
         return {xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle, direction: this.direction, action: this.action};
       }

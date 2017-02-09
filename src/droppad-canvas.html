@@ -47,14 +47,14 @@
         return {
           properties: {
             drops: Array,
-            heldKeys: Array
+            heldKeys: Array,
+            _pointerMove: Event
           }
         }
       }
 
       connectedCallback() {
-        this._copyMoverListener = this._copyMover.bind(this);
-        this._copyPlacerListener = this._copyPlacer.bind(this);
+        this.addEventListener("pointermove", function(e){this._pointerMove = e;}.bind(this)); //this.set("_pointerMove", e); no need here, since it is not in the template or being observed
       }
 
       _startMovingMarker(e) {
@@ -104,44 +104,30 @@
         this.$.square.show();
       }
 
-      _copyMover(e) {
-        DroppadItemMarker._cancelPropDefault(e);
-        let copyCenter = this.$.square.getCenter();
-        let xMove = this.p2p.addZoom(e.clientX - copyCenter.x);
-        let yMove = this.p2p.addZoom(e.clientY - copyCenter.y);
-        this.$.ghostCopy.move(xMove, yMove);
-      }
-
-      _copyPlacer(e) {
-        DroppadItemMarker._cancelPropDefault(e);
-        this.removeEventListener("pointermove", this._copyMoverListener);
-        this.removeEventListener("pointerdown", this._copyPlacerListener);
-        this.$.dropSelector.deselectAll();
-        this.dispatchEvent(new CustomEvent("addshapes", {detail: this.$.ghostCopy.end()}));
-        this.copyData = null;
-      }
-
       copy() {
         this.copyData = this.getSelectedInfos().map(info => info.makeCopy());
+        this.copyCenter = this.$.square.getCenter();
       }
 
       paste() {
         this.$.ghostCopy.start(this.copyData);
-        this.$.canvas.abort();      //remove the listener for the canvas-canvas
-        this.addEventListener("pointermove", this._copyMoverListener);
-        this.addEventListener("pointerdown", this._copyPlacerListener);
+        let xMove = this.p2p.addZoom(this._pointerMove.clientX - this.copyCenter.x);
+        let yMove = this.p2p.addZoom(this._pointerMove.clientY - this.copyCenter.y);
+        this.$.ghostCopy.move(xMove, yMove);
+        this.dispatchEvent(new CustomEvent("addshapes", {detail: this.$.ghostCopy.end()}));
+        //todo here I need to select the new shapes added..
       }
 
       handleKeyPress(e) {
         if (e.code === "Escape")
           this.$.dropSelector.deselectAll(); // also do this.$.square.abort();
-        else if (e.code === "Digit0" && this.heldKeys["ControlLeft"])
+        else if (e.code === "Digit0" && this.holdsCtrl())
           this.$.canvas.reset();
         else if (e.code === "KeyD")
           this._deleteElem();
-        else if (e.code === "KeyC")
+        else if (e.code === "KeyC" && this.holdsCtrl())
           this.copy();
-        else if (e.code === "KeyV")
+        else if (e.code === "KeyV" && this.holdsCtrl())
           this.paste();
         else if (e.code == "KeyM")
           this.replaceChanges(this.getSelectedInfos().map(info => info.mirror()));
@@ -151,6 +137,10 @@
           this.replaceChanges(this.getSelectedInfos().map(info => info.zUp()));
         else if (e.code == "PageDown")
           this.replaceChanges(this.getSelectedInfos().map(info => info.zDown()));
+      }
+
+      holdsCtrl() {
+        return this.heldKeys["ControlLeft"] || this.heldKeys["ControlRight"];
       }
 
       timeTravel(historicState) {

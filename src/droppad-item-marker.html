@@ -332,6 +332,10 @@
           scaleY = -scaleY;
         if (this.direction.indexOf("w") >= 0)
           scaleX = -scaleX;
+        if (this.direction.indexOf("n") < 0 && this.direction.indexOf("s") < 0)
+          scaleY = 0;
+        if (this.direction.indexOf("e") < 0 && this.direction.indexOf("w") < 0)
+          scaleX = 0;
         const angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
         return {xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle, direction: this.direction};
       }

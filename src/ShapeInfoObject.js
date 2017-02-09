@@ -61,25 +61,23 @@ class ShapeInfoObject {
 
   scaleInBox(xPercent, yPercent, box, direction) {
     const c = this.clone();
-    //todo here I need to recalculate the different orientations based on c.angle..
     if (direction.indexOf("s") >= 0) {
       let topDistance = this.y-box.top;
       c.y += topDistance * yPercent;
-      c.h *= (1+yPercent);
     } else if (direction.indexOf("n") >= 0) {
       let bottomDistance = box.bottom-this.y;
       c.y -= bottomDistance * yPercent;
-      c.h *= (1+yPercent);
     }
     if (direction.indexOf("e") >= 0) {
       let leftDistance = this.x - box.left;
       c.x += leftDistance * xPercent;
-      c.w *= (1+xPercent);
     } else if (direction.indexOf("w") >= 0) {
       let rightDistance = box.right - this.x;
       c.x -= rightDistance * xPercent;
-      c.w *= (1+xPercent);
     }
+    //todo here I need to recalculate the different orientations based on c.angle..
+    c.h *= (1+yPercent);
+    c.w *= (1+xPercent);
     return c;
   }
 

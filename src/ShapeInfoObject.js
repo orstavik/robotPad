@@ -59,34 +59,26 @@ class ShapeInfoObject {
     return {x: center.x + newX, y: center.y + newY};  //returns the new position positioned against the underlying map again.
   }
 
-  scaleInBox(percentX, percentY, box, direction) {
-    return this.scaleDirection(
-      percentX,
-      percentY,
-      box.top - this.y,
-      box.right - this.x,
-      this.y - box.bottom,
-      this.x - box.left,
-      direction
-    );
-  }
-
-  scaleDirection(xPercent, yPercent, topDistance, rightDistance, bottomDistance, leftDistance, direction) {
+  scaleInBox(xPercent, yPercent, box, direction) {
     const c = this.clone();
     //todo here I need to recalculate the different orientations based on c.angle..
     if (direction.indexOf("s") >= 0) {
+      let topDistance = box.top - this.y;
       c.y -= topDistance * yPercent;
       c.h *= (1+yPercent);
     }
     if (direction.indexOf("n") >= 0) {
+      let bottomDistance = this.y - box.bottom;
       c.y -= bottomDistance * yPercent;
       c.h *= (1-yPercent);
     }
     if (direction.indexOf("e") >= 0) {
+      let leftDistance = this.x - box.left;
       c.x += leftDistance * xPercent;
       c.w *= (1+xPercent);
     }
     if (direction.indexOf("w") >= 0) {
+      let rightDistance = box.right - this.x;
       c.x += rightDistance * xPercent;
       c.w *= (1-xPercent);
     }

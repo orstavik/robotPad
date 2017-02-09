@@ -289,6 +289,7 @@
         this.groupCenter = DroppadItemMarker.getScreenCenter(this.$.marker);
         this.start = {x: e.clientX, y: e.clientY};
         this.startAngle = Math.atan2(this.start.y - this.groupCenter.y, this.start.x - this.groupCenter.x);
+        this.direction = e.target.id;
         this.dispatchEvent(new CustomEvent("track-start", {detail: DroppadItemMarker.setMoveAction(e)}));
       }
 
@@ -316,19 +317,23 @@
 
       static setMoveAction(e) {
         if (e.target.classList.contains("scale"))
-          return {method: "scale", direction: e.target.id};
+          return "scale";
         if (e.target.id == "rotate")
-          return {method: "rotate", direction: e.target.id};
-        return {method: "move", direction: e.target.id};
+          return "rotate";
+        return "move";
       }
 
       calculateTrackMovements(e) {
         const movX = this.p2p.addZoom(e.clientX - this.start.x);
         const movY = this.p2p.addZoom(e.clientY - this.start.y);
-        const scaleX = movX / this.groupOfShapes.width;
-        const scaleY = movY / this.groupOfShapes.height;
+        let scaleX = movX / this.groupOfShapes.width;
+        let scaleY = movY / this.groupOfShapes.height;
+        if (this.direction.indexOf("n") >= 0)
+          scaleY = -scaleY;
+        if (this.direction.indexOf("w") >= 0)
+          scaleX = -scaleX;
         const angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
-        return {xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle};
+        return {xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle, direction: this.direction};
       }
 
       static getScreenCenter(elem) {

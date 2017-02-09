@@ -60,9 +60,9 @@
       _startMovingMarker(e) {
         this.action = e.detail;
         if (this.heldKeys["KeyR"])
-          this.action.method = "rotate";
+          this.action = "rotate";
         else if (this.heldKeys["KeyE"])
-          this.action.method = "scale";
+          this.action = "scale";
         this.$.ghost.start(this.getSelectedInfos());
         this.$.square.hide();
       }
@@ -79,9 +79,9 @@
       _movingMarker(e) {
         let ms = e.detail;
         this.doSnapping(ms);
-        switch (this.action.method) {
+        switch (this.action) {
           case "scale":
-            return this.$.ghost.scaleDirection(ms.percentX, ms.percentY, this.action.direction);
+            return this.$.ghost.scaleDirection(ms.percentX, ms.percentY, ms.direction);
           case "rotate":
             return this.$.ghost.rotate(ms.angle);
           case "move":

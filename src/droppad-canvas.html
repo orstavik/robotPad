@@ -27,7 +27,7 @@
           <drop-shape id="drop[[item.number]]" info="[[item]]" data-selectable></drop-shape>
         </template>
       </droppad-selector>
-      <droppad-item-marker id="square" p2p="[[p2p]]"
+      <droppad-item-marker id="square" p2p="[[p2p]]" held-keys="[[heldKeys]]"
                            on-track-start="_startMovingMarker"
                            on-track-move="_movingMarker"
                            on-track-end="_stopMovingMarker"></droppad-item-marker>
@@ -58,11 +58,6 @@
       }
 
       _startMovingMarker(e) {
-        this.action = e.detail;
-        if (this.heldKeys["KeyR"])
-          this.action = "rotate";
-        else if (this.heldKeys["KeyE"])
-          this.action = "scale";
         this.$.ghost.start(this.getSelectedInfos());
         this.$.square.hide();
       }
@@ -79,7 +74,7 @@
       _movingMarker(e) {
         let ms = e.detail;
         this.doSnapping(ms);
-        switch (this.action) {
+        switch (ms.action) {
           case "scale":
             return this.$.ghost.scaleDirection(ms.percentX, ms.percentY, ms.direction);
           case "rotate":

@@ -290,7 +290,8 @@
         this.start = {x: e.clientX, y: e.clientY};
         this.startAngle = Math.atan2(this.start.y - this.groupCenter.y, this.start.x - this.groupCenter.x);
         this.direction = e.target.id;
-        this.dispatchEvent(new CustomEvent("track-start", {detail: DroppadItemMarker.setMoveAction(e)}));
+        this.action = this.setMoveAction(e);
+        this.dispatchEvent(new CustomEvent("track-start", null));
       }
 
       _pointerMove(e) {
@@ -315,7 +316,11 @@
         return DroppadItemMarker.getScreenCenter(this.$.marker);
       }
 
-      static setMoveAction(e) {
+      setMoveAction(e) {
+        if (this.heldKeys["KeyR"])
+          return "rotate";
+        if (this.heldKeys["KeyE"])
+          return "scale";
         if (e.target.classList.contains("scale"))
           return "scale";
         if (e.target.id == "rotate")
@@ -337,7 +342,7 @@
         if (this.direction.indexOf("e") < 0 && this.direction.indexOf("w") < 0)
           scaleX = 0;
         const angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
-        return {xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle, direction: this.direction};
+        return {xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle, direction: this.direction, action: this.action};
       }
 
       static getScreenCenter(elem) {

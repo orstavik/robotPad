@@ -339,6 +339,7 @@
         return {xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle, direction: this.direction, action: this.action};
       }
 
+      //todo this could use some work..
       doSnapping(ms) {
         if (this.direction.indexOf("n") >= 0)
           ms.percentY= -ms.percentY;

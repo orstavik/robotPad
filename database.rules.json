@@ -1,6 +1,24 @@
 {
   "rules": {
-    ".read": true,
-    ".write": true
+    "sketches": {
+      "$sketchid": {
+        ".read": "root.hasChild('users/'+auth.uid +'/sketchlist/'+$sketchid)",
+        ".write": "root.hasChild('users/'+auth.uid +'/sketchlist/'+$sketchid)"
+      }
+    },
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+        "sketchlist": {
+          "$sketchid" : {
+            ".validate" : "newData.hasChild('name') && newData.hasChild('created')",
+            "name": {
+              ".validate": "newData.isString()"
+            }
+          }
+        }
+      }
+    }
   }
 }

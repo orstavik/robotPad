@@ -2,6 +2,7 @@
 <link rel="import" href="drop-shape.html">
 <link rel="import" href="droppad-selector.html">
 <link rel="import" href="droppad-canvas-canvas.html">
+<link rel="import" href="selected-observer.html">
 <link rel="import" href="droppad-item-marker.html">
 
 <dom-module id="droppad-canvas">
@@ -27,7 +28,8 @@
           <drop-shape id="drop[[item.number]]" info="[[item]]" data-selectable></drop-shape>
         </template>
       </droppad-selector>
-      <droppad-item-marker id="square" p2p="[[p2p]]" held-keys="[[heldKeys]]"
+      <selected-observer selected="{{selecteds}}"></selected-observer>
+      <droppad-item-marker id="square" p2p="[[p2p]]" held-keys="[[heldKeys]]" items="[[selecteds]]"
                            on-track-start="_startMovingMarker"
                            on-track-move="_movingMarker"
                            on-track-end="_stopMovingMarker"></droppad-item-marker>

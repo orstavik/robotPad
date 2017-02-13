@@ -1,0 +1,64 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="selected-observer">
+  <script>
+    class SelectedObserver extends Polymer.Element {
+      static get is() {
+        return "selected-observer";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            selected: {
+              type: Array,
+              notify: true
+            }
+          }
+        }
+      }
+
+      connectedCallback() {
+        this.selector = this.parentNode.querySelector("#dropSelector");
+        this.mutationObservers= {};
+        var addRemoveFromSelectorObserver = new MutationObserver(function (mutations) {
+          for (let mutation of mutations) {
+            for (let node of mutation.addedNodes) {
+              if (node instanceof HTMLElement && node.hasAttribute("data-selectable"))
+                this.addToObservableList(node);
+            }
+            for (let node of mutation.removedNodes) {
+              if (node instanceof HTMLElement && node.hasAttribute("data-selectable"))
+                this.removeFromObservableList(node);
+              this.set("selected", selector.querySelectorAll("drop-shape[data-selected]"));
+            }
+          }
+        }.bind(this));
+        addRemoveFromSelectorObserver.observe(this.selector, {childList: true});
+      }
+
+      addToObservableList(node) {
+        this.mutationObservers[node.id] = new MutationObserver(this.toggleSelected.bind(this));
+        this.mutationObservers[node.id].observe(node, {attributes: true, attributeOldValue: true});
+      }
+
+      //todo not sure i need to clean this up??
+      removeFromObservableList(node) {
+        this.mutationObservers[node.id].disconnect();
+        delete this.mutationObservers[node.id];
+      }
+
+      toggleSelected(mutations) {
+        let newSearch = false;
+        for (let mutation of mutations) {
+          if (mutation.attributeName == "data-selected")
+            newSearch = true;
+        }
+        if (newSearch)
+          this.selected = this.selector.querySelectorAll("drop-shape[data-selected]");
+        this.notifyPath("selected");
+      }
+    }
+    customElements.define(SelectedObserver.is, SelectedObserver);
+  </script>
+</dom-module>

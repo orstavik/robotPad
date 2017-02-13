@@ -8,83 +8,70 @@
       :host {
         display: block;
       }
-
       div {
         position: absolute;
       }
-
       #marker {
+        position: absolute;
         box-sizing: border-box;
         top: 0;
         left: 0;
         border: 1px dotted grey;
       }
-
       #marker div {
         z-index: 10000;
       }
-
       .scale {
         width: 6px;
         height: 6px;
         background-color: lightgrey;
         border: 1px solid grey;
       }
-
       #nw {
         top: -4px;
         left: -4px;
       }
-
       #ne {
         top: -4px;
         right: -4px;
       }
-
       #sw {
         bottom: -4px;
         left: -4px;
       }
-
       #se {
         bottom: -4px;
         right: -4px;
       }
-
       #w {
         top: calc(50% - 4px);
         left: -4px;
         border-radius: 50% 0 0 50%;
       }
-
       #e {
         top: calc(50% - 4px);
         right: -4px;
         border-radius: 0 50% 50% 0;
       }
-
       #s {
         bottom: -4px;
         left: calc(50% - 4px);
         border-radius: 0 0 50% 50%;
       }
-
       #n {
         top: -4px;
         left: calc(50% - 4px);
         border-radius: 50% 50% 0 0;
       }
-
       #marker #move {
-        top: calc(50% - 6px);
-        left: calc(50% - 6px);
+        bottom: -16px;
+        right: -16px;
         width: 12px;
         height: 12px;
         transform: rotate(45deg);
         background: url(../images/move.png);
         background-size: contain;
       }
-
       #marker #rotate {
         top: -20px;
         right: -20px;
@@ -93,69 +80,41 @@
         background: url(../images/rotate.png);
         background-size: contain;
       }
+      #ne:hover { cursor: nesw-resize; }
+      #sw:hover { cursor: nesw-resize; }
+      #nw:hover { cursor: nwse-resize; }
+      #se:hover { cursor: nwse-resize; }
+      #e:hover { cursor: ew-resize; }
+      #w:hover { cursor: ew-resize; }
+      #n:hover { cursor: ns-resize; }
+      #s:hover { cursor: ns-resize; }
+      #rotate:hover { cursor: ns-resize; }
+      #move:hover { cursor: move; }
+      #marker:hover { cursor: move; }
 
-      #ne:hover {
-        cursor: nesw-resize;
-      }
-
-      #sw:hover {
-        cursor: nesw-resize;
-      }
-
-      #nw:hover {
-        cursor: nwse-resize;
-      }
-
-      #se:hover {
-        cursor: nwse-resize;
-      }
-
-      #e:hover {
-        cursor: ew-resize;
-      }
-
-      #w:hover {
-        cursor: ew-resize;
-      }
-
-      #n:hover {
-        cursor: ns-resize;
-      }
-
-      #s:hover {
-        cursor: ns-resize;
-      }
-
-      #rotate:hover {
-        cursor: ns-resize;
-      }
-
-      #move:hover {
-        cursor: move;
-      }
-
-      #marker:hover {
-        cursor: move;
-      }
+      .nw { transform-origin: 100% 100%; }
+      .se { transform-origin: 0 0; }
+      .ne { transform-origin: 0 100%; }
+      .sw { transform-origin: 100% 0; }
+      .s { transform-origin: 50% 0; }
+      .n { transform-origin: 50% 100%; }
+      .e { transform-origin: 0 50%; }
+      .w { transform-origin: 100% 50%; }
 
     </style>
-    <div id="marker" hidden$="[[!box]]"
-         style$="
+    <div id="marker" hidden$="[[!box]]" class$="[[direction]]" style$="
          left: [[box.left]]px;
          top: [[box.top]]px;
          width:  [[box.width]]px;
-         height: [[box.height]]px;
-         [[cssMatrix]]">
+         height: [[box.height]]px;">
       <div id="nw" class="scale corner"></div>
       <div id="ne" class="scale corner"></div>
       <div id="sw" class="scale corner"></div>
       <div id="se" class="scale corner"></div>
-      <template is="dom-if" if="[[box.isSingle]]">
-        <div id="w" class="scale"></div>
-        <div id="n" class="scale"></div>
-        <div id="s" class="scale"></div>
-        <div id="e" class="scale"></div>
-      </template>
+      <div id="w" class="scale" hidden$="[[!box.isSingle]]"></div>
+      <div id="n" class="scale" hidden$="[[!box.isSingle]]"></div>
+      <div id="s" class="scale" hidden$="[[!box.isSingle]]"></div>
+      <div id="e" class="scale" hidden$="[[!box.isSingle]]"></div>
       <div id="move"></div>
       <div id="rotate"></div>
     </div>
@@ -164,7 +123,7 @@
   <script>
     class SquareBox {
 
-      constructor(boxes, p2p){
+      constructor(boxes, p2p) {
         this.p2p = p2p;
         this.isSingle = boxes.length == 1;
         for (let next of boxes) {
@@ -174,9 +133,9 @@
           this.bottom = Math.max(this.bottom || -Number.MAX_VALUE, next.bottom);
         }
         this.left = p2p.toLogicalX(this.left);
-        this.right= p2p.toLogicalX(this.right);
-        this.top= p2p.toLogicalY(this.top);
-        this.bottom= p2p.toLogicalY(this.bottom);
+        this.right = p2p.toLogicalX(this.right);
+        this.top = p2p.toLogicalY(this.top);
+        this.bottom = p2p.toLogicalY(this.bottom);
 
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
@@ -194,12 +153,7 @@
       static get config() {
         return {
           properties: {
-            items: {
-              type: Array,
-              value: function () {
-                return [];
-              }
-            },
+            items: Array,
             p2p: PointToPoint,
             box: {
               type: Object,
@@ -207,56 +161,44 @@
             },
             action: String,
             direction: String,
-            startAngle2: {
+            boxAngle: {
               type: Number,
-              computed: "_calcStartAngle(items)"
+              computed: "_calcBoxAngle(items)"
             },
             changes: {
               type: Object,
-              value: null
-            },
-            cssMatrix: {
-              type: String,
-              computed: "_changeStyle(changes, action, direction, startAngle2)"
+              observer: "changeStyle"
             }
           }
         }
       }
 
-      _changeStyle(changes, action, direction, startAngle2) {
+      changeStyle(changes) {
         if (!changes)
-          return startAngle2 ? "transform: rotate(" + startAngle2 + "rad);" : "";
-        if (action == "rotate")
-          return "transform: rotate(" + (startAngle2 + changes.angle ) + "rad);";
-        if (action == "move")
-          return "transform: translate(" + changes.xMove + "px, " + changes.yMove + "px) rotate(" + startAngle2 + "rad);";
-        if (action != "scale")
-          return "";
-        return ItemMarker.textToCssTransformOrigin(direction) +
-            "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+          return;
+        changes = this.filterChanges(changes);
+        let trans = "";
+        if (changes.xMove)
+          trans += " translate(" + changes.xMove + "px, " + changes.yMove + "px) ";
+        if (changes.percentX)
+          trans += " scaleX(" + (1 + changes.percentX) + ") ";
+        if (changes.percentY)
+          trans += " scaleY(" + (1 + changes.percentY) + ") ";
+        if (changes.angle)
+          trans += " rotate(" + changes.angle + "rad);";
+        return this.$.marker.style.transform = trans;
+      }
+      filterChanges(ms) {
+        if (ms.action == "rotate")
+          return {angle: this.boxAngle + ms.angle};
+        if (ms.action == "move")
+          return {xMove: ms.xMove, yMove: ms.yMove, angle: this.boxAngle};
+        if (ms.action == "scale")
+          return {percentX: ms.percentX, percentY: ms.percentY, angle: this.boxAngle};
+        return {};
       }
 
-      static textToCssTransformOrigin(direction){
-        if (direction == "nw")
-          return "transform-origin: 100% 100%; ";
-        if (direction == "se")
-          return "transform-origin: 0% 0%; ";
-        if (direction == "ne")
-          return "transform-origin: 0% 100%; ";
-        if (direction == "sw")
-          return "transform-origin: 100% 0%; ";
-        if (direction == "s")
-          return "transform-origin: 50% 0%; ";
-        if (direction == "n")
-          return "transform-origin: 50% 100%; ";
-        if (direction == "e")
-          return "transform-origin: 0% 50%; ";
-        if (direction == "w")
-          return "transform-origin: 100% 50%; ";
-        return "";
-      }
-
-      _calcStartAngle(items){
+      _calcBoxAngle(items) {
         return items && items.length == 1 ? items[0].info.angle : 0;
       }
 
@@ -281,7 +223,7 @@
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);
         this.start = this.p2p.calcLogicPoint(e.clientX, e.clientY);
-        this.set("startAngle" ,ItemMarker.calcAngle(this.box.center, this.start));
+        this.startAngle = ItemMarker.calcAngle(this.box.center, this.start);
         this.set("direction", e.target.id);
         this.set("action", this.setMoveAction(e));
         this.set("changes", null);
@@ -291,7 +233,7 @@
       _pointerMove(e) {
         ItemMarker._cancelPropDefault(e);
         const logicPointPos = this.p2p.calcLogicPoint(e.clientX, e.clientY);
-        let ms = this.calculateTrackMovements(logicPointPos);
+        let ms = this.calculateTrackMovements(logicPointPos, this.start, this.startAngle);
         ms.direction = this.direction;
         ms.action = this.action;
         ms.box = this.box;
@@ -332,29 +274,26 @@
         return "move";
       }
 
-      calculateTrackMovements(logicPointPos) {
-        const movX = logicPointPos.x - this.start.x;
-        const movY = logicPointPos.y - this.start.y;
-        const scaleX = movX / this.box.width;
-        const scaleY = movY / this.box.height;
-        const angle = ItemMarker.calcAngle(this.box.center, logicPointPos);
+      calculateTrackMovements(logicPointPos, startPos, startAngle) {
+        const movX = logicPointPos.x - startPos.x;
+        const movY = logicPointPos.y - startPos.y;
         return {
           xMove: movX,
           yMove: movY,
-          percentX: scaleX,
-          percentY: scaleY,
-          angle: angle - this.startAngle,
+          percentX: movX / this.box.width,
+          percentY: movY / this.box.height,
+          angle: ItemMarker.calcAngle(this.box.center, logicPointPos) - startAngle,
         };
       }
 
       //todo this could use some work..
       doSnapping(ms) {
         if (this.direction.indexOf("n") >= 0)
-          ms.percentY= -ms.percentY;
+          ms.percentY = -ms.percentY;
         if (this.direction.indexOf("w") >= 0)
           ms.percentX = -ms.percentX;
         if (this.direction.indexOf("n") < 0 && this.direction.indexOf("s") < 0)
-          ms.percentY= 0;
+          ms.percentY = 0;
         if (this.direction.indexOf("e") < 0 && this.direction.indexOf("w") < 0)
           ms.percentX = 0;
         if (Math.abs(ms.xMove) < 6 && Math.abs(ms.yMove) < 6)
@@ -367,7 +306,7 @@
           ms.percentX = ms.percentY;
       }
 
-      static calcAngle(center, satelite){
+      static calcAngle(center, satelite) {
         return Math.atan2(satelite.y - center.y, satelite.x - center.x);
       }
     }

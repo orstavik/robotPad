@@ -59,22 +59,24 @@ class ShapeInfoObject {
     return {x: center.x + newX, y: center.y + newY};  //returns the new position positioned against the underlying map again.
   }
 
-  scaleInBox(xPercent, yPercent, box, direction) {
+  scaleInBox(xPer, yPer, box, direction) {
     const c = this.clone();
-    c._moveInScaledBox(xPercent, yPercent, box, direction);
-    c._scaleInRotatedBox(xPercent, yPercent);
+    c._moveInScaledBox(xPer, yPer, box, direction);
+    c._scaleInRotatedBox(xPer, yPer, direction);
     return c;
   }
 
-  _moveInScaledBox(xPercent, yPercent, box, direction) {
+  _moveInScaledBox(xPer, yPer, box, direction) {
+    let nx = (Math.cos(this.angle)*xPer)+(Math.sin(this.angle)*yPer);
+	  let ny = (Math.cos(this.angle)*yPer)-(Math.sin(this.angle)*xPer);
     if (direction.indexOf("s") >= 0)
-      this.y += (this.y - box.top) * yPercent;
+      this.y += (this.y - box.top) * ny;
     else if (direction.indexOf("n") >= 0)
-      this.y -= (box.bottom - this.y) * yPercent;
+      this.y -= (box.bottom - this.y) * ny;
     if (direction.indexOf("e") >= 0)
-      this.x += (this.x - box.left) * xPercent;
+      this.x += (this.x - box.left) * nx;
     else if (direction.indexOf("w") >= 0)
-      this.x -= (box.right - this.x) * xPercent;
+      this.x -= (box.right - this.x) * nx;
   }
 
   static rotateAng(x,y,a) {
@@ -83,9 +85,11 @@ class ShapeInfoObject {
     return [nx,ny];
   }
 
-  _scaleInRotatedBox(xPercent, yPercent) {
-    this.h *= (1+yPercent);
-    this.w *= (1+xPercent);
+  _scaleInRotatedBox(xPer, yPer, direction) {
+    let nx = (Math.cos(this.angle)*xPer)+(Math.sin(this.angle)*yPer);
+	  let ny = (Math.cos(this.angle)*yPer)-(Math.sin(this.angle)*xPer);
+    this.h *= (1+ny);
+    this.w *= (1+nx);
   }
 
   mirror() {

@@ -218,16 +218,16 @@
           return "";
         if (direction == "nw")
           return "transform-origin: 100% 100%; " +
-            "transform: scaleX(" + (1 - changes.percentX) + ") scaleY(" + (1 - changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+            "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
         if (direction == "se")
           return "transform-origin: 0% 0%; " +
             "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
         if (direction == "ne")
           return "transform-origin: 0% 100%; " +
-            "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 - changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+            "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
         if (direction == "sw")
           return "transform-origin: 100% 0%; " +
-            "transform: scaleX(" + (1 - changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+            "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
         if (direction == "s")
           return "transform-origin: 50% 0%; " +
             "transform: scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
@@ -297,6 +297,7 @@
         ms.action = this.action;
         ms.box = this.groupOfShapes;
         this.doSnapping(ms);
+        this.set("changes", ms);
         this.dispatchEvent(new CustomEvent("track-move", {detail: ms, composed: true, bubbles: true}));
       }
 
@@ -338,15 +339,13 @@
         const scaleX = movX / this.groupOfShapes.width;
         const scaleY = movY / this.groupOfShapes.height;
         const angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
-        const changes = {
+        return {
           xMove: movX,
           yMove: movY,
           percentX: scaleX,
           percentY: scaleY,
           angle: angle - this.startAngle,
         };
-        this.set("changes", changes);
-        return changes;
       }
 
       //todo this could use some work..

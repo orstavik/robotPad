@@ -77,6 +77,12 @@ class ShapeInfoObject {
       this.x -= (box.right - this.x) * xPercent;
   }
 
+  static rotateAng(x,y,a) {
+    let nx = (Math.cos(a)*x)+(Math.sin(a)*y);
+    let ny = (Math.cos(a)*y)-(Math.sin(a)*x);
+    return [nx,ny];
+  }
+
   _scaleInRotatedBox(xPercent, yPercent) {
     this.h *= (1+yPercent);
     this.w *= (1+xPercent);

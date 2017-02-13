@@ -138,25 +138,6 @@
         cursor: move;
       }
 
-      .help {
-        display: none;
-        top: -80px;
-        left: -40px;
-        font-size: 10px;
-        width: 180px;
-        height: 10px;
-        background: rgba(0, 0, 0, 0.3);
-        border: none;
-        border-radius: 20px;
-        padding: 15px;
-        line-height: 10px;
-        color: white;
-        font-weight: bold;
-      }
-
-      #marker .corner:hover ~ #cornerhelp {
-        display: block;
-      }
     </style>
     <div id="marker" hidden$="[[hidden]]"
          style$="
@@ -177,10 +158,6 @@
       </template>
       <div id="move"></div>
       <div id="rotate"></div>
-
-      <div id="cornerhelp" class="help">Hold "shift" to scale symmetrically.</div>
-      <!--<div id="rotatehelp" class="help">Hold "shift" to snap to nearest 30 deg.</div>-->
-      <!--<div id="rotatehelp" class="help">Hold "shift" to rotate the elements individually.</div>-->
     </div>
   </template>
 
@@ -220,55 +197,63 @@
             },
             action: String,
             direction: String,
+            startAngle2: {
+              type: Number,
+              computed: "_calcStartAngle(items)"
+            },
             changes: {
               type: Object,
               value: null
             },
             cssMatrix: {
               type: String,
-              computed: "_changeStyle(changes, action, direction)"
+              computed: "_changeStyle(changes, action, direction, startAngle2)"
             }
           }
         }
       }
 
-      _changeStyle(changes, action, direction){
+      _changeStyle(changes, action, direction, startAngle2) {
         if (!changes)
-          return "";
+          return startAngle2 ? "transform: rotate(" + startAngle2 + "rad);" : "";
         if (action == "rotate")
-          return "transform: rotate("+changes.angle+"rad);";
-        if (action == "scale"){
-          if (direction == "nw")
-            return "transform-origin: 100% 100%; "+
-              "transform: scaleX("+(1-changes.percentX)+") scaleY("+(1-changes.percentY)+");";
-          if (direction == "se")
-            return "transform-origin: 0% 0%; "+
-              "transform: scaleX("+(1+changes.percentX)+") scaleY("+(1+changes.percentY)+");";
-          if (direction == "ne")
-            return "transform-origin: 0% 100%; "+
-              "transform: scaleX("+(1+changes.percentX)+") scaleY("+(1-changes.percentY)+");";
-          if (direction == "sw")
-            return "transform-origin: 100% 0%; "+
-              "transform: scaleX("+(1-changes.percentX)+") scaleY("+(1+changes.percentY)+");";
-          if (direction == "s")
-            return "transform-origin: 50% 0%; "+
-              "transform: scaleY("+(1+changes.percentY)+");";
-          if (direction == "n")
-            return "transform-origin: 50% 100%; "+
-              "transform: scaleY("+(1-changes.percentY)+");";
-          if (direction == "e")
-            return "transform-origin: 0% 50%; "+
-              "transform: scaleX("+(1+changes.percentX)+");";
-          if (direction == "w")
-            return "transform-origin: 100% 50%; "+
-              "transform: scaleX("+(1-changes.percentX)+");";
-        }
+          return "transform: rotate(" + (startAngle2 + changes.angle ) + "rad);";
         if (action == "move")
-          return "transform: translate("+changes.xMove+"px, "+changes.yMove+"px);";
+          return "transform: translate(" + changes.xMove + "px, " + changes.yMove + "px) rotate(" + startAngle2 + "rad);";
+        if (action != "scale")
+          return "";
+        if (direction == "nw")
+          return "transform-origin: 100% 100%; " +
+            "transform: scaleX(" + (1 - changes.percentX) + ") scaleY(" + (1 - changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+        if (direction == "se")
+          return "transform-origin: 0% 0%; " +
+            "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+        if (direction == "ne")
+          return "transform-origin: 0% 100%; " +
+            "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 - changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+        if (direction == "sw")
+          return "transform-origin: 100% 0%; " +
+            "transform: scaleX(" + (1 - changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+        if (direction == "s")
+          return "transform-origin: 50% 0%; " +
+            "transform: scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+        if (direction == "n")
+          return "transform-origin: 50% 100%; " +
+            "transform: scaleY(" + (1 - changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+        if (direction == "e")
+          return "transform-origin: 0% 50%; " +
+            "transform: scaleX(" + (1 + changes.percentX) + ") rotate(" + startAngle2 + "rad);";
+        if (direction == "w")
+          return "transform-origin: 100% 50%; " +
+            "transform: scaleX(" + (1 - changes.percentX) + ") rotate(" + startAngle2 + "rad);";
       }
 
       _isSingle(items){
         return items.length ==1;
+      }
+
+      _calcStartAngle(items){
+        return items && items.length == 1 ? items[0].info.angle : 0;
       }
 
       _hide(items) {
@@ -288,6 +273,7 @@
         dims.height = dims.bottom - dims.top;
         dims.centerX = dims.left + dims.width / 2;
         dims.centerY = dims.top + dims.height / 2;
+        //dims.angle = this.getAngleForSingleElement(single);
         return p2p.makeLogical(dims);
       }
 
@@ -341,7 +327,7 @@
         this.addEventListener("pointerup", this.pointerupListener);
         this.groupCenter = DroppadItemMarker.getScreenCenter(this.$.marker);
         this.start = {x: e.clientX, y: e.clientY};
-        this.startAngle = Math.atan2(this.start.y - this.groupCenter.y, this.start.x - this.groupCenter.x);
+        this.set("startAngle" ,Math.atan2(this.start.y - this.groupCenter.y, this.start.x - this.groupCenter.x));
         this.set("direction", e.target.id);
         this.set("action", this.setMoveAction(e));
         this.set("changes", null);

@@ -59,6 +59,7 @@
 
       _startMovingMarker(e) {
         this.$.ghost.start(this.getSelectedInfos());
+        //todo show help info for this action
       }
 
       getSelectedInfos() {
@@ -85,7 +86,33 @@
       _stopMovingMarker(e) {
         this.action = null;
         this.replaceChanges(this.$.ghost.end());
+        //todo hide help info for this action
       }
+
+      /*
+       .help {
+       display: none;
+       top: -80px;
+       left: -40px;
+       font-size: 10px;
+       width: 180px;
+       height: 10px;
+       background: rgba(0, 0, 0, 0.3);
+       border: none;
+       border-radius: 20px;
+       padding: 15px;
+       line-height: 10px;
+       color: white;
+       font-weight: bold;
+       }
+
+       #marker .corner:hover ~ #cornerhelp {
+       display: block;
+       }
+       <div id="cornerhelp" class="help">Hold "shift" to scale symmetrically.</div>
+       <!--<div id="rotatehelp" class="help">Hold "shift" to snap to nearest 30 deg.</div>-->
+       <!--<div id="rotatehelp" class="help">Hold "shift" to rotate the elements individually.</div>-->
+      * */
 
       copy() {
         this.copyData = this.getSelectedInfos().map(info => info.makeCopy());

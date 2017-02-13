@@ -3,7 +3,7 @@
 <link rel="import" href="droppad-selector.html">
 <link rel="import" href="droppad-canvas-canvas.html">
 <link rel="import" href="selected-observer.html">
-<link rel="import" href="droppad-item-marker.html">
+<link rel="import" href="item-marker.html">
 
 <dom-module id="droppad-canvas">
   <template>
@@ -29,10 +29,10 @@
         </template>
       </droppad-selector>
       <selected-observer selected="{{selecteds}}"></selected-observer>
-      <droppad-item-marker id="square" p2p="[[p2p]]" held-keys="[[heldKeys]]" items="[[selecteds]]"
+      <item-marker id="square" p2p="[[p2p]]" held-keys="[[heldKeys]]" items="[[selecteds]]"
                            on-track-start="_startMovingMarker"
                            on-track-move="_movingMarker"
-                           on-track-end="_stopMovingMarker"></droppad-item-marker>
+                           on-track-end="_stopMovingMarker"></item-marker>
       <group-of-shapes id="ghost" class="copy"></group-of-shapes>
       <group-of-shapes id="ghostCopy"></group-of-shapes>
       <group-of-shapes id="historyPreview"></group-of-shapes>
@@ -56,7 +56,7 @@
       }
 
       connectedCallback() {
-        this.addEventListener("pointermove", function(e){this._pointerMove = e;}.bind(this)); //this.set("_pointerMove", e); no need here, since it is not in the template or being observed
+        this.addEventListener("pointermove", function(e){this._pointerMove = e;}.bind(this));
       }
 
       _startMovingMarker(e) {

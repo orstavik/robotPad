@@ -2,7 +2,7 @@
 <link rel="import" href="drop-shape.html">
 <link rel="import" href="group-of-shapes.html">
 
-<dom-module id="droppad-item-marker">
+<dom-module id="item-marker">
   <template>
     <style>
       :host {
@@ -139,18 +139,18 @@
       }
 
     </style>
-    <div id="marker" hidden$="[[!groupOfShapes]]"
+    <div id="marker" hidden$="[[!box]]"
          style$="
-         left: [[groupOfShapes.left]]px;
-         top: [[groupOfShapes.top]]px;
-         width:  [[groupOfShapes.width]]px;
-         height: [[groupOfShapes.height]]px;
+         left: [[box.left]]px;
+         top: [[box.top]]px;
+         width:  [[box.width]]px;
+         height: [[box.height]]px;
          [[cssMatrix]]">
       <div id="nw" class="scale corner"></div>
       <div id="ne" class="scale corner"></div>
       <div id="sw" class="scale corner"></div>
       <div id="se" class="scale corner"></div>
-      <template is="dom-if" if="[[groupOfShapes.isSingle]]">
+      <template is="dom-if" if="[[box.isSingle]]">
         <div id="w" class="scale"></div>
         <div id="n" class="scale"></div>
         <div id="s" class="scale"></div>
@@ -186,9 +186,9 @@
       }
     }
 
-    class DroppadItemMarker extends Polymer.Element {
+    class ItemMarker extends Polymer.Element {
       static get is() {
-        return "droppad-item-marker";
+        return "item-marker";
       }
 
       static get config() {
@@ -201,7 +201,7 @@
               }
             },
             p2p: PointToPoint,
-            groupOfShapes: {
+            box: {
               type: Object,
               computed: "_calcRectangle(items, p2p)"
             },
@@ -232,7 +232,7 @@
           return "transform: translate(" + changes.xMove + "px, " + changes.yMove + "px) rotate(" + startAngle2 + "rad);";
         if (action != "scale")
           return "";
-        return DroppadItemMarker.textToCssTransformOrigin(direction) +
+        return ItemMarker.textToCssTransformOrigin(direction) +
             "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
       }
 
@@ -276,12 +276,12 @@
       }
 
       _pointerDown(e) {
-        DroppadItemMarker._cancelPropDefault(e);
+        ItemMarker._cancelPropDefault(e);
         this.setPointerCapture(e.pointerId);
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);
         this.start = this.p2p.calcLogicPoint(e.clientX, e.clientY);
-        this.set("startAngle" ,DroppadItemMarker.calcAngle(this.groupOfShapes.center, this.start));
+        this.set("startAngle" ,ItemMarker.calcAngle(this.box.center, this.start));
         this.set("direction", e.target.id);
         this.set("action", this.setMoveAction(e));
         this.set("changes", null);
@@ -289,19 +289,19 @@
       }
 
       _pointerMove(e) {
-        DroppadItemMarker._cancelPropDefault(e);
+        ItemMarker._cancelPropDefault(e);
         const logicPointPos = this.p2p.calcLogicPoint(e.clientX, e.clientY);
         let ms = this.calculateTrackMovements(logicPointPos);
         ms.direction = this.direction;
         ms.action = this.action;
-        ms.box = this.groupOfShapes;
+        ms.box = this.box;
         this.doSnapping(ms);
         this.set("changes", ms);
         this.dispatchEvent(new CustomEvent("track-move", {detail: ms, composed: true, bubbles: true}));
       }
 
       _pointerUp(e) {
-        DroppadItemMarker._cancelPropDefault(e);
+        ItemMarker._cancelPropDefault(e);
         this.releasePointerCapture(e.pointerId);
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
@@ -317,7 +317,7 @@
       }
 
       getLogicalCenter() {
-        return this.groupOfShapes.center;
+        return this.box.center;
       }
 
       setMoveAction(e) {
@@ -335,9 +335,9 @@
       calculateTrackMovements(logicPointPos) {
         const movX = logicPointPos.x - this.start.x;
         const movY = logicPointPos.y - this.start.y;
-        const scaleX = movX / this.groupOfShapes.width;
-        const scaleY = movY / this.groupOfShapes.height;
-        const angle = DroppadItemMarker.calcAngle(this.groupOfShapes.center, logicPointPos);
+        const scaleX = movX / this.box.width;
+        const scaleY = movY / this.box.height;
+        const angle = ItemMarker.calcAngle(this.box.center, logicPointPos);
         return {
           xMove: movX,
           yMove: movY,
@@ -363,7 +363,7 @@
           ms.xMove = ms.yMove;
           ms.percentX = ms.percentY;
         }
-        if (ms.action == "scale" && !this.groupOfShapes.isSingle)
+        if (ms.action == "scale" && !this.box.isSingle)
           ms.percentX = ms.percentY;
       }
 
@@ -371,6 +371,6 @@
         return Math.atan2(satelite.y - center.y, satelite.x - center.x);
       }
     }
-    customElements.define(DroppadItemMarker.is, DroppadItemMarker);
+    customElements.define(ItemMarker.is, ItemMarker);
   </script>
 </dom-module>

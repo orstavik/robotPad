@@ -164,10 +164,12 @@
       <div id="ne" class="scale corner"></div>
       <div id="sw" class="scale corner"></div>
       <div id="se" class="scale corner"></div>
-      <div id="w" class="scale"></div>
-      <div id="n" class="scale"></div>
-      <div id="s" class="scale"></div>
-      <div id="e" class="scale"></div>
+      <template is="dom-if" if="[[singleGroup]]">
+        <div id="w" class="scale"></div>
+        <div id="n" class="scale"></div>
+        <div id="s" class="scale"></div>
+        <div id="e" class="scale"></div>
+      </template>
       <div id="move"></div>
       <div id="rotate"></div>
 
@@ -192,6 +194,10 @@
                 return [];
               }
             },
+            singleGroup: {
+              type: Boolean,
+              computed: "_isSingle(items)"
+            } ,
             mutationObservers: {    //todo I don't know if we need this one, it might be garbagecollected by default if the target element of the mutation observer is removed from the dom.
               type: Object,
               value: function(){
@@ -209,6 +215,10 @@
             }
           }
         }
+      }
+
+      _isSingle(items){
+        return items.length ==1;
       }
 
       _calcRectangle(items, p2p) {
@@ -351,7 +361,7 @@
           ms.percentX = 0;
         if (Math.abs(ms.xMove) < 6 && Math.abs(ms.yMove) < 6)
           ms.xMove = ms.yMove = 0;
-        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"]) {
+        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"] || !this.singleGroup) {
           ms.xMove = ms.yMove;
           ms.percentX = ms.percentY;
         }

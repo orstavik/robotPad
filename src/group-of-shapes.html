@@ -52,8 +52,7 @@
       }
 
       rotate(angle, box) {
-        let center = {x: box.centerX, y: box.centerY};
-        this.set("infos", this.originals.map(info => info.rotatePositionFromExternalPoint(center, angle)));
+        this.set("infos", this.originals.map(info => info.rotatePositionFromExternalPoint(box.center, angle)));
       }
 
       scaleDirection(percentX, percentY, direction, box) {

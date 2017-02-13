@@ -1,0 +1,9 @@
+/users/1,2,3,4/info/sketchlist/a,b,c,d/name, created,updated
+
+/sketchobjects/a,b,c,d/state1, state2, state3
+
+except that everybody can read the last state of any sketchobject they have the sketchid for
+
+/sharing/a,b,c,d/useremail1,useremail2,useremail3,
+
+/users/2/ should be able to do push operations on users/1 sketchobjects/a/ where auth.email is in /users/1/sharing/a/

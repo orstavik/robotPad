@@ -123,9 +123,10 @@
 
       paste() {
         this.$.ghostCopy.start(this.copyData);
-        let xMove = this.p2p.addZoom(this._pointerMove.clientX - this.copyCenter.x);
-        let yMove = this.p2p.addZoom(this._pointerMove.clientY - this.copyCenter.y);
-        this.$.ghostCopy.move(xMove, yMove);
+        const logicPointPos = this.p2p.calcLogicPoint(this._pointerMove.clientX, this._pointerMove.clientY);
+//        let xMove = this.p2p.addZoom(this._pointerMove.clientX - this.copyCenter.x);
+//        let yMove = this.p2p.addZoom(this._pointerMove.clientY - this.copyCenter.y);
+        this.$.ghostCopy.move(logicPointPos.x-this.copyCenter.x, logicPointPos.y -this.copyCenter.y);
         this.dispatchEvent(new CustomEvent("addshapes", {detail: this.$.ghostCopy.end()}));
         //todo here I need to select the new shapes added..
       }

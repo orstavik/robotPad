@@ -285,7 +285,7 @@
         this.set("direction", e.target.id);
         this.set("action", this.setMoveAction(e));
         this.set("changes", null);
-        this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true}));
+        this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: this.action}));
       }
 
       _pointerMove(e) {
@@ -316,7 +316,7 @@
         e.preventDefault();
       }
 
-      getCenter() {
+      getLogicalCenter() {
         return this.groupOfShapes.center;
       }
 

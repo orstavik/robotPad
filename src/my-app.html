@@ -105,6 +105,23 @@
         position: fixed;
         z-index: 1;
       }
+
+      #helpText {
+        position: fixed;
+        bottom: 40px;
+        left: 40px;
+        font-size: 10px;
+        width: 180px;
+        height: 10px;
+        background: rgba(0, 0, 0, 0.3);
+        border: none;
+        border-radius: 20px;
+        padding: 15px;
+        line-height: 10px;
+        color: white;
+        font-weight: bold;
+      }
+
     </style>
 
     <firebase-app auth-domain="robotpad-762de.firebaseapp.com"
@@ -117,6 +134,8 @@
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
                     on-changeshapes="_changeShapes"
+                    on-help-on="showHelp"
+                    on-help-off="hideHelp"
     ></droppad-canvas>
 
     <!--<div id="toolbar">
@@ -176,6 +195,8 @@
       <!--</tab-wrapper>
     </iron-selector>-->
 
+    <div id="helpText" hidden$="[[!helpText]]">[[helpText]]</div>
+
     <keyboard-listener on-key-down="_checkKey" held-keys="{{heldKeys}}"></keyboard-listener>
 
   </template>
@@ -197,7 +218,11 @@
               observer: "colorScaleChanged"
             },
             heldKeys: Array,
-            sketchName: String
+            sketchName: String,
+            helpText: {
+              type: String,
+              value: null
+            }
           }
         }
       }
@@ -254,6 +279,22 @@
 
       newSketch(){
         this.$.history.setState([]);
+      }
+
+      showHelp(e){
+        let action = e.detail;
+        let txt;
+        if (action == "scale")
+          txt = 'Hold "shift" to scale symmetrically.';
+        else if (action == "rotate")
+          txt = 'Hold "ctrl" to snap elements to nearest 30deg.';
+        else if (action == "move")
+          txt = "Hold 'shift' to rotate the elements individually.";
+        this.set("helpText", action + ": " + txt);
+      }
+
+      hideHelp(){
+        this.set("helpText", null);
       }
 
       writeInChanges(e) {

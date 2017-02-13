@@ -59,7 +59,6 @@
 
       _startMovingMarker(e) {
         this.$.ghost.start(this.getSelectedInfos());
-        this.$.square.hide();
       }
 
       getSelectedInfos() {
@@ -86,7 +85,6 @@
       _stopMovingMarker(e) {
         this.action = null;
         this.replaceChanges(this.$.ghost.end());
-        this.$.square.show();
       }
 
       copy() {

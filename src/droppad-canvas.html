@@ -98,10 +98,13 @@
 
       paste() {
         this.$.ghostCopy.start(this.copyData);
+        this.copyData = this.copyData.map(info => info.makeCopy());//todo need to do this if we paste more than once from the same copy
         const logicPointPos = this.p2p.calcLogicPoint(this._pointerMove.clientX, this._pointerMove.clientY);
         this.$.ghostCopy.move(logicPointPos.x-this.copyCenter.x, logicPointPos.y -this.copyCenter.y);
-        this.dispatchEvent(new CustomEvent("addshapes", {detail: this.$.ghostCopy.end()}));
-        //todo here I need to select the new shapes added..
+        let shapes = this.$.ghostCopy.end();
+        this.dispatchEvent(new CustomEvent("addshapes", {detail: shapes}));
+        this.$.dropSelector.deselectAll();
+        this.selectDelayed(shapes);
       }
 
       handleKeyPress(e) {
@@ -155,12 +158,18 @@
       }
 
       _newShape(e) {
-        let shape = new ShapeInfoObject(e.detail.x, e.detail.y);
-        this.dispatchEvent(new CustomEvent("addshapes", {detail: [shape]}));
+        let shapes = [new ShapeInfoObject(e.detail.x, e.detail.y)];
+        this.dispatchEvent(new CustomEvent("addshapes", {detail: shapes}));
         if (!e.shiftKey)
           this.$.dropSelector.deselectAll();
-        setTimeout(function () { //must wait for the element to appear in the dom.
-          this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + shape.number));
+        this.selectDelayed(shapes);
+      }
+
+      //must wait for the element to appear in the dom.
+      selectDelayed(shapes) {
+        setTimeout(function () {
+          for (let shape of shapes)
+            this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + shape.number));
         }.bind(this), 0);
       }
 

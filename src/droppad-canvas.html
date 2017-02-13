@@ -75,9 +75,9 @@
         let ms = e.detail;
         switch (ms.action) {
           case "scale":
-            return this.$.ghost.scaleDirection(ms.percentX, ms.percentY, ms.direction);
+            return this.$.ghost.scaleDirection(ms.percentX, ms.percentY, ms.direction, ms.box);
           case "rotate":
-            return this.$.ghost.rotate(ms.angle);
+            return this.$.ghost.rotate(ms.angle, ms.box);
           case "move":
             return this.$.ghost.move(ms.xMove, ms.yMove);
         }

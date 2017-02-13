@@ -237,6 +237,8 @@
         }
         dims.width = dims.right - dims.left;
         dims.height = dims.bottom - dims.top;
+        dims.centerX = dims.left + dims.width / 2;
+        dims.centerY = dims.top + dims.height / 2;
         return p2p.makeLogical(dims);
       }
 
@@ -346,7 +348,16 @@
         const scaleX = movX / this.groupOfShapes.width;
         const scaleY = movY / this.groupOfShapes.height;
         const angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
-        return {xMove: movX, yMove: movY, percentX: scaleX, percentY: scaleY, angle: angle - this.startAngle, direction: this.direction, action: this.action};
+        return {
+          xMove: movX,
+          yMove: movY,
+          percentX: scaleX,
+          percentY: scaleY,
+          angle: angle - this.startAngle,
+          direction: this.direction,
+          action: this.action,
+          box: this.groupOfShapes
+        };
       }
 
       //todo this could use some work..

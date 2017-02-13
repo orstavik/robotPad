@@ -27,10 +27,6 @@
         return {
           properties: {
             originals: Array,
-            box: {
-              type: Object,
-              computed: "_updateGroupOfShapes(originals)"
-            },
             infos: {
               type: Array,
               value: []
@@ -51,41 +47,17 @@
         return infos;
       }
 
-      _updateGroupOfShapes(infos) {
-        let box = {};
-        if (!infos || infos.length == 0)
-          return null;
-        for (let info of infos) {
-          box.left = Math.min(box.left || Number.MAX_VALUE, info.x);
-          box.top = Math.min(box.top || Number.MAX_VALUE, info.y);
-          box.right = Math.max(box.right || -Number.MAX_VALUE, info.x);
-          box.bottom = Math.max(box.bottom || -Number.MAX_VALUE, info.y);
-        }
-        box.width = box.right - box.left;
-        box.height = box.bottom - box.top;
-        box.centerX = box.left + box.width / 2;
-        box.centerY = box.top + box.height / 2;
-        return box;
-      }
-
-      makeACopy() {
-        let clone = Object.assign({}, this.box);
-        clone.infos = this.infos.map(info => info.makeACopy(0, 0));
-        return clone;
-      }
-
       move(xMove, yMove) {
         this.set("infos", this.originals.map(info => info.move(xMove, yMove)));
       }
 
-      rotate(angle) {
-        let center = {x: this.box.centerX, y: this.box.centerY};
-        this.set("infos", this.originals.map(info =>
-          info.rotatePositionFromExternalPoint(center, angle)));
+      rotate(angle, box) {
+        let center = {x: box.centerX, y: box.centerY};
+        this.set("infos", this.originals.map(info => info.rotatePositionFromExternalPoint(center, angle)));
       }
 
-      scaleDirection(percentX, percentY, direction) {
-        this.set("infos", this.originals.map(info => info.scaleInBox(percentX, percentY, this.box, direction)));
+      scaleDirection(percentX, percentY, direction, box) {
+        this.set("infos", this.originals.map(info => info.scaleInBox(percentX, percentY, box, direction)));
       }
     }
     customElements.define(GroupOfShapes.is, GroupOfShapes);

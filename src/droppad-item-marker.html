@@ -159,7 +159,12 @@
       }
     </style>
     <div id="marker" hidden$="[[hidden]]"
-         style$="left: [[groupOfShapes.left]]px; top: [[groupOfShapes.top]]px; width:  [[groupOfShapes.width]]px; height: [[groupOfShapes.height]]px;">
+         style$="
+         left: [[groupOfShapes.left]]px;
+         top: [[groupOfShapes.top]]px;
+         width:  [[groupOfShapes.width]]px;
+         height: [[groupOfShapes.height]]px;
+         [[cssMatrix]]">
       <div id="nw" class="scale corner"></div>
       <div id="ne" class="scale corner"></div>
       <div id="sw" class="scale corner"></div>
@@ -211,22 +216,66 @@
             },
             hidden: {
               type: Boolean,
-              value: false
+              computed: "_hide(items)"
+            },
+            action: String,
+            direction: String,
+            changes: {
+              type: Object,
+              value: null
+            },
+            cssMatrix: {
+              type: String,
+              computed: "_changeStyle(changes, action, direction)"
             }
           }
         }
+      }
+
+      _changeStyle(changes, action, direction){
+        if (!changes)
+          return "";
+        if (action == "rotate")
+          return "transform: rotate("+changes.angle+"rad);";
+        if (action == "scale"){
+          if (direction == "nw")
+            return "transform-origin: 100% 100%; "+
+              "transform: scaleX("+(1-changes.percentX)+") scaleY("+(1-changes.percentY)+");";
+          if (direction == "se")
+            return "transform-origin: 0% 0%; "+
+              "transform: scaleX("+(1+changes.percentX)+") scaleY("+(1+changes.percentY)+");";
+          if (direction == "ne")
+            return "transform-origin: 0% 100%; "+
+              "transform: scaleX("+(1+changes.percentX)+") scaleY("+(1-changes.percentY)+");";
+          if (direction == "sw")
+            return "transform-origin: 100% 0%; "+
+              "transform: scaleX("+(1-changes.percentX)+") scaleY("+(1+changes.percentY)+");";
+          if (direction == "s")
+            return "transform-origin: 50% 0%; "+
+              "transform: scaleY("+(1+changes.percentY)+");";
+          if (direction == "n")
+            return "transform-origin: 50% 100%; "+
+              "transform: scaleY("+(1-changes.percentY)+");";
+          if (direction == "e")
+            return "transform-origin: 0% 50%; "+
+              "transform: scaleX("+(1+changes.percentX)+");";
+          if (direction == "w")
+            return "transform-origin: 100% 50%; "+
+              "transform: scaleX("+(1-changes.percentX)+");";
+        }
+        if (action == "move")
+          return "transform: translate("+changes.xMove+"px, "+changes.yMove+"px);";
       }
 
       _isSingle(items){
         return items.length ==1;
       }
 
+      _hide(items) {
+        return !items || items.length == 0;
+      }
+
       _calcRectangle(items, p2p) {
-        if (!items || items.length == 0){
-          this.set("hidden", true);
-          return null;
-        }
-        this.set("hidden", false);
         let dims = {};
         for (let item of items) {
           let next = item.getBoundingClientRect();
@@ -285,14 +334,6 @@
         this.notifyPath("items");
       }
 
-      show() {
-        this.set("hidden", false);
-      }
-
-      hide() {
-        this.set("hidden", true);
-      }
-
       _pointerDown(e) {
         DroppadItemMarker._cancelPropDefault(e);
         this.setPointerCapture(e.pointerId);
@@ -301,14 +342,18 @@
         this.groupCenter = DroppadItemMarker.getScreenCenter(this.$.marker);
         this.start = {x: e.clientX, y: e.clientY};
         this.startAngle = Math.atan2(this.start.y - this.groupCenter.y, this.start.x - this.groupCenter.x);
-        this.direction = e.target.id;
-        this.action = this.setMoveAction(e);
+        this.set("direction", e.target.id);
+        this.set("action", this.setMoveAction(e));
+        this.set("changes", null);
         this.dispatchEvent(new CustomEvent("track-start", null));
       }
 
       _pointerMove(e) {
         DroppadItemMarker._cancelPropDefault(e);
         let ms = this.calculateTrackMovements(e);
+        ms.direction = this.direction;
+        ms.action = this.action;
+        ms.box = this.groupOfShapes;
         this.doSnapping(ms);
         this.dispatchEvent(new CustomEvent("track-move", {detail: ms}));
       }
@@ -319,6 +364,9 @@
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
         this.dispatchEvent(new CustomEvent("track-end", null));
+        this.set("changes", null);
+        this.set("action", null);
+        this.set("direction", null);
       }
 
       static _cancelPropDefault(e) {
@@ -348,16 +396,15 @@
         const scaleX = movX / this.groupOfShapes.width;
         const scaleY = movY / this.groupOfShapes.height;
         const angle = Math.atan2(e.clientY - this.groupCenter.y, e.clientX - this.groupCenter.x);
-        return {
+        const changes = {
           xMove: movX,
           yMove: movY,
           percentX: scaleX,
           percentY: scaleY,
           angle: angle - this.startAngle,
-          direction: this.direction,
-          action: this.action,
-          box: this.groupOfShapes
         };
+        this.set("changes", changes);
+        return changes;
       }
 
       //todo this could use some work..

@@ -361,10 +361,12 @@
           ms.percentX = 0;
         if (Math.abs(ms.xMove) < 6 && Math.abs(ms.yMove) < 6)
           ms.xMove = ms.yMove = 0;
-        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"] || !this.singleGroup) {
+        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"]) {
           ms.xMove = ms.yMove;
           ms.percentX = ms.percentY;
         }
+        if (ms.action == "scale" && !this.singleGroup)
+          ms.percentX = ms.percentY;
       }
 
       static getScreenCenter(elem) {

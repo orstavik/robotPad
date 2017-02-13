@@ -216,30 +216,28 @@
           return "transform: translate(" + changes.xMove + "px, " + changes.yMove + "px) rotate(" + startAngle2 + "rad);";
         if (action != "scale")
           return "";
+        return DroppadItemMarker.textToCssTransformOrigin(direction) +
+            "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+      }
+
+      static textToCssTransformOrigin(direction){
         if (direction == "nw")
-          return "transform-origin: 100% 100%; " +
-            "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+          return "transform-origin: 100% 100%; ";
         if (direction == "se")
-          return "transform-origin: 0% 0%; " +
-            "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+          return "transform-origin: 0% 0%; ";
         if (direction == "ne")
-          return "transform-origin: 0% 100%; " +
-            "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+          return "transform-origin: 0% 100%; ";
         if (direction == "sw")
-          return "transform-origin: 100% 0%; " +
-            "transform: scaleX(" + (1 + changes.percentX) + ") scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+          return "transform-origin: 100% 0%; ";
         if (direction == "s")
-          return "transform-origin: 50% 0%; " +
-            "transform: scaleY(" + (1 + changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+          return "transform-origin: 50% 0%; ";
         if (direction == "n")
-          return "transform-origin: 50% 100%; " +
-            "transform: scaleY(" + (1 - changes.percentY) + ") rotate(" + startAngle2 + "rad);";
+          return "transform-origin: 50% 100%; ";
         if (direction == "e")
-          return "transform-origin: 0% 50%; " +
-            "transform: scaleX(" + (1 + changes.percentX) + ") rotate(" + startAngle2 + "rad);";
+          return "transform-origin: 0% 50%; ";
         if (direction == "w")
-          return "transform-origin: 100% 50%; " +
-            "transform: scaleX(" + (1 - changes.percentX) + ") rotate(" + startAngle2 + "rad);";
+          return "transform-origin: 100% 50%; ";
+        return "";
       }
 
       _isSingle(items){

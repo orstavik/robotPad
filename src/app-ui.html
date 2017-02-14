@@ -66,7 +66,6 @@
 
       <!--on-new-sketch="_madeNewSketch"-->
       <app-ui-namelabel id="namelabel" uid="[[_user.uid]]"></app-ui-namelabel>
-      <app-ui-sketchlist id="sketchlist" uid="[[_user.uid]]" on-load-sketch="_loadSketch"></app-ui-sketchlist>
 
       <tools-button icon="icons:build" active="{{toolsOpen}}">
             <grow-child-button menu="Json" child-button icon="icons:settings-ethernet">
@@ -83,6 +82,7 @@
 
         <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
             <app-login on-sign-in="_signIn" on-sign-out="_signOut" on-changed-user-data="_changedUserData"></app-login>
+            <app-ui-sketchlist id="sketchlist" uid="[[_user.uid]]" on-load-sketch="_loadSketch"></app-ui-sketchlist>
         </grow-button>
 
         <!--<grow-button id="help" icon="help-outline">

@@ -91,15 +91,14 @@
       #rotate:hover { cursor: ns-resize; }
       #move:hover { cursor: move; }
       #marker:hover { cursor: move; }
-
-      .nw { transform-origin: 100% 100%; }
-      .se { transform-origin: 0 0; }
-      .ne { transform-origin: 0 100%; }
-      .sw { transform-origin: 100% 0; }
-      .s { transform-origin: 50% 0; }
-      .n { transform-origin: 50% 100%; }
-      .e { transform-origin: 0 50%; }
-      .w { transform-origin: 100% 50%; }
+      /*.nw { transform-origin: 100% 100%; }*/
+      /*.se { transform-origin: 0 0; }*/
+      /*.ne { transform-origin: 0 100%; }*/
+      /*.sw { transform-origin: 100% 0; }*/
+      /*.s { transform-origin: 50% 0; }*/
+      /*.n { transform-origin: 50% 100%; }*/
+      /*.e { transform-origin: 0 50%; }*/
+      /*.w { transform-origin: 100% 50%; }*/
 
     </style>
     <div id="marker" hidden$="[[!box]]" class$="[[direction]]" style$="
@@ -107,7 +106,7 @@
          top: [[box.top]]px;
          width:  [[box.width]]px;
          height: [[box.height]]px;
-         transform: rotate([[box.angle]]rad);">
+         [[matrix]]">
       <div id="nw" class="scale corner"></div>
       <div id="ne" class="scale corner"></div>
       <div id="sw" class="scale corner"></div>
@@ -134,37 +133,25 @@
             box: Object,
             action: String,
             direction: String,
-            changes: {
-              type: Object,
-              observer: "changeStyle"
-            }
+            matrix: String,
           }
         }
       }
 
-      changeStyle(changes) {
-        if (!changes)
-          return;
-        changes = this.filterChanges(changes);
-        let trans = "";
-        if (changes.xMove)
-          trans += " translate(" + changes.xMove + "px, " + changes.yMove + "px) ";
-        if (changes.percentX)
-          trans += " scaleX(" + (1 + changes.percentX) + ") ";
-        if (changes.percentY)
-          trans += " scaleY(" + (1 + changes.percentY) + ") ";
-        if (changes.angle)
-          trans += " rotate(" + changes.angle + "rad);";
-        return this.$.marker.style.transform = trans;
-      }
-      filterChanges(ms) {
-        if (ms.action == "rotate")
-          return {angle: this.box.angle + ms.angle};
-        if (ms.action == "move")
-          return {xMove: ms.xMove, yMove: ms.yMove, angle: this.box.angle};
-        if (ms.action == "scale")
-          return {percentX: ms.percentX, percentY: ms.percentY, angle: this.box.angle};
-        return {};
+      _makeMatrix(changes, box) {
+        let rad = (box.angle || 0) + (changes.angle || 0);
+        let w = 1 + (changes.percentX || 0);
+        let h = 1 + (changes.percentY || 0);
+        let x = changes.xMove || 0;
+        let y = changes.yMove || 0;
+        const matrix = [
+          w * Math.cos(rad),
+          w * Math.sin(rad),
+          -h * Math.sin(rad),
+          h * Math.cos(rad),
+          x,
+          y];
+        return "transform: matrix(" + matrix.join(',') + ");";
       }
 
       connectedCallback() {
@@ -182,20 +169,57 @@
         this.startAngle = ItemMarker.calcAngle(this.box.center, this.start);
         this.set("direction", e.target.id);
         this.set("action", this.setMoveAction(e));
-        this.set("changes", null);
+        this.set("matrix", null);
         this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: this.action}));
       }
 
       _pointerMove(e) {
         ItemMarker._cancelPropDefault(e);
-        const logicPointPos = this.p2p.calcLogicPoint(e.clientX, e.clientY);
-        let ms = this.calculateTrackMovements(logicPointPos, this.start, this.startAngle);
+        let newPos = this.p2p.calcLogicPoint(e.clientX, e.clientY);
+        newPos = this.doSnappingOnPointer(newPos, this.start);
+        let ms = this.calculateEventData(this.start, newPos, this.box, this.startAngle, this.action, this.direction);
         ms.direction = this.direction;
         ms.action = this.action;
         ms.box = this.box;
-        this.doSnapping(ms);
-        this.set("changes", ms);
+        this.set("matrix", this._makeMatrix(ms, this.box));
         this.dispatchEvent(new CustomEvent("track-move", {detail: ms, composed: true, bubbles: true}));
+      }
+
+      calculateEventData(start, newPos, box, startAngle, action, direction) {
+        if (action == "scale") {
+          if (direction.indexOf("n") < 0 && direction.indexOf("s") < 0)
+            newPos.y = start.y;
+          if (direction.indexOf("e") < 0 && direction.indexOf("w") < 0)
+            newPos.x = start.x;
+
+          let ms = {
+            percentX: (newPos.x - start.x) / box.width,
+            percentY: (newPos.y - start.y) / box.height
+          };
+          ms.yMove = box.height/2 * ms.percentY;
+          ms.xMove = box.width/2 * ms.percentX;
+
+          if (direction.indexOf("n") >= 0)
+            ms.percentY *= -1;
+          if (direction.indexOf("w") >= 0)
+            ms.percentX *= -1;
+
+//          if (direction == "n") {
+//            ms.percentY = -ms.percentY;
+//            ms.percentX = 0;
+//            ms.yMove = yMove;
+//            let nx = (Math.cos(startAngle)*0)+(Math.sin(startAngle)*yMove);
+//            let ny = (Math.cos(startAngle)*yMove)-(Math.sin(startAngle)*0);
+//            ms.yMove = nx;
+//            ms.xMove = ny;
+//          }
+
+          return ms;
+        }
+        if (action == "rotate")
+          return {angle: ItemMarker.calcAngle(box.center, newPos) - startAngle};
+        //if (this.action == "move")
+        return {xMove: newPos.x - start.x, yMove: newPos.y - start.y};
       }
 
       _pointerUp(e) {
@@ -204,7 +228,7 @@
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
         this.dispatchEvent(new CustomEvent("track-end", {composed: true, bubbles: true}));
-        this.set("changes", null);
+        this.set("matrix", null);
         this.set("action", null);
         this.set("direction", null);
       }
@@ -230,36 +254,12 @@
         return "move";
       }
 
-      calculateTrackMovements(logicPointPos, startPos, startAngle) {
-        const movX = logicPointPos.x - startPos.x;
-        const movY = logicPointPos.y - startPos.y;
-        return {
-          xMove: movX,
-          yMove: movY,
-          percentX: movX / this.box.width,
-          percentY: movY / this.box.height,
-          angle: ItemMarker.calcAngle(this.box.center, logicPointPos) - startAngle,
-        };
-      }
-
-      //todo this could use some work..
-      doSnapping(ms) {
-        if (ms.direction.indexOf("n") >= 0)
-          ms.percentY = -ms.percentY;
-        if (ms.direction.indexOf("w") >= 0)
-          ms.percentX = -ms.percentX;
-        if (ms.direction.indexOf("n") < 0 && ms.direction.indexOf("s") < 0)
-          ms.percentY = 0;
-        if (ms.direction.indexOf("e") < 0 && ms.direction.indexOf("w") < 0)
-          ms.percentX = 0;
-        if (Math.abs(ms.xMove) < 6 && Math.abs(ms.yMove) < 6)
-          ms.xMove = ms.yMove = 0;
-        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"]) {
-          ms.xMove = ms.yMove;
-          ms.percentX = ms.percentY;
-        }
-        if (ms.action == "scale" && !ms.box.isSingle)
-          ms.percentX = ms.percentY;
+      doSnappingOnPointer(point, start) {
+        if (Math.abs(start.x - point.x) < 6 && Math.abs(start.y - point.y) < 6)
+          return start;
+        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"] || !this.box.isSingle)
+          return {x: point.y, y: point.y};
+        return point;
       }
 
       static calcAngle(center, satelite) {

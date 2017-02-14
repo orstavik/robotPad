@@ -35,7 +35,7 @@
                            on-track-end="_stopMovingMarker"></item-marker>
       <group-of-shapes id="ghost" class="copy"></group-of-shapes>
       <group-of-shapes id="ghostCopy"></group-of-shapes>
-      <group-of-shapes id="historyPreview" class="copy"></group-of-shapes>
+      <group-of-shapes id="historyPreview"></group-of-shapes>
     </droppad-canvas-canvas>
   </template>
 
@@ -133,10 +133,13 @@
       }
 
       timeTravel(historicState) {
-        if (historicState)
+        if (historicState){
+          this.$.dropSelector.style.opacity = 0.2;
           this.$.historyPreview.start(historicState);
-        else
+        } else {
+          this.$.dropSelector.style.opacity = 1;
           this.$.historyPreview.end();
+        }
       }
 
       addStyleToSelected(styleName) {

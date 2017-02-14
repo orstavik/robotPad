@@ -7,13 +7,11 @@
         display: block;
         padding: 10%;
       }
-      #scrollbar {
-        border: 2px solid red;
-      }
     </style>
     <div id="scrollbar">
       <template is="dom-repeat" items="[[history.actions]]">
-        <div data-num$="[[index]]" on-pointerenter="_hoverTime" on-pointerout="_hoverTimeOff">[[item.date.toDateString]]</div>
+        <div data-num$="[[index]]" on-pointerenter="_hoverTime" on-pointerout="_hoverTimeOff"
+        title="[[item.date]]">X</div>
       </template>
     </div>
   </template>

@@ -157,6 +157,7 @@
       }
 
       _deselectAll() {
+        this.dispatchEvent(new CustomEvent("deselect"));
         this.$.dropSelector.deselectAll();
       }
 

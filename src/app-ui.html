@@ -85,6 +85,11 @@
         }
       }
 
+      deselect(){
+        this.set("toolsOpen", false);
+        this.set("accountOpen", false);
+      }
+
       _signIn(e) {
         this.set("signed", true);
         this.set("_user", e.detail);

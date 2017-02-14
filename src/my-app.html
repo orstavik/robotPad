@@ -135,6 +135,7 @@
                     on-changeshapes="_changeShapes"
                     on-help-on="showHelp"
                     on-help-off="hideHelp"
+                    on-deselect="_deselect"
     ></droppad-canvas>
 
     <!--<div id="toolbar">
@@ -173,7 +174,7 @@
 
     <!--<key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower> -->
 
-    <app-ui app-name="[[sketchName]]" petals="[[letters]]"
+    <app-ui id="ui" app-name="[[sketchName]]" petals="[[letters]]"
             history="[[history]]" scale="[[scale]]"
             on-new-user="_newUserLoggedIn"
             on-new-sketch="_newSketchSet"
@@ -264,6 +265,9 @@
           let dbPos = firebase.app("droppad").database().ref(path);
           dbPos.push({changed: firebase.database.ServerValue.TIMESTAMP, state: e.detail});
         }
+      }
+      _deselect(){
+        this.$.ui.deselect();
       }
 
       _addShapes(e){

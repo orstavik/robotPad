@@ -1,0 +1,59 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="app-ui-history">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 10%;
+      }
+      #scrollbar {
+        border: 2px solid red;
+      }
+    </style>
+    <div id="scrollbar">
+      <template is="dom-repeat" items="[[history.actions]]">
+        <div data-num$="[[index]]" on-pointerenter="_hoverTime" on-pointerout="_hoverTimeOff">[[item.date.toDateString]]</div>
+      </template>
+    </div>
+  </template>
+
+  <script>
+    class AppUiHistory extends Polymer.Element {
+      static get is() {
+        return "app-ui-history";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            history: StateMachine,
+            preview: {
+              type: Array,
+              notify: true,
+              value: null
+            }
+          }
+        }
+      }
+
+      _hoverTime(e) {
+        let historicState = this.history.getState(Number(e.target.dataset.num));
+        this.dispatchEvent(new CustomEvent("timetravel", {composed: true, bubbles: true, detail: historicState}));
+      }
+      _hoverTimeOff(e) {
+        this.dispatchEvent(new CustomEvent("timetravel", {composed: true, bubbles: true, detail: null}));
+      }
+//
+//      connectedCallback() {
+//        this.addEventListener("wheel", this._scroll.bind(this));
+//        this.$.scrollbar.addEventListener("wheel", this._scroll.bind(this));
+//      }
+//
+//      _scroll(e) {
+//        //todo translate the top of the scrollbar?
+//      }
+    }
+    customElements.define(AppUiHistory.is, AppUiHistory);
+  </script>
+</dom-module>

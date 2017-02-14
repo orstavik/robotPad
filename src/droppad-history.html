@@ -2,23 +2,6 @@
 <link rel="import" href="drop-shape.html">
 
 <dom-module id="droppad-history">
-  <template>
-    <style>
-      :host {
-        display: block;
-        padding: 10%;
-      }
-      #scrollbar {
-        border: 2px solid red;
-      }
-    </style>
-    <div id="scrollbar">
-      <template is="dom-repeat" items="[[history.actions]]">
-        <div data-num$="[[index]]" on-pointerenter="_hoverTime" on-pointerout="_hoverTimeOff">[[item.date.toDateString]]</div>
-      </template>
-    </div>
-  </template>
-
   <script>
     class StateMachine {
       constructor() {
@@ -87,12 +70,8 @@
               type: StateMachine,
               value: function () {
                 return new StateMachine();
-              }
-            },
-            preview: {
-              type: Array,
-              notify: true,
-              value: null
+              },
+              notify: true
             }
           }
         }
@@ -130,25 +109,6 @@
         this.dispatchEvent(new CustomEvent("new-state", {detail: this.history.update(array)}));
         this.notifyPath("history");
       }
-
-      _hoverTime(e) {
-        let historicState = this.history.getState(Number(e.target.dataset.num));
-//        this.set("preview", historicState);
-        this.dispatchEvent(new CustomEvent("timetravel", {detail: historicState}));
-      }
-      _hoverTimeOff(e) {
-//        this.set("preview", null);
-        this.dispatchEvent(new CustomEvent("timetravel", {detail: null}));
-      }
-//
-//      connectedCallback() {
-//        this.addEventListener("wheel", this._scroll.bind(this));
-//        this.$.scrollbar.addEventListener("wheel", this._scroll.bind(this));
-//      }
-//
-//      _scroll(e) {
-//        //todo translate the top of the scrollbar?
-//      }
     }
     customElements.define(DroppadHistory.is, DroppadHistory);
   </script>

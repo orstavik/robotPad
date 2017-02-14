@@ -11,6 +11,9 @@
 <link rel="import" href="grow-child-button.html">
 <link rel="import" href="json-wrapper.html">
 <link rel="import" href="app-ui-history.html">
+<link rel="import" href="color-palette.html">
+<link rel="import" href="key-flower.html">
+
 
 <dom-module id="app-ui">
     <template>
@@ -70,13 +73,8 @@
                 <json-wrapper petals="[[petals]]"></json-wrapper>
             </grow-child-button>
             <grow-child-button menu="Palette" child-button icon="image:color-lens">
-                <div id="testingOne">
-                    1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-                    laborum.
-                </div>
+              <color-palette id="palette" css-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
+              <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]"></key-flower>
             </grow-child-button>
             <grow-child-button menu="History" child-button icon="icons:restore">
               <app-ui-history history="[[history]]"></app-ui-history>
@@ -107,6 +105,7 @@
                 return {
                     properties: {
                         appName: String,
+                        scale: Object,
                         history: StateMachine,
                         petals: Array,
                         toolsOpen: Boolean,

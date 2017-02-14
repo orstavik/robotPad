@@ -8,7 +8,6 @@
 <link rel="import" href="droppad-canvas.html">
 <link rel="import" href="keyboard-listener.html">
 <link rel="import" href="music-clef.html">
-<link rel="import" href="key-flower.html">
 <link rel="import" href="tab-wrapper.html">
 <link rel="import" href="app-ui.html">
 
@@ -172,15 +171,18 @@
       <div class="button" title="Skew the shape: press 'n'"> n</div>
     </div>-->
 
-    <!--<key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower>
-    <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>-->
+    <!--<key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower> -->
 
     <app-ui app-name="[[sketchName]]" petals="[[letters]]"
-            history="[[history]]"
+            history="[[history]]" scale="[[scale]]"
             on-new-user="_newUserLoggedIn"
             on-new-sketch="_newSketchSet"
             on-load-sketch="_loadSketch"
-            on-timetravel="_timetravel"></app-ui>
+            on-timetravel="_timetravel"
+            on-new-colors="_newColors"
+            on-new-color-scale="_newColorScale"
+            on-select-color="colorSelected"
+    ></app-ui>
 
     <!--<iron-selector attr-for-selected="select" multi>
       <tab-wrapper title="JSON" select="1">
@@ -201,6 +203,7 @@
     </iron-selector>-->
 
     <div id="helpText" hidden$="[[!helpText]]">[[helpText]]</div>
+    <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
     <keyboard-listener on-key-down="_checkKey" held-keys="{{heldKeys}}"></keyboard-listener>
 
@@ -216,12 +219,7 @@
       static get config() {
         return {
           properties: {
-            colors: Array,
             letters: Array,
-            coloredScale: {
-              type: Array,
-              observer: "colorScaleChanged"
-            },
             heldKeys: Array,
             sketchName: String,
             history: history,
@@ -235,6 +233,24 @@
 
       connectedCallback() {
         super.connectedCallback();
+      }
+
+      _newColors(e){
+        let colors = e.detail;
+        for (let i = 0; i < colors.length; i++)
+          this.style.setProperty('--tone-color-' + i, colors[i]);
+      }
+
+      _newColorScale(e){
+        let coloredScale = e.detail;
+        for (let i = 0; i < coloredScale.length; i++){
+          this.style.setProperty('--tone-tone-' + i, coloredScale[i].color);
+          this.style.setProperty('--tone-rotation-' + i, "rotate("+coloredScale[i].rotation+"deg)");
+        }
+      }
+
+      colorSelected(e) {
+        this.$.shapeSelector.addStyleToSelected(e.detail);
       }
 
       _newSketchSet(e){
@@ -322,15 +338,6 @@
 
       setStyleName(e) {
         this.$.shapeSelector.addStyleToSelected(e.target.id);
-      }
-
-      colorScaleChanged() {
-        for (let i = 0; i < this.coloredScale.length; i++){
-          this.style.setProperty('--tone-tone-' + i, this.coloredScale[i].color);
-          this.style.setProperty('--tone-rotation-' + i, "rotate("+this.coloredScale[i].rotation+"deg)");
-        }
-        for (let i = 0; i < this.colors.length; i++)
-          this.style.setProperty('--tone-color-' + i, this.colors[i]);
       }
     }
     customElements.define(MyApp.is, MyApp);

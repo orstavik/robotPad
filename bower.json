@@ -14,7 +14,8 @@
     "iron-icons": "PolymerElements/iron-icons#2.0-preview",
     "paper-styles": "PolymerElements/paper-styles#2.0-preview",
     "web-animations-js": "Web-Animations/web-animations-js",
-    "paper-button": "PolymerElements/paper-button#2.0-preview"
+    "paper-button": "PolymerElements/paper-button#2.0-preview",
+    "paper-tabs": "PolymerElements/paper-tabs#2.0-preview"
   },
   "devDependencies": {},
   "resolutions": {

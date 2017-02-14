@@ -7,9 +7,15 @@
       :host {
         display: flex;
         box-sizing: border-box;
-        width: 200px;
+        width: 350px;
         padding: 25px;
         flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .headerRow {
+        display: flex;
+        flex-direction: row;
         align-items: center;
       }
 
@@ -20,7 +26,13 @@
         justify-content: center;
         width: 100px;
         height: 100px;
-        margin-bottom: 10px;
+        margin-right: 20px;
+      }
+
+      .secondCol {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
       }
 
       #accountImage img {
@@ -31,9 +43,9 @@
       }
 
       .accountName {
-        font-size: 20px;
+        font-size: 24px;
         font-weight: 300;
-        margin-bottom: 20px;
+        margin-bottom: 6px;
       }
 
       *[hidden] {
@@ -41,6 +53,8 @@
       }
 
       paper-button {
+        margin: 0;
+        text-align: center;
         font-size: 12px;
       }
 
@@ -53,15 +67,19 @@
     <firebase-auth id="auth" app-name="droppad" user="{{user}}" provider="google"></firebase-auth>
     <firebase-query id="query" app-name="droppad"></firebase-query>
 
+    <div class="headerRow">
+      <div class="firstCol">
+        <div id="accountImage">
+          <img src="[[_userImage]]" alt="anonymous">
+        </div>
+      </div>
 
-    <div id="accountImage">
-      <img src="[[_userImage]]" alt="anonymous">
+      <div class="secondCol">
+        <div class="accountName">[[_userName]]</div>
+        <paper-button id="signIn" raised on-click="_signIn" hidden$="[[_toBool(user)]]">Sign in with Google</paper-button>
+        <paper-button raised on-click="_signOut" hidden$="[[!user]]">Sign out</paper-button>
+      </div>
     </div>
-
-    <div class="accountName">[[_userName]]</div>
-
-    <paper-button id="signIn" raised on-click="_signIn" hidden$="[[_toBool(user)]]">Sign in with Google</paper-button>
-    <paper-button raised on-click="_signOut" hidden$="[[!user]]">Sign out</paper-button>
 
   </template>
   <script>

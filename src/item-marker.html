@@ -113,6 +113,39 @@
 
   <script>
 
+    class MatrixChange {
+      static doStartSnap(point, start) {
+        let nearStartingPoint = Math.abs(start.x - point.x) < 6 && Math.abs(start.y - point.y) < 6;
+        return nearStartingPoint ? start : point;
+      }
+
+      static multiMatrixTom(A, B) {
+        A = [
+          [A[0], A[2], A[4]],
+          [A[1], A[3], A[5]],
+          [0, 0, 1]
+        ];
+        B = [
+          [B[0], B[2], B[4]],
+          [B[1], B[3], B[5]],
+          [0, 0, 1]
+        ];
+        const arr = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+        for (let ai = 0; ai < A.length; ai++) {
+          for (let bj = 0; bj < B[0].length; bj++) {
+            for (let aj = 0; aj < A[0].length; aj++) {
+              for (let bi = 0; bi < B.length; bi++) {
+                if (aj === bi) {
+                  arr[ai][bj] += A[ai][aj] * B[bi][bj];
+                }
+              }
+            }
+          }
+        }
+        return [arr[0][0], arr[1][0], arr[0][1], arr[1][1], arr[0][2], arr[1][2]];
+      }
+    }
+
     class RotateChange {
       constructor(startPoint, center, box) {
         this.start = startPoint;        //don't really need
@@ -128,7 +161,7 @@
       }
 
       change(newPoint, shift) {
-        newPoint = MoveChange.doStartSnap(newPoint, this.start);
+        newPoint = MatrixChange.doStartSnap(newPoint, this.start);
 //        if (shiftIsDown)
 //          rad = this.currentAngle?
 //        if (ctrlIsDown)
@@ -159,7 +192,7 @@
       }
 
       change(newPoint, shift) {
-        newPoint = MoveChange.doStartSnap(newPoint, this.start);
+        newPoint = MatrixChange.doStartSnap(newPoint, this.start);
 //        if (shift)
 //          this.yMove = 0;
 //        if (ctrl)
@@ -193,7 +226,7 @@
       }
 
       change(newPoint, shift) {
-        newPoint = MoveChange.doStartSnap(newPoint, this.start);
+        newPoint = MatrixChange.doStartSnap(newPoint, this.start);
 //        if (shift){
 //          this.percentX = 0;
 //          this.xMove = a little less or more?
@@ -251,43 +284,17 @@
         }
       }
 
-      multiMatrixTom(A, B) {
-        A = [
-          [A[0], A[2], A[4]],
-          [A[1], A[3], A[5]],
-          [0, 0, 1]
-        ];
-        B = [
-          [B[0], B[2], B[4]],
-          [B[1], B[3], B[5]],
-          [0, 0, 1]
-        ];
-        const arr = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-        for (let ai = 0; ai < A.length; ai++) {
-          for (let bj = 0; bj < B[0].length; bj++) {
-            for (let aj = 0; aj < A[0].length; aj++) {
-              for (let bi = 0; bi < B.length; bi++) {
-                if (aj === bi) {
-                  arr[ai][bj] += A[ai][aj] * B[bi][bj];
-                }
-              }
-            }
-          }
-        }
-        return [arr[0][0], arr[1][0], arr[0][1], arr[1][1], arr[0][2], arr[1][2]];
-      }
-
       _makeMatrix(changes, box) {
-        const noMatrix = [1,0,0,1,0,0];
-        let startMatrix = (box && box.angle) ?
-          [Math.cos(box.angle),Math.sin(box.angle),-Math.sin(box.angle),Math.cos(box.angle),0,0]:
-          noMatrix;
-        let changeMatrix = changes ?
-          changes.getMatrix():
-          noMatrix;
-        let mergedMatrices = (changes && changes.action == "scale")?             //scale must be applied after the other changes..
-          this.multiMatrixTom(startMatrix, changeMatrix):
-          this.multiMatrixTom(changeMatrix, startMatrix);
+        if(!changes && !box)
+          return "";
+        if (!box)
+          return "transform: matrix(" + changes.getMatrix().join(',') + ");";
+        let startMatrix = [Math.cos(box.angle),Math.sin(box.angle),-Math.sin(box.angle),Math.cos(box.angle),0,0];
+        if (!changes)
+          return "transform: matrix(" + startMatrix.join(',') + ");";
+        let mergedMatrices = (changes.action == "scale")?             //scale must be applied after the other changes..
+          MatrixChange.multiMatrixTom(startMatrix, changes.getMatrix()):
+          MatrixChange.multiMatrixTom(changes.getMatrix(), startMatrix);
         return "transform: matrix(" + mergedMatrices.join(',') + ");";
       }
 

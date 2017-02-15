@@ -168,20 +168,24 @@
         return [arr[0][0],arr[1][0],arr[0][1], arr[1][1],arr[0][2],arr[1][2] ];
       }
 
-
       _makeMatrix(changes, box) {
         changes = changes || {};
         box = box || {};
 
         const startMatrix = this.turn5to6(box);
-        const matrixWithoutStart = this.turn5to6(changes);
+        const changeMatrix = this.turn5to6(changes);
         let mergedMatrices;
-        if (changes.percentX || changes.percentY)             //rotation must be applied last..
-          mergedMatrices = this.multiMatrixTom(startMatrix, matrixWithoutStart);
+        if (changes.percentX || changes.percentY)             //scale must be applied after the other changes..
+          mergedMatrices = this.multiMatrixTom(startMatrix, changeMatrix);
         else
-          mergedMatrices = this.multiMatrixTom(matrixWithoutStart, startMatrix);
+          mergedMatrices = this.multiMatrixTom(changeMatrix, startMatrix);
 
 
+        this.verify(box, changes, mergedMatrices);
+        return "transform: matrix(" + mergedMatrices.join(',') + ");";
+      }
+
+      verify(box, changes, mergedMatrices) {
         let rad = (box.angle || 0) + (changes.angle || 0);
         let w = 1 + (changes.percentX || 0);
         let h = 1 + (changes.percentY || 0);
@@ -195,11 +199,6 @@
           x,
           y];
 
-        this.verify(matrix, mergedMatrices);
-        return "transform: matrix(" + mergedMatrices.join(',') + ");";
-      }
-
-      verify(matrix, mergedMatrices) {
         console.log("__test__");
         console.log(matrix);
         console.log(mergedMatrices);
@@ -242,7 +241,7 @@
       _pointerMove(e) {
         ItemMarker._cancelPropDefault(e);
         let newPos = this.p2p.calcLogicPoint(e.clientX, e.clientY);
-        newPos = this.doSnappingOnPointer(newPos, this.start);
+        newPos = this.doSnappingOnPointer(newPos, this.start, this.direction, this.action, this.box.angle);
         let ms = this.calculateEventData(this.start, newPos, this.box, this.startAngle, this.action, this.direction);
         ms.direction = this.direction;
         ms.action = this.action;
@@ -253,11 +252,6 @@
 
       calculateEventData(start, newPos, box, startAngle, action, direction) {
         if (action == "scale") {
-          if (direction.indexOf("n") < 0 && direction.indexOf("s") < 0)
-            newPos.y = start.y;
-          if (direction.indexOf("e") < 0 && direction.indexOf("w") < 0)
-            newPos.x = start.x;
-
           //todo have to change the x and y here based on the sin and cos of the startAngle
           let ms = {
             percentX: (newPos.x - start.x) / box.width,
@@ -298,6 +292,24 @@
         return this.box.center;
       }
 
+      doSnappingOnPointer(point, start, direction, action, angle) {
+        if (Math.abs(start.x - point.x) < 6 && Math.abs(start.y - point.y) < 6)
+          return start;
+        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"] || !this.box.isSingle)
+          return {x: point.y, y: point.y};
+        if (action != "scale")
+          return point;
+        if (direction.indexOf("n") < 0 && direction.indexOf("s") < 0){
+          point.y = start.y;
+          //todo adjust the point.y so that it is on the x-axis of the rotated item marker. don't know how to..
+          let reducePointY = angle * point.y-start.y / angle * point.x-start.x;
+        } else if (direction.indexOf("e") < 0 && direction.indexOf("w") < 0){
+          point.x = start.x;
+          //todo adjust the point.y so that it is on the x-axis of the rotated item marker
+        }
+        return point;
+      }
+
       setMoveAction(e) {
         if (this.heldKeys["KeyR"])
           return "rotate";
@@ -308,14 +320,6 @@
         if (e.target.id == "rotate")
           return "rotate";
         return "move";
-      }
-
-      doSnappingOnPointer(point, start) {
-        if (Math.abs(start.x - point.x) < 6 && Math.abs(start.y - point.y) < 6)
-          return start;
-        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"] || !this.box.isSingle)
-          return {x: point.y, y: point.y};
-        return point;
       }
 
       static calcAngle(center, satelite) {

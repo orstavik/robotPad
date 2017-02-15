@@ -92,7 +92,7 @@
       #move:hover { cursor: move; }
       #marker:hover { cursor: move; }
     </style>
-    <div id="marker" hidden$="[[!box]]" class$="[[direction]]" style$="
+    <div id="marker" hidden$="[[!box]]" style$="
          left: [[box.left]]px;
          top: [[box.top]]px;
          width:  [[box.width]]px;
@@ -181,6 +181,10 @@
           0
         ];
       }
+
+      subdueMatrix(matrix) {
+        return MatrixChange.multiMatrixTom(this.getMatrix(), matrix);
+      }
     }
 
     class MoveChange {
@@ -205,9 +209,8 @@
         return [1, 0, 0, 1, this.xMove, this.yMove];
       }
 
-      static doStartSnap(point, start) {
-        let nearStartingPoint = Math.abs(start.x - point.x) < 6 && Math.abs(start.y - point.y) < 6;
-        return nearStartingPoint ? start : point;
+      subdueMatrix(matrix) {
+        return MatrixChange.multiMatrixTom(this.getMatrix(), matrix);
       }
     }
 
@@ -263,6 +266,10 @@
           this.xMove,
           this.yMove];
       }
+
+      subdueMatrix(matrix) {
+        return MatrixChange.multiMatrixTom(matrix, this.getMatrix());
+      }
     }
 
     class ItemMarker extends Polymer.Element {
@@ -285,17 +292,14 @@
       }
 
       _makeMatrix(changes, box) {
-        if(!changes && !box)
+        if (!changes && !box)
           return "";
         if (!box)
           return "transform: matrix(" + changes.getMatrix().join(',') + ");";
-        let startMatrix = [Math.cos(box.angle),Math.sin(box.angle),-Math.sin(box.angle),Math.cos(box.angle),0,0];
+        let startMatrix = [Math.cos(box.angle), Math.sin(box.angle), -Math.sin(box.angle), Math.cos(box.angle), 0, 0];
         if (!changes)
           return "transform: matrix(" + startMatrix.join(',') + ");";
-        let mergedMatrices = (changes.action == "scale")?             //scale must be applied after the other changes..
-          MatrixChange.multiMatrixTom(startMatrix, changes.getMatrix()):
-          MatrixChange.multiMatrixTom(changes.getMatrix(), startMatrix);
-        return "transform: matrix(" + mergedMatrices.join(',') + ");";
+        return "transform: matrix(" + changes.subdueMatrix(startMatrix).join(',') + ");";
       }
 
       connectedCallback() {

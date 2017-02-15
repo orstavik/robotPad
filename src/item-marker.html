@@ -91,15 +91,6 @@
       #rotate:hover { cursor: ns-resize; }
       #move:hover { cursor: move; }
       #marker:hover { cursor: move; }
-      /*.nw { transform-origin: 100% 100%; }*/
-      /*.se { transform-origin: 0 0; }*/
-      /*.ne { transform-origin: 0 100%; }*/
-      /*.sw { transform-origin: 100% 0; }*/
-      /*.s { transform-origin: 50% 0; }*/
-      /*.n { transform-origin: 50% 100%; }*/
-      /*.e { transform-origin: 0 50%; }*/
-      /*.w { transform-origin: 100% 50%; }*/
-
     </style>
     <div id="marker" hidden$="[[!box]]" class$="[[direction]]" style$="
          left: [[box.left]]px;
@@ -136,17 +127,18 @@
         return Math.atan2(satelite.y - center.y, satelite.x - center.x);
       }
 
-      change(newPoint) {
+      change(newPoint, shift) {
+        newPoint = MoveChange.doStartSnap(newPoint, this.start);
+//        if (shiftIsDown)
+//          rad = this.currentAngle?
+//        if (ctrlIsDown)
+//          rad = this.angle snap to nearest 30degree?
         this.currentAngle = RotateChange.calcAngle(this.center, newPoint);
         this.angle = this.currentAngle - this.startAngle;
       }
 
       getMatrix() {
         let rad = this.angle;
-//        if (shiftIsDown)
-//          rad = this.currentAngle?
-//        if (ctrlIsDown)
-//          rad = this.angle snap to nearest 30degree?
         return [
           Math.cos(rad),
           Math.sin(rad),
@@ -166,17 +158,23 @@
         this.yMove = 0;
       }
 
-      change(newPoint) {
+      change(newPoint, shift) {
+        newPoint = MoveChange.doStartSnap(newPoint, this.start);
+//        if (shift)
+//          this.yMove = 0;
+//        if (ctrl)
+//          this.xMove = 0;
         this.xMove = newPoint.x - this.start.x;
         this.yMove = newPoint.y - this.start.y;
       }
 
       getMatrix() {
-//        if (shift)
-//          return [1, 0, 0, 1, 0, this.yMove];
-//        if (ctrl)
-//          return [1, 0, 0, 1, this.xMove, 0];
         return [1, 0, 0, 1, this.xMove, this.yMove];
+      }
+
+      static doStartSnap(point, start) {
+        let nearStartingPoint = Math.abs(start.x - point.x) < 6 && Math.abs(start.y - point.y) < 6;
+        return nearStartingPoint ? start : point;
       }
     }
 
@@ -194,7 +192,17 @@
         this.yMove = 0;
       }
 
-      change(newPoint) {
+      change(newPoint, shift) {
+        newPoint = MoveChange.doStartSnap(newPoint, this.start);
+//        if (shift){
+//          this.percentX = 0;
+//          this.xMove = a little less or more?
+//        }
+//        if (ctrl){
+//          this.percentY = 0;
+//          this.yMove = a little less or more?
+//        }
+
         let xMove = newPoint.x - this.start.x;
         let yMove = newPoint.y - this.start.y;
 
@@ -214,14 +222,6 @@
       }
 
       getMatrix() {
-//        if (shift){
-//          this.percentX = 0;
-//          this.xMove = a little less or more?
-//        }
-//        if (ctrl){
-//          this.percentY = 0;
-//          this.yMove = a little less or more?
-//        }
         return [
           1 + this.percentX,
           0,
@@ -231,59 +231,6 @@
           this.yMove];
       }
     }
-
-//    class ChangeObject {
-//      constructor(box, direction, action) {
-//        this.box = box;
-//        this.direction = direction;
-//        this.action = action;
-//      }
-//
-//      move(x, y) {
-//        this.xMove = x;
-//        this.yMove = y;
-//      }
-//
-//      rotate(rad) {
-//        this.angle = rad;
-//      }
-//
-//      //todo make the pointer movement follow the angle of the marker box = this.box.angle
-//      scale(xMove, yMove) {
-//        if (this.direction.indexOf("n") < 0 && this.direction.indexOf("s") < 0)
-//          yMove = 0;
-//        if (this.direction.indexOf("e") < 0 && this.direction.indexOf("w") < 0)
-//          xMove = 0;
-//
-//        this.percentX = xMove / this.box.width;
-//        this.percentY = yMove / this.box.height;
-//        this.yMove = this.box.height / 2 * this.percentY;
-//        this.xMove = this.box.width / 2 * this.percentX;
-//        if (this.direction.indexOf("n") >= 0)
-//          this.percentY *= -1;
-//        if (this.direction.indexOf("w") >= 0)
-//          this.percentX *= -1;
-//      }
-//
-//      isScaling() {
-//        return (this.percentX || this.percentX);
-//      }
-//
-//      getMatrix() {
-//        let rad = (this.angle || 0);
-//        let w = 1 + (this.percentX || 0);
-//        let h = 1 + (this.percentY || 0);
-//        let x = this.xMove || 0;
-//        let y = this.yMove || 0;
-//        return [
-//          w * Math.cos(rad),
-//          w * Math.sin(rad),
-//          -h * Math.sin(rad),
-//          h * Math.cos(rad),
-//          x,
-//          y];
-//      }
-//    }
 
     class ItemMarker extends Polymer.Element {
       static get is() {
@@ -295,7 +242,6 @@
           properties: {
             p2p: PointToPoint,
             box: Object,
-//            action: String,
             change2: Object,
             matrix: {
               type: String,
@@ -332,57 +278,17 @@
       }
 
       _makeMatrix(changes, box) {
-        box = box || {};
-
-        const startMatrix = this.turn5to6(box);
-        let changeMatrix;
-        if (changes)
-          changeMatrix = changes.getMatrix();
-        else
-          changeMatrix = this.turn5to6(changes = {});
-        let mergedMatrices;
-        if (changes.percentX || changes.percentY)             //scale must be applied after the other changes..
-          mergedMatrices = this.multiMatrixTom(startMatrix, changeMatrix);
-        else
-          mergedMatrices = this.multiMatrixTom(changeMatrix, startMatrix);
-
-
-        this.verify(box, changes, mergedMatrices);
+        const noMatrix = [1,0,0,1,0,0];
+        let startMatrix = (box && box.angle) ?
+          [Math.cos(box.angle),Math.sin(box.angle),-Math.sin(box.angle),Math.cos(box.angle),0,0]:
+          noMatrix;
+        let changeMatrix = changes ?
+          changes.getMatrix():
+          noMatrix;
+        let mergedMatrices = (changes && changes.action == "scale")?             //scale must be applied after the other changes..
+          this.multiMatrixTom(startMatrix, changeMatrix):
+          this.multiMatrixTom(changeMatrix, startMatrix);
         return "transform: matrix(" + mergedMatrices.join(',') + ");";
-      }
-
-      verify(box, changes, mergedMatrices) {
-        let rad = (box.angle || 0) + (changes.angle || 0);
-        let w = 1 + (changes.percentX || 0);
-        let h = 1 + (changes.percentY || 0);
-        let x = changes.xMove || 0;
-        let y = changes.yMove || 0;
-        const matrix = [
-          w * Math.cos(rad),
-          w * Math.sin(rad),
-          -h * Math.sin(rad),
-          h * Math.cos(rad),
-          x,
-          y];
-
-        console.log("__test__");
-        console.log(matrix);
-        console.log(mergedMatrices);
-      }
-
-      turn5to6(changes) {
-        let rad = (changes.angle || 0);
-        let w = 1 + (changes.percentX || 0);
-        let h = 1 + (changes.percentY || 0);
-        let x = changes.xMove || 0;
-        let y = changes.yMove || 0;
-        return [
-          w * Math.cos(rad),
-          w * Math.sin(rad),
-          -h * Math.sin(rad),
-          h * Math.cos(rad),
-          x,
-          y];
       }
 
       connectedCallback() {
@@ -396,38 +302,26 @@
         this.setPointerCapture(e.pointerId);
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);
-        this.start = this.p2p.calcLogicPoint(e.clientX, e.clientY);
+        let start = this.p2p.calcLogicPoint(e.clientX, e.clientY);
         let action = this.setMoveAction(e);
         if (action == "rotate")
-          this.set("change2", new RotateChange(this.start, this.box.center, this.box));
+          this.set("change2", new RotateChange(start, this.box.center, this.box));
         else if (action == "move")
-          this.set("change2", new MoveChange(this.start));
+          this.set("change2", new MoveChange(start));
         else if (action == "scale")
-          this.set("change2", new ScaleChange(this.start, this.box.width, this.box.height, e.target.id, this.box));
-        this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: this.action}));
+          this.set("change2", new ScaleChange(start, this.box.width, this.box.height, e.target.id, this.box));
+        this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: action}));
       }
 
       _pointerMove(e) {
         ItemMarker._cancelPropDefault(e);
         let newPos = this.p2p.calcLogicPoint(e.clientX, e.clientY);
-        //todo first I need to calculate the mouse movement, both in terms of the screen coordinates, and in relation to the box.
-        newPos = this.doSnappingOnPointer(newPos, this.start);
-        this.change2.change(newPos);
+        let shift = this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"];  //todo make heldKeys.shift()
+        this.change2.change(newPos, shift);
         this.notifyPath("change2");
         this.dispatchEvent(new CustomEvent("track-move", {detail: this.change2, composed: true, bubbles: true}));
       }
 
-//      calculateEventData(start, newPos, box, startAngle, action, change2) {
-//        if (action == "rotate")
-//          return change2.rotate(ItemMarker.calcAngle(box.center, newPos) - startAngle);
-//
-//        let xMove = (newPos.x - start.x);
-//        let yMove = (newPos.y - start.y);
-//        if (action == "scale")
-//          return change2.scale(xMove, yMove);
-//        change2.move(xMove, yMove);
-//      }
-//
       _pointerUp(e) {
         ItemMarker._cancelPropDefault(e);
         this.releasePointerCapture(e.pointerId);
@@ -444,14 +338,6 @@
 
       getLogicalCenter() {
         return this.box.center;
-      }
-
-      doSnappingOnPointer(point, start) {
-        if (Math.abs(start.x - point.x) < 6 && Math.abs(start.y - point.y) < 6)
-          return start;
-        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"])// || !this.box.isSingle)
-          return {x: point.y, y: point.y};
-        return point;
       }
 
       setMoveAction(e) {

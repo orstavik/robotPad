@@ -4,20 +4,66 @@
       :host {
         display: block;
       }
-      span {
-        font-size: 10px;
+      .sketchCard {
+        display: flex;
+        height: 120px;
+        margin: 0 0 12px;
+        background-color: white;
+        border-radius: 3px;
       }
-      .deletor {
-        width: 10px;
-        height: 10px;
-        background-color: red;
-        font-weight: bold;
+      .previewImg {
+        display: inline-block;
+        width: 150px;
+        background: mediumspringgreen;
+      }
+      .contentBox {
+        display: flex;
+        box-sizing: border-box;
+        flex-direction: column;
+        flex-grow: 1;
+        align-content: flex-start;
+        justify-content: space-between;
+        padding: 12px;
+      }
+      .contentBox h4 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 300;
+        line-height: 1;
+      }
+      .contentBox span {
+        font-size: 10px;
+        color: gray;
+      }
+      .contentBox paper-button {
+        height: 32px;
+        margin: 0 0 0 12px;
+        font-size: 12px;
+        text-align: center;
+      }
+      .buttonRow {
+        display: flex;
+        justify-content: flex-end;
+      }
+      paper-button#load {
+        background-color: var(--paper-indigo-a200);
         color: white;
       }
     </style>
     <template is="dom-repeat" items="[[sketchList]]">
-      <span on-click="_loadSketch" data-key$="[[item.key]]">[[item.value.name]]: [[item.value.created]]</span>
-      <span class="deletor" data-key$="[[item.key]]" on-click="_deleteSketch">X</span><br>
+      <paper-material elevation="1" class="sketchCard">
+        <div class="previewImg"></div>
+        <div class="contentBox">
+          <div>
+            <h4>[[item.value.name]]</h4>
+            <span>[[item.value.created]]</span>
+          </div>
+          <div class="buttonRow">
+            <paper-button id="load" raised on-click="_loadSketch" data-key$="[[item.key]]">Load</paper-button>
+            <paper-button id="remove" raised on-click="_deleteSketch" data-key$="[[item.key]]">Remove</paper-button>
+          </div>
+        </div>
+      </paper-material>
     </template>
   </template>
   <script>

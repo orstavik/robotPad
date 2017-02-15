@@ -1,5 +1,6 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="app-ui-sketchlist.html">
 
 <dom-module id="app-login">
   <template>
@@ -8,7 +9,6 @@
         display: flex;
         box-sizing: border-box;
         width: 350px;
-        padding: 25px;
         flex-direction: column;
         align-items: flex-start;
       }
@@ -17,6 +17,7 @@
         display: flex;
         flex-direction: row;
         align-items: center;
+        margin: 25px 25px 20px;
       }
 
       #accountImage {
@@ -27,6 +28,10 @@
         width: 100px;
         height: 100px;
         margin-right: 20px;
+        border-radius: 50%;
+        border: 1px solid #cccccc;
+        background-image: url(https://lh5.googleusercontent.com/-9S_-DOF54g4/AAAAAAAAAAI/AAAAAAAAAF4/x3wk4OsDgYA/photo.jpg);
+        background-size: cover;
       }
 
       .secondCol {
@@ -62,6 +67,65 @@
         background-color: var(--paper-indigo-a200);
         color: white;
       }
+      .tabsRow {
+        display: flex;
+        position: relative;
+        width: 350px;
+        justify-content: center;
+        background-color: white;
+        z-index: 2;
+      }
+      .tabTitle {
+        border-bottom: 3px solid blue;
+      }
+      .tabTitle>h4 {
+        margin: 8px;
+        font-size: 14px;
+        font-weight: 400;
+      }
+      .shadow {
+        position: relative;
+        width: 100%;
+        height: 10px;
+        margin-top: -10px;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                    0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                    0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+      }
+      .sketchRow {
+        display: inline-block;
+        box-sizing: border-box;
+        width: 100%;
+        height: 300px;
+        background-color: #f6f6f6;
+      }
+      .scrollWrapper {
+        box-sizing: border-box;
+        width: 367px;
+        height: 100%;
+        padding: 15px 25px;
+        overflow-y: scroll;
+        overflow-x: hidden;
+      }
+      .addWrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
+      .addText {
+        width: 250px;
+        text-align: center;
+        line-height: 1.2;
+        font-size: 36px;
+        font-weight: 900;
+        opacity: 0.2;
+      }
+      *[removed] {
+        display: none;
+      }
     </style>
 
     <firebase-auth id="auth" app-name="droppad" user="{{user}}" provider="google"></firebase-auth>
@@ -69,15 +133,27 @@
 
     <div class="headerRow">
       <div class="firstCol">
-        <div id="accountImage">
-          <img src="[[_userImage]]" alt="anonymous">
-        </div>
+        <div id="accountImage" style="background-image: url('[[_userImage]]')"></div>
       </div>
 
       <div class="secondCol">
         <div class="accountName">[[_userName]]</div>
         <paper-button id="signIn" raised on-click="_signIn" hidden$="[[_toBool(user)]]">Sign in with Google</paper-button>
         <paper-button raised on-click="_signOut" hidden$="[[!user]]">Sign out</paper-button>
+      </div>
+    </div>
+    <div class="tabsRow">
+      <div class="tabTitle">
+        <h4>YOUR SKETCHES</h4>
+      </div>
+    </div>
+    <div class="shadow"></div>
+    <div class="sketchRow">
+      <div class="addWrapper" removed$="[[_toBool(user)]]">
+        <span class="addText">Sign in to save your sketches</span>
+      </div>
+      <div class="scrollWrapper" removed$="[[!user]]">
+        <app-ui-sketchlist id="sketchlist" uid="[[user.uid]]" on-load-sketch="_loadSketch"></app-ui-sketchlist>
       </div>
     </div>
 

@@ -5,7 +5,6 @@
 <link rel="import" href="../bower_components/iron-icons/image-icons.html">
 <link rel="import" href="app-login.html">
 <link rel="import" href="app-ui-namelabel.html">
-<link rel="import" href="app-ui-sketchlist.html">
 <link rel="import" href="tools-button.html">
 <link rel="import" href="grow-button.html">
 <link rel="import" href="grow-child-button.html">
@@ -63,7 +62,6 @@
 
     <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
       <app-login on-sign-in="_signIn" on-sign-out="_signOut"></app-login>
-      <app-ui-sketchlist id="sketchlist" uid="[[_user.uid]]" on-load-sketch="_loadSketch"></app-ui-sketchlist>
     </grow-button>
   </template>
   <script>

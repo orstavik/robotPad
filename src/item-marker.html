@@ -122,55 +122,168 @@
 
   <script>
 
-    class ChangeObject {
-      constructor(box, direction, action) {
+    class RotateChange {
+      constructor(startPoint, center, box) {
+        this.start = startPoint;        //don't really need
+        this.center = center;
+        this.startAngle = RotateChange.calcAngle(this.center, startPoint);
+        this.action = "rotate";
         this.box = box;
-        this.direction = direction;
-        this.action = action;
+        this.angle = 0;
       }
 
-      move(x,y){
-        this.xMove = x;
-        this.yMove = y;
+      static calcAngle(center, satelite) {
+        return Math.atan2(satelite.y - center.y, satelite.x - center.x);
       }
-      rotate(rad){
-        this.angle = rad;
+
+      change(newPoint) {
+        this.currentAngle = RotateChange.calcAngle(this.center, newPoint);
+        this.angle = this.currentAngle - this.startAngle;
       }
-      //todo make the pointer movement follow the angle of the marker box = this.box.angle
-      scale(xMove, yMove){
+
+      getMatrix() {
+        let rad = this.angle;
+//        if (shiftIsDown)
+//          rad = this.currentAngle?
+//        if (ctrlIsDown)
+//          rad = this.angle snap to nearest 30degree?
+        return [
+          Math.cos(rad),
+          Math.sin(rad),
+          -Math.sin(rad),
+          Math.cos(rad),
+          0,
+          0
+        ];
+      }
+    }
+
+    class MoveChange {
+      constructor(startPoint) {
+        this.start = startPoint;
+        this.action = "move";
+        this.xMove = 0;
+        this.yMove = 0;
+      }
+
+      change(newPoint) {
+        this.xMove = newPoint.x - this.start.x;
+        this.yMove = newPoint.y - this.start.y;
+      }
+
+      getMatrix() {
+//        if (shift)
+//          return [1, 0, 0, 1, 0, this.yMove];
+//        if (ctrl)
+//          return [1, 0, 0, 1, this.xMove, 0];
+        return [1, 0, 0, 1, this.xMove, this.yMove];
+      }
+    }
+
+    class ScaleChange {
+      constructor(startPoint, boxWidth, boxHeight, direction, box) {
+        this.start = startPoint;
+        this.boxWidth = boxWidth;
+        this.boxHeight = boxHeight;
+        this.action = "scale";
+        this.direction = direction;
+        this.box = box;
+        this.percentX = 0;
+        this.percentY = 0;
+        this.xMove = 0;
+        this.yMove = 0;
+      }
+
+      change(newPoint) {
+        let xMove = newPoint.x - this.start.x;
+        let yMove = newPoint.y - this.start.y;
+
         if (this.direction.indexOf("n") < 0 && this.direction.indexOf("s") < 0)
           yMove = 0;
         if (this.direction.indexOf("e") < 0 && this.direction.indexOf("w") < 0)
           xMove = 0;
 
-        this.percentX = xMove / this.box.width;
-        this.percentY = yMove /this.box.height;
-        this.yMove = this.box.height / 2 * this.percentY;
-        this.xMove = this.box.width / 2 * this.percentX;
+        this.percentX = xMove / this.boxWidth;
+        this.percentY = yMove / this.boxHeight;
+        this.yMove = this.percentY * this.boxHeight / 2;
+        this.xMove = this.percentX * this.boxWidth / 2;
         if (this.direction.indexOf("n") >= 0)
           this.percentY *= -1;
         if (this.direction.indexOf("w") >= 0)
           this.percentX *= -1;
       }
-      
-      isScaling(){
-        return (this.percentX || this.percentX);
-      }
+
       getMatrix() {
-        let rad = (this.angle || 0);
-        let w = 1 + (this.percentX || 0);
-        let h = 1 + (this.percentY || 0);
-        let x = this.xMove || 0;
-        let y = this.yMove || 0;
+//        if (shift){
+//          this.percentX = 0;
+//          this.xMove = a little less or more?
+//        }
+//        if (ctrl){
+//          this.percentY = 0;
+//          this.yMove = a little less or more?
+//        }
         return [
-          w * Math.cos(rad),
-          w * Math.sin(rad),
-          -h * Math.sin(rad),
-          h * Math.cos(rad),
-          x,
-          y];
+          1 + this.percentX,
+          0,
+          0,
+          1 + this.percentY,
+          this.xMove,
+          this.yMove];
       }
     }
+
+//    class ChangeObject {
+//      constructor(box, direction, action) {
+//        this.box = box;
+//        this.direction = direction;
+//        this.action = action;
+//      }
+//
+//      move(x, y) {
+//        this.xMove = x;
+//        this.yMove = y;
+//      }
+//
+//      rotate(rad) {
+//        this.angle = rad;
+//      }
+//
+//      //todo make the pointer movement follow the angle of the marker box = this.box.angle
+//      scale(xMove, yMove) {
+//        if (this.direction.indexOf("n") < 0 && this.direction.indexOf("s") < 0)
+//          yMove = 0;
+//        if (this.direction.indexOf("e") < 0 && this.direction.indexOf("w") < 0)
+//          xMove = 0;
+//
+//        this.percentX = xMove / this.box.width;
+//        this.percentY = yMove / this.box.height;
+//        this.yMove = this.box.height / 2 * this.percentY;
+//        this.xMove = this.box.width / 2 * this.percentX;
+//        if (this.direction.indexOf("n") >= 0)
+//          this.percentY *= -1;
+//        if (this.direction.indexOf("w") >= 0)
+//          this.percentX *= -1;
+//      }
+//
+//      isScaling() {
+//        return (this.percentX || this.percentX);
+//      }
+//
+//      getMatrix() {
+//        let rad = (this.angle || 0);
+//        let w = 1 + (this.percentX || 0);
+//        let h = 1 + (this.percentY || 0);
+//        let x = this.xMove || 0;
+//        let y = this.yMove || 0;
+//        return [
+//          w * Math.cos(rad),
+//          w * Math.sin(rad),
+//          -h * Math.sin(rad),
+//          h * Math.cos(rad),
+//          x,
+//          y];
+//      }
+//    }
 
     class ItemMarker extends Polymer.Element {
       static get is() {
@@ -182,8 +295,8 @@
           properties: {
             p2p: PointToPoint,
             box: Object,
-            action: String,
-            direction: String,
+//            action: String,
+            change2: Object,
             matrix: {
               type: String,
               computed: "_makeMatrix(change2, box)"
@@ -219,11 +332,14 @@
       }
 
       _makeMatrix(changes, box) {
-        changes = changes || {};
         box = box || {};
 
         const startMatrix = this.turn5to6(box);
-        const changeMatrix = this.turn5to6(changes);
+        let changeMatrix;
+        if (changes)
+          changeMatrix = changes.getMatrix();
+        else
+          changeMatrix = this.turn5to6(changes = {});
         let mergedMatrices;
         if (changes.percentX || changes.percentY)             //scale must be applied after the other changes..
           mergedMatrices = this.multiMatrixTom(startMatrix, changeMatrix);
@@ -281,10 +397,13 @@
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);
         this.start = this.p2p.calcLogicPoint(e.clientX, e.clientY);
-        this.startAngle = ItemMarker.calcAngle(this.box.center, this.start);
-        this.set("change2", new ChangeObject(this.box, e.target.id, this.setMoveAction(e)));
-        this.set("direction", e.target.id);
-        this.set("action", this.setMoveAction(e));
+        let action = this.setMoveAction(e);
+        if (action == "rotate")
+          this.set("change2", new RotateChange(this.start, this.box.center, this.box));
+        else if (action == "move")
+          this.set("change2", new MoveChange(this.start));
+        else if (action == "scale")
+          this.set("change2", new ScaleChange(this.start, this.box.width, this.box.height, e.target.id, this.box));
         this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: this.action}));
       }
 
@@ -292,25 +411,23 @@
         ItemMarker._cancelPropDefault(e);
         let newPos = this.p2p.calcLogicPoint(e.clientX, e.clientY);
         //todo first I need to calculate the mouse movement, both in terms of the screen coordinates, and in relation to the box.
-        //todo second I need to make a "change" object that will contain information about how much bigger/smaller and moved and rotated the box is
-        //todo this change object I must make
-        newPos = this.doSnappingOnPointer(newPos, this.start, this.direction, this.action, this.box.angle);
-        this.calculateEventData(this.start, newPos, this.box, this.startAngle, this.action, this.change2);
+        newPos = this.doSnappingOnPointer(newPos, this.start);
+        this.change2.change(newPos);
         this.notifyPath("change2");
         this.dispatchEvent(new CustomEvent("track-move", {detail: this.change2, composed: true, bubbles: true}));
       }
 
-      calculateEventData(start, newPos, box, startAngle, action, change2) {
-        if (action == "rotate")
-          return change2.rotate(ItemMarker.calcAngle(box.center, newPos) - startAngle);
-
-        let xMove = (newPos.x - start.x);
-        let yMove = (newPos.y - start.y);
-        if (action == "scale")
-          return change2.scale(xMove, yMove);
-        change2.move(xMove, yMove);
-      }
-
+//      calculateEventData(start, newPos, box, startAngle, action, change2) {
+//        if (action == "rotate")
+//          return change2.rotate(ItemMarker.calcAngle(box.center, newPos) - startAngle);
+//
+//        let xMove = (newPos.x - start.x);
+//        let yMove = (newPos.y - start.y);
+//        if (action == "scale")
+//          return change2.scale(xMove, yMove);
+//        change2.move(xMove, yMove);
+//      }
+//
       _pointerUp(e) {
         ItemMarker._cancelPropDefault(e);
         this.releasePointerCapture(e.pointerId);
@@ -318,8 +435,6 @@
         this.removeEventListener("pointermove", this.pointermoveListener);
         this.dispatchEvent(new CustomEvent("track-end", {composed: true, bubbles: true}));
         this.set("change2", null);
-        this.set("action", null);
-        this.set("direction", null);
       }
 
       static _cancelPropDefault(e) {
@@ -331,10 +446,10 @@
         return this.box.center;
       }
 
-      doSnappingOnPointer(point, start, direction, action, angle) {
+      doSnappingOnPointer(point, start) {
         if (Math.abs(start.x - point.x) < 6 && Math.abs(start.y - point.y) < 6)
           return start;
-        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"] || !this.box.isSingle)
+        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"])// || !this.box.isSingle)
           return {x: point.y, y: point.y};
         return point;
       }
@@ -349,10 +464,6 @@
         if (e.target.id == "rotate")
           return "rotate";
         return "move";
-      }
-
-      static calcAngle(center, satelite) {
-        return Math.atan2(satelite.y - center.y, satelite.x - center.x);
       }
     }
     customElements.define(ItemMarker.is, ItemMarker);

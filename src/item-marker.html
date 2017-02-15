@@ -133,25 +133,148 @@
             box: Object,
             action: String,
             direction: String,
-            matrix: String,
+            changes: Object,
+            matrix: {
+              type: String,
+              computed: "_makeMatrix(changes, box)"
+            },
           }
         }
       }
 
+      /**
+       *
+       * Adds the "normal third row of the matrix 0,0,1 turning the css matrix into a 3x3 matrix.
+       *
+       * Then do a normal dot multiplication.
+       *
+       * [
+       *   a00, a01, a02,
+       *   a10, a11, a12,
+       *   a20, a21, a22,
+       * ]
+       *   *
+       * [
+       *   b00, b01, b02,
+       *   b10, b11, b12,
+       *   b20, b21, b22,
+       * ]
+       *   =
+       *
+       **/
+//      multiplyMatrices (a, b) {
+//        let a00 = a[0], a01 = a[2], a02 = a[4],
+//            a10 = a[1], a11 = a[3], a12 = a[5],
+//            a20 = 0, a21 = 0, a22 = 1;
+//
+//        let b00 = b[0], b01 = b[2], b02 = b[4],
+//            b10 = b[1], b11 = b[3], b12 = b[5],
+//            b20 = 0, b21 = 0, b22 = 1;
+//
+//        var result = [];
+//        result[0] = b00*a00 + b01*a10 + b02*a20;
+//        result[1] = b00*a01 + b01*a11 + b02*a21;
+//        result[2] = b00*a02 + b01*a12 + b02*a22;
+//
+//        result[3] = b10*a00 + b11*a10 + b22*a20;
+//        result[4] = b10*a01 + b11*a11 + b22*a21;
+//        result[5] = b10*a02 + b11*a12 + b22*a22;
+//
+//        result[6] = b20*a00 + b21*a10 + b22*a20;
+//        result[7] = b20*a01 + b21*a11 + b22*a21;
+//        result[8] = b20*a02 + b21*a12 + b22*a22;
+//        return [
+//          result[0],
+//          result[3],
+//          result[1],
+//          result[4],
+//          result[2],
+//          result[5]
+//        ];
+//      }
+
+      multiMatrixTom(A, B) {
+        A = [
+          [A[0], A[2], A[4]],
+          [A[1], A[3], A[5]],
+          [0,0,1]
+        ];
+        B = [
+          [B[0], B[2], B[4]],
+          [B[1], B[3], B[5]],
+          [0,0,1]
+        ];
+        let arr = [];
+        for (let i = 0; i < A.length; i++) {
+          arr.push([]);
+          for (let j = 0; j < B[0].length; j++) {
+            arr[i][j] = 0;
+          }
+        }
+        for (let ai = 0; ai < A.length; ai++) {
+          for (let bj = 0; bj < B[0].length; bj++) {
+            for (let aj = 0; aj < A[0].length; aj++) {
+              for (let bi = 0; bi < B.length; bi++) {
+                if (aj === bi) {
+                  arr[ai][bj] += A[ai][aj] * B[bi][bj];
+                }
+              }
+            }
+          }
+        }
+        return [arr[0][0],arr[1][0],arr[0][1], arr[1][1],arr[0][2],arr[1][2] ];
+      }
+
+
       _makeMatrix(changes, box) {
-        let rad = (box.angle || 0) + (changes.angle || 0);
-        let w = 1 + (changes.percentX || 0);
-        let h = 1 + (changes.percentY || 0);
-        let x = changes.xMove || 0;
-        let y = changes.yMove || 0;
-        const matrix = [
-          w * Math.cos(rad),
-          w * Math.sin(rad),
-          -h * Math.sin(rad),
-          h * Math.cos(rad),
-          x,
-          y];
-        return "transform: matrix(" + matrix.join(',') + ");";
+        changes = changes || {};
+        box = box || {};
+
+        let rad2 = box.angle || 0;
+        let startMatrix = [
+          Math.cos(rad2),
+          Math.sin(rad2),
+          -1 * Math.sin(rad2),
+          Math.cos(rad2),
+          0,
+          0];
+
+        rad2 = (changes.angle || 0);
+        let w2 = 1 + (changes.percentX || 0);
+        let h2 = 1 + (changes.percentY || 0);
+        let x2 = changes.xMove || 0;
+        let y2 = changes.yMove || 0;
+        const matrixWithoutStart = [
+          w2 * Math.cos(rad2),
+          w2 * Math.sin(rad2),
+          -h2 * Math.sin(rad2),
+          h2 * Math.cos(rad2),
+          x2,
+          y2];
+//        let testMatrix = this.multiplyMatrices(matrixWithoutStart, startMatrix);
+        let mergedMatrices = this.multiMatrixTom(matrixWithoutStart, startMatrix);
+
+//        let rad = (box.angle || 0) + (changes.angle || 0);
+//        let w = 1 + (changes.percentX || 0);
+//        let h = 1 + (changes.percentY || 0);
+//        let x = changes.xMove || 0;
+//        let y = changes.yMove || 0;
+//        const matrix = [
+//          w * Math.cos(rad),
+//          w * Math.sin(rad),
+//          -h * Math.sin(rad),
+//          h * Math.cos(rad),
+//          x,
+//          y];
+//
+//        console.log("__test__");
+//        console.log(matrix);
+//        console.log(testMatrix);
+//        console.log(mergedMatrices);
+//        console.log("____");
+
+        return "transform: matrix(" + mergedMatrices.join(',') + ");";
+//        return "transform: matrix(" + matrix.join(',') + ");";
       }
 
       connectedCallback() {
@@ -169,19 +292,19 @@
         this.startAngle = ItemMarker.calcAngle(this.box.center, this.start);
         this.set("direction", e.target.id);
         this.set("action", this.setMoveAction(e));
-        this.set("matrix", null);
+        this.set("changes", null);
         this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: this.action}));
       }
 
       _pointerMove(e) {
         ItemMarker._cancelPropDefault(e);
         let newPos = this.p2p.calcLogicPoint(e.clientX, e.clientY);
-        newPos = this.doSnappingOnPointer(newPos, this.start);
+//        newPos = this.doSnappingOnPointer(newPos, this.start);
         let ms = this.calculateEventData(this.start, newPos, this.box, this.startAngle, this.action, this.direction);
         ms.direction = this.direction;
         ms.action = this.action;
         ms.box = this.box;
-        this.set("matrix", this._makeMatrix(ms, this.box));
+        this.set("changes", ms);
         this.dispatchEvent(new CustomEvent("track-move", {detail: ms, composed: true, bubbles: true}));
       }
 
@@ -203,17 +326,6 @@
             ms.percentY *= -1;
           if (direction.indexOf("w") >= 0)
             ms.percentX *= -1;
-
-//          if (direction == "n") {
-//            ms.percentY = -ms.percentY;
-//            ms.percentX = 0;
-//            ms.yMove = yMove;
-//            let nx = (Math.cos(startAngle)*0)+(Math.sin(startAngle)*yMove);
-//            let ny = (Math.cos(startAngle)*yMove)-(Math.sin(startAngle)*0);
-//            ms.yMove = nx;
-//            ms.xMove = ny;
-//          }
-
           return ms;
         }
         if (action == "rotate")
@@ -228,7 +340,7 @@
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
         this.dispatchEvent(new CustomEvent("track-end", {composed: true, bubbles: true}));
-        this.set("matrix", null);
+        this.set("changes", null);
         this.set("action", null);
         this.set("direction", null);
       }

@@ -121,6 +121,44 @@
   </template>
 
   <script>
+
+    class ChangeObject {
+      constructor(box, direction, action) {
+        this.box = box;
+        this.direction = direction;
+        this.action = action;
+      }
+
+      move(x,y){
+        this.xMove = x;
+        this.yMove = x;
+      }
+      rotate(rad){
+        this.angle = rad;
+      }
+      scale(percentX, percentY){
+        this.percentX = percentX;
+        this.percenty = percentY;
+      }
+      isScaling(){
+        return (this.percentX || this.percentX);
+      }
+      turn5to6() {
+        let rad = (this.angle || 0);
+        let w = 1 + (this.percentX || 0);
+        let h = 1 + (this.percentY || 0);
+        let x = this.xMove || 0;
+        let y = this.yMove || 0;
+        return [
+          w * Math.cos(rad),
+          w * Math.sin(rad),
+          -h * Math.sin(rad),
+          h * Math.cos(rad),
+          x,
+          y];
+      }
+    }
+
     class ItemMarker extends Polymer.Element {
       static get is() {
         return "item-marker";
@@ -146,14 +184,14 @@
         A = [
           [A[0], A[2], A[4]],
           [A[1], A[3], A[5]],
-          [0,0,1]
+          [0, 0, 1]
         ];
         B = [
           [B[0], B[2], B[4]],
           [B[1], B[3], B[5]],
-          [0,0,1]
+          [0, 0, 1]
         ];
-        const arr = [[0,0,0],[0,0,0],[0,0,0]];
+        const arr = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
         for (let ai = 0; ai < A.length; ai++) {
           for (let bj = 0; bj < B[0].length; bj++) {
             for (let aj = 0; aj < A[0].length; aj++) {
@@ -165,7 +203,7 @@
             }
           }
         }
-        return [arr[0][0],arr[1][0],arr[0][1], arr[1][1],arr[0][2],arr[1][2] ];
+        return [arr[0][0], arr[1][0], arr[0][1], arr[1][1], arr[0][2], arr[1][2]];
       }
 
       _makeMatrix(changes, box) {
@@ -178,7 +216,7 @@
         if (changes.percentX || changes.percentY)             //scale must be applied after the other changes..
           mergedMatrices = this.multiMatrixTom(startMatrix, changeMatrix);
         else
-          mergedMatrices = this.multiMatrixTom(changeMatrix, startMatrix);
+          mergedMatrices = this.multiMatrixTom(changeMatrix, startMatrix);
 
 
         this.verify(box, changes, mergedMatrices);
@@ -241,6 +279,9 @@
       _pointerMove(e) {
         ItemMarker._cancelPropDefault(e);
         let newPos = this.p2p.calcLogicPoint(e.clientX, e.clientY);
+        //todo first I need to calculate the mouse movement, both in terms of the screen coordinates, and in relation to the box.
+        //todo second I need to make a "change" object that will contain information about how much bigger/smaller and moved and rotated the box is
+        //todo this change object I must make
         newPos = this.doSnappingOnPointer(newPos, this.start, this.direction, this.action, this.box.angle);
         let ms = this.calculateEventData(this.start, newPos, this.box, this.startAngle, this.action, this.direction);
         ms.direction = this.direction;
@@ -252,13 +293,12 @@
 
       calculateEventData(start, newPos, box, startAngle, action, direction) {
         if (action == "scale") {
-          //todo have to change the x and y here based on the sin and cos of the startAngle
           let ms = {
             percentX: (newPos.x - start.x) / box.width,
             percentY: (newPos.y - start.y) / box.height
           };
-          ms.yMove = box.height/2 * ms.percentY;
-          ms.xMove = box.width/2 * ms.percentX;
+          ms.yMove = box.height / 2 * ms.percentY;
+          ms.xMove = box.width / 2 * ms.percentX;
 
           if (direction.indexOf("n") >= 0)
             ms.percentY *= -1;
@@ -299,11 +339,11 @@
           return {x: point.y, y: point.y};
         if (action != "scale")
           return point;
-        if (direction.indexOf("n") < 0 && direction.indexOf("s") < 0){
+        if (direction.indexOf("n") < 0 && direction.indexOf("s") < 0) {
           point.y = start.y;
           //todo adjust the point.y so that it is on the x-axis of the rotated item marker. don't know how to..
-          let reducePointY = angle * point.y-start.y / angle * point.x-start.x;
-        } else if (direction.indexOf("e") < 0 && direction.indexOf("w") < 0){
+//          let reducePointY = angle * point.y-start.y / angle * point.x-start.x;
+        } else if (direction.indexOf("e") < 0 && direction.indexOf("w") < 0) {
           point.x = start.x;
           //todo adjust the point.y so that it is on the x-axis of the rotated item marker
         }

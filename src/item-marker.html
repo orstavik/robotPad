@@ -136,7 +136,13 @@
       rotate(rad){
         this.angle = rad;
       }
+      //todo make the pointer movement follow the angle of the marker box = this.box.angle
       scale(xMove, yMove){
+        if (this.direction.indexOf("n") < 0 && this.direction.indexOf("s") < 0)
+          yMove = 0;
+        if (this.direction.indexOf("e") < 0 && this.direction.indexOf("w") < 0)
+          xMove = 0;
+
         this.percentX = xMove / this.box.width;
         this.percentY = yMove /this.box.height;
         this.yMove = this.box.height / 2 * this.percentY;
@@ -330,16 +336,6 @@
           return start;
         if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"] || !this.box.isSingle)
           return {x: point.y, y: point.y};
-        if (action != "scale")
-          return point;
-        if (direction.indexOf("n") < 0 && direction.indexOf("s") < 0) {
-          point.y = start.y;
-          //todo adjust the point.y so that it is on the x-axis of the rotated item marker. don't know how to..
-//          let reducePointY = angle * point.y-start.y / angle * point.x-start.x;
-        } else if (direction.indexOf("e") < 0 && direction.indexOf("w") < 0) {
-          point.x = start.x;
-          //todo adjust the point.y so that it is on the x-axis of the rotated item marker
-        }
         return point;
       }
 

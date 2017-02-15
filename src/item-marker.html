@@ -289,20 +289,20 @@
         //todo second I need to make a "change" object that will contain information about how much bigger/smaller and moved and rotated the box is
         //todo this change object I must make
         newPos = this.doSnappingOnPointer(newPos, this.start, this.direction, this.action, this.box.angle);
-        this.calculateEventData(this.start, newPos, this.box, this.startAngle, this.action, this.direction, this.change2);
+        this.calculateEventData(this.start, newPos, this.box, this.startAngle, this.action, this.change2);
         this.notifyPath("change2");
         this.dispatchEvent(new CustomEvent("track-move", {detail: this.change2, composed: true, bubbles: true}));
       }
 
-      calculateEventData(start, newPos, box, startAngle, action, direction, change2) {
+      calculateEventData(start, newPos, box, startAngle, action, change2) {
         if (action == "rotate")
-          return this.change2.rotate(ItemMarker.calcAngle(box.center, newPos) - startAngle);
+          return change2.rotate(ItemMarker.calcAngle(box.center, newPos) - startAngle);
 
         let xMove = (newPos.x - start.x);
         let yMove = (newPos.y - start.y);
         if (action == "scale")
-          return this.change2.scale(xMove, yMove);
-        this.change2.move(xMove, yMove);
+          return change2.scale(xMove, yMove);
+        change2.move(xMove, yMove);
       }
 
       _pointerUp(e) {

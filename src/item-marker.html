@@ -147,12 +147,11 @@
     }
 
     class RotateChange {
-      constructor(startPoint, center, box) {
+      constructor(startPoint, center) {
         this.start = startPoint;        //don't really need
         this.center = center;
         this.startAngle = RotateChange.calcAngle(this.center, startPoint);
         this.action = "rotate";
-        this.box = box;
         this.angle = 0;
       }
 

@@ -123,16 +123,23 @@ class ShapeInfoObject {
     return Object.assign(this.clone(), value);
   }
 
-  cssMatrix() {
-    const angle = this.style.startsWith("tone") ? 0 : this.angle;
-    const matrix = [
+  getAngle() {
+    return this.style.startsWith("tone") ? 0 : this.angle;
+  }
+
+  getMatrix(){
+    const angle = this.getAngle();
+    return [
       this.w * Math.cos(angle),
       this.w * Math.sin(angle),
       -this.h * Math.sin(angle),
       this.h * Math.cos(angle),
       this.x,
       this.y];
-    return "matrix(" + matrix.join(',') + ")";
+  }
+
+  cssMatrix() {
+    return "matrix(" + this.getMatrix().join(',') + ")";
   }
 
   static generateId() {

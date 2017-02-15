@@ -2,6 +2,29 @@
 
 <dom-module id="selected-observer">
   <script>
+    class SquareBox {
+      constructor(boxes, p2p, angle) {
+        this.angle = angle;
+        this.isSingle = boxes.length == 1;
+        for (let next of boxes) {
+          this.left = Math.min(this.left || Number.MAX_VALUE, next.left);
+          this.top = Math.min(this.top || Number.MAX_VALUE, next.top);
+          this.right = Math.max(this.right || -Number.MAX_VALUE, next.right);
+          this.bottom = Math.max(this.bottom || -Number.MAX_VALUE, next.bottom);
+        }
+        this.left = p2p.toLogicalX(this.left);
+        this.right = p2p.toLogicalX(this.right);
+        this.top = p2p.toLogicalY(this.top);
+        this.bottom = p2p.toLogicalY(this.bottom);
+
+        this.width = this.right - this.left;
+        this.height = this.bottom - this.top;
+        this.center = {};
+        this.center.x = this.left + this.width / 2;
+        this.center.y = this.top + this.height / 2;
+      }
+    }
+
     class SelectedObserver extends Polymer.Element {
       static get is() {
         return "selected-observer";
@@ -10,8 +33,14 @@
       static get config() {
         return {
           properties: {
+            p2p: Object,
             selected: {
               type: Array,
+              notify: true
+            },
+            box: {
+              type: SquareBox,
+              computed: "_calcRectangle(selected, p2p)",
               notify: true
             }
           }
@@ -57,6 +86,16 @@
         if (newSearch)
           this.selected = this.selector.querySelectorAll("drop-shape[data-selected]");
         this.notifyPath("selected");
+      }
+
+      _calcRectangle(items, p2p) {
+        if (!items || items.length == 0)
+          return null;
+        let boxes = [];
+        for (let el of items)
+          boxes.push(el.getBoundingClientRect());
+        let angle = (items && items.length == 1) ? items[0].info.angle : 0;
+        return new SquareBox(boxes, p2p, angle);
       }
     }
     customElements.define(SelectedObserver.is, SelectedObserver);

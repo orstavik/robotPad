@@ -8,7 +8,6 @@
 <link rel="import" href="droppad-canvas.html">
 <link rel="import" href="keyboard-listener.html">
 <link rel="import" href="music-clef.html">
-<link rel="import" href="key-flower.html">
 <link rel="import" href="tab-wrapper.html">
 <link rel="import" href="app-ui.html">
 
@@ -105,6 +104,23 @@
         position: fixed;
         z-index: 1;
       }
+
+      #helpText {
+        position: fixed;
+        bottom: 40px;
+        left: 40px;
+        font-size: 10px;
+        width: 180px;
+        height: 10px;
+        background: rgba(0, 0, 0, 0.3);
+        border: none;
+        border-radius: 20px;
+        padding: 15px;
+        line-height: 10px;
+        color: white;
+        font-weight: bold;
+      }
+
     </style>
 
     <firebase-app auth-domain="robotpad-762de.firebaseapp.com"
@@ -117,6 +133,9 @@
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
                     on-changeshapes="_changeShapes"
+                    on-help-on="showHelp"
+                    on-help-off="hideHelp"
+                    on-deselect="_deselect"
     ></droppad-canvas>
 
     <!--<div id="toolbar">
@@ -153,10 +172,18 @@
       <div class="button" title="Skew the shape: press 'n'"> n</div>
     </div>-->
 
-    <!--<key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower>
-    <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>-->
+    <!--<key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower> -->
 
-    <app-ui app-name="[[sketchName]]" petals="[[letters]]" on-new-user="_newUserLoggedIn" on-new-sketch="_newSketchSet" on-load-sketch="_loadSketch"></app-ui>
+    <app-ui id="ui" app-name="[[sketchName]]" petals="[[letters]]"
+            history="[[history]]" scale="[[scale]]"
+            on-new-user="_newUserLoggedIn"
+            on-new-sketch="_newSketchSet"
+            on-load-sketch="_loadSketch"
+            on-timetravel="_timetravel"
+            on-new-colors="_newColors"
+            on-new-color-scale="_newColorScale"
+            on-select-color="colorSelected"
+    ></app-ui>
 
     <!--<iron-selector attr-for-selected="select" multi>
       <tab-wrapper title="JSON" select="1">
@@ -170,11 +197,14 @@
       <tab-wrapper title="Save/Load" select="3">
       </tab-wrapper>
       <tab-wrapper title="History" select="4">-->
-    <droppad-history id="history" on-new-state="_newState" on-timetravel="_timetravel" style="visibility: hidden"></droppad-history>
+    <droppad-history id="history" on-new-state="_newState" style="visibility: hidden" history="{{history}}"></droppad-history>
     <!--<json-saver  id="jsonSaver" input="[[letters]]" on-sketchload="loadSketch" json-name="{{sketchName}}" style="visibility: hidden"></json-saver>-->
         <!--History: <input type="range" min="0" max="10000" value="0" id="h" on-input="timeTravel"/> <br>-->
       <!--</tab-wrapper>
     </iron-selector>-->
+
+    <div id="helpText" hidden$="[[!helpText]]">[[helpText]]</div>
+    <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
     <keyboard-listener on-key-down="_checkKey" held-keys="{{heldKeys}}"></keyboard-listener>
 
@@ -190,20 +220,38 @@
       static get config() {
         return {
           properties: {
-            colors: Array,
             letters: Array,
-            coloredScale: {
-              type: Array,
-              observer: "colorScaleChanged"
-            },
             heldKeys: Array,
-            sketchName: String
+            sketchName: String,
+            history: history,
+            helpText: {
+              type: String,
+              value: null
+            }
           }
         }
       }
 
       connectedCallback() {
         super.connectedCallback();
+      }
+
+      _newColors(e){
+        let colors = e.detail;
+        for (let i = 0; i < colors.length; i++)
+          this.style.setProperty('--tone-color-' + i, colors[i]);
+      }
+
+      _newColorScale(e){
+        let coloredScale = e.detail;
+        for (let i = 0; i < coloredScale.length; i++){
+          this.style.setProperty('--tone-tone-' + i, coloredScale[i].color);
+          this.style.setProperty('--tone-rotation-' + i, "rotate("+coloredScale[i].rotation+"deg)");
+        }
+      }
+
+      colorSelected(e) {
+        this.$.shapeSelector.addStyleToSelected(e.detail);
       }
 
       _newSketchSet(e){
@@ -217,6 +265,9 @@
           let dbPos = firebase.app("droppad").database().ref(path);
           dbPos.push({changed: firebase.database.ServerValue.TIMESTAMP, state: e.detail});
         }
+      }
+      _deselect(){
+        this.$.ui.deselect();
       }
 
       _addShapes(e){
@@ -256,6 +307,22 @@
         this.$.history.setState([]);
       }
 
+      showHelp(e){
+        let action = e.detail;
+        let txt;
+        if (action == "scale")
+          txt = 'Hold "shift" to scale symmetrically.';
+        else if (action == "rotate")
+          txt = 'Hold "ctrl" to snap elements to nearest 30deg.';
+        else if (action == "move")
+          txt = "Hold 'shift' to rotate the elements individually.";
+        this.set("helpText", action + ": " + txt);
+      }
+
+      hideHelp(){
+        this.set("helpText", null);
+      }
+
       writeInChanges(e) {
         this.$.shapeSelector.updateShape(e.target.key, e.detail[e.target.key]);
       }
@@ -275,15 +342,6 @@
 
       setStyleName(e) {
         this.$.shapeSelector.addStyleToSelected(e.target.id);
-      }
-
-      colorScaleChanged() {
-        for (let i = 0; i < this.coloredScale.length; i++){
-          this.style.setProperty('--tone-tone-' + i, this.coloredScale[i].color);
-          this.style.setProperty('--tone-rotation-' + i, "rotate("+this.coloredScale[i].rotation+"deg)");
-        }
-        for (let i = 0; i < this.colors.length; i++)
-          this.style.setProperty('--tone-color-' + i, this.colors[i]);
       }
     }
     customElements.define(MyApp.is, MyApp);

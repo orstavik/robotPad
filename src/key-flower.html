@@ -101,8 +101,7 @@
             scale: Object,
             coloredScale: {
               type: Array,
-              computed: "makeColoredScale(scale, palette)",
-              notify: true
+              computed: "makeColoredScale(scale, palette)"
             }
           }
         }
@@ -132,6 +131,7 @@
             return a.number - b.number;
           });
         }
+        this.dispatchEvent(new CustomEvent("new-color-scale", {composed: true, bubbles: true, detail: arr}));
         return arr;
       }
     }

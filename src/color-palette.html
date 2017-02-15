@@ -3,9 +3,6 @@
     <style>
       :host {
         display: block;
-        position: fixed;
-        bottom: 0;
-        left: 0;
       }
 
       .color {
@@ -22,7 +19,7 @@
     S <input type="range" min="-100" max="100" value="0" id="s" on-input="setS"/> <br>
     L <input type="range" min="-100" max="100" value="0" id="l" on-input="setL"/> <br>
     <template is="dom-repeat" items="[[cssColors]]">
-      <div id="color[[index]]" class="color" style$="background: [[item]]"></div>
+      <div id="color[[index]]" class="color" style$="background: [[item]]" on-click="_selectColor"></div>
     </template>
 
   </template>
@@ -63,7 +60,8 @@
             cssColors: {
               type: Array,
               computed: "makeCSS(computedColors)",
-              notify: true
+              notify: true,
+              observer: "_passOutNewColors"
             },
             s: {
               type: Number,
@@ -86,6 +84,14 @@
         this.blueDistance = -60;
         this.redDistance = 60;
         this.greenDistance = 39;
+      }
+
+      _passOutNewColors(cssColors){
+        this.dispatchEvent(new CustomEvent("new-colors", {composed: true, bubbles: true, detail: cssColors}));
+      }
+
+      _selectColor(e) {
+        this.dispatchEvent(new CustomEvent("select-color", {composed: true, bubbles: true, detail: e.target.id}));
       }
 
       makeComputed(staticColors, l, s, sunset) {

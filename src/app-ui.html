@@ -10,155 +10,100 @@
 <link rel="import" href="grow-button.html">
 <link rel="import" href="grow-child-button.html">
 <link rel="import" href="json-wrapper.html">
+<link rel="import" href="app-ui-history.html">
+<link rel="import" href="color-palette.html">
+<link rel="import" href="key-flower.html">
+
 
 <dom-module id="app-ui">
-    <template>
-        <style>
-            tools-button {
-                --mother-button-size: 50px;
-                --mother-button-color: var(--paper-light-blue-200);
-                --mother-button-icon-color: black;
-                position: absolute;
-                top: 6px;
-                left: 6px;
-                z-index: 100;
-            }
+  <template>
+    <style>
+      tools-button {
+        --mother-button-size: 50px;
+        --mother-button-color: var(--paper-light-blue-200);
+        --mother-button-icon-color: black;
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        z-index: 100;
+      }
+      grow-child-button {
+        --grow-child-button-size: 36px;
+        --grow-child-button-color: white;
+        --grow-child-button-icon-color: black;
+      }
+      grow-button#account {
+        --grow-button-size: 50px;
+        --grow-button-color: white;
+        --grow-button-icon-color: black;
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        z-index: 100;
+      }
+      grow-button#account[signed] {
+        --grow-button-color: var(--paper-light-blue-200);
+      }
+    </style>
 
-            grow-child-button {
-                --grow-child-button-size: 36px;
-                --grow-child-button-color: white;
-                --grow-child-button-icon-color: black;
-            }
+    <app-ui-namelabel id="namelabel" uid="[[_user.uid]]"></app-ui-namelabel>
 
-            grow-button#account {
-                --grow-button-size: 50px;
-                --grow-button-color: white;
-                --grow-button-icon-color: black;
-                position: absolute;
-                top: 6px;
-                right: 6px;
-                z-index: 100;
-            }
+    <tools-button icon="icons:build" active="{{toolsOpen}}">
+      <grow-child-button menu="Json" child-button icon="icons:settings-ethernet">
+        <json-wrapper petals="[[petals]]"></json-wrapper>
+      </grow-child-button>
+      <grow-child-button menu="Palette" child-button icon="image:color-lens">
+        <color-palette id="palette" css-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
+        <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]"></key-flower>
+      </grow-child-button>
+      <grow-child-button menu="History" child-button icon="icons:restore">
+        <app-ui-history history="[[history]]"></app-ui-history>
+      </grow-child-button>
+    </tools-button>
 
-            grow-button#account[signed] {
-                --grow-button-color: var(--paper-light-blue-200);
-            }
-
-            grow-button#help {
-                --grow-button-size: 36px;
-                --grow-button-color: white;
-                --grow-button-icon-color: black;
-                position: absolute;
-                bottom: 6px;
-                left: 6px;
-                z-index: 100;
-            }
-            #testingOne {
-                box-sizing: border-box;
-                width: 300px;
-                padding: 12px;
-            }
-        </style>
-
-      <!--on-new-sketch="_madeNewSketch"-->
-      <app-ui-namelabel id="namelabel" uid="[[_user.uid]]"></app-ui-namelabel>
+    <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
+      <app-login on-sign-in="_signIn" on-sign-out="_signOut"></app-login>
       <app-ui-sketchlist id="sketchlist" uid="[[_user.uid]]" on-load-sketch="_loadSketch"></app-ui-sketchlist>
+    </grow-button>
+  </template>
+  <script>
+    class AppUi extends Polymer.Element {
+      static get is() {
+        return "app-ui";
+      }
 
-      <tools-button icon="icons:build" active="{{toolsOpen}}">
-            <grow-child-button menu="Json" child-button icon="icons:settings-ethernet">
-                <json-wrapper petals="[[petals]]"></json-wrapper>
-            </grow-child-button>
-            <grow-child-button menu="Palette" child-button icon="image:color-lens">
-                <div id="testingOne">
-                    1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-                    laborum.
-                </div>
-            </grow-child-button>
-            <grow-child-button menu="History" child-button icon="icons:restore">
-                <div id="testingOne">
-                    2Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                    Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-                    laborum. 1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                    labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
-                    ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-                    dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
-                    deserunt mollit anim id est laborum.
-                </div>
-            </grow-child-button>
-        </tools-button>
-
-        <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
-            <app-login on-sign-in="_signIn" on-sign-out="_signOut" on-changed-user-data="_changedUserData"></app-login>
-        </grow-button>
-
-        <!--<grow-button id="help" icon="help-outline">
-            <div id="testingOne">
-                1Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-                sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </div>
-        </grow-button>-->
-
-    </template>
-    <script>
-        class AppUi extends Polymer.Element {
-            static get is() {
-                return "app-ui";
-            }
-
-            static get config() {
-                return {
-                    properties: {
-                        appName: String,
-                        petals: Array,
-                        toolsOpen: Boolean,
-                        accountOpen: Boolean,
-                      _sketchList: Array,
-                      _sketchListObject: {
-                          type: Object,
-                        observer: "debug"
-                      }
-                    }
-                }
-            }
-
-          _signIn(e){
-            this.set("signed", true);
-            this.set("_user", e.detail);
-
-            let db = firebase.app("droppad").database();
-            let path = "/users/" + this._user.uid + "/sketchlist/";
-            this.dbListener = db.ref(path).on("value", function(snap){
-              let val = snap.val();
-              this.set("_sketchList", Object.keys(val).map(function (key) {
-                return {key: key, value: val[key]};
-              }));
-            }.bind(this));
-          }
-
-          _signOut(e){
-            this.set("signed", false);
-            this.set("_user", null);
-          }
-
-          _changedUserData(e){
-            const newData = e.detail;
-            let sketchList = [];
-            if (newData && newData.sketchlist && newData.sketchlist.length != 0)
-              sketchList = Object.keys(newData.sketchlist).map(function(key) { return {key: key, value: newData.sketchlist[key]};});
-            this.set("_sketchList", sketchList);
-          }
-
-          _loadSketch(e){
-            this.$.namelabel.loadSketch(e.detail);
+      static get config() {
+        return {
+          properties: {
+            appName: String,
+            scale: Object,
+            history: StateMachine,
+            petals: Array,
+            toolsOpen: Boolean,
+            accountOpen: Boolean,
           }
         }
+      }
+
+      deselect(){
+        this.set("toolsOpen", false);
+        this.set("accountOpen", false);
+      }
+
+      _signIn(e) {
+        this.set("signed", true);
+        this.set("_user", e.detail);
+      }
+
+      _signOut(e) {
+        this.set("signed", false);
+        this.set("_user", null);
+      }
+
+      _loadSketch(e) {
+        this.$.namelabel.loadSketch(e.detail);
+      }
+    }
     customElements.define(AppUi.is, AppUi);
-    </script>
+  </script>
 </dom-module>

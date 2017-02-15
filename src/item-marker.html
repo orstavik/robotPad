@@ -1,0 +1,271 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="drop-shape.html">
+<link rel="import" href="group-of-shapes.html">
+
+<dom-module id="item-marker">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      div {
+        position: absolute;
+      }
+      #marker {
+        position: absolute;
+        box-sizing: border-box;
+        top: 0;
+        left: 0;
+        border: 1px dotted grey;
+      }
+      #marker div {
+        z-index: 10000;
+      }
+      .scale {
+        width: 6px;
+        height: 6px;
+        background-color: lightgrey;
+        border: 1px solid grey;
+      }
+      #nw {
+        top: -4px;
+        left: -4px;
+      }
+      #ne {
+        top: -4px;
+        right: -4px;
+      }
+      #sw {
+        bottom: -4px;
+        left: -4px;
+      }
+      #se {
+        bottom: -4px;
+        right: -4px;
+      }
+      #w {
+        top: calc(50% - 4px);
+        left: -4px;
+        border-radius: 50% 0 0 50%;
+      }
+      #e {
+        top: calc(50% - 4px);
+        right: -4px;
+        border-radius: 0 50% 50% 0;
+      }
+      #s {
+        bottom: -4px;
+        left: calc(50% - 4px);
+        border-radius: 0 0 50% 50%;
+      }
+      #n {
+        top: -4px;
+        left: calc(50% - 4px);
+        border-radius: 50% 50% 0 0;
+      }
+      #marker #move {
+        bottom: -16px;
+        right: -16px;
+        width: 12px;
+        height: 12px;
+        transform: rotate(45deg);
+        background: url(../images/move.png);
+        background-size: contain;
+      }
+      #marker #rotate {
+        top: -20px;
+        right: -20px;
+        width: 16px;
+        height: 16px;
+        background: url(../images/rotate.png);
+        background-size: contain;
+      }
+      #ne:hover { cursor: nesw-resize; }
+      #sw:hover { cursor: nesw-resize; }
+      #nw:hover { cursor: nwse-resize; }
+      #se:hover { cursor: nwse-resize; }
+      #e:hover { cursor: ew-resize; }
+      #w:hover { cursor: ew-resize; }
+      #n:hover { cursor: ns-resize; }
+      #s:hover { cursor: ns-resize; }
+      #rotate:hover { cursor: ns-resize; }
+      #move:hover { cursor: move; }
+      #marker:hover { cursor: move; }
+      /*.nw { transform-origin: 100% 100%; }*/
+      /*.se { transform-origin: 0 0; }*/
+      /*.ne { transform-origin: 0 100%; }*/
+      /*.sw { transform-origin: 100% 0; }*/
+      /*.s { transform-origin: 50% 0; }*/
+      /*.n { transform-origin: 50% 100%; }*/
+      /*.e { transform-origin: 0 50%; }*/
+      /*.w { transform-origin: 100% 50%; }*/
+
+    </style>
+    <div id="marker" hidden$="[[!box]]" class$="[[direction]]" style$="
+         left: [[box.left]]px;
+         top: [[box.top]]px;
+         width:  [[box.width]]px;
+         height: [[box.height]]px;
+         [[matrix]]">
+      <div id="nw" class="scale corner"></div>
+      <div id="ne" class="scale corner"></div>
+      <div id="sw" class="scale corner"></div>
+      <div id="se" class="scale corner"></div>
+      <div id="w" class="scale" hidden$="[[!box.isSingle]]"></div>
+      <div id="n" class="scale" hidden$="[[!box.isSingle]]"></div>
+      <div id="s" class="scale" hidden$="[[!box.isSingle]]"></div>
+      <div id="e" class="scale" hidden$="[[!box.isSingle]]"></div>
+      <div id="move"></div>
+      <div id="rotate"></div>
+    </div>
+  </template>
+
+  <script>
+    class ItemMarker extends Polymer.Element {
+      static get is() {
+        return "item-marker";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            p2p: PointToPoint,
+            box: Object,
+            action: String,
+            direction: String,
+            matrix: String,
+          }
+        }
+      }
+
+      _makeMatrix(changes, box) {
+        let rad = (box.angle || 0) + (changes.angle || 0);
+        let w = 1 + (changes.percentX || 0);
+        let h = 1 + (changes.percentY || 0);
+        let x = changes.xMove || 0;
+        let y = changes.yMove || 0;
+        const matrix = [
+          w * Math.cos(rad),
+          w * Math.sin(rad),
+          -h * Math.sin(rad),
+          h * Math.cos(rad),
+          x,
+          y];
+        return "transform: matrix(" + matrix.join(',') + ");";
+      }
+
+      connectedCallback() {
+        this.$.marker.addEventListener("pointerdown", this._pointerDown.bind(this));
+        this.pointermoveListener = this._pointerMove.bind(this);
+        this.pointerupListener = this._pointerUp.bind(this);
+      }
+
+      _pointerDown(e) {
+        ItemMarker._cancelPropDefault(e);
+        this.setPointerCapture(e.pointerId);
+        this.addEventListener("pointermove", this.pointermoveListener);
+        this.addEventListener("pointerup", this.pointerupListener);
+        this.start = this.p2p.calcLogicPoint(e.clientX, e.clientY);
+        this.startAngle = ItemMarker.calcAngle(this.box.center, this.start);
+        this.set("direction", e.target.id);
+        this.set("action", this.setMoveAction(e));
+        this.set("matrix", null);
+        this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: this.action}));
+      }
+
+      _pointerMove(e) {
+        ItemMarker._cancelPropDefault(e);
+        let newPos = this.p2p.calcLogicPoint(e.clientX, e.clientY);
+        newPos = this.doSnappingOnPointer(newPos, this.start);
+        let ms = this.calculateEventData(this.start, newPos, this.box, this.startAngle, this.action, this.direction);
+        ms.direction = this.direction;
+        ms.action = this.action;
+        ms.box = this.box;
+        this.set("matrix", this._makeMatrix(ms, this.box));
+        this.dispatchEvent(new CustomEvent("track-move", {detail: ms, composed: true, bubbles: true}));
+      }
+
+      calculateEventData(start, newPos, box, startAngle, action, direction) {
+        if (action == "scale") {
+          if (direction.indexOf("n") < 0 && direction.indexOf("s") < 0)
+            newPos.y = start.y;
+          if (direction.indexOf("e") < 0 && direction.indexOf("w") < 0)
+            newPos.x = start.x;
+
+          let ms = {
+            percentX: (newPos.x - start.x) / box.width,
+            percentY: (newPos.y - start.y) / box.height
+          };
+          ms.yMove = box.height/2 * ms.percentY;
+          ms.xMove = box.width/2 * ms.percentX;
+
+          if (direction.indexOf("n") >= 0)
+            ms.percentY *= -1;
+          if (direction.indexOf("w") >= 0)
+            ms.percentX *= -1;
+
+//          if (direction == "n") {
+//            ms.percentY = -ms.percentY;
+//            ms.percentX = 0;
+//            ms.yMove = yMove;
+//            let nx = (Math.cos(startAngle)*0)+(Math.sin(startAngle)*yMove);
+//            let ny = (Math.cos(startAngle)*yMove)-(Math.sin(startAngle)*0);
+//            ms.yMove = nx;
+//            ms.xMove = ny;
+//          }
+
+          return ms;
+        }
+        if (action == "rotate")
+          return {angle: ItemMarker.calcAngle(box.center, newPos) - startAngle};
+        //if (this.action == "move")
+        return {xMove: newPos.x - start.x, yMove: newPos.y - start.y};
+      }
+
+      _pointerUp(e) {
+        ItemMarker._cancelPropDefault(e);
+        this.releasePointerCapture(e.pointerId);
+        this.removeEventListener("pointerup", this.pointerupListener);
+        this.removeEventListener("pointermove", this.pointermoveListener);
+        this.dispatchEvent(new CustomEvent("track-end", {composed: true, bubbles: true}));
+        this.set("matrix", null);
+        this.set("action", null);
+        this.set("direction", null);
+      }
+
+      static _cancelPropDefault(e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+
+      getLogicalCenter() {
+        return this.box.center;
+      }
+
+      setMoveAction(e) {
+        if (this.heldKeys["KeyR"])
+          return "rotate";
+        if (this.heldKeys["KeyE"])
+          return "scale";
+        if (e.target.classList.contains("scale"))
+          return "scale";
+        if (e.target.id == "rotate")
+          return "rotate";
+        return "move";
+      }
+
+      doSnappingOnPointer(point, start) {
+        if (Math.abs(start.x - point.x) < 6 && Math.abs(start.y - point.y) < 6)
+          return start;
+        if (this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"] || !this.box.isSingle)
+          return {x: point.y, y: point.y};
+        return point;
+      }
+
+      static calcAngle(center, satelite) {
+        return Math.atan2(satelite.y - center.y, satelite.x - center.x);
+      }
+    }
+    customElements.define(ItemMarker.is, ItemMarker);
+  </script>
+</dom-module>

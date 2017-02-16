@@ -74,15 +74,7 @@
       }
 
       _movingMarker(e) {
-        let ms = e.detail;
-        switch (ms.action) {
-          case "scale":
-            return this.$.ghost.scaleDirection(ms.percentX, ms.percentY, ms.direction, ms.box);
-          case "rotate":
-            return this.$.ghost.rotate(ms.angle, ms.center);
-          case "move":
-            return this.$.ghost.move(ms.xMove, ms.yMove);
-        }
+        this.$.ghost.change(e.detail);
       }
 
       _stopMovingMarker(e) {

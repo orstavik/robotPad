@@ -97,7 +97,7 @@
          top: [[box.top]]px;
          width:  [[box.width]]px;
          height: [[box.height]]px;
-         [[matrix]]">
+         [[matrixString]]">
       <div id="nw" class="scale corner"></div>
       <div id="ne" class="scale corner"></div>
       <div id="sw" class="scale corner"></div>
@@ -170,7 +170,10 @@
       }
 
       getMatrix() {
-        let rad = this.angle;
+        return RotateChange.toMatrix(this.angle);
+      }
+
+      static toMatrix(rad) {
         return [
           Math.cos(rad),
           Math.sin(rad),
@@ -283,22 +286,29 @@
             box: Object,
             change2: Object,
             matrix: {
-              type: String,
+              type: Array,
               computed: "_makeMatrix(change2, box)"
             },
+            matrixString: {
+              type: String,
+              computed: "_matrixToString(matrix)"
+            }
           }
         }
       }
 
+      _matrixToString(matrix) {
+        return matrix ? "transform: matrix(" + matrix.join(',') + ");" : "";
+      }
+
       _makeMatrix(changes, box) {
         if (!changes && !box)
-          return "";
+          return null;
         if (!box)
-          return "transform: matrix(" + changes.getMatrix().join(',') + ");";
-        let startMatrix = [Math.cos(box.angle), Math.sin(box.angle), -Math.sin(box.angle), Math.cos(box.angle), 0, 0];
+          return changes.getMatrix();
         if (!changes)
-          return "transform: matrix(" + startMatrix.join(',') + ");";
-        return "transform: matrix(" + changes.subdueMatrix(startMatrix).join(',') + ");";
+          return RotateChange.toMatrix(box.angle);
+        return changes.subdueMatrix(RotateChange.toMatrix(box.angle));
       }
 
       connectedCallback() {

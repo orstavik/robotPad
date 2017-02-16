@@ -7,7 +7,7 @@
       :host {
         display: block;
       }
-      :host(.copy) drop-shape{
+      :host(.copy) drop-shape {
         opacity: 0.5;
         border: 2px dotted red;
       }
@@ -45,6 +45,20 @@
         this.set("infos", []);
         this.set("originals", null);
         return infos;
+      }
+
+      //todo here i can push the change into the ShapeInfoObject,
+      //todo or, i can take the ShapeInfoObject and pass out to the ItemMarker instead.
+      //todo that means making the item-marker hold the shapeInfoObjects as a subunit, and so when I apply the matrix to them,
+      //todo they automatically change with the css.
+      //todo BUT can i take out the x,y coordinates at any point??
+      change(change) {
+        if (change instanceof ScaleChange)
+          return this.scaleDirection(change.percentX, change.percentY, change.direction, change.box);
+        if (change instanceof RotateChange)
+          return this.rotate(change.angle, change.center);
+        if (change instanceof MoveChange)
+          return this.move(change.xMove, change.yMove);
       }
 
       move(xMove, yMove) {

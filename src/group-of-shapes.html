@@ -7,7 +7,7 @@
       :host {
         display: block;
       }
-      :host(.copy) drop-shape{
+      :host(.copy) drop-shape {
         opacity: 0.5;
         border: 2px dotted red;
       }
@@ -47,16 +47,8 @@
         return infos;
       }
 
-      move(xMove, yMove) {
-        this.set("infos", this.originals.map(info => info.move(xMove, yMove)));
-      }
-
-      rotate(angle, box) {
-        this.set("infos", this.originals.map(info => info.rotatePositionFromExternalPoint(box.center, angle)));
-      }
-
-      scaleDirection(percentX, percentY, direction, box) {
-        this.set("infos", this.originals.map(info => info.scaleInBox(percentX, percentY, box, direction)));
+      change(change) {
+        this.set("infos", this.originals.map(info => info.change(change)));
       }
     }
     customElements.define(GroupOfShapes.is, GroupOfShapes);

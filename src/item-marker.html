@@ -151,8 +151,6 @@
         this.start = startPoint;        //don't really need
         this.center = center;
         this.startAngle = RotateChange.calcAngle(this.center, startPoint);
-        this.action = "rotate";
-        this.angle = 0;
       }
 
       static calcAngle(center, satelite) {
@@ -160,17 +158,28 @@
       }
 
       change(newPoint, shift) {
-        newPoint = MatrixChange.doStartSnap(newPoint, this.start);
-//        if (shiftIsDown)
-//          rad = this.currentAngle?
-//        if (ctrlIsDown)
-//          rad = this.angle snap to nearest 30degree?
-        this.currentAngle = RotateChange.calcAngle(this.center, newPoint);
-        this.angle = this.currentAngle - this.startAngle;
+        this.newPoint = MatrixChange.doStartSnap(newPoint, this.start);
+        this.absAngle = this.getAbsoluteAngle();
+        this.angle = this.absAngle - this.startAngle;
       }
 
       getMatrix() {
-        return RotateChange.toMatrix(this.angle);
+//        if (shiftIsDown)
+//          return RotateChange.toMatrix(this.angle)?
+//        if (ctrlIsDown)
+//          return RotateChange.toMatrix(this.angle snap to nearest 30degree?);
+        return RotateChange.toMatrix(this.getAngle());
+      }
+
+      getCenter(){
+        return this.center;
+      }
+      getAngle() {
+        return this.angle || 0;
+      }
+
+      getAbsoluteAngle() {
+        return RotateChange.calcAngle(this.center, this.newPoint);
       }
 
       static toMatrix(rad) {
@@ -192,23 +201,28 @@
     class MoveChange {
       constructor(startPoint) {
         this.start = startPoint;
-        this.action = "move";
-        this.xMove = 0;
-        this.yMove = 0;
       }
 
       change(newPoint, shift) {
-        newPoint = MatrixChange.doStartSnap(newPoint, this.start);
+        this.newPoint = MatrixChange.doStartSnap(newPoint, this.start);
+        this.xMove = this.newPoint.x - this.start.x;
+        this.yMove = this.newPoint.y - this.start.y;
+      }
+
+      getX(){
+        return this.xMove || 0;
+      }
+
+      getY(){
+        return this.yMove || 0;
+      }
+
+      getMatrix() {
 //        if (shift)
 //          this.yMove = 0;
 //        if (ctrl)
 //          this.xMove = 0;
-        this.xMove = newPoint.x - this.start.x;
-        this.yMove = newPoint.y - this.start.y;
-      }
-
-      getMatrix() {
-        return [1, 0, 0, 1, this.xMove, this.yMove];
+        return [1, 0, 0, 1, this.getX(), this.getY()];
       }
 
       subdueMatrix(matrix) {

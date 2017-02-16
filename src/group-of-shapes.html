@@ -56,9 +56,9 @@
         if (change instanceof ScaleChange)
           return this.scaleDirection(change.percentX, change.percentY, change.direction, change.box);
         if (change instanceof RotateChange)
-          return this.rotate(change.angle, change.center);
+          return this.rotate(change.getAngle(), change.getCenter());
         if (change instanceof MoveChange)
-          return this.move(change.xMove, change.yMove);
+          return this.move(change.getX(), change.getY());
       }
 
       move(xMove, yMove) {

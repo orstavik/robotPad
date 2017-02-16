@@ -40,44 +40,13 @@ class ShapeInfoObject {
     return c;
   }
 
-  addAngleAndsetPosition(angle, point){
+  rotateAndSetNewPosition(angle, point){
     const c = this.rotate(angle);
     c.x = point.x;
     c.y = point.y;
     return c;
   }
 
-  //todo does not work in rotated space start
-  scaleInBox(change) {
-    const c = this.clone();
-    c._moveInScaledBox(change.percentX, change.percentY, change.box, change.direction);
-    c._scaleInRotatedBox(change.percentX, change.percentY);
-    return c;
-  }
-
-  _moveInScaledBox(xPercent, yPercent, box, direction) {
-    if (direction.indexOf("s") >= 0)
-      this.y += (this.y - box.top) * yPercent;
-    else if (direction.indexOf("n") >= 0)
-      this.y -= (box.bottom - this.y) * yPercent;
-    if (direction.indexOf("e") >= 0)
-      this.x += (this.x - box.left) * xPercent;
-    else if (direction.indexOf("w") >= 0)
-      this.x -= (box.right - this.x) * xPercent;
-  }
-
-  static rotateAng(x,y,a) {
-    let nx = (Math.cos(a)*x)+(Math.sin(a)*y);
-    let ny = (Math.cos(a)*y)-(Math.sin(a)*x);
-    return [nx,ny];
-  }
-
-  _scaleInRotatedBox(xPercent, yPercent) {
-    let newVector = ShapeInfoObject.rotateAng(xPercent, yPercent, this.angle);
-    this.h *= (1+newVector[0]);
-    this.w *= (1+newVector[1]);
-  }
-  //todo does not work in rotated space end
   mirror() {
     const c = this.clone();
     c.w *= -1;

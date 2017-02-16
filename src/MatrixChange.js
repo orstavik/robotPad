@@ -60,7 +60,10 @@ class RotateChange {
   }
 
   applyToShapeInfoObject(info) {
-    return info.addAngleAndsetPosition(this.getAngle(), this.calcNewSatelitePosition(info));
+    return info.rotateAndSetNewPosition(
+      this.getAngle(),
+      this.calcNewSatelitePosition(info)
+    );
   }
 
   getMatrix() {
@@ -195,7 +198,9 @@ class ScaleChangeBackup {
   subdueMatrix(matrix) {
     return MatrixChange.multiMatrixTom(matrix, this.getMatrix());
   }
-}class ScaleChange {
+}
+
+class ScaleChange {
   constructor(startPoint, center, direction, box) {
     this.start = startPoint;
     this.center = center;
@@ -231,9 +236,39 @@ class ScaleChangeBackup {
       this.percentX *= -1;
   }
 
+  //todo does not work in rotated space start
   applyToShapeInfoObject(info){
-    return info.scaleInBox(this);
+    let c = ScaleChange._moveInScaledBox(this.percentX, this.percentY, this.box, this.direction, info);
+    return ScaleChange._scaleInRotatedBox(this.percentX, this.percentY, c);
   }
+
+  static rotateAng(x,y,a) {
+    let nx = (Math.cos(a)*x)+(Math.sin(a)*y);
+    let ny = (Math.cos(a)*y)-(Math.sin(a)*x);
+    return [nx,ny];
+  }
+
+  static _scaleInRotatedBox(xPercent, yPercent, info) {
+    const c = info.clone();
+    let newVector = ScaleChange.rotateAng(xPercent, yPercent, c.angle);
+    c.h *= (1+newVector[0]);
+    c.w *= (1+newVector[1]);
+    return c;
+  }
+
+  static _moveInScaledBox(xPercent, yPercent, box, direction, info) {
+    const c = info.clone();
+    if (direction.indexOf("s") >= 0)
+      c.y += (c.y - box.top) * yPercent;
+    else if (direction.indexOf("n") >= 0)
+      c.y -= (box.bottom - c.y) * yPercent;
+    if (direction.indexOf("e") >= 0)
+      c.x += (c.x - box.left) * xPercent;
+    else if (direction.indexOf("w") >= 0)
+      c.x -= (box.right - c.x) * xPercent;
+    return c;
+  }
+  //todo does not work in rotated space end
 
   getMatrix() {
     //        if (shift){

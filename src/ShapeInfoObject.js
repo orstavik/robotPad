@@ -39,23 +39,23 @@ class ShapeInfoObject {
   //todo BUT can i take out the x,y coordinates at any point??
   change(change){
     if (change instanceof ScaleChange)
-      return this.scaleInBox(change.percentX, change.percentY, change.box, change.direction);
+      return this.scaleInBox(change);
     if (change instanceof RotateChange)
-      return this.rotatePositionFromExternalPoint( change.getCenter(), change.getAngle());
+      return this.rotatePositionFromExternalPoint(change);
     if (change instanceof MoveChange)
-      return this.move(change.getX(), change.getY());
+      return this.move(change);
   }
 
-  move(x, y) {
+  move(change) {
     const c = this.clone();
-    c.x += x;
-    c.y += y;
+    c.x += change.getX();
+    c.y += change.getY();
     return c;
   }
 
-  rotatePositionFromExternalPoint(center, angle) {
-    const newPos = this.calcNewSatelitePosition(center, angle);
-    const c = this.rotate(angle);
+  rotatePositionFromExternalPoint(change) {
+    const newPos = this.calcNewSatelitePosition(change.getCenter(), change.getAngle());
+    const c = this.rotate(change.getAngle());
     c.x = newPos.x;
     c.y = newPos.y;
     return c;
@@ -71,11 +71,11 @@ class ShapeInfoObject {
     const newY = Math.sin(newAngle) * radius;
     return {x: center.x + newX, y: center.y + newY};  //returns the new position positioned against the underlying map again.
   }
-
-  scaleInBox(xPercent, yPercent, box, direction) {
+  //todo does not work in rotated space start
+  scaleInBox(change) {
     const c = this.clone();
-    c._moveInScaledBox(xPercent, yPercent, box, direction);
-    c._scaleInRotatedBox(xPercent, yPercent);
+    c._moveInScaledBox(change.percentX, change.percentY, change.box, change.direction);
+    c._scaleInRotatedBox(change.percentX, change.percentY);
     return c;
   }
 
@@ -101,7 +101,7 @@ class ShapeInfoObject {
     this.h *= (1+newVector[0]);
     this.w *= (1+newVector[1]);
   }
-
+  //todo does not work in rotated space end
   mirror() {
     const c = this.clone();
     c.w *= -1;

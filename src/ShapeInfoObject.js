@@ -40,24 +40,13 @@ class ShapeInfoObject {
     return c;
   }
 
-  rotatePositionFromExternalPoint(change) {
-    const newPos = this.calcNewSatelitePosition(change.getCenter(), change.getAngle());
-    const c = this.rotate(change.getAngle());
-    c.x = newPos.x;
-    c.y = newPos.y;
+  addAngleAndsetPosition(angle, point){
+    const c = this.rotate(angle);
+    c.x = point.x;
+    c.y = point.y;
     return c;
   }
 
-  calcNewSatelitePosition(center, angleChange) {
-    const x = this.x - center.x;           //the center of this group = {0,0}. The position of the shape from this center = {x,y}.
-    const y = this.y - center.y;
-    const radius = Math.sqrt(x * x + y * y);    //the length of the radius from the center of the group to the center of the shape.
-    const oldAngle = Math.atan2(y, x);          //the angle between the vertical (horisontal?) line and to the shape, from 0->2PI
-    const newAngle = oldAngle + angleChange;    //adds the angle change
-    const newX = Math.cos(newAngle) * radius;   //calculates the new x and y coordinates to where the shape should move.
-    const newY = Math.sin(newAngle) * radius;
-    return {x: center.x + newX, y: center.y + newY};  //returns the new position positioned against the underlying map again.
-  }
   //todo does not work in rotated space start
   scaleInBox(change) {
     const c = this.clone();

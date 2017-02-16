@@ -33,23 +33,10 @@ class ShapeInfoObject {
     return c;
   }
 
-  //todo i can take the ShapeInfoObject and place it into the ItemMarker instead.
-  //todo that means making the item-marker hold the shapeInfoObjects as a subunit, and so when I apply the matrix to them,
-  //todo they automatically change with the css.
-  //todo BUT can i take out the x,y coordinates at any point??
-  change(change){
-    if (change instanceof ScaleChange)
-      return this.scaleInBox(change);
-    if (change instanceof RotateChange)
-      return this.rotatePositionFromExternalPoint(change);
-    if (change instanceof MoveChange)
-      return this.move(change);
-  }
-
-  move(change) {
+  move(x, y) {
     const c = this.clone();
-    c.x += change.getX();
-    c.y += change.getY();
+    c.x += x;
+    c.y += y;
     return c;
   }
 

@@ -48,7 +48,7 @@
       }
 
       change(change) {
-        this.set("infos", this.originals.map(info => info.change(change)));
+        this.set("infos", this.originals.map(info => change.applyToShapeInfoObject(info)));
       }
     }
     customElements.define(GroupOfShapes.is, GroupOfShapes);

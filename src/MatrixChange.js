@@ -48,6 +48,10 @@ class RotateChange {
     this.angle = this.absAngle - this.startAngle;
   }
 
+  applyToShapeInfoObject(info) {
+    return info.rotatePositionFromExternalPoint(this);
+  }
+
   getMatrix() {
 //        if (shiftIsDown)
 //          return RotateChange.toMatrix(this.angle)?
@@ -92,6 +96,10 @@ class MoveChange {
     this.newPoint = MatrixChange.doStartSnap(newPoint, this.start);
     this.xMove = this.newPoint.x - this.start.x;
     this.yMove = this.newPoint.y - this.start.y;
+  }
+
+  applyToShapeInfoObject(info){
+    return info.move(this.getX(), this.getY());
   }
 
   getX(){
@@ -210,6 +218,10 @@ class ScaleChangeBackup {
       this.percentY *= -1;
     if (this.direction.indexOf("w") >= 0)
       this.percentX *= -1;
+  }
+
+  applyToShapeInfoObject(info){
+    return info.scaleInBox(this);
   }
 
   getMatrix() {

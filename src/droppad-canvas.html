@@ -50,7 +50,8 @@
           properties: {
             drops: Array,
             heldKeys: Array,
-            _pointerMove: Event
+            _pointerMove: Event,
+            selecteds: SquareBox
           }
         }
       }
@@ -85,14 +86,14 @@
 
       copy() {
         this.copyData = this.getSelectedInfos().map(info => info.makeCopy());
-        this.copyCenter = this.$.square.getLogicalCenter();
+        this.copyCenter = this.selecteds.center;
       }
 
       paste() {
         this.$.ghostCopy.start(this.copyData);
         this.copyData = this.copyData.map(info => info.makeCopy());//todo need to do this if we paste more than once from the same copy
         const logicPointPos = this.p2p.calcLogicPoint(this._pointerMove.clientX, this._pointerMove.clientY);
-        this.$.ghostCopy.move(logicPointPos.x-this.copyCenter.x, logicPointPos.y -this.copyCenter.y);
+        this.$.ghostCopy.change(MoveChange.makeMoveChange(this.copyCenter, logicPointPos));
         let shapes = this.$.ghostCopy.end();
         this.dispatchEvent(new CustomEvent("addshapes", {detail: shapes}));
         this.$.dropSelector.deselectAll();

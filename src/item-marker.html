@@ -165,7 +165,7 @@
         let action = this.setMoveAction(e);
         let change = null;
         if (action == "rotate")
-          change = new RotateChange(start, this.box.center);    //todo, make all the ChangeObjects take (start, center) as input
+          change = new RotateChange(start, this.box.center);//todo, make all the ChangeObjects take (start, center) as input
         else if (action == "move")
           change = new MoveChange(start);
         else if (action == "scale")
@@ -176,7 +176,7 @@
 
       _pointerMove(e) {
         ItemMarker._cancelPropDefault(e);
-        this.change2.change(this.p2p.calcLogicPoint(e.clientX, e.clientY), this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"]);  //todo make heldKeys.shift()
+        this.change2.update(this.p2p.calcLogicPoint(e.clientX, e.clientY), this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"]);  //todo make heldKeys.shift()
         this.notifyPath("change2");
         this.dispatchEvent(new CustomEvent("track-move", {detail: this.change2, composed: true, bubbles: true}));
       }
@@ -193,10 +193,6 @@
       static _cancelPropDefault(e) {
         e.stopPropagation();
         e.preventDefault();
-      }
-
-      getLogicalCenter() {
-        return this.box.center;
       }
 
       setMoveAction(e) {

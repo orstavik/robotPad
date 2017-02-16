@@ -42,7 +42,7 @@ class RotateChange {
     return Math.atan2(satelite.y - center.y, satelite.x - center.x);
   }
 
-  change(newPoint, shift) {
+  update(newPoint, shift) {
     this.newPoint = MatrixChange.doStartSnap(newPoint, this.start);
     this.absAngle = this.getAbsoluteAngle();
     this.angle = this.absAngle - this.startAngle;
@@ -88,7 +88,7 @@ class MoveChange {
     this.start = startPoint;
   }
 
-  change(newPoint, shift) {
+  update(newPoint, shift) {
     this.newPoint = MatrixChange.doStartSnap(newPoint, this.start);
     this.xMove = this.newPoint.x - this.start.x;
     this.yMove = this.newPoint.y - this.start.y;
@@ -113,6 +113,12 @@ class MoveChange {
   subdueMatrix(matrix) {
     return MatrixChange.multiMatrixTom(this.getMatrix(), matrix);
   }
+
+  static makeMoveChange(start,end){
+    let c = new MoveChange(start);
+    c.update(end, false);
+    return c;
+  }
 }
 
 class ScaleChange {
@@ -129,17 +135,8 @@ class ScaleChange {
     this.yMove = 0;
   }
 
-  change(newPoint, shift) {
+  update(newPoint, shift) {
     newPoint = MatrixChange.doStartSnap(newPoint, this.start);
-//        if (shift){
-//          this.percentX = 0;
-//          this.xMove = a little less or more?
-//        }
-//        if (ctrl){
-//          this.percentY = 0;
-//          this.yMove = a little less or more?
-//        }
-
     let xMove = newPoint.x - this.start.x;
     let yMove = newPoint.y - this.start.y;
 
@@ -159,6 +156,14 @@ class ScaleChange {
   }
 
   getMatrix() {
+    //        if (shift){
+    //          this.percentX = 0;
+    //          this.xMove = a little less or more?
+    //        }
+    //        if (ctrl){
+    //          this.percentY = 0;
+    //          this.yMove = a little less or more?
+    //        }
     return [
       1 + this.percentX,
       0,

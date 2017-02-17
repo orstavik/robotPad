@@ -1,12 +1,12 @@
 <dom-module id="keyboard-listener">
   <script>
 
-    class KeyEvent{
-      constructor(code, start, stop){
+    class KeyEvent {
+      constructor(code, start, stop) {
         this.code = code;
         this.start = start;
         this.stop = stop;
-        this.duration = stop-start;
+        this.duration = stop - start;
       }
     }
 
@@ -28,36 +28,24 @@
       }
 
       connectedCallback() {
-        window.addEventListener("keydown", this._catchNativeKeyBoardEvents.bind(this));
-        window.addEventListener("keyup", this._catchNativeKeyBoardEvents.bind(this));
+        window.addEventListener("keydown", this._keydown.bind(this));
+        window.addEventListener("keyup", this._keyup.bind(this));
         this.prevKeyEvent = {};
         this.heldKeys = {};
       }
 
-      _catchNativeKeyBoardEvents(e) {
+      _doBoth(e, name) {
         KeyboardListener.preventCertainDefaultAction(e);
-        let name = e.type.substr(0, 3) + "-" + e.type.slice(3);
-        this.dispatchEvent(new CustomEvent(name, {
-          "composed": true,
-          "bubbles": true,
-          "detail": {keyboardEvent: e, heldKeys: this.getHeldKeysRightNow(), code: e.code}
-        }));
-        if (e.type == "keydown")
-          this._keyWasDown(e);
-        if (e.type == "keyup")
-          this._keyWasUp(e);
+        this._fire(name, {keyboardEvent: e, heldKeys: this.getHeldKeysRightNow(), code: e.code});
       }
 
-      _keyWasDown(e) {
+      _keydown(e) {
+        this._doBoth(e, "key-down");
         e.absTime = new Date().getTime();
         if (this.isRepeatKeyEvent(e))
           return;
         if ((Object.keys(this.heldKeys).length === 0) && this.prevKeyEvent.timeStamp) {
-          this.dispatchEvent(new CustomEvent("key-pause-end", {
-            "composed": true,
-            "bubbles": true,
-            "detail": {duration: e.timeStamp - this.prevKeyEvent.timeStamp}
-          }));
+          this._fire("key-pause-end", {duration: e.timeStamp - this.prevKeyEvent.timeStamp});
         }
         this.prevKeyEvent = e;
         this.heldKeys[e.code] = e;
@@ -68,7 +56,8 @@
         return this.prevKeyEvent.type === e.type && this.prevKeyEvent.code === e.code;
       }
 
-      _keyWasUp(e) {
+      _keyup(e) {
+        this._doBoth(e, "key-up");
         e.absTime = new Date().getTime();
         this.prevKeyEvent = e;
         let correspondingDown = this.heldKeys[e.code];
@@ -77,11 +66,15 @@
         let keyE = new KeyEvent(e.code, correspondingDown.absTime, e.absTime);
         delete this.heldKeys[e.code];
         this.notifyPath("heldKeys");
-        this.dispatchEvent(new CustomEvent("key-stroke", {"composed": true, "bubbles": true, detail: keyE}));
+        this._fire("key-stroke", keyE);
       }
 
-      getHeldKeysRightNow(){
+      getHeldKeysRightNow() {
         return Object.keys(this.heldKeys);
+      }
+
+      _fire(name, detail) {
+        this.dispatchEvent(new CustomEvent(name, {"composed": true, "bubbles": true, "detail": detail}));
       }
 
       static preventCertainDefaultAction(e) {

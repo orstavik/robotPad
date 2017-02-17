@@ -174,7 +174,7 @@
 
       _pointerMove(e) {
         ItemMarker._cancelPropDefault(e);
-        this.change2.update(this.p2p.calcLogicPoint(e.clientX, e.clientY), this.heldKeys.shift());
+        this.change2.update(this.p2p.calcLogicPoint(e.clientX, e.clientY), (this.heldKeys && this.heldKeys.shift()));
         this.notifyPath("change2");
         this.dispatchEvent(new CustomEvent("track-move", {detail: this.change2, composed: true, bubbles: true}));
       }
@@ -194,9 +194,9 @@
       }
 
       setMoveAction(e) {
-        if (this.heldKeys["KeyR"] || e.target.id == "rotate")
+        if ((this.heldKeys && this.heldKeys["KeyR"]) || e.target.id == "rotate")
           return "rotate";
-        if (this.heldKeys["KeyE"] || e.target.classList.contains("scale"))
+        if ((this.heldKeys && this.heldKeys["KeyE"]) || e.target.classList.contains("scale"))
           return "scale";
         return "move";
       }

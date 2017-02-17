@@ -18,27 +18,20 @@
       static get config() {
         return {
           properties: {
-            prevKeyEvent: {
-              type: Object,
-              value: function () {
-                return {};
-              }
-            },
+            prevKeyEvent: Object,
             heldKeys: {
               type: Object,
-              value: function () {
-                return {};
-              },
               notify: true
             },
           }
         }
       }
 
-      constructor() {
-        super();
+      connectedCallback() {
         window.addEventListener("keydown", this._catchNativeKeyBoardEvents.bind(this));
         window.addEventListener("keyup", this._catchNativeKeyBoardEvents.bind(this));
+        this.prevKeyEvent = {};
+        this.heldKeys = {};
       }
 
       _catchNativeKeyBoardEvents(e) {

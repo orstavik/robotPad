@@ -34,13 +34,9 @@
         this.heldKeys = {};
       }
 
-      _doBoth(e, name) {
-        KeyboardListener.preventCertainDefaultAction(e);
-        this._fire(name, {keyboardEvent: e, heldKeys: this.getHeldKeysRightNow(), code: e.code});
-      }
-
       _keydown(e) {
-        this._doBoth(e, "key-down");
+        KeyboardListener.preventCertainDefaultAction(e);
+        this._fire("key-down", {keyboardEvent: e, heldKeys: this.getHeldKeysRightNow(), code: e.code});
         e.absTime = new Date().getTime();
         if (this.isRepeatKeyEvent(e))
           return;
@@ -57,7 +53,8 @@
       }
 
       _keyup(e) {
-        this._doBoth(e, "key-up");
+        KeyboardListener.preventCertainDefaultAction(e);
+        this._fire("key-up", {keyboardEvent: e, heldKeys: this.getHeldKeysRightNow(), code: e.code});
         e.absTime = new Date().getTime();
         this.prevKeyEvent = e;
         let correspondingDown = this.heldKeys[e.code];

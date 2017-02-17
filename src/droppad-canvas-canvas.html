@@ -110,12 +110,8 @@
         return {
           properties: {
             pointDown: Object,
-            pointDown2: Object,
             p2p: {
               type: PointToPoint,
-              value: function () {
-                return new PointToPoint(window.innerWidth, window.innerHeight);
-              },
               notify: true
             }
           }
@@ -123,6 +119,7 @@
       }
 
       connectedCallback() {
+        this.p2p = new PointToPoint(window.innerWidth, window.innerHeight);
         window.addEventListener("resize", this._resize.bind(this));
         this.addEventListener("wheel", this._wheel.bind(this));
         this.addEventListener("pointerdown", this._pointerdown.bind(this));

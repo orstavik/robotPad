@@ -174,7 +174,7 @@
 
       _pointerMove(e) {
         ItemMarker._cancelPropDefault(e);
-        this.change2.update(this.p2p.calcLogicPoint(e.clientX, e.clientY), this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"]);  //todo make heldKeys.shift()
+        this.change2.update(this.p2p.calcLogicPoint(e.clientX, e.clientY), this.heldKeys.shift());
         this.notifyPath("change2");
         this.dispatchEvent(new CustomEvent("track-move", {detail: this.change2, composed: true, bubbles: true}));
       }

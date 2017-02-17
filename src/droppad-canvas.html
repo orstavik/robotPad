@@ -100,29 +100,24 @@
         this.selectDelayed(shapes);
       }
 
-      handleKeyPress(e) {
-        if (e.code === "Escape")
-          this.$.dropSelector.deselectAll(); // also do this.$.square.abort();
-        else if (e.code === "Digit0" && this.holdsCtrl())
-          this.$.canvas.reset();
-        else if (e.code === "KeyD")
-          this._deleteElem();
-        else if (e.code === "KeyC" && this.holdsCtrl())
-          this.copy();
-        else if (e.code === "KeyV" && this.holdsCtrl())
-          this.paste();
-        else if (e.code == "KeyM")
-          this.replaceChanges(this.getSelectedInfos().map(info => info.mirror()));
-        else if (e.code == "KeyN")
-          this.replaceChanges(this.getSelectedInfos().map(info => info.center()));
-        else if (e.code == "PageUp")
-          this.replaceChanges(this.getSelectedInfos().map(info => info.zUp()));
-        else if (e.code == "PageDown")
-          this.replaceChanges(this.getSelectedInfos().map(info => info.zDown()));
+      zoomNormal() {
+        this.$.canvas.reset();
       }
 
-      holdsCtrl() {
-        return this.heldKeys["ControlLeft"] || this.heldKeys["ControlRight"];
+      zDownSelected() {
+        this.replaceChanges(this.getSelectedInfos().map(info => info.zDown()));
+      }
+
+      zUpSelected() {
+        this.replaceChanges(this.getSelectedInfos().map(info => info.zUp()));
+      }
+
+      centerSelected() {
+        this.replaceChanges(this.getSelectedInfos().map(info => info.center()));
+      }
+
+      mirrorSelected() {
+        this.replaceChanges(this.getSelectedInfos().map(info => info.mirror()));
       }
 
       timeTravel(historicState) {

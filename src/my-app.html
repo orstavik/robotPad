@@ -18,7 +18,6 @@
       :host {
         display: block;
       }
-
       json-object {
         display: inline-block;
         width: 250px;
@@ -28,7 +27,6 @@
         overflow-y: scroll;
         z-index: 1;
       }
-
       :host {
         --tone-color-0: blue;
         --tone-color-1: red;
@@ -42,7 +40,6 @@
         --tone-color-9: pink;
         --tone-color-10: teal;
         --tone-color-11: magenta;
-
         --tone-tone-0: blue;
         --tone-tone-1: red;
         --tone-tone-2: yellow;
@@ -50,7 +47,6 @@
         --tone-tone-4: orange;
         --tone-tone-5: green;
         --tone-tone-6: purple;
-
         --tone-rotation-0: rotate(0deg);
         --tone-rotation-1: rotate(0deg);
         --tone-rotation-2: rotate(0deg);
@@ -58,7 +54,6 @@
         --tone-rotation-4: rotate(0deg);
         --tone-rotation-5: rotate(0deg);
         --tone-rotation-6: rotate(0deg);
-
         --tone-grey-0: hsl(0, 0%, 0%);
         --tone-grey-1: hsl(0, 0%, 9%);
         --tone-grey-2: hsl(0, 0%, 18%);
@@ -72,14 +67,12 @@
         --tone-grey-10: hsl(0, 0%, 90%);
         --tone-grey-11: hsl(0, 0%, 100%);
       }
-
       #guide {
         display: inline-block;
         padding: 10px;
         font-size: 12px;
         color: grey;
       }
-
       .button {
         display: inline-block;
         float: left;
@@ -91,12 +84,10 @@
         font-size: 11px;
         line-height: 12px;
       }
-
-      .spacer{
+      .spacer {
         clear: left;
         width: 1px;
       }
-
       #toolbar {
         left: 0;
         bottom: 0;
@@ -104,7 +95,6 @@
         position: fixed;
         z-index: 1;
       }
-
       #helpText {
         position: fixed;
         bottom: 40px;
@@ -197,16 +187,17 @@
       <tab-wrapper title="Save/Load" select="3">
       </tab-wrapper>
       <tab-wrapper title="History" select="4">-->
-    <droppad-history id="history" on-new-state="_newState" style="visibility: hidden" history="{{history}}"></droppad-history>
+    <droppad-history id="history" on-new-state="_newState" style="visibility: hidden"
+                     history="{{history}}"></droppad-history>
     <!--<json-saver  id="jsonSaver" input="[[letters]]" on-sketchload="loadSketch" json-name="{{sketchName}}" style="visibility: hidden"></json-saver>-->
-        <!--History: <input type="range" min="0" max="10000" value="0" id="h" on-input="timeTravel"/> <br>-->
-      <!--</tab-wrapper>
-    </iron-selector>-->
+    <!--History: <input type="range" min="0" max="10000" value="0" id="h" on-input="timeTravel"/> <br>-->
+    <!--</tab-wrapper>
+  </iron-selector>-->
 
     <div id="helpText" hidden$="[[!helpText]]">[[helpText]]</div>
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
-    <keyboard-listener on-key-down="_checkKey" held-keys="{{heldKeys}}"></keyboard-listener>
+    <keyboard-listener on-key-down="_checkKey" on-key-up="_keyUp" exclude-repeats></keyboard-listener>
 
   </template>
 
@@ -236,17 +227,17 @@
         super.connectedCallback();
       }
 
-      _newColors(e){
+      _newColors(e) {
         let colors = e.detail;
         for (let i = 0; i < colors.length; i++)
           this.style.setProperty('--tone-color-' + i, colors[i]);
       }
 
-      _newColorScale(e){
+      _newColorScale(e) {
         let coloredScale = e.detail;
-        for (let i = 0; i < coloredScale.length; i++){
+        for (let i = 0; i < coloredScale.length; i++) {
           this.style.setProperty('--tone-tone-' + i, coloredScale[i].color);
-          this.style.setProperty('--tone-rotation-' + i, "rotate("+coloredScale[i].rotation+"deg)");
+          this.style.setProperty('--tone-rotation-' + i, "rotate(" + coloredScale[i].rotation + "deg)");
         }
       }
 
@@ -254,47 +245,48 @@
         this.$.shapeSelector.addStyleToSelected(e.detail);
       }
 
-      _newSketchSet(e){
+      _newSketchSet(e) {
         this.set("sketchid", e.detail);
       }
 
-      _newState(e){
+      _newState(e) {
         this.set("letters", e.detail);
-        if (this.sketchid){
+        if (this.sketchid) {
           let path = "/sketches/" + this.sketchid;
           let dbPos = firebase.app("droppad").database().ref(path);
           dbPos.push({changed: firebase.database.ServerValue.TIMESTAMP, state: e.detail});
         }
       }
-      _deselect(){
+
+      _deselect() {
         this.$.ui.deselect();
       }
 
-      _addShapes(e){
+      _addShapes(e) {
         this.$.history.add(e.detail);
       }
 
-      _removeShapes(e){
+      _removeShapes(e) {
         this.$.history.remove(e.detail);
       }
 
-      _changeShapes(e){
+      _changeShapes(e) {
         this.$.history.update(e.detail);
       }
 
-      _timetravel(e){
+      _timetravel(e) {
         this.$.shapeSelector.timeTravel(e.detail);
       }
 
-      _newUserLoggedIn(e){
+      _newUserLoggedIn(e) {
         console.log("new user");
       }
 
-      _loadSketch(e){
+      _loadSketch(e) {
         this.set("sketchid", e.detail);
         let path = "/sketches/" + this.sketchid;
         let dbPos = firebase.app("droppad").database().ref(path);
-        dbPos.limitToLast(1).once("child_added", function(snap){
+        dbPos.limitToLast(1).once("child_added", function (snap) {
           this.$.history.load(snap.val().state);
         }.bind(this));
       }
@@ -303,11 +295,11 @@
         this.$.history.setState(e.detail.json);
       }
 
-      newSketch(){
+      newSketch() {
         this.$.history.setState([]);
       }
 
-      showHelp(e){
+      showHelp(e) {
         let action = e.detail;
         let txt;
         if (action == "scale")
@@ -319,7 +311,7 @@
         this.set("helpText", action + ": " + txt);
       }
 
-      hideHelp(){
+      hideHelp() {
         this.set("helpText", null);
       }
 
@@ -328,16 +320,51 @@
       }
 
       _checkKey(e) {
-        e.preventDefault();
-        if (e.detail.code === "Enter")
-          this.$.clef.turnKeyRight();
-        else if (e.detail.code === "Tab")
-          this.$.clef.turnKeyLeft();
-        else if (e.detail.code === "Backspace")
-          this.$.clef.turnModusRight();
-        else if (e.detail.code === "Backquote")
-          this.$.clef.turnModusLeft();
-        this.$.shapeSelector.handleKeyPress(e.detail);
+        this.set("heldKeys", Object.keys(e.detail));
+        switch (e.detail.code()) {
+          case "Enter":
+            this.$.clef.turnKeyRight();
+            return;
+          case "Tab":
+            this.$.clef.turnKeyLeft();
+            return;
+          case "Backspace":
+            this.$.clef.turnModusRight();
+            return;
+          case "Backquote":
+            this.$.clef.turnModusLeft();
+            return;
+          case "Escape":
+            this.$.shapeSelector._deselectAll();
+            return;
+          case "KeyD":
+            this.$.shapeSelector._deleteElem();
+            return;
+          case "KeyM":
+            this.$.shapeSelector.mirrorSelected();
+            return;
+          case "KeyN":
+            this.$.shapeSelector.centerSelected();
+            return;
+          case "PageUp":
+            this.$.shapeSelector.zUpSelected();
+            return;
+          case "PageDown":
+            this.$.shapeSelector.zDownSelected();
+            return;
+        }
+        if (e.detail.ctrl()) {
+          if (e.detail.code() === "Digit0")
+            this.$.shapeSelector.zoomNormal();
+          else if (e.detail.code() === "KeyC")
+            this.$.shapeSelector.copy();
+          else if (e.detail.code() === "KeyV")
+            this.$.shapeSelector.paste();
+        }
+      }
+
+      _keyUp(e) {
+        this.set("heldKeys", Object.keys(e.detail.heldKeys));
       }
 
       setStyleName(e) {

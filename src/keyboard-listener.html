@@ -5,6 +5,11 @@
         prev = prev || {heldKeys: {}};
         this.heldKeys = Object.assign({}, prev.heldKeys);
         this.prev = prev;
+        this.e = e;
+      }
+
+      getTime() {
+        return this.e.timeStamp;
       }
 
       getPreviousDown() {
@@ -17,11 +22,8 @@
         return p instanceof KeyUpEvent ? p : p.getPreviousUp();
       }
 
-
       getDurationToLastDifferent() {
-        const previousUnique = this.getPreviousUnique();
-        const x = previousUnique.down || previousUnique.up;
-        return this.down.timeStamp - x.timeStamp;
+        return this.getTime() - this.getPreviousUnique().getTime();
       }
 
       noHeldKeys() {
@@ -29,40 +31,26 @@
       }
     }
 
-    class KeyUpEvent extends ComplexKeyEvent{
+    class KeyUpEvent extends ComplexKeyEvent {
       constructor(prev, e) {
-        super(prev,e);
-        this.up(e);
-      }
-
-      up(e) {
-        this.up = e;
+        super(prev, e);
         this.down = this.heldKeys[e.code];
         if (this.down)
           delete this.heldKeys[e.code];
       }
 
       getDurationOfKeyStroke() {
-        return this.up.timeStamp - this.down.timeStamp;
+        return this.e.timeStamp - this.down.timeStamp;
       }
 
       getPreviousUnique() {
         return this.prev;
       }
-
-      getTime(){
-        return this.up.timeStamp;
-      }
     }
 
-    class KeyDownEvent extends ComplexKeyEvent{
+    class KeyDownEvent extends ComplexKeyEvent {
       constructor(prev, e) {
-        super(prev,e);
-        this.down(e);
-      }
-
-      down(e) {
-        this.down = e;
+        super(prev, e);
         if (!this.heldKeys[e.code])
           this.heldKeys[e.code] = e;
         else
@@ -77,10 +65,6 @@
         return this.isRepeat() ?
           this.prev.getPreviousUnique() :
           this.prev;
-      }
-
-      getTime(){
-        return this.up.timeStamp;
       }
     }
 
@@ -110,18 +94,15 @@
       _keydown(e) {
         KeyboardListener.preventCertainDefaultAction(e);
         let nowEvent = new KeyDownEvent(this.cachedEvent, e);
-        if (!this.excludeRepeats || !nowEvent.isRepeat())
-          this._fire("key-down", nowEvent);
+        if (!this.excludeRepeats || !nowEvent.isRepeat()) {
+          this.dispatchEvent(new CustomEvent("key-down", {"composed": true, "bubbles": true, "detail": nowEvent}));
+        }
       }
 
       _keyup(e) {
         KeyboardListener.preventCertainDefaultAction(e);
         let nowEvent = new KeyUpEvent(this.cachedEvent, e);
-        this._fire("key-up", nowEvent);
-      }
-
-      _fire(name, detail) {
-        this.dispatchEvent(new CustomEvent(name, {"composed": true, "bubbles": true, "detail": detail}));
+        this.dispatchEvent(new CustomEvent("key-up", {"composed": true, "bubbles": true, "detail": nowEvent}));
       }
 
       static preventCertainDefaultAction(e) {

@@ -329,15 +329,15 @@
 
       _checkKey(e) {
         this.set("heldKeys", Object.keys(e.detail.heldKeys));
-        if (e.detail.down.code === "Enter")
+        if (e.detail.e.code === "Enter")
           this.$.clef.turnKeyRight();
-        else if (e.detail.down.code === "Tab")
+        else if (e.detail.e.code === "Tab")
           this.$.clef.turnKeyLeft();
-        else if (e.detail.down.code === "Backspace")
+        else if (e.detail.e.code === "Backspace")
           this.$.clef.turnModusRight();
-        else if (e.detail.down.code === "Backquote")
+        else if (e.detail.e.code === "Backquote")
           this.$.clef.turnModusLeft();
-        this.$.shapeSelector.handleKeyPress(e.detail.down);
+        this.$.shapeSelector.handleKeyPress(e.detail.e);
       }
 
       _keyUp(e){

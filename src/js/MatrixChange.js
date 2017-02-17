@@ -39,4 +39,8 @@ class MatrixChange {
     const matrix = MatrixChange.toMatrix(obj.w, obj.h, obj.angle, obj.x, obj.y);
     return "matrix(" + matrix.join(",") + ")";
   }
+
+  static mergeInfoObjects(a, b) {
+    return {h: a.h * b.h, w: a.w * b.w, angle: a.angle + b.angle, x: a.x + b.x, y: a.y + b.y};
+  }
 }

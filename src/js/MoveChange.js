@@ -21,16 +21,8 @@ class MoveChange {
     return this.yMove || 0;
   }
 
-  getMatrix() {
-//        if (shift)
-//          this.yMove = 0;
-//        if (ctrl)
-//          this.xMove = 0;
-    return [1, 0, 0, 1, this.getX(), this.getY()];
-  }
-
-  subdueMatrix(matrix) {
-    return MatrixChange.multiMatrixTom(this.getMatrix(), matrix);
+  asInfoObject(){
+    return {w:1, h:1, angle: 0, x: this.getX(), y: this.getY()};
   }
 
   static makeMoveChange(start,end){

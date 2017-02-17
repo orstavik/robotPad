@@ -66,18 +66,8 @@ class ScaleChange {
     return c;
   }
 
-  getMatrix() {
-    return [
-      1 + this.percentX,
-      0,
-      0,
-      1 + this.percentY,
-      this.xMove,
-      this.yMove];
-  }
-
-  subdueMatrix(matrix) {
-    return MatrixChange.multiMatrixTom(matrix, this.getMatrix());
+  asInfoObject(){
+    return {w:1+this.percentX, h:1+this.percentY, angle: 0, x: this.xMove, y: this.yMove};
   }
 
   shift() {

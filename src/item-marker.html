@@ -125,7 +125,7 @@
             box: Object,
             change2: Object,
             matrix: {
-              type: Array,
+              type: Object,
               computed: "_makeMatrix(change2, box)"
             },
             matrixString: {
@@ -136,18 +136,19 @@
         }
       }
 
-      _matrixToString(matrix) {
-        return matrix ? "matrix(" + matrix.join(',') + ");" : "";
+      _matrixToString(changeInfo) {
+        return changeInfo ? MatrixChange.toCss(changeInfo) : "";
       }
 
       _makeMatrix(changes, box) {
         if (!changes && !box)
           return null;
         if (!box)
-          return changes.getMatrix();
+          return changes.asInfoObject();
+        let rotate = {w: 1, h: 1, angle: box.angle, x: 0, y: 0};
         if (!changes)
-          return RotateChange.toMatrix(box.angle);
-        return changes.subdueMatrix(RotateChange.toMatrix(box.angle));
+          return rotate;
+        return MatrixChange.mergeInfoObjects(changes.asInfoObject(),rotate);
       }
 
       connectedCallback() {
@@ -166,7 +167,7 @@
         if (action == "rotate")
           this.change2 = new RotateChange(start, this.box.center);//todo, make all the ChangeObjects take (start, center) as input
         else if (action == "move")
-          this.change2= new MoveChange(start);
+          this.change2 = new MoveChange(start);
         else if (action == "scale")
           this.change2 = new ScaleChange(start, this.box.center, e.target.id, this.box);
         this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: action}));

@@ -33,12 +33,8 @@ class RotateChange {
     );
   }
 
-  getMatrix() {
-//        if (shiftIsDown)
-//          return RotateChange.toMatrix(this.angle)?
-//        if (ctrlIsDown)
-//          return RotateChange.toMatrix(this.angle snap to nearest 30degree?);
-    return RotateChange.toMatrix(this.getAngle());
+  asInfoObject(){
+    return {w:1, h:1, angle: this.getAngle(), x: 0, y: 0};
   }
 
   getCenter(){
@@ -61,9 +57,5 @@ class RotateChange {
       0,
       0
     ];
-  }
-
-  subdueMatrix(matrix) {
-    return MatrixChange.multiMatrixTom(this.getMatrix(), matrix);
   }
 }

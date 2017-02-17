@@ -17,7 +17,7 @@ class RotateChange {
     const newAngle = oldAngle + this.getAngle();    //adds the angle change
     const newX = Math.cos(newAngle) * radius;   //calculates the new x and y coordinates to where the shape should move.
     const newY = Math.sin(newAngle) * radius;
-    return {x: this.center.x + newX, y: this.center.y + newY};  //returns the new position positioned against the underlying map again.
+    return {x: this.center.x -point.x + newX, y: this.center.y - point.y + newY};  //returns the new position positioned against the underlying map again.
   }
 
   update(newPoint, shift) {
@@ -27,10 +27,11 @@ class RotateChange {
   }
 
   applyToShapeInfoObject(info) {
-    return info.rotateAndSetNewPosition(
-      this.getAngle(),
-      this.calcNewSatelitePosition(info)
-    );
+    let changes = this.calcNewSatelitePosition(info);
+    changes.angle = this.getAngle();
+    changes.w = 1;
+    changes.h = 1;
+    return info.applyChanges(changes);
   }
 
   asInfoObject(){

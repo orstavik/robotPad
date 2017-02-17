@@ -36,38 +36,42 @@ class ScaleChange {
 
   applyToShapeInfoObject(info) {
     let c = ScaleChange._moveInScaledBox(this.percentX, this.percentY, this.box, this.direction, info);
-    return ScaleChange._scaleInRotatedBox(this.percentX, this.percentY, c);
+    // let c2 = ScaleChange._scaleInRotatedBox(this.percentX, this.percentY, c);
+    let changes = this.asInfoObject();
+    changes.y = c.y;
+    changes.x = c.x;
+    return info.applyChanges(changes);
   }
-
-  static rotateAng(x, y, a) {
-    let nx = (Math.cos(a) * x) + (Math.sin(a) * y);
-    let ny = (Math.cos(a) * y) - (Math.sin(a) * x);
-    return [nx, ny];
-  }
-
-  static _scaleInRotatedBox(xPercent, yPercent, info) {
-    const c = info.clone();
-    let newVector = ScaleChange.rotateAng(xPercent, yPercent, c.angle);
-    c.h *= (1 + newVector[0]);
-    c.w *= (1 + newVector[1]);
-    return c;
-  }
+  //
+  // static rotateAng(x, y, a) {
+  //   let nx = (Math.cos(a) * x) + (Math.sin(a) * y);
+  //   let ny = (Math.cos(a) * y) - (Math.sin(a) * x);
+  //   return [nx, ny];
+  // }
+  //
+  // static _scaleInRotatedBox(xPercent, yPercent, info) {
+  //   let c = {};
+  //   let newVector = ScaleChange.rotateAng(xPercent, yPercent, c.angle);
+  //   c.h = (1 + newVector[0]);
+  //   c.w = (1 + newVector[1]);
+  //   return c;
+  // }
 
   static _moveInScaledBox(xPercent, yPercent, box, direction, info) {
-    const c = info.clone();
+    let c = {};
     if (direction.indexOf("s") >= 0)
-      c.y += (c.y - box.top) * yPercent;
+      c.y = (info.y - box.top) * yPercent;
     else if (direction.indexOf("n") >= 0)
-      c.y -= (box.bottom - c.y) * yPercent;
+      c.y = (box.bottom - info.y) * -yPercent;
     if (direction.indexOf("e") >= 0)
-      c.x += (c.x - box.left) * xPercent;
+      c.x = (info.x - box.left) * xPercent;
     else if (direction.indexOf("w") >= 0)
-      c.x -= (box.right - c.x) * xPercent;
+      c.x = (box.right - info.x) * -xPercent;
     return c;
   }
 
-  asInfoObject(){
-    return {w:1+this.percentX, h:1+this.percentY, angle: 0, x: this.xMove, y: this.yMove};
+  asInfoObject() {
+    return {w: 1 + this.percentX, h: 1 + this.percentY, angle: 0, x: this.xMove, y: this.yMove};
   }
 
   shift() {

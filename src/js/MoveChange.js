@@ -1,6 +1,8 @@
 class MoveChange {
   constructor(startPoint) {
     this.start = startPoint;
+    this.xMove = 0;
+    this.yMove = 0;
   }
 
   update(newPoint, shift) {
@@ -10,19 +12,11 @@ class MoveChange {
   }
 
   applyToShapeInfoObject(info){
-    return info.move(this.getX(), this.getY());
-  }
-
-  getX(){
-    return this.xMove || 0;
-  }
-
-  getY(){
-    return this.yMove || 0;
+    return info.applyChanges(this.asInfoObject());
   }
 
   asInfoObject(){
-    return {w:1, h:1, angle: 0, x: this.getX(), y: this.getY()};
+    return {w: 1, h: 1, angle: 0, x: this.xMove, y: this.yMove};
   }
 
   static makeMoveChange(start,end){

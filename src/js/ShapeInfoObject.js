@@ -86,14 +86,7 @@ class ShapeInfoObject {
   }
 
   getMatrix(){
-    const angle = this.getAngle();
-    return [
-      this.w * Math.cos(angle),
-      this.w * Math.sin(angle),
-      -this.h * Math.sin(angle),
-      this.h * Math.cos(angle),
-      this.x,
-      this.y];
+    return MatrixChange.toMatrix(this.w, this.h, this.getAngle(), this.x, this.y);
   }
 
   cssMatrix() {

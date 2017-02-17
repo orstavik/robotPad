@@ -171,19 +171,19 @@
       static get config() {
         return {
           properties: {
-            info: Object,
-            selected: Boolean,
-          },
-          observers: [
-            "updateStyle(info, info.style, info.angle, info.x, info.y, info.w, info.h, info.centered, info.zIndex)"
-          ]
+            info: {
+              type: Object,
+              observer: "updateStyle"
+            },
+            selected: Boolean
+          }
         };
       }
 
-      updateStyle(info, style, angle, posX, posY, scX, scY, centered, zIndex) {
+      updateStyle(info) {
         this.style.transform = info.cssMatrix();
-        this.setAttribute("centered", centered);
-        this.style.zIndex = zIndex;
+        this.setAttribute("centered", info.centered);
+        this.style.zIndex = info.zIndex;
       }
     }
     customElements.define(DropShape.is, DropShape);

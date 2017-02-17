@@ -1,19 +1,95 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
-
 <dom-module id="app-ui-history">
   <template>
     <style>
       :host {
-        display: block;
-        padding: 10%;
+        display: inline-block;
+        width: 300px;
+        height: 260px;
+        position: relative;
+        background-color: var(--paper-grey-100);
+        z-index: -1;
+      }
+      #topShadow {
+        position: relative;
+        width: 100%;
+        height: 10px;
+        margin-top: -10px;
+        opacity: 0.5;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                    0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                    0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        transition: opacity 0.2s;
+        z-index: -1;
+      }
+      #historyPipe {
+        display: inline-block;
+        width: 6px;
+        height: 0px;
+        position: absolute;
+        left: 30px;
+        top: 130px;
+        background-color: var(--paper-light-blue-600);
+        transition: transform 0.2s;
+        z-index: -1;
+      }
+      .historyPoint {
+        display: inline-block;
+        box-sizing: border-box;
+        width: 14px;
+        height: 14px;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        margin: -7px;
+        border: 3px solid;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+      }
+      .historyPoint.active {
+        background-color: white !important;
+      }
+      .historyCard {
+        display: inline-block;
+        width: 210px;
+        height: 200px;
+        position: absolute;
+        top: 30px;
+        left: 60px;
+        border-radius: 3px;
+        background-color: white;
+      }
+      .cardPreview {
+        height: 115px;
+        background-color: mediumspringgreen;
+      }
+      .cardContent {
+        height: 85px;
       }
     </style>
-    <div id="scrollbar">
+    
+    <div id="topShadow"></div>
+    <div id="historyPipe">
+      <iron-selector selected="[[activePoint]]" selected-class="active">
+        <template is="dom-repeat" items="[[history.actions]]">
+          <div class="historyPoint" style$="transform: translateY(calc(24px * [[index]])); background-color: [[_getColor(item)]]; border-color: [[_getColor(item)]];"></div>  
+        </template>
+      </iron-selector>
+    </div>
+    
+    <paper-material elevation="1" class="historyCard">
+      <div class="cardPreview"></div>
+      <div class="cardContent">
+        <span>[[_getChangeTime(activePoint)]]</span>
+        <paper-button raised>Revert</paper-button>
+      </div>
+    </paper-material>
+
+    <!--<div id="scrollbar">
       <template is="dom-repeat" items="[[history.actions]]">
         <div data-num$="[[index]]" on-pointerenter="_hoverTime" on-pointerout="_hoverTimeOff"
         title="[[item.date]]">X</div>
       </template>
-    </div>
+    </div>-->
   </template>
 
   <script>
@@ -25,14 +101,25 @@
       static get config() {
         return {
           properties: {
-            history: StateMachine,
+            history: {
+              type: StateMachine,
+              observer: "_historyChange"
+            },
             preview: {
               type: Array,
               notify: true,
               value: null
+            },
+            activePoint: {
+              type: Number,
+              value: 0
             }
           }
         }
+      }
+
+      connectedCallback() {
+        this.addEventListener("wheel", this._scroll.bind(this));
       }
 
       _hoverTime(e) {
@@ -42,15 +129,37 @@
       _hoverTimeOff(e) {
         this.dispatchEvent(new CustomEvent("timetravel", {composed: true, bubbles: true, detail: null}));
       }
-//
-//      connectedCallback() {
-//        this.addEventListener("wheel", this._scroll.bind(this));
-//        this.$.scrollbar.addEventListener("wheel", this._scroll.bind(this));
-//      }
-//
-//      _scroll(e) {
-//        //todo translate the top of the scrollbar?
-//      }
+
+      _scroll(e) {
+        if ((e.deltaY < 0 && this.activePoint > 0) || (e.deltaY > 0 && this.activePoint+1 < this.history.actions.length))
+          this.activePoint += e.deltaY/100;
+        // if (this.activePoint >= 4)
+        //   this.$.topShadow.style.opacity = 0.5;
+        // else
+        //   this.$.topShadow.style.opacity = 0;
+        this.$.historyPipe.style.transform = "translateY("+(this.activePoint*(-24))+"px)";
+      }
+
+      _historyChange() {
+        this.$.historyPipe.style.height = (24*(this.history.actions.length-1))+"px";
+      }
+      
+      _getColor(item) {
+        switch(item.action) {
+          case "add":
+            return "var(--paper-green-800)";
+          case "change":
+            return "var(--paper-blue-800)";
+          case "remove":
+            return "var(--paper-red-800)";
+        }
+      }
+
+      _getChangeTime(point) {
+        if (this.history)
+          return this.history.actions[point].date.toGMTString().substr(4,21);
+      }
+
     }
     customElements.define(AppUiHistory.is, AppUiHistory);
   </script>

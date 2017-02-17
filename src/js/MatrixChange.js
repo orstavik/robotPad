@@ -35,8 +35,8 @@ class MatrixChange {
     return [w * Math.cos(angle), w * Math.sin(angle), -h * Math.sin(angle), h * Math.cos(angle), x, y];
   }
 
-  static toCss(w, h, angle, x, y) {
-    const matrix = MatrixChange.toMatrix(w, h, angle, x, y);
+  static toCss(obj) {
+    const matrix = MatrixChange.toMatrix(obj.w, obj.h, obj.angle, obj.x, obj.y);
     return "matrix(" + matrix.join(",") + ")";
   }
 }

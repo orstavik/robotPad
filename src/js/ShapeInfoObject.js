@@ -85,6 +85,16 @@ class ShapeInfoObject {
     return this.style.startsWith("tone") ? 0 : this.angle;
   }
 
+  getVisualValues(){
+    return {
+      w: this.w,
+      h: this.h,
+      angle: this.getAngle(),
+      x:this.x,
+      y: this.y
+    };
+  }
+
   static generateId() {
     return ShapeInfoObject.__sessionID++;
   }

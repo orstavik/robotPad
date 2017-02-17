@@ -12,9 +12,12 @@ class MoveChange {
   }
 
   applyToShapeInfoObject(info){
-    return info.applyChanges(this.asInfoObject());
+    return info.change(this.asInfoObjectForInfo(info));
   }
 
+  asInfoObjectForInfo(info){
+    return this.asInfoObject();
+  }
   asInfoObject(){
     return {w: 1, h: 1, angle: 0, x: this.xMove, y: this.yMove};
   }

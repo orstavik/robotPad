@@ -35,38 +35,19 @@ class ScaleChange {
   }
 
   applyToShapeInfoObject(info) {
-    let c = ScaleChange._moveInScaledBox(this.percentX, this.percentY, this.box, this.direction, info);
-    // let c2 = ScaleChange._scaleInRotatedBox(this.percentX, this.percentY, c);
-    let changes = this.asInfoObject();
-    changes.y = c.y;
-    changes.x = c.x;
-    return info.applyChanges(changes);
+    return info.change(this.asInfoObjectForInfo(info));
   }
-  //
-  // static rotateAng(x, y, a) {
-  //   let nx = (Math.cos(a) * x) + (Math.sin(a) * y);
-  //   let ny = (Math.cos(a) * y) - (Math.sin(a) * x);
-  //   return [nx, ny];
-  // }
-  //
-  // static _scaleInRotatedBox(xPercent, yPercent, info) {
-  //   let c = {};
-  //   let newVector = ScaleChange.rotateAng(xPercent, yPercent, c.angle);
-  //   c.h = (1 + newVector[0]);
-  //   c.w = (1 + newVector[1]);
-  //   return c;
-  // }
 
-  static _moveInScaledBox(xPercent, yPercent, box, direction, info) {
-    let c = {};
-    if (direction.indexOf("s") >= 0)
-      c.y = (info.y - box.top) * yPercent;
-    else if (direction.indexOf("n") >= 0)
-      c.y = (box.bottom - info.y) * -yPercent;
-    if (direction.indexOf("e") >= 0)
-      c.x = (info.x - box.left) * xPercent;
-    else if (direction.indexOf("w") >= 0)
-      c.x = (box.right - info.x) * -xPercent;
+   asInfoObjectForInfo(info) {
+    let c = {x: 0, y: 0, angle: 0, w: 1 + this.percentX, h: 1 + this.percentY};
+    if (this.direction.indexOf("s") >= 0)
+      c.y = (info.y - this.box.top) * this.percentY;
+    else if (this.direction.indexOf("n") >= 0)
+      c.y = (this.box.bottom - info.y) * -this.percentY;
+    if (this.direction.indexOf("e") >= 0)
+      c.x = (info.x - this.box.left) * this.percentX;
+    else if (this.direction.indexOf("w") >= 0)
+      c.x = (this.box.right - info.x) * -this.percentX;
     return c;
   }
 

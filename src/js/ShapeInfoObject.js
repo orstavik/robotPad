@@ -33,30 +33,16 @@ class ShapeInfoObject {
     return c;
   }
 
-  applyChanges(changes){
+  change(whxyd){
     const c = this.clone();
-    c.x += changes.x;
-    c.y += changes.y;
-    c.w *= changes.w;
-    c.h *= changes.h;
-    c.angle += changes.angle;
+    c.x += whxyd.x;
+    c.y += whxyd.y;
+    c.w *= whxyd.w;
+    c.h *= whxyd.h;
+    c.angle += whxyd.angle;
     return c;
   }
 
-  // move(changes) {
-  //   const c = this.clone();
-  //   c.x += changes.x;
-  //   c.y += changes.y;
-  //   return c;
-  // }
-  //
-  // rotateAndSetNewPosition(angle, point){
-  //   const c = this.rotate(angle);
-  //   c.x = point.x;
-  //   c.y = point.y;
-  //   return c;
-  // }
-  //
   mirror() {
     const c = this.clone();
     c.w *= -1;

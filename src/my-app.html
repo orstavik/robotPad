@@ -206,7 +206,7 @@
     <div id="helpText" hidden$="[[!helpText]]">[[helpText]]</div>
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
-    <keyboard-listener on-key-down="_checkKey" held-keys="{{heldKeys}}"></keyboard-listener>
+    <keyboard-listener on-key-down="_checkKey" on-key-up="_keyUp"></keyboard-listener>
 
   </template>
 
@@ -328,16 +328,20 @@
       }
 
       _checkKey(e) {
-        e.preventDefault();
-        if (e.detail.code === "Enter")
+        this.set("heldKeys", Object.keys(e.detail.heldKeys));
+        if (e.detail.down.code === "Enter")
           this.$.clef.turnKeyRight();
-        else if (e.detail.code === "Tab")
+        else if (e.detail.down.code === "Tab")
           this.$.clef.turnKeyLeft();
-        else if (e.detail.code === "Backspace")
+        else if (e.detail.down.code === "Backspace")
           this.$.clef.turnModusRight();
-        else if (e.detail.code === "Backquote")
+        else if (e.detail.down.code === "Backquote")
           this.$.clef.turnModusLeft();
-        this.$.shapeSelector.handleKeyPress(e.detail);
+        this.$.shapeSelector.handleKeyPress(e.detail.down);
+      }
+
+      _keyUp(e){
+        this.set("heldKeys", Object.keys(e.detail.heldKeys));
       }
 
       setStyleName(e) {

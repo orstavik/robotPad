@@ -1,5 +1,46 @@
 <dom-module id="keyboard-listener">
   <script>
+    class ComplexKeyEvent {
+      constructor(prevComplexEvent) {
+        prevComplexEvent = prevComplexEvent || {heldKeys: {}, lastUnique: null};
+        this.heldKeys = Object.assign({}, prevComplexEvent.heldKeys);
+        this.lastUnique = prevComplexEvent;
+      }
+
+      down(e) {
+        let c = new ComplexKeyEvent(this);
+        c.down = e;
+        if (this.down.code == c.down.code) {
+          c.isRepeat = true;
+          c.lastUnique = this.lastUnique;
+          return c;
+        }
+        if (!c.heldKeys[e.code])
+          c.heldKeys[e.code] = e;
+        return c;
+      }
+
+      up(e) {
+        let c = new ComplexKeyEvent(this);
+        c.up = e;
+        c.down = c.heldKeys[e.code];
+        if (c.down)
+          delete c.heldKeys[e.code];
+        return c;
+      }
+
+      getDurationToLastDifferent() {
+        return this.down.timeStamp - this.lastUnique.timeStamp;
+      }
+
+      getDurationDownToUp() {
+        return this.up.timeStamp - this.down.timeStamp;
+      }
+
+      noHeldKeys() {
+        this.heldKeys.length == 0;
+      }
+    }
 
     class KeyEvent {
       constructor(code, start, stop) {
@@ -18,11 +59,7 @@
       static get config() {
         return {
           properties: {
-            prevKeyEvent: Object,
-            heldKeys: {
-              type: Object,
-              notify: true
-            },
+            cachedEvent: ComplexKeyEvent,
           }
         }
       }
@@ -30,44 +67,22 @@
       connectedCallback() {
         window.addEventListener("keydown", this._keydown.bind(this));
         window.addEventListener("keyup", this._keyup.bind(this));
-        this.prevKeyEvent = {};
-        this.heldKeys = {};
+        this.cachedEvent = new ComplexKeyEvent(null);
       }
 
       _keydown(e) {
         KeyboardListener.preventCertainDefaultAction(e);
-        this._fire("key-down", {keyboardEvent: e, heldKeys: this.getHeldKeysRightNow(), code: e.code});
-        e.absTime = new Date().getTime();
-        if (this.isRepeatKeyEvent(e))
-          return;
-        if ((Object.keys(this.heldKeys).length === 0) && this.prevKeyEvent.timeStamp) {
-          this._fire("key-pause-end", {duration: e.timeStamp - this.prevKeyEvent.timeStamp});
-        }
-        this.prevKeyEvent = e;
-        this.heldKeys[e.code] = e;
-        this.notifyPath("heldKeys");
-      }
-
-      isRepeatKeyEvent(e) {
-        return this.prevKeyEvent.type === e.type && this.prevKeyEvent.code === e.code;
+        let nowEvent = this.cachedEvent.down(e);
+        this._fire("key-down", nowEvent);
+        if (!nowEvent.isRepeat && this.cachedEvent.noHeldKeys())
+          this._fire("key-pause-end", nowEvent);
       }
 
       _keyup(e) {
         KeyboardListener.preventCertainDefaultAction(e);
-        this._fire("key-up", {keyboardEvent: e, heldKeys: this.getHeldKeysRightNow(), code: e.code});
-        e.absTime = new Date().getTime();
-        this.prevKeyEvent = e;
-        let correspondingDown = this.heldKeys[e.code];
-        if (!correspondingDown)
-          return;
-        let keyE = new KeyEvent(e.code, correspondingDown.absTime, e.absTime);
-        delete this.heldKeys[e.code];
-        this.notifyPath("heldKeys");
-        this._fire("key-stroke", keyE);
-      }
-
-      getHeldKeysRightNow() {
-        return Object.keys(this.heldKeys);
+        let nowEvent = this.cachedEvent.up(e);
+        this._fire("key-up", nowEvent);
+        this._fire("key-stroke", nowEvent);
       }
 
       _fire(name, detail) {

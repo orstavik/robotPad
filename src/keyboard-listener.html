@@ -29,6 +29,18 @@
       noHeldKeys() {
         this.heldKeys.length == 0;
       }
+
+      code(){
+        return this.e.code;
+      }
+
+      shift(){
+        return this.heldKeys["ShiftLeft"] || this.heldKeys["ShiftRight"];
+      }
+
+      ctrl(){
+        return this.heldKeys["ControlLeft"] || this.heldKeys["ControlRight"];
+      }
     }
 
     class KeyUpEvent extends ComplexKeyEvent {
@@ -93,16 +105,15 @@
 
       _keydown(e) {
         KeyboardListener.preventCertainDefaultAction(e);
-        let nowEvent = new KeyDownEvent(this.cachedEvent, e);
-        if (!this.excludeRepeats || !nowEvent.isRepeat()) {
-          this.dispatchEvent(new CustomEvent("key-down", {"composed": true, "bubbles": true, "detail": nowEvent}));
-        }
+        this.cachedEvent = new KeyDownEvent(this.cachedEvent, e);
+        if (!this.excludeRepeats || !this.cachedEvent.isRepeat())
+          this.dispatchEvent(new CustomEvent("key-down", {"composed": true, "bubbles": true, "detail": this.cachedEvent}));
       }
 
       _keyup(e) {
         KeyboardListener.preventCertainDefaultAction(e);
-        let nowEvent = new KeyUpEvent(this.cachedEvent, e);
-        this.dispatchEvent(new CustomEvent("key-up", {"composed": true, "bubbles": true, "detail": nowEvent}));
+        this.cachedEvent = new KeyUpEvent(this.cachedEvent, e);
+        this.dispatchEvent(new CustomEvent("key-up", {"composed": true, "bubbles": true, "detail": this.cachedEvent}));
       }
 
       static preventCertainDefaultAction(e) {

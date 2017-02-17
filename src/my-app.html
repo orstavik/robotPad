@@ -206,7 +206,7 @@
     <div id="helpText" hidden$="[[!helpText]]">[[helpText]]</div>
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
-    <keyboard-listener on-key-down="_checkKey" on-key-up="_keyUp"></keyboard-listener>
+    <keyboard-listener on-key-down="_checkKey" on-key-up="_keyUp" exclude-repeats></keyboard-listener>
 
   </template>
 
@@ -328,16 +328,34 @@
       }
 
       _checkKey(e) {
-        this.set("heldKeys", Object.keys(e.detail.heldKeys));
-        if (e.detail.e.code === "Enter")
+        this.set("heldKeys", Object.keys(e.detail));
+        let key = e.detail.code();
+        if (key === "Enter")
           this.$.clef.turnKeyRight();
-        else if (e.detail.e.code === "Tab")
+        else if (key === "Tab")
           this.$.clef.turnKeyLeft();
-        else if (e.detail.e.code === "Backspace")
+        else if (key === "Backspace")
           this.$.clef.turnModusRight();
-        else if (e.detail.e.code === "Backquote")
+        else if (key === "Backquote")
           this.$.clef.turnModusLeft();
-        this.$.shapeSelector.handleKeyPress(e.detail.e);
+        else if (key === "Escape")
+          this.$.shapeSelector._deselectAll(); // also do this.$.square.abort();
+        else if (key === "Digit0" && e.detail.ctrl())
+          this.$.shapeSelector.zoomNormal();
+        else if (key === "KeyD")
+          this.$.shapeSelector._deleteElem();
+        else if (key === "KeyC" && e.detail.ctrl())
+          this.$.shapeSelector.copy();
+        else if (key === "KeyV" && e.detail.ctrl())
+          this.$.shapeSelector.paste();
+        else if (key == "KeyM")
+          this.$.shapeSelector.mirrorSelected();
+        else if (key == "KeyN")
+          this.$.shapeSelector.centerSelected();
+        else if (key == "PageUp")
+          this.$.shapeSelector.zUpSelected();
+        else if (key == "PageDown")
+          this.$.shapeSelector.zDownSelected();
       }
 
       _keyUp(e){

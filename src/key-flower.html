@@ -2,22 +2,15 @@
   <template>
     <style>
       :host {
-        display: block;
-        position: fixed;
-        bottom: 4vh;
-        right: 4vh;
-        align-items: center;
-        justify-content: center;
-        width: 8vh;
-        height: 8vh;
+        display: inline-block;
+        margin: 60px;
       }
-
       .leaf {
         display: inline-block;
         box-sizing: border-box;
-        width: 80%;
-        height: 80%;
-        bottom: 50%;
+        width: 40px;
+        height: 40px;
+        margin: -40px -20px;
         position: absolute;
         transform-origin: bottom;
         transition-duration: 0.5s;
@@ -31,60 +24,20 @@
         border-top-left-radius: 50%;
         border-bottom-left-radius: 50%;
         border-top-right-radius: 50%;
-        transform: rotate(45deg);
+        transform: translateY(-22%) rotate(-135deg);
         transition-duration: 0.5s;
-        box-shadow: 0 0 3px 0px black;
+        box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+                    0 1px 10px 0 rgba(0, 0, 0, 0.12),
+                    0 2px 4px -1px rgba(0, 0, 0, 0.4);
         color: black;
-      }
-
-      #flowerCenter {
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        margin: auto;
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0.1vh;
-        right: 1vh;
-
-        width: 4vh;
-        height: 4vh;
-        border-radius: 50%;
-        background: lightgrey;
-        box-shadow: 0 0 3px 0 black;
-        color: black;
-        line-height: normal;
-        text-align: center;
-        font-size: 1vh;
-        z-index: 1;
-      }
-
-      .note {
-        position: absolute;
-        left: 50%;
-        top: 0%;
-        margin-top: 1vh;
-        font-size: 2vh;
-        font-weight: bold;
-        transform: translateX(-50%) scaleY(0.75);
       }
     </style>
-
-    <div id="flowerCenter">
-      [[scale.key]]
-      [[scale.mode]]
-    </div>
-    <template is="dom-repeat" items="[[coloredScale]]">
-      <div class="leaf" style$="transform: rotate([[item.rotation]]deg) scale([[item.scale]]) translateY(-2vh);">
-        <div id="tone[[index]]" class="innerLeaf" style$="background: [[item.color]]"></div>
-        <span class="note">
-          [[item.name]]
-        </span>
-      </div>
-    </template>
+    
+      <template is="dom-repeat" items="[[coloredScale]]">
+        <div class="leaf" style$="transform: rotate([[item.rotation]]deg);">
+          <div id="tone[[index]]" class="innerLeaf" style$="background: [[item.color]];"></div>
+        </div>
+      </template>
 
   </template>
 
@@ -115,9 +68,9 @@
           let tonePosition = scale.getTonePositionRelativeToKey(i);
           let chordType = scale.getChordType(i);
           let transScale =
-            chordType == "maj" ? "0.75, 1" :
-              chordType == "min" ? "0.6375, 0.85" :
-                chordType == "dim" ? "0.525, 0.7" : "0,0";
+            chordType == "maj" ? "1" :
+              chordType == "min" ? "0.85" :
+                chordType == "dim" ? "0.7" : "0";
           let colorNumber = scale.getToneColor(i);
           arr.push({
             number: tonePosition,

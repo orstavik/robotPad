@@ -1,4 +1,5 @@
 class MatrixChange {
+
   static doStartSnap(point, start) {
     let nearStartingPoint = Math.abs(start.x - point.x) < 6 && Math.abs(start.y - point.y) < 6;
     return nearStartingPoint ? start : point;
@@ -32,5 +33,10 @@ class MatrixChange {
 
   static toMatrix(w, h, angle, x, y) {
     return [w * Math.cos(angle), w * Math.sin(angle), -h * Math.sin(angle), h * Math.cos(angle), x, y];
+  }
+
+  static toCss(w, h, angle, x, y) {
+    const matrix = MatrixChange.toMatrix(w, h, angle, x, y);
+    return "matrix(" + matrix.join(",") + ")";
   }
 }

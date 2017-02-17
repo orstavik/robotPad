@@ -181,7 +181,7 @@
       }
 
       updateStyle(info) {
-        this.style.transform = info.cssMatrix();
+        this.style.transform = MatrixChange.toCss(info.w, info.h, info.getAngle(), info.x, info.y);
         this.setAttribute("centered", info.centered);
         this.style.zIndex = info.zIndex;
       }

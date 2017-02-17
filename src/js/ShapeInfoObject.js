@@ -85,14 +85,6 @@ class ShapeInfoObject {
     return this.style.startsWith("tone") ? 0 : this.angle;
   }
 
-  getMatrix(){
-    return MatrixChange.toMatrix(this.w, this.h, this.getAngle(), this.x, this.y);
-  }
-
-  cssMatrix() {
-    return "matrix(" + this.getMatrix().join(',') + ")";
-  }
-
   static generateId() {
     return ShapeInfoObject.__sessionID++;
   }

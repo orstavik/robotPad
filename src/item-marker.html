@@ -97,7 +97,7 @@
          top: [[box.top]]px;
          width:  [[box.width]]px;
          height: [[box.height]]px;
-         [[matrixString]]">
+         transform: [[matrixString]]">
       <div id="nw" class="scale corner"></div>
       <div id="ne" class="scale corner"></div>
       <div id="sw" class="scale corner"></div>
@@ -137,7 +137,7 @@
       }
 
       _matrixToString(matrix) {
-        return matrix ? "transform: matrix(" + matrix.join(',') + ");" : "";
+        return matrix ? "matrix(" + matrix.join(',') + ");" : "";
       }
 
       _makeMatrix(changes, box) {

@@ -1,20 +1,15 @@
 <dom-module id="keyboard-listener">
   <script>
     class ComplexKeyEvent {
-      constructor(prevComplexEvent) {
-        prevComplexEvent = prevComplexEvent || {heldKeys: {}, lastUnique: null};
-        this.heldKeys = Object.assign({}, prevComplexEvent.heldKeys);
-        this.lastUnique = prevComplexEvent;
+      constructor(prev) {
+        prev = prev || {heldKeys: {}};
+        this.heldKeys = Object.assign({}, prev.heldKeys);
+        this.prev = prev;
       }
 
       down(e) {
         let c = new ComplexKeyEvent(this);
         c.down = e;
-        if (this.down.code == c.down.code) {
-          c.isRepeat = true;
-          c.lastUnique = this.lastUnique;
-          return c;
-        }
         if (!c.heldKeys[e.code])
           c.heldKeys[e.code] = e;
         return c;
@@ -29,11 +24,33 @@
         return c;
       }
 
-      getDurationToLastDifferent() {
-        return this.down.timeStamp - this.lastUnique.timeStamp;
+      isRepeat() {
+        return this.down && this.prev.down && this.down.code == this.down.prev.code;
       }
 
-      getDurationDownToUp() {
+      getPreviousUnique() {
+        return this.isRepetition() ?
+          this.prev.getPreviousUnique() :
+          this.prev;
+      }
+
+      getPreviousDown() {
+        let prevUniq = this.getPreviousUnique();
+        return prevUniq.down ? prevUniq : prevUniq.getPreviousDown();
+      }
+
+      getPreviousUp() {
+        let prevUniq = this.getPreviousUnique();
+        return prevUniq.up ? prevUniq : prevUniq.getPreviousUp();
+      }
+
+      getDurationToLastDifferent() {
+        const previousUnique = this.getPreviousUnique();
+        const x = previousUnique.down || previousUnique.up;
+        return this.down.timeStamp - x.timeStamp;
+      }
+
+      getDurationOfKeyStroke() {
         return this.up.timeStamp - this.down.timeStamp;
       }
 
@@ -51,6 +68,10 @@
         return {
           properties: {
             cachedEvent: ComplexKeyEvent,
+            excludeRepeats : {
+              type: Boolean,
+              value: false
+            }
           }
         }
       }
@@ -64,16 +85,13 @@
       _keydown(e) {
         KeyboardListener.preventCertainDefaultAction(e);
         let nowEvent = this.cachedEvent.down(e);
-        this._fire("key-down", nowEvent);
-        if (!nowEvent.isRepeat && this.cachedEvent.noHeldKeys())
-          this._fire("key-pause-end", nowEvent);
+        if (!this.excludeRepeats || !nowEvent.isRepeat())
+          this._fire("key-down", nowEvent);
       }
 
       _keyup(e) {
         KeyboardListener.preventCertainDefaultAction(e);
-        let nowEvent = this.cachedEvent.up(e);
-        this._fire("key-up", nowEvent);
-        this._fire("key-stroke", nowEvent);
+        this._fire("key-up", this.cachedEvent.up(e));
       }
 
       _fire(name, detail) {

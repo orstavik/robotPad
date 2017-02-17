@@ -4,16 +4,45 @@
   <template>
     <style>
       :host {
-        display: block;
-        padding: 10%;
+        display: inline-block;
+        width: 300px;
+        height: 200px;
+        position: relative;
+      }
+      #historyPipe {
+        display: inline-block;
+        width: 6px;
+        height: 100px;
+        position: absolute;
+        left: 30px;
+        top: 100px;
+        background-color: var(--paper-indigo-500);
+      }
+      .historyPoint {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        margin: -7px;
+        background-color: var(--paper-indigo-900);
+        border-radius: 50%;
       }
     </style>
-    <div id="scrollbar">
+
+    <div id="historyPipe">
+      <template is="dom-repeat" items="[[history.actions]]">
+        <div class="historyPoint" style$="transform: translateY(calc(24px * [[index]]));"></div>  
+      </template>
+    </div>
+
+    <!--<div id="scrollbar">
       <template is="dom-repeat" items="[[history.actions]]">
         <div data-num$="[[index]]" on-pointerenter="_hoverTime" on-pointerout="_hoverTimeOff"
         title="[[item.date]]">X</div>
       </template>
-    </div>
+    </div>-->
   </template>
 
   <script>

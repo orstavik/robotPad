@@ -13,7 +13,6 @@
         width: 100vw;
         height: 100vh;
       }
-
       #crossX, #crossY, #center {
         display: block;
         position: absolute;
@@ -21,20 +20,12 @@
         top: 0;
         left: 0;
       }
-
-      #center {
-        overflow: visible;
-      }
-
-      #crossX, #crossY {
-        pointer-events: none;
-      }
-
+      #center { overflow: visible; }
+      #crossX, #crossY { pointer-events: none; }
       #crossX {
         border-bottom: 1px dashed darkgray;
         width: 100%;
       }
-
       #crossY {
         border-right: 1px dashed darkgray;
         height: 100%;
@@ -51,10 +42,12 @@
   <script>
     class PointToPoint {
 
-      constructor(left, top) {
+      constructor(width, height) {
         this.zoom = 1;
-        this.top = top;
-        this.left = left;
+        this.windowWidth = width;
+        this.windowHeight = height;
+        this.top = height / 2;
+        this.left = width / 2;
       }
 
       setZoom(zoom, x, y) {
@@ -78,11 +71,11 @@
         return {x: this.toLogicalX(screenX), y: this.toLogicalY(screenY)};
       }
 
-      toLogicalX(screenX){
+      toLogicalX(screenX) {
         return this.addZoom(screenX - this.left);
       }
 
-      toLogicalY(screenY){
+      toLogicalY(screenY) {
         return this.addZoom(screenY - this.top);
       }
 
@@ -100,10 +93,11 @@
         return screenValue / this.zoom;
       }
 
-      reset(left, top) {
-        this.zoom = 1;
-        this.left = left;
-        this.top = top;
+      resize(width, height) {
+        this.left += (width - this.windowWidth)/2;
+        this.top += (height - this.windowHeight)/2;
+        this.windowWidth = width;
+        this.windowHeight = height;
       }
     }
 
@@ -120,7 +114,7 @@
             p2p: {
               type: PointToPoint,
               value: function () {
-                return new PointToPoint(window.innerWidth / 2, window.innerHeight / 2);
+                return new PointToPoint(window.innerWidth, window.innerHeight);
               },
               notify: true
             }
@@ -129,8 +123,8 @@
       }
 
       connectedCallback() {
-        this.addEventListener("resize", this._resizeThrottler.bind(this));
-        this.addEventListener("wheel", this._mouseScroll.bind(this));
+        window.addEventListener("resize", this._resize.bind(this));
+        this.addEventListener("wheel", this._wheel.bind(this));
         this.addEventListener("pointerdown", this._pointerdown.bind(this));
         this.mouseMoveListener = this._pointermove.bind(this);
         this.mouseUpListener = this._pointerup.bind(this);
@@ -140,20 +134,18 @@
         }.bind(this);
       }
 
-      _resizeThrottler() {
-        if (this.doingResize)
+      _resize() {
+        if (this._doingResize)
           return;
-        this.doingResize = true;
-        setTimeout(function () {
-          this.doingResize = false;
-
-
-        }, 66);// The actualResizeHandler will execute at a rate of 15fps
+        this._doingResize = setTimeout(function () {
+          this._doingResize = false;
+          this.p2p.resize(window.innerWidth, window.innerHeight);
+          this.notifyPath("p2p");
+        }.bind(this), 133);// The actualResizeHandler will execute at a rate of 7fps
       }
 
-
       reset() {
-        this.set("p2p", new PointToPoint(window.innerWidth / 2, window.innerHeight / 2));
+        this.set("p2p", new PointToPoint(window.innerWidth, window.innerHeight));
       }
 
       _pointerdown(e) {
@@ -178,7 +170,7 @@
       _pointermove(e) {
         this.doSingleTap = false;
         this.p2p.moveScreen(e.clientX - this.pointDown.clientX, e.clientY - this.pointDown.clientY);
-        this.notifyPath("p2p"); //todo delay this using requestAnimationFrame?? or does Polymer do this for us??
+        this.notifyPath("p2p");//todo delay this using requestAnimationFrame?? or does Polymer do this for us??
         this.pointDown = e;
       }
 
@@ -190,7 +182,7 @@
         this.removeEventListener("pointerup", this.mouseMoveListener);
       }
 
-      _mouseScroll(e) {
+      _wheel(e) {
         this.p2p.setZoom(e.deltaY / 500, e.clientX, e.clientY);
         this.notifyPath("p2p");
       }

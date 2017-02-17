@@ -1,48 +1,22 @@
 <dom-module id="keyboard-listener">
   <script>
     class ComplexKeyEvent {
-      constructor(prev) {
+      constructor(prev, e) {
         prev = prev || {heldKeys: {}};
         this.heldKeys = Object.assign({}, prev.heldKeys);
         this.prev = prev;
       }
 
-      down(e) {
-        let c = new ComplexKeyEvent(this);
-        c.down = e;
-        if (!c.heldKeys[e.code])
-          c.heldKeys[e.code] = e;
-        return c;
-      }
-
-      up(e) {
-        let c = new ComplexKeyEvent(this);
-        c.up = e;
-        c.down = c.heldKeys[e.code];
-        if (c.down)
-          delete c.heldKeys[e.code];
-        return c;
-      }
-
-      isRepeat() {
-        return this.down && this.prev.down && this.down.code == this.down.prev.code;
-      }
-
-      getPreviousUnique() {
-        return this.isRepetition() ?
-          this.prev.getPreviousUnique() :
-          this.prev;
-      }
-
       getPreviousDown() {
-        let prevUniq = this.getPreviousUnique();
-        return prevUniq.down ? prevUniq : prevUniq.getPreviousDown();
+        const p = this.getPreviousUnique();
+        return p instanceof KeyDownEvent ? p : p.getPreviousDown();
       }
 
       getPreviousUp() {
-        let prevUniq = this.getPreviousUnique();
-        return prevUniq.up ? prevUniq : prevUniq.getPreviousUp();
+        const p = this.getPreviousUnique();
+        return p instanceof KeyUpEvent ? p : p.getPreviousUp();
       }
+
 
       getDurationToLastDifferent() {
         const previousUnique = this.getPreviousUnique();
@@ -50,12 +24,63 @@
         return this.down.timeStamp - x.timeStamp;
       }
 
+      noHeldKeys() {
+        this.heldKeys.length == 0;
+      }
+    }
+
+    class KeyUpEvent extends ComplexKeyEvent{
+      constructor(prev, e) {
+        super(prev,e);
+        this.up(e);
+      }
+
+      up(e) {
+        this.up = e;
+        this.down = this.heldKeys[e.code];
+        if (this.down)
+          delete this.heldKeys[e.code];
+      }
+
       getDurationOfKeyStroke() {
         return this.up.timeStamp - this.down.timeStamp;
       }
 
-      noHeldKeys() {
-        this.heldKeys.length == 0;
+      getPreviousUnique() {
+        return this.prev;
+      }
+
+      getTime(){
+        return this.up.timeStamp;
+      }
+    }
+
+    class KeyDownEvent extends ComplexKeyEvent{
+      constructor(prev, e) {
+        super(prev,e);
+        this.down(e);
+      }
+
+      down(e) {
+        this.down = e;
+        if (!this.heldKeys[e.code])
+          this.heldKeys[e.code] = e;
+        else
+          this.isRepeating = this.heldKeys[e.code];
+      }
+
+      isRepeat() {
+        return !!this.isRepeating;
+      }
+
+      getPreviousUnique() {
+        return this.isRepeat() ?
+          this.prev.getPreviousUnique() :
+          this.prev;
+      }
+
+      getTime(){
+        return this.up.timeStamp;
       }
     }
 
@@ -68,7 +93,7 @@
         return {
           properties: {
             cachedEvent: ComplexKeyEvent,
-            excludeRepeats : {
+            excludeRepeats: {
               type: Boolean,
               value: false
             }
@@ -84,14 +109,15 @@
 
       _keydown(e) {
         KeyboardListener.preventCertainDefaultAction(e);
-        let nowEvent = this.cachedEvent.down(e);
+        let nowEvent = new KeyDownEvent(this.cachedEvent, e);
         if (!this.excludeRepeats || !nowEvent.isRepeat())
           this._fire("key-down", nowEvent);
       }
 
       _keyup(e) {
         KeyboardListener.preventCertainDefaultAction(e);
-        this._fire("key-up", this.cachedEvent.up(e));
+        let nowEvent = new KeyUpEvent(this.cachedEvent, e);
+        this._fire("key-up", nowEvent);
       }
 
       _fire(name, detail) {

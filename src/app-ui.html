@@ -9,10 +9,8 @@
 <link rel="import" href="grow-button.html">
 <link rel="import" href="grow-child-button.html">
 <link rel="import" href="json-wrapper.html">
-<link rel="import" href="app-ui-history.html">
 <link rel="import" href="color-palette.html">
-<link rel="import" href="key-flower.html">
-
+<link rel="import" href="app-ui-history.html">
 
 <dom-module id="app-ui">
   <template>
@@ -52,8 +50,7 @@
         <json-wrapper petals="[[petals]]"></json-wrapper>
       </grow-child-button>
       <grow-child-button menu="Palette" child-button icon="image:color-lens">
-        <color-palette id="palette" css-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
-        <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]"></key-flower>
+        <color-palette id="palette" css-colors="{{colors}}" scale="[[scale]]" on-color-selected="colorSelected"></color-palette>
       </grow-child-button>
       <grow-child-button menu="History" child-button icon="icons:restore">
         <app-ui-history history="[[history]]"></app-ui-history>

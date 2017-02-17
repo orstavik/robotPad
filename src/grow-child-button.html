@@ -50,6 +50,13 @@
                 pointer-events: auto;
                 z-index: 1000;
             }
+            #outerBox[expanded] #boxContent {
+                opacity: 1;
+                pointer-events: auto;
+                transform: translateX(0);
+                transition-duration: 100ms;
+                transition-delay: 200ms;
+            }
             #shadyCircle {
                 width: var(--grow-child-button-size);
                 height: var(--grow-child-button-size);
@@ -64,6 +71,7 @@
                 display: flex;
                 flex-direction: column;
                 opacity: 0;
+                transform: translateX(-2px);
             }
             #boxContent .header {
                 background-color: white;
@@ -186,22 +194,22 @@
                     fill: "forwards",
                     easing: "linear"
                 });
-                this.contentShow = content.animate({opacity: [0,1], transform: ["translateX(-2px)", "translateX(0)"]}, {
-                    delay: dur/3*2,
-                    duration: dur/3,
-                    fill: "forwards",
-                    easing: "ease-out"
-                });
+                // this.contentShow = content.animate({opacity: [0,1], transform: ["translateX(-2px)", "translateX(0)"]}, {
+                //     delay: dur/3*2,
+                //     duration: dur/3,
+                //     fill: "forwards",
+                //     easing: "ease-out"
+                // });
                 setTimeout(function() {
                     box.elevation = 2;
                 }.bind(this), dur/3*2);
             }
 
             _collapseCard(dur) {
-                this.$.boxContent.animate({opacity: [1,0]}, {
-                    duration: 0,
-                    fill: "forwards"
-                });
+                // this.$.boxContent.animate({opacity: [1,0]}, {
+                //     duration: 0,
+                //     fill: "forwards"
+                // });
                 this.$.outerBox.elevation = 0;
             }
         }

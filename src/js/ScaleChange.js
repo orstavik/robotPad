@@ -35,7 +35,7 @@ class ScaleChange {
   }
 
    changeForPoint(x, y) {
-    let c = {x: 0, y: 0, angle: 0, w: 1 + this.percentX, h: 1 + this.percentY};
+    let c = this.asInfoObject();
     if (this.direction.indexOf("s") >= 0)
       c.y = (y - this.box.top) * this.percentY;
     else if (this.direction.indexOf("n") >= 0)

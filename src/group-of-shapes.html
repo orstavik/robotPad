@@ -47,8 +47,11 @@
         return infos;
       }
 
-      change(change) {
-        this.set("infos", this.originals.map(info => change.applyToShapeInfoObject(info)));
+      change(groupChange) {
+        this.set("infos", this.originals.map(function(info){
+          const individualChange = groupChange.changeForPoint(info.x,info.y);
+          return info.change(individualChange);
+        }));
       }
     }
     customElements.define(GroupOfShapes.is, GroupOfShapes);

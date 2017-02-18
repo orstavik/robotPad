@@ -11,13 +11,10 @@ class MoveChange {
     this.yMove = this.newPoint.y - this.start.y;
   }
 
-  applyToShapeInfoObject(info){
-    return info.change(this.asInfoObjectForInfo(info));
+  changeForPoint(x,y){
+    return {w: 1, h: 1, angle: 0, x: this.xMove, y: this.yMove};
   }
 
-  asInfoObjectForInfo(info){
-    return this.asInfoObject();
-  }
   asInfoObject(){
     return {w: 1, h: 1, angle: 0, x: this.xMove, y: this.yMove};
   }

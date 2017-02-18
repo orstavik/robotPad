@@ -15,7 +15,7 @@ class ScaleChange {
   }
 
   update(newPoint, shift) {
-    this.newPoint = MatrixChange.doStartSnap(newPoint, this.start);
+    newPoint = MatrixChange.doStartSnap(newPoint, this.start);
     let xMove = newPoint.x - this.start.x;
     let yMove = newPoint.y - this.start.y;
 
@@ -34,20 +34,16 @@ class ScaleChange {
       this.percentX *= -1;
   }
 
-  applyToShapeInfoObject(info) {
-    return info.change(this.asInfoObjectForInfo(info));
-  }
-
-   asInfoObjectForInfo(info) {
+   changeForPoint(x, y) {
     let c = {x: 0, y: 0, angle: 0, w: 1 + this.percentX, h: 1 + this.percentY};
     if (this.direction.indexOf("s") >= 0)
-      c.y = (info.y - this.box.top) * this.percentY;
+      c.y = (y - this.box.top) * this.percentY;
     else if (this.direction.indexOf("n") >= 0)
-      c.y = (this.box.bottom - info.y) * -this.percentY;
+      c.y = (this.box.bottom - y) * -this.percentY;
     if (this.direction.indexOf("e") >= 0)
-      c.x = (info.x - this.box.left) * this.percentX;
+      c.x = (x - this.box.left) * this.percentX;
     else if (this.direction.indexOf("w") >= 0)
-      c.x = (this.box.right - info.x) * -this.percentX;
+      c.x = (this.box.right - x) * -this.percentX;
     return c;
   }
 

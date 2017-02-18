@@ -3,6 +3,7 @@ class RotateChange {
     this.start = startPoint;        //don't really need
     this.center = center;
     this.startAngle = RotateChange.calcAngle(this.center, startPoint);
+    this.angle = 0;
   }
 
   static calcAngle(center, satelite) {
@@ -14,17 +15,17 @@ class RotateChange {
     const y = point.y - this.center.y;
     const radius = Math.sqrt(x * x + y * y);    //the length of the radius from the center of the group to the center of the shape.
     const oldAngle = Math.atan2(y, x);          //the angle between the vertical (horisontal?) line and to the shape, from 0->2PI
-    const newAngle = oldAngle + this.getAngle();    //adds the angle change
+    const newAngle = oldAngle + this.angle;    //adds the angle change
     const newX = Math.cos(newAngle) * radius;   //calculates the new x and y coordinates to where the shape should move.
     const newY = Math.sin(newAngle) * radius;
     const xMove = this.center.x -point.x + newX;
     const yMove = this.center.y - point.y + newY;   //returns the new position positioned against the underlying map again.
-    return {w:1, h:1, angle: this.getAngle(), x: xMove, y: yMove};
+    return {w: 1, h: 1, angle: this.angle, x: xMove, y: yMove};
   }
 
   update(newPoint, shift) {
     this.newPoint = MatrixChange.doStartSnap(newPoint, this.start);
-    this.absAngle = this.getAbsoluteAngle();
+    this.absAngle = RotateChange.calcAngle(this.center, this.newPoint);
     this.angle = this.absAngle - this.startAngle;
   }
 
@@ -33,28 +34,6 @@ class RotateChange {
   }
 
   asInfoObject(){
-    return {w:1, h:1, angle: this.getAngle(), x: 0, y: 0};
-  }
-
-  getCenter(){
-    return this.center;
-  }
-  getAngle() {
-    return this.angle || 0;
-  }
-
-  getAbsoluteAngle() {
-    return RotateChange.calcAngle(this.center, this.newPoint);
-  }
-
-  static toMatrix(rad) {
-    return [
-      Math.cos(rad),
-      Math.sin(rad),
-      -Math.sin(rad),
-      Math.cos(rad),
-      0,
-      0
-    ];
+    return {w: 1, h: 1, angle: this.angle, x: 0, y: 0};
   }
 }

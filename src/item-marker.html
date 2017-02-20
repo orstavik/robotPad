@@ -92,7 +92,12 @@
       #move:hover { cursor: move; }
       #marker:hover { cursor: move; }
     </style>
-    <div id="marker" hidden$="[[!box]]" style$="[[style]]">
+    <div id="marker" hidden$="[[!changedBox]]" style$="
+      top: [[changedBox.center.y]]px;
+      left: [[changedBox.center.x]]px;
+      width: [[changedBox.width]]px;
+      height: [[changedBox.height]]px;
+      transform: translate(-50%, -50%) rotate([[changedBox.angle]]rad); ">
       <div id="nw" class="scale corner"></div>
       <div id="ne" class="scale corner"></div>
       <div id="sw" class="scale corner"></div>
@@ -117,12 +122,9 @@
         return {
           properties: {
             p2p: PointToPoint,
-            box: {
-              type: Object,
-              observer:"debug"
-            },
+            box: Object,
             change2: Object,
-            style: {
+            changedBox: {
               type: String,
               computed: "_makeStyle(change2, box)"
             }
@@ -130,26 +132,17 @@
         }
       }
 
-      debug(box){
-      }
-
       _makeStyle(change2, box) {
         if (!box)
-          return "";
-        if (change2) {
-          const individualChange = change2.changeForPoint(box.center.x, box.center.y);
-          box = ItemMarker.mergeChanges(box, individualChange);
-        }
-        let res = "top: " + box.center.y + "px; ";
-        res += "left: " + box.center.x + "px; ";
-        res += "width: " + box.width + "px; ";
-        res += "height: " + box.height + "px; ";
-        res += "transform: translate(-50%, -50%) rotate(" + box.angle + "rad); ";
-        return res;
+          return null;
+        if (!change2)
+          return box;
+        const individualChange = change2.changeForPoint(box.center.x, box.center.y);
+        return ItemMarker.mergeChanges(box, individualChange);
       }
 
       static mergeChanges(box, individualChange) {
-        let merge = {};//Object.assign({}, box);
+        let merge = {};
         merge.center = {};
         merge.center.x = box.center.x + individualChange.x;
         merge.center.y = box.center.y + individualChange.y;

@@ -33,13 +33,13 @@ class ShapeInfoObject {
     return c;
   }
 
-  change(whxyd){
+  change(whaxy){
     const c = this.clone();
-    c.x += whxyd.x;
-    c.y += whxyd.y;
-    c.w *= whxyd.w;
-    c.h *= whxyd.h;
-    c.angle += whxyd.angle;
+    c.x += whaxy.x;
+    c.y += whaxy.y;
+    c.w *= whaxy.w;
+    c.h *= whaxy.h;
+    c.angle += whaxy.angle;
     return c;
   }
 

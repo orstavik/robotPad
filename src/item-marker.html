@@ -135,6 +135,7 @@
       _makeStyle(change, box) {
         if (!box)
           return null;
+        box.angle = 0;       //todo here i am removing the angle in the incoming box.
         if (!change)
           return box;
         return box.mergeChanges(change.changeForPoint(box.center.x, box.center.y));

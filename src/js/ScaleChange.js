@@ -23,13 +23,23 @@ class ScaleChange {
     this.h = this.yDistNow / this.yDistStart;
   }
 
-  changeForPoint(x, y) {
+  changeForPoint(x, y, angle) {
     let whaxy = {w: this.w, h: this.h, angle: 0, x: this.x, y: this.y};
     let xDistPoint = x - this.center.x;
     let yDistPoint = y - this.center.y;
     whaxy.x = (xDistPoint * (this.w - 1));
     whaxy.y = (yDistPoint * (this.h - 1));
-    //todo change .w and .h so that it fits with the angle of the info
+    if (!angle)
+      return whaxy;
+
+    let sqrt = Math.sqrt(whaxy.h*whaxy.h+whaxy.w*whaxy.w);
+    console.log(sqrt);
+    whaxy.w = Math.abs(Math.cos(angle) * this.w);
+    whaxy.h = Math.abs(Math.sin(angle) * this.w);
+    whaxy.h += Math.abs(Math.cos(-angle) * this.h);
+    whaxy.w += Math.abs(Math.sin(-angle) * this.h);
+    let sqrt2 = Math.sqrt(whaxy.h*whaxy.h+whaxy.w*whaxy.w);
+    console.log(sqrt2);
     return whaxy;
   }
 }

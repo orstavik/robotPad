@@ -49,7 +49,7 @@
 
       change(groupChange) {
         this.set("infos", this.originals.map(function(info){
-          const individualChange = groupChange.changeForPoint(info.x,info.y);
+          const individualChange = groupChange.changeForPoint(info.x,info.y, info.angle);
           return info.change(individualChange);
         }));
       }

@@ -4,7 +4,7 @@
       :host {
         display: inline-block;
         width: 300px;
-        height: 260px;
+        height: 250px;
         position: relative;
         background-color: var(--paper-grey-100);
         z-index: -1;
@@ -19,7 +19,25 @@
                     0 1px 5px 0 rgba(0, 0, 0, 0.12),
                     0 3px 1px -2px rgba(0, 0, 0, 0.2);
         transition: opacity 0.2s;
-        z-index: -1;
+        z-index: 1;
+      }
+      .filledCard, .emptyCard {
+        display: flex; 
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
+      .filledCard[hidden], .emptyCard[hidden] {
+        display: none;
+      }
+      .addText {
+        width: 250px;
+        text-align: center;
+        line-height: 1.2;
+        font-size: 30px;
+        font-weight: 900;
+        opacity: 0.2;
       }
       #historyPipe {
         display: inline-block;
@@ -27,10 +45,10 @@
         height: 0px;
         position: absolute;
         left: 30px;
-        top: 130px;
+        top: 125px;
         background-color: var(--paper-light-blue-600);
         transition: transform 0.2s;
-        z-index: -1;
+        z-index: 0;
       }
       .historyPoint {
         display: inline-block;
@@ -48,41 +66,97 @@
       .historyPoint.active {
         background-color: white !important;
       }
-      .historyCard {
-        display: inline-block;
-        width: 210px;
-        height: 200px;
-        position: absolute;
-        top: 30px;
-        left: 60px;
-        border-radius: 3px;
+      #historyCard {
+        display: flex;
+        flex-direction: column;
+        width: 78%;
+        height: 100%;
+        box-sizing: border-box;
+        position: relative;
+        margin-left: 22%;
+        border-left: 1px solid #ccc;
         background-color: white;
+        padding: 16px 16px 20px;
+        opacity: 1;
+        z-index: 0;
+        transition-duration: 0.2s;
+      }
+      .cardArrow {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: white;
+        border-left: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        transform-origin: left top;
+        transform: translate(-1px, 113px) rotate(45deg);
+        z-index: -2;
       }
       .cardPreview {
-        height: 115px;
+        position: relative;
+        height: 130px;
         background-color: mediumspringgreen;
       }
+      .changeType {
+        position: absolute;
+        bottom: 8px;
+        right: 10px;
+        padding: 2px 8px;
+        border-radius: 12px;
+        color: white;
+        font-size: 12px;
+      }
       .cardContent {
-        height: 85px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex-grow: 1;
+        margin-top: 10px;
+      }
+      .changeTime {
+        font-size: 18px;
+        font-weight: 300;
+      }
+      .buttonRow {
+        display: flex;
+        justify-content: flex-end;
+      }
+      paper-button {
+        margin: 0;
+        text-align: center;
+        font-size: 12px;
       }
     </style>
-    
+
     <div id="topShadow"></div>
-    <div id="historyPipe">
-      <iron-selector selected="[[activePoint]]" selected-class="active">
-        <template is="dom-repeat" items="[[history.actions]]">
-          <div class="historyPoint" style$="transform: translateY(calc(24px * [[index]])); background-color: [[_getColor(item)]]; border-color: [[_getColor(item)]];"></div>  
-        </template>
-      </iron-selector>
-    </div>
-    
-    <paper-material elevation="1" class="historyCard">
-      <div class="cardPreview"></div>
-      <div class="cardContent">
-        <span>[[_getChangeTime(activePoint)]]</span>
-        <paper-button raised>Revert</paper-button>
+    <div class="filledCard" hidden="[[!_fillCard(history)]]">
+      <div id="historyPipe">
+        <iron-selector selected="{{activePoint}}" selected-class="active">
+          <template is="dom-repeat" items="[[history.actions]]">
+            <div class="historyPoint" style$="transform: translateY(calc(24px * [[index]])); background-color: [[_getPointColor(item)]]; border-color: [[_getPointColor(item)]];"></div>  
+          </template>
+        </iron-selector>
       </div>
-    </paper-material>
+      
+      <div id="historyCard">
+        <div class="cardArrow"></div>
+        <div class="cardPreview">
+          <span class="changeType" style="background-color: [[_getColor(activePoint, history.actions)]]">[[_getType(activePoint, history.actions)]]</span>
+        </div>
+        <div class="cardContent">
+          <span class="changeTime">[[_getChangeTime(activePoint, history.actions)]]</span>
+          <div class="buttonRow">
+            <paper-button raised>Revert</paper-button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="emptyCard" hidden="[[_fillCard(history)]]">
+      <span class="addText">Create something to see the history!</span>
+    </div>
 
     <!--<div id="scrollbar">
       <template is="dom-repeat" items="[[history.actions]]">
@@ -112,7 +186,8 @@
             },
             activePoint: {
               type: Number,
-              value: 0
+              value: 0,
+              observer: "_pointChange"
             }
           }
         }
@@ -123,28 +198,37 @@
       }
 
       _hoverTime(e) {
-        let historicState = this.history.getState(Number(e.target.dataset.num));
+        let historicState = this.history.getState(this.activePoint);
         this.dispatchEvent(new CustomEvent("timetravel", {composed: true, bubbles: true, detail: historicState}));
       }
       _hoverTimeOff(e) {
         this.dispatchEvent(new CustomEvent("timetravel", {composed: true, bubbles: true, detail: null}));
       }
 
+      _fillCard(history) {
+        return history && history.actions.length > 0;
+      }
+
       _scroll(e) {
         if ((e.deltaY < 0 && this.activePoint > 0) || (e.deltaY > 0 && this.activePoint+1 < this.history.actions.length))
           this.activePoint += e.deltaY/100;
-        // if (this.activePoint >= 4)
-        //   this.$.topShadow.style.opacity = 0.5;
-        // else
-        //   this.$.topShadow.style.opacity = 0;
+      }
+
+      _pointChange() {
         this.$.historyPipe.style.transform = "translateY("+(this.activePoint*(-24))+"px)";
+        // if (this.activePoint) this._hoverTime();
       }
 
       _historyChange() {
-        this.$.historyPipe.style.height = (24*(this.history.actions.length-1))+"px";
+        if (this.history.actions.length !== 0) {
+          this.activePoint = 0;
+          this.$.historyPipe.style.height = (24*(this.history.actions.length-1))+"px";
+        } else {
+          this.$.historyPipe.style.height = 0;
+        }
       }
       
-      _getColor(item) {
+      _getPointColor(item) {
         switch(item.action) {
           case "add":
             return "var(--paper-green-800)";
@@ -154,10 +238,27 @@
             return "var(--paper-red-800)";
         }
       }
+      
+      _getColor(point, actions) {
+        if (actions && actions.length)
+        switch(actions[point].action) {
+          case "add":
+            return "var(--paper-green-800)";
+          case "change":
+            return "var(--paper-blue-800)";
+          case "remove":
+            return "var(--paper-red-800)";
+        }
+      }
 
-      _getChangeTime(point) {
-        if (this.history)
-          return this.history.actions[point].date.toGMTString().substr(4,21);
+      _getChangeTime(point, actions) {
+        if (actions && actions.length)
+          return actions[point].date.toGMTString().substr(4,21);
+      }
+
+      _getType(point, actions) {
+        if (actions && actions.length)
+          return actions[point].action;
       }
 
     }

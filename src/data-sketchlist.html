@@ -13,16 +13,22 @@
             sketchList: {
               type: Array,
               notify: true
+            },
+            sketchid: {
+              type: String,
+              notify: true
             }
           }
         };
       }
 
-      connectedCallback(){
-        this.updateSketchlistFunc = this.updateSketchList.bind(this);
+      connectedCallback() {
+        this.updateSketchlistFunc = function (snap) {
+          this.set("sketchList", snap.val());
+        }.bind(this);
       }
 
-      signOut(){
+      signOut() {
         this.offSketchlistListener();
         this.set("sketchList", []);
       }
@@ -41,23 +47,47 @@
         this.dbListener = null;
       }
 
-      updateSketchList(snap){
-        let res = DataSketchlist.firebaseObjectToArray(snap.val());
-        this.set("sketchList", res);
-      }
-
-      deleteSketch(sketchid, uid){
+      deleteSketch(sketchid, uid) {
         const updates = {};
-        updates["sketches/"+ sketchid] = null;
+        updates["sketches/" + sketchid] = null;
         updates["/users/" + uid + "/sketchlist/" + sketchid] = null;
-        return firebase.app("droppad").database().ref().update(updates, function(){
-          //this.fire("you have deleted #" + sketchid")
-          alert("you have deleted #" + sketchid);
-        });
+        return firebase.app("droppad").database().ref().update(updates, function () {
+          this.systemMessage("sketch#" + sketchid + " is successfully deleted on server.");
+        }.bind(this));
       }
 
-      static firebaseObjectToArray(val) {
-        return Object.keys(val).map(function (key) { return {key: key, value: val[key]}; });
+      newSketch(uid) {
+        let db = firebase.app("droppad").database();
+        let userDataSketchListPath = "/users/" + uid + "/sketchlist/";
+        let startValue = {
+          name: DataSketchlist.generateSketchName(),
+          created: firebase.database.ServerValue.TIMESTAMP
+        };
+        let sketchid = db.ref(userDataSketchListPath).push().key;
+        let updates = {};
+        updates[userDataSketchListPath + sketchid] = startValue;
+        updates["/sketches/" + sketchid] = {created: startValue.created};
+        db.ref().update(updates, function () {
+          this.set("sketchid", sketchid);
+          this.systemMessage("sketch#" + sketchid + " is successfully created on server.");
+        }.bind(this));
+      }
+
+      renameSketch(uid, sketchid, newName) {
+        let db = firebase.app("droppad").database();
+        let sketchInfoPath = "/users/" + uid + "/sketchlist/" + sketchid + "/name";
+        db.ref(sketchInfoPath).set(newName, function () {
+          this.systemMessage("sketch#" + sketchid + " is successfully renamed on server to: " + newName);
+        }.bind(this));
+      }
+
+      systemMessage(txt) {
+        this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: txt}));
+      }
+
+      static generateSketchName() {
+        let date = new Date();
+        return "Sketch_" + date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
       }
     }
     customElements.define(DataSketchlist.is, DataSketchlist);

@@ -43,7 +43,7 @@
       }
     </style>
 
-    <app-ui-namelabel id="namelabel" uid="[[_user.uid]]"></app-ui-namelabel>
+    <app-ui-namelabel id="namelabel" uid="[[_user.uid]]" sketchid="[[sketchid]]" sketch-list="[[sketchList]]"></app-ui-namelabel>
 
     <tools-button icon="icons:build" active="{{toolsOpen}}">
       <grow-child-button menu="Json" child-button icon="icons:settings-ethernet">
@@ -75,6 +75,7 @@
             history: StateMachine,
             petals: Array,
             sketchList: Array,
+            sketchid: String,
             toolsOpen: Boolean,
             accountOpen: Boolean,
           }

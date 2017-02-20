@@ -166,10 +166,8 @@
     <!--<key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower> -->
 
     <app-ui id="ui" app-name="[[sketchName]]" petals="[[letters]]"
-            history="[[history]]" scale="[[scale]]"
-            sketch-list="[[sketchList]]"
+            history="[[history]]" scale="[[scale]]" sketch-list="[[sketchList]]" sketchid="[[sketchid]]"
             on-new-user="_newUserLoggedIn"
-            on-new-sketch="_newSketchSet"
             on-load-sketch="_loadSketch"
             on-timetravel="_timetravel"
             on-new-colors="_newColors"
@@ -178,6 +176,8 @@
             on-sign-in="_signIn"
             on-sign-out="_signOut"
             on-delete-sketch="_deleteSketch"
+            on-rename-sketch="_renameSketch"
+            on-new-sketch="_newSketch"
     ></app-ui>
 
     <!--<iron-selector attr-for-selected="select" multi>
@@ -199,7 +199,7 @@
     <!--</tab-wrapper>
   </iron-selector>-->
 
-    <data-sketchlist id="sketchlist" sketch-list="{{sketchList}}"></data-sketchlist>
+    <data-sketchlist id="sketchlist" sketch-list="{{sketchList}}" sketchid="{{sketchid}}" on-system-message="_systemMessage"></data-sketchlist>
     <div id="helpText" hidden$="[[!helpText]]">[[helpText]]</div>
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
@@ -250,10 +250,6 @@
 
       colorSelected(e) {
         this.$.shapeSelector.addStyleToSelected(e.detail);
-      }
-
-      _newSketchSet(e) {
-        this.set("sketchid", e.detail);
       }
 
       _newState(e) {
@@ -310,12 +306,22 @@
         this.$.sketchlist.deleteSketch(e.detail.sketch, e.detail.user);
       }
 
+      _systemMessage(e){
+        console.log(e.detail);
+      }
+
+      _renameSketch(e){
+        this.$.sketchlist.deleteSketch(e.detail.sketch, e.detail.user, e.detail.name);
+      }
+
       loadSketch(e) {
         this.$.history.setState(e.detail.json);
       }
 
-      newSketch() {
-        this.$.history.setState([]);
+      _newSketch(e) {
+        console.log(e);
+        this.$.sketchlist.newSketch(e.detail);
+//        todo this.$.history.setState([]);
       }
 
       showHelp(e) {

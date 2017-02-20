@@ -25,15 +25,11 @@
       }
     </style>
 
+    <!--todo set the color red when the name has not been persisted, and to green when the data is stored in the db-->
     <template is="dom-if" if="[[uid]]">
         <paper-material id="paper" elevation=1>
-          <template is="dom-if" if="[[_hasSketchObject]]">
-<!--todo set the color red when the name has not been persisted, and to green when the data is stored in the db-->
-            <div id="sketchName" contenteditable="true" on-pointerdown="_stopProp" on-input="_changeSketchName">[[sketchObject.name]]</div>
-          </template>
-          <template is="dom-if" if="[[!_hasSketchObject]]">
-            <div on-click="_newSketch">click to make a new sketch</div>
-          </template>
+          <div hidden$="[[!sketchObject]]" id="sketchName" contenteditable="true" on-pointerdown="_stopProp" on-input="_changeSketchName">[[sketchObject.name]]</div>
+          <div hidden$="[[sketchObject]]" on-click="_newSketch">click to make a new sketch</div>
         </paper-material>
     </template>
   </template>
@@ -49,74 +45,40 @@
           properties: {
             uid: String,
             sketchid: String,
-            sketchObject:{
-              type: Object
-            },
-            _hasSketchObject: {
-              type: Boolean,
-              computed: "_sketchObjectToBool(sketchObject)"
+            sketchList: Array,
+            sketchObject: {
+              type: Object,
+              computed:"_makeSketchObject(sketchid, sketchList)"
             }
-          },
-          observers: ["_newUidSketchid(uid, sketchid)"]
+          }
         }
       }
 
-      connectedCallback() {
-        this._dbListenerFunc = function(snap){ this.set("sketchObject", snap.val());}.bind(this);
-      }
-
-      _sketchObjectToBool(sketchObject) {
-        return !sketchObject || sketchObject.length == 0 ? false : true; //att! don't replace || with && here
-      }
-
-      loadSketch(sketchid){
-        this.set("sketchid", sketchid);
-      }
-
-      _newUidSketchid(uid, sketchid) {
-        if (this.dbListener)
-          this.dbListener.off("value", this._dbListenerFunc);
-        if (!uid || !sketchid){
-          this.set("sketchObject", null);
-          return;
-        }
-        let path = "/users/" + uid + "/sketchlist/" + sketchid;
-        this.dbListener = firebase.app("droppad").database().ref(path);
-        this.dbListener.on("value", this._dbListenerFunc);
+      _makeSketchObject(sketchid, sketchList){
+        if (!sketchid || !sketchList)
+          return null;
+        let sketchObject = sketchList[sketchid];
+        if (!sketchObject)
+          return null;
+        sketchObject.key = sketchid;
+        return sketchObject;
       }
 
       _newSketch(e) {
-        let db = firebase.app("droppad").database();
-        let userDataSketchListPath = "/users/" + this.uid + "/sketchlist/";
-        let startValue = {
-          name: AppUiNamelabel.generateSketchName(),
-          created: firebase.database.ServerValue.TIMESTAMP
-        };
-        let sketchid = db.ref(userDataSketchListPath).push().key;
-        let updates = {};
-        updates[userDataSketchListPath + sketchid] = startValue;
-        updates["/sketches/" + sketchid] = {created: startValue.created};
-        db.ref().update(updates, function(){
-          this.set("sketchid", sketchid);
-          this.dispatchEvent(new CustomEvent("new-sketch", {composed: true, bubbles: true, detail: sketchid}));
-        }.bind(this));
+        this._fire("new-sketch", this.uid);
       }
 
       _changeSketchName(e) {
         if (this.nameChanger)
           clearTimeout(this.nameChanger);
-        this.nameChanger = setTimeout(this.renameSketchOnDB.bind(this, e.target.innerHTML), 3000);
+        this.nameChanger = setTimeout(function() {
+          this._fire("rename-sketch", {sketch: this.sketchid, user: this.uid, name: e.target.innerHTML});
+          this.nameChanger = null;
+        }.bind(this), 3000);
       }
 
-      renameSketchOnDB(newName){
-        let db = firebase.app("droppad").database();
-        let sketchInfoPath = "/users/" + this.uid + "/sketchlist/" + this.sketchid + "/name" ;
-        db.ref(sketchInfoPath).set(newName);
-      }
-
-      static generateSketchName() {
-        let date = new Date();
-        return "Sketch_" + date.getDate() + "." + date.getMonth() + "." + date.getFullYear();
+      _fire(name, detail){
+        this.dispatchEvent(new CustomEvent(name, {composed: true, bubbles: true, detail: detail}));
       }
 
       _stopProp(e){

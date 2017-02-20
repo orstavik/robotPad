@@ -25,7 +25,7 @@
       }
 
       set(action, elements, newState) {
-        this.actions.push({action: action, elements: elements, state: newState, date: new Date()});
+        this.actions.unshift({action: action, elements: elements, state: newState, date: new Date()}); // the newest should be in the front
         return this.currentState = newState;
       }
 

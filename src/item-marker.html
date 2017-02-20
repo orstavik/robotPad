@@ -117,7 +117,10 @@
         return {
           properties: {
             p2p: PointToPoint,
-            box: Object,
+            box: {
+              type: Object,
+              observer:"debug"
+            },
             change2: Object,
             style: {
               type: String,
@@ -127,38 +130,33 @@
         }
       }
 
+      debug(box){
+      }
+
       _makeStyle(change2, box) {
         if (!box)
           return "";
         if (change2) {
-          let x = box.center.x;
-          let y = box.center.y;
-          if (change2 instanceof ScaleChange) {
-            x = (box.center.x + this.start.x) / 2;
-            y = (box.center.y + this.start.y) / 2;
-          }
-          const individualChange = change2.changeForPoint(x, y);
-          let merge = Object.assign({}, box);
-          merge.center = {};
-          merge.center.x = x + individualChange.x;
-          merge.center.y = y + individualChange.y;
-          merge.width *= individualChange.w;
-          merge.height *= individualChange.h;
-          merge.angle += individualChange.angle;
-          box = merge;
+          const individualChange = change2.changeForPoint(box.center.x, box.center.y);
+          box = ItemMarker.mergeChanges(box, individualChange);
         }
         let res = "top: " + box.center.y + "px; ";
         res += "left: " + box.center.x + "px; ";
         res += "width: " + box.width + "px; ";
         res += "height: " + box.height + "px; ";
-        res += "margin-top: -" + (box.height / 2) + "px; ";
-        res += "margin-left: -" + (box.width / 2) + "px; ";
-        res += "transform: rotate(" + box.angle + "rad); ";
+        res += "transform: translate(-50%, -50%) rotate(" + box.angle + "rad); ";
         return res;
       }
 
-      _matrixToString(changeInfo) {
-        return changeInfo ? MatrixChange.toCss(changeInfo) : "";
+      static mergeChanges(box, individualChange) {
+        let merge = {};//Object.assign({}, box);
+        merge.center = {};
+        merge.center.x = box.center.x + individualChange.x;
+        merge.center.y = box.center.y + individualChange.y;
+        merge.width = box.width * individualChange.w;
+        merge.height = box.height * individualChange.h;
+        merge.angle = box.angle + individualChange.angle;
+        return merge;
       }
 
       connectedCallback() {

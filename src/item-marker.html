@@ -137,19 +137,7 @@
           return null;
         if (!change2)
           return box;
-        const individualChange = change2.changeForPoint(box.center.x, box.center.y);
-        return ItemMarker.mergeChanges(box, individualChange);
-      }
-
-      static mergeChanges(box, individualChange) {
-        let merge = {};
-        merge.center = {};
-        merge.center.x = box.center.x + individualChange.x;
-        merge.center.y = box.center.y + individualChange.y;
-        merge.width = box.width * individualChange.w;
-        merge.height = box.height * individualChange.h;
-        merge.angle = box.angle + individualChange.angle;
-        return merge;
+        return box.mergeChanges(change2.changeForPoint(box.center.x, box.center.y));
       }
 
       connectedCallback() {

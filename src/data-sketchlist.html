@@ -1,0 +1,65 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="data-sketchlist">
+  <script>
+    class DataSketchlist extends Polymer.Element {
+      static get is() {
+        return "data-sketchlist";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            sketchList: {
+              type: Array,
+              notify: true
+            }
+          }
+        };
+      }
+
+      connectedCallback(){
+        this.updateSketchlistFunc = this.updateSketchList.bind(this);
+      }
+
+      signOut(){
+        this.offSketchlistListener();
+        this.set("sketchList", []);
+      }
+
+      signIn(uid) {
+        this.offSketchlistListener();
+        let path = "/users/" + uid + "/sketchlist/";
+        this.dbListener = firebase.app("droppad").database().ref(path);
+        this.dbListener.on("value", this.updateSketchlistFunc);
+      }
+
+      offSketchlistListener() {
+        if (!this.dbListener)
+          return;
+        this.dbListener.off("value", this.updateSketchlistFunc);
+        this.dbListener = null;
+      }
+
+      updateSketchList(snap){
+        let res = DataSketchlist.firebaseObjectToArray(snap.val());
+        this.set("sketchList", res);
+      }
+
+      deleteSketch(sketchid, uid){
+        const updates = {};
+        updates["sketches/"+ sketchid] = null;
+        updates["/users/" + uid + "/sketchlist/" + sketchid] = null;
+        return firebase.app("droppad").database().ref().update(updates, function(){
+          //this.fire("you have deleted #" + sketchid")
+          alert("you have deleted #" + sketchid);
+        });
+      }
+
+      static firebaseObjectToArray(val) {
+        return Object.keys(val).map(function (key) { return {key: key, value: val[key]}; });
+      }
+    }
+    customElements.define(DataSketchlist.is, DataSketchlist);
+  </script>
+</dom-module>

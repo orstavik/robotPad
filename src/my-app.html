@@ -10,6 +10,7 @@
 <link rel="import" href="music-clef.html">
 <link rel="import" href="tab-wrapper.html">
 <link rel="import" href="app-ui.html">
+<link rel="import" href="data-sketchlist.html">
 
 <dom-module id="my-app">
   <template>
@@ -166,6 +167,7 @@
 
     <app-ui id="ui" app-name="[[sketchName]]" petals="[[letters]]"
             history="[[history]]" scale="[[scale]]"
+            sketch-list="[[sketchList]]"
             on-new-user="_newUserLoggedIn"
             on-new-sketch="_newSketchSet"
             on-load-sketch="_loadSketch"
@@ -173,6 +175,9 @@
             on-new-colors="_newColors"
             on-new-color-scale="_newColorScale"
             on-select-color="colorSelected"
+            on-sign-in="_signIn"
+            on-sign-out="_signOut"
+            on-delete-sketch="_deleteSketch"
     ></app-ui>
 
     <!--<iron-selector attr-for-selected="select" multi>
@@ -194,6 +199,7 @@
     <!--</tab-wrapper>
   </iron-selector>-->
 
+    <data-sketchlist id="sketchlist" sketch-list="{{sketchList}}"></data-sketchlist>
     <div id="helpText" hidden$="[[!helpText]]">[[helpText]]</div>
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
@@ -214,6 +220,10 @@
             letters: Array,
             heldKeys: Array,
             sketchName: String,
+            sketchList: {
+               type: Array,
+              observer: "debug"
+            } ,
             history: history,
             helpText: {
               type: String,
@@ -221,6 +231,10 @@
             }
           }
         }
+      }
+
+      debug(e){
+        console.log(e);
       }
 
       connectedCallback() {
@@ -289,6 +303,18 @@
         dbPos.limitToLast(1).once("child_added", function (snap) {
           this.$.history.load(snap.val().state);
         }.bind(this));
+      }
+
+      _signIn(e){
+        this.$.sketchlist.signIn(e.detail.uid);
+      }
+
+      _signOut(){
+        this.$.sketchlist.signOut();
+      }
+
+      _deleteSketch(e){
+        this.$.sketchlist.deleteSketch(e.detail.sketch, e.detail.user);
       }
 
       loadSketch(e) {

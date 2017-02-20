@@ -76,31 +76,10 @@
       static get config() {
         return {
           properties: {
-            uid: {
-              type: String,
-              observer: "_newUid"
-            },
+            uid: String,
             sketchList: Array
           }
         }
-      }
-
-      connectedCallback(){
-        this.updateSketchlistFunc = this.updateSketchList.bind(this);
-      }
-
-      _newUid(uid) {
-        if (this.dbListener){
-          this.dbListener.off("value", this.updateSketchlistFunc);
-          this.dbListener = null;
-        }
-        if (!uid){
-          this.set("sketchList", []);
-          return;
-        }
-        let path = "/users/" + uid + "/sketchlist/";
-        this.dbListener = firebase.app("droppad").database().ref(path);
-        this.dbListener.on("value", this.updateSketchlistFunc);
       }
 
       _loadSketch(e){
@@ -111,21 +90,7 @@
         let sketchid = e.target.dataset.key;
         if(!confirm("do you want to delete sketch #" + sketchid))
           return;
-        const updates = {};
-        updates["sketches/"+ sketchid] = null;
-        updates["/users/" + this.uid + "/sketchlist/" + sketchid] = null;
-        return firebase.app("droppad").database().ref().update(updates, function(){
-          alert("you have deleted #" + sketchid);
-        });
-      }
-
-      updateSketchList(snap){
-        let res = AppUiSketchlist.firebaseObjectToArray(snap.val());
-        this.set("sketchList", res);
-      }
-
-      static firebaseObjectToArray(val) {
-        return Object.keys(val).map(function (key) { return {key: key, value: val[key]}; });
+        this.dispatchEvent(new CustomEvent("delete-sketch", {composed: true, bubbles: true, detail: {sketch: sketchid, user: this.uid}}));
       }
     }
     customElements.define(AppUiSketchlist.is, AppUiSketchlist);

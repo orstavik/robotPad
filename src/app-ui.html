@@ -58,7 +58,7 @@
     </tools-button>
 
     <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
-      <app-login on-sign-in="_signIn" on-sign-out="_signOut"></app-login>
+      <app-login on-sign-in="_signIn" on-sign-out="_signOut" sketch-list="[[sketchList]]"></app-login>
     </grow-button>
   </template>
   <script>
@@ -74,6 +74,7 @@
             scale: Object,
             history: StateMachine,
             petals: Array,
+            sketchList: Array,
             toolsOpen: Boolean,
             accountOpen: Boolean,
           }

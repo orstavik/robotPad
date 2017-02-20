@@ -220,10 +220,7 @@
             letters: Array,
             heldKeys: Array,
             sketchName: String,
-            sketchList: {
-               type: Array,
-              observer: "debug"
-            } ,
+            sketchList: Array,
             history: history,
             helpText: {
               type: String,
@@ -231,10 +228,6 @@
             }
           }
         }
-      }
-
-      debug(e){
-        console.log(e);
       }
 
       connectedCallback() {

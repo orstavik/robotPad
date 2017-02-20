@@ -86,19 +86,20 @@
       }
 
       _newSketch(e) {
-        //todo these two set and push operations are not atomic, they should be..
         let db = firebase.app("droppad").database();
-        let userDataSketchListPath = "/users/" + this.uid + "/sketchlist";
+        let userDataSketchListPath = "/users/" + this.uid + "/sketchlist/";
         let startValue = {
           name: AppUiNamelabel.generateSketchName(),
           created: firebase.database.ServerValue.TIMESTAMP
         };
-        let newUserSketch = db.ref(userDataSketchListPath).push(startValue);
-        let sketchid = newUserSketch.key;
-        let sketchesPath = "/sketches/" + sketchid;
-        db.ref(sketchesPath).set({created: firebase.database.ServerValue.TIMESTAMP});
-        this.set("sketchid", sketchid);
-        this.dispatchEvent(new CustomEvent("new-sketch", {composed: true, bubbles: true, detail: sketchid}));
+        let sketchid = db.ref(userDataSketchListPath).push().key;
+        let updates = {};
+        updates[userDataSketchListPath + sketchid] = startValue;
+        updates["/sketches/" + sketchid] = {created: startValue.created};
+        db.ref().update(updates, function(){
+          this.set("sketchid", sketchid);
+          this.dispatchEvent(new CustomEvent("new-sketch", {composed: true, bubbles: true, detail: sketchid}));
+        }.bind(this));
       }
 
       _changeSketchName(e) {

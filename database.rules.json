@@ -3,7 +3,7 @@
     "sketches": {
       "$sketchid": {
         ".read": "root.hasChild('users/'+auth.uid +'/sketchlist/'+$sketchid)",
-        ".write": "root.hasChild('users/'+auth.uid +'/sketchlist/'+$sketchid)"
+        ".write": "!data.exists() || root.hasChild('users/'+auth.uid +'/sketchlist/'+$sketchid)"
       }
     },
     "users": {

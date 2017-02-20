@@ -76,6 +76,27 @@
         }.bind(this));
       }
 
+      loadSketch(sketchid) {
+        console.log(sketchid);
+        let dbPos = this._db.ref("/sketches/" + sketchid);
+        dbPos.limitToLast(1).once("child_added", function (snap) {
+          //todo here we should verify that the snap.val().state actually is ok before we congratulate ourselves with loading the thing from the server
+          this.systemMessage("sketch#" + sketchid + " successfully loaded from server.");
+          this.set("sketchid", sketchid);
+          let state = snap.val().state;
+          this.dispatchEvent(new CustomEvent("new-sketch-object", {composed: true, bubbles: true, detail: state}));
+        }.bind(this));
+      }
+
+      saveSketch(state){
+        if (!this.sketchid || !state)
+          this.systemMessage("Failed to save sketch#" + this.sketchid + ". " + state);
+        let sketch = this._db.ref("/sketches/" + this.sketchid);
+        sketch.push({changed: firebase.database.ServerValue.TIMESTAMP, state: state}, function(){
+          this.systemMessage("Saved sketch#" + this.sketchid + ".");
+        }.bind(this));
+      }
+
       systemMessage(txt) {
         this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: txt}));
       }

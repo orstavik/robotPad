@@ -199,7 +199,10 @@
     <!--</tab-wrapper>
   </iron-selector>-->
 
-    <data-sketchlist id="sketchlist" sketch-list="{{sketchList}}" sketchid="{{sketchid}}" on-system-message="_systemMessage"></data-sketchlist>
+    <data-sketchlist id="sketchlist" sketch-list="{{sketchList}}" sketchid="{{sketchid}}"
+                     on-system-message="_systemMessage"
+                     on-new-sketch-object="_newSketchObject"
+    ></data-sketchlist>
     <div id="helpText" hidden$="[[!helpText]]">[[helpText]]</div>
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
@@ -254,11 +257,9 @@
 
       _newState(e) {
         this.set("letters", e.detail);
-        if (this.sketchid) {
-          let path = "/sketches/" + this.sketchid;
-          let dbPos = firebase.app("droppad").database().ref(path);
-          dbPos.push({changed: firebase.database.ServerValue.TIMESTAMP, state: e.detail});
-        }
+        if (!this.sketchid)
+          return;
+        this.$.sketchlist.saveSketch(e.detail);
       }
 
       _deselect() {
@@ -286,12 +287,8 @@
       }
 
       _loadSketch(e) {
-        this.set("sketchid", e.detail);
-        let path = "/sketches/" + this.sketchid;
-        let dbPos = firebase.app("droppad").database().ref(path);
-        dbPos.limitToLast(1).once("child_added", function (snap) {
-          this.$.history.load(snap.val().state);
-        }.bind(this));
+        console.log(e);
+        this.$.sketchlist.loadSketch(e.detail);
       }
 
       _signIn(e){
@@ -308,6 +305,10 @@
 
       _systemMessage(e){
         console.log(e.detail);
+      }
+
+      _newSketchObject(e){
+        this.$.history.load(e.detail);
       }
 
       _renameSketch(e){

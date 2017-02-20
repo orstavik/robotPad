@@ -300,15 +300,12 @@
       }
 
       showHelp(e) {
-        let action = e.detail;
-        let txt;
-        if (action == "scale")
-          txt = 'Hold "shift" to scale symmetrically.';
-        else if (action == "rotate")
-          txt = 'Hold "ctrl" to snap elements to nearest 30deg.';
-        else if (action == "move")
-          txt = "Hold 'shift' to rotate the elements individually.";
-        this.set("helpText", action + ": " + txt);
+        if (e.detail instanceof ScaleChange)
+          this.set("helpText", 'Scale: Hold "shift" to scale symmetrically.');
+        else if (e.detail instanceof MoveChange)
+          this.set("helpText", 'Move: Hold "ctrl" to snap elements to nearest 30deg.');
+        else if (e.detail instanceof RotateChange)
+          this.set("helpText", "Rotate: Hold 'shift' to rotate the elements individually.");
       }
 
       hideHelp() {

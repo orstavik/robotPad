@@ -123,21 +123,21 @@
           properties: {
             p2p: PointToPoint,
             box: Object,
-            change2: Object,
+            change: Object,
             changedBox: {
               type: String,
-              computed: "_makeStyle(change2, box)"
+              computed: "_makeStyle(change, box)"
             }
           }
         }
       }
 
-      _makeStyle(change2, box) {
+      _makeStyle(change, box) {
         if (!box)
           return null;
-        if (!change2)
+        if (!change)
           return box;
-        return box.mergeChanges(change2.changeForPoint(box.center.x, box.center.y));
+        return box.mergeChanges(change.changeForPoint(box.center.x, box.center.y));
       }
 
       connectedCallback() {
@@ -154,19 +154,19 @@
         this.start = this.p2p.calcLogicPoint(e.clientX, e.clientY);
         let action = this.setMoveAction(e);
         if (action == "rotate")
-          this.change2 = new RotateChange(this.start, this.box.center);
+          this.change = new RotateChange(this.start, this.box.center);
         else if (action == "move")
-          this.change2 = new MoveChange(this.start);
+          this.change = new MoveChange(this.start);
         else if (action == "scale")
-          this.change2 = new ScaleChange(this.start, this.box.center);
-        this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: action}));
+          this.change = new ScaleChange(this.start, this.box.center);
+        this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: this.change}));
       }
 
       _pointerMove(e) {
         ItemMarker._cancelPropDefault(e);
-        this.change2.update(this.p2p.calcLogicPoint(e.clientX, e.clientY), (this.heldKeys && this.heldKeys.shift()));
-        this.notifyPath("change2");
-        this.dispatchEvent(new CustomEvent("track-move", {detail: this.change2, composed: true, bubbles: true}));
+        this.change.update(this.p2p.calcLogicPoint(e.clientX, e.clientY), (this.heldKeys && this.heldKeys.shift()));
+        this.notifyPath("change");
+        this.dispatchEvent(new CustomEvent("track-move", {detail: this.change, composed: true, bubbles: true}));
       }
 
       _pointerUp(e) {
@@ -175,7 +175,7 @@
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
         this.dispatchEvent(new CustomEvent("track-end", {composed: true, bubbles: true}));
-        this.set("change2", null);
+        this.set("change", null);
       }
 
       static _cancelPropDefault(e) {

@@ -71,8 +71,9 @@
       _changeSketchName(e) {
         if (this.nameChanger)
           clearTimeout(this.nameChanger);
+        const newName = e.target.innerHTML;
         this.nameChanger = setTimeout(function() {
-          this._fire("rename-sketch", {sketch: this.sketchid, user: this.uid, name: e.target.innerHTML});
+          this._fire("rename-sketch", {sketch: this.sketchid, user: this.uid, name: newName});
           this.nameChanger = null;
         }.bind(this), 3000);
       }

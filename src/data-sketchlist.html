@@ -23,9 +23,8 @@
       }
 
       connectedCallback() {
-        this.updateSketchlistFunc = function (snap) {
-          this.set("sketchList", snap.val());
-        }.bind(this);
+        this.updateSketchlistFunc = function (snap) { this.set("sketchList", snap.val()); }.bind(this);
+        this._db = firebase.app("droppad").database();
       }
 
       signOut() {
@@ -35,8 +34,7 @@
 
       signIn(uid) {
         this.offSketchlistListener();
-        let path = "/users/" + uid + "/sketchlist/";
-        this.dbListener = firebase.app("droppad").database().ref(path);
+        this.dbListener = this._db.ref("/users/" + uid + "/sketchlist/");
         this.dbListener.on("value", this.updateSketchlistFunc);
       }
 
@@ -51,32 +49,29 @@
         const updates = {};
         updates["sketches/" + sketchid] = null;
         updates["/users/" + uid + "/sketchlist/" + sketchid] = null;
-        return firebase.app("droppad").database().ref().update(updates, function () {
+        return this._db.ref().update(updates, function () {
           this.systemMessage("sketch#" + sketchid + " is successfully deleted on server.");
         }.bind(this));
       }
 
       newSketch(uid) {
-        let db = firebase.app("droppad").database();
-        let userDataSketchListPath = "/users/" + uid + "/sketchlist/";
+        let sketchid = this._db.ref("/users/" + uid + "/sketchlist/").push().key;
         let startValue = {
           name: DataSketchlist.generateSketchName(),
           created: firebase.database.ServerValue.TIMESTAMP
         };
-        let sketchid = db.ref(userDataSketchListPath).push().key;
         let updates = {};
-        updates[userDataSketchListPath + sketchid] = startValue;
-        updates["/sketches/" + sketchid] = {created: startValue.created};
-        db.ref().update(updates, function () {
+        updates["/users/" + uid + "/sketchlist/" + sketchid] = startValue;
+        updates["/sketches/" + sketchid] = {created: firebase.database.ServerValue.TIMESTAMP};
+        this._db.ref().update(updates, function () {
           this.set("sketchid", sketchid);
           this.systemMessage("sketch#" + sketchid + " is successfully created on server.");
         }.bind(this));
       }
 
-      renameSketch(uid, sketchid, newName) {
-        let db = firebase.app("droppad").database();
-        let sketchInfoPath = "/users/" + uid + "/sketchlist/" + sketchid + "/name";
-        db.ref(sketchInfoPath).set(newName, function () {
+      renameSketch(sketchid, uid, newName) {
+        let ref = this._db.ref("/users/" + uid + "/sketchlist/" + sketchid + "/name");
+        ref.set(newName, function () {
           this.systemMessage("sketch#" + sketchid + " is successfully renamed on server to: " + newName);
         }.bind(this));
       }

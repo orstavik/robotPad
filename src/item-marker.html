@@ -92,12 +92,7 @@
       #move:hover { cursor: move; }
       #marker:hover { cursor: move; }
     </style>
-    <div id="marker" hidden$="[[!box]]" style$="
-         left: [[box.left]]px;
-         top: [[box.top]]px;
-         width:  [[box.width]]px;
-         height: [[box.height]]px;
-         transform: [[matrixString]]">
+    <div id="marker" hidden$="[[!box]]" style$="[[style]]">
       <div id="nw" class="scale corner"></div>
       <div id="ne" class="scale corner"></div>
       <div id="sw" class="scale corner"></div>
@@ -124,31 +119,46 @@
             p2p: PointToPoint,
             box: Object,
             change2: Object,
-            matrix: {
-              type: Object,
-              computed: "_makeMatrix(change2, box)"
-            },
-            matrixString: {
+            style: {
               type: String,
-              computed: "_matrixToString(matrix)"
+              computed: "_makeStyle(change2, box)"
             }
           }
         }
       }
 
-      _matrixToString(changeInfo) {
-        return changeInfo ? MatrixChange.toCss(changeInfo) : "";
+      _makeStyle(change2, box) {
+        if (!box)
+          return "";
+        if (change2) {
+          let x = box.center.x;
+          let y = box.center.y;
+          if (change2 instanceof ScaleChange) {
+            x = (box.center.x + this.start.x) / 2;
+            y = (box.center.y + this.start.y) / 2;
+          }
+          const individualChange = change2.changeForPoint(x, y);
+          let merge = Object.assign({}, box);
+          merge.center = {};
+          merge.center.x = x + individualChange.x;
+          merge.center.y = y + individualChange.y;
+          merge.width *= individualChange.w;
+          merge.height *= individualChange.h;
+          merge.angle += individualChange.angle;
+          box = merge;
+        }
+        let res = "top: " + box.center.y + "px; ";
+        res += "left: " + box.center.x + "px; ";
+        res += "width: " + box.width + "px; ";
+        res += "height: " + box.height + "px; ";
+        res += "margin-top: -" + (box.height / 2) + "px; ";
+        res += "margin-left: -" + (box.width / 2) + "px; ";
+        res += "transform: rotate(" + box.angle + "rad); ";
+        return res;
       }
 
-      _makeMatrix(changes, box) {
-        if (!changes && !box)
-          return null;
-        if (!box)
-          return changes.asInfoObject();
-        let rotate = {w: 1, h: 1, angle: box.angle, x: 0, y: 0};
-        if (!changes)
-          return rotate;
-        return MatrixChange.mergeInfoObjects(changes.asInfoObject(),rotate);
+      _matrixToString(changeInfo) {
+        return changeInfo ? MatrixChange.toCss(changeInfo) : "";
       }
 
       connectedCallback() {
@@ -162,14 +172,14 @@
         this.setPointerCapture(e.pointerId);
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);
-        let start = this.p2p.calcLogicPoint(e.clientX, e.clientY);
+        this.start = this.p2p.calcLogicPoint(e.clientX, e.clientY);
         let action = this.setMoveAction(e);
         if (action == "rotate")
-          this.change2 = new RotateChange(start, this.box.center);//todo, make all the ChangeObjects take (start, center) as input
+          this.change2 = new RotateChange(this.start, this.box.center);
         else if (action == "move")
-          this.change2 = new MoveChange(start);
+          this.change2 = new MoveChange(this.start);
         else if (action == "scale")
-          this.change2 = new ScaleChange(start, this.box.center, e.target.id, this.box);
+          this.change2 = new ScaleChange(this.start, this.box.center);
         this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: action}));
       }
 

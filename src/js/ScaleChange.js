@@ -24,18 +24,12 @@ class ScaleChange {
   }
 
   changeForPoint(x, y) {
-    let asInfoObject2 = this.asInfoObject();
+    let whaxy = {w: this.w, h: this.h, angle: 0, x: this.x, y: this.y};
     let xDistPoint = x - this.center.x;
     let yDistPoint = y - this.center.y;
-    asInfoObject2.x = (xDistPoint * (this.w-1));
-    asInfoObject2.y = (yDistPoint * (this.h-1));
-
+    whaxy.x = (xDistPoint * (this.w-1));
+    whaxy.y = (yDistPoint * (this.h-1));
     //todo change .w and .h so that it fits with the angle of the info
-
-    return asInfoObject2;
-  }
-
-  asInfoObject() {
-    return {w: this.w, h: this.h, angle: 0, x: this.x, y: this.y};
+    return whaxy;
   }
 }

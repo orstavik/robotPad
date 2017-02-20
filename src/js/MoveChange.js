@@ -15,10 +15,6 @@ class MoveChange {
     return {w: 1, h: 1, angle: 0, x: this.xMove, y: this.yMove};
   }
 
-  asInfoObject(){
-    return {w: 1, h: 1, angle: 0, x: this.xMove, y: this.yMove};
-  }
-
   static makeMoveChange(start,end){
     let c = new MoveChange(start);
     c.update(end, false);

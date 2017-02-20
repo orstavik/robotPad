@@ -23,6 +23,19 @@
         this.center.x = this.left + this.width / 2;
         this.center.y = this.top + this.height / 2;
       }
+
+      //immutable
+      mergeChanges(individualChange) {
+        let merge = {};
+        merge.center = {
+          x: this.center.x + individualChange.x,
+          y: this.center.y + individualChange.y
+        };
+        merge.width = this.width * individualChange.w;
+        merge.height = this.height * individualChange.h;
+        merge.angle = this.angle + individualChange.angle;
+        return merge;
+      }
     }
 
     class SelectedObserver extends Polymer.Element {
@@ -49,7 +62,7 @@
 
       connectedCallback() {
         this.selector = this.parentNode.querySelector("#dropSelector");
-        this.mutationObservers= {};
+        this.mutationObservers = {};
         var addRemoveFromSelectorObserver = new MutationObserver(function (mutations) {
           for (let mutation of mutations) {
             for (let node of mutation.addedNodes) {

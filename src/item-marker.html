@@ -92,12 +92,12 @@
       #move:hover { cursor: move; }
       #marker:hover { cursor: move; }
     </style>
-    <div id="marker" hidden$="[[!box]]" style$="
-         left: [[box.left]]px;
-         top: [[box.top]]px;
-         width:  [[box.width]]px;
-         height: [[box.height]]px;
-         transform: [[matrixString]]">
+    <div id="marker" hidden$="[[!changedBox]]" style$="
+      top: [[changedBox.center.y]]px;
+      left: [[changedBox.center.x]]px;
+      width: [[changedBox.width]]px;
+      height: [[changedBox.height]]px;
+      transform: translate(-50%, -50%) rotate([[changedBox.angle]]rad); ">
       <div id="nw" class="scale corner"></div>
       <div id="ne" class="scale corner"></div>
       <div id="sw" class="scale corner"></div>
@@ -123,32 +123,21 @@
           properties: {
             p2p: PointToPoint,
             box: Object,
-            change2: Object,
-            matrix: {
-              type: Object,
-              computed: "_makeMatrix(change2, box)"
-            },
-            matrixString: {
+            change: Object,
+            changedBox: {
               type: String,
-              computed: "_matrixToString(matrix)"
+              computed: "_makeStyle(change, box)"
             }
           }
         }
       }
 
-      _matrixToString(changeInfo) {
-        return changeInfo ? MatrixChange.toCss(changeInfo) : "";
-      }
-
-      _makeMatrix(changes, box) {
-        if (!changes && !box)
-          return null;
+      _makeStyle(change, box) {
         if (!box)
-          return changes.asInfoObject();
-        let rotate = {w: 1, h: 1, angle: box.angle, x: 0, y: 0};
-        if (!changes)
-          return rotate;
-        return MatrixChange.mergeInfoObjects(changes.asInfoObject(),rotate);
+          return null;
+        if (!change)
+          return box;
+        return box.mergeChanges(change.changeForPoint(box.center.x, box.center.y));
       }
 
       connectedCallback() {
@@ -162,22 +151,22 @@
         this.setPointerCapture(e.pointerId);
         this.addEventListener("pointermove", this.pointermoveListener);
         this.addEventListener("pointerup", this.pointerupListener);
-        let start = this.p2p.calcLogicPoint(e.clientX, e.clientY);
+        this.start = this.p2p.calcLogicPoint(e.clientX, e.clientY);
         let action = this.setMoveAction(e);
         if (action == "rotate")
-          this.change2 = new RotateChange(start, this.box.center);//todo, make all the ChangeObjects take (start, center) as input
+          this.change = new RotateChange(this.start, this.box.center);
         else if (action == "move")
-          this.change2 = new MoveChange(start);
+          this.change = new MoveChange(this.start);
         else if (action == "scale")
-          this.change2 = new ScaleChange(start, this.box.center, e.target.id, this.box);
-        this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: action}));
+          this.change = new ScaleChange(this.start, this.box.center);
+        this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: this.change}));
       }
 
       _pointerMove(e) {
         ItemMarker._cancelPropDefault(e);
-        this.change2.update(this.p2p.calcLogicPoint(e.clientX, e.clientY), (this.heldKeys && this.heldKeys.shift()));
-        this.notifyPath("change2");
-        this.dispatchEvent(new CustomEvent("track-move", {detail: this.change2, composed: true, bubbles: true}));
+        this.change.update(this.p2p.calcLogicPoint(e.clientX, e.clientY), (this.heldKeys && this.heldKeys.shift()));
+        this.notifyPath("change");
+        this.dispatchEvent(new CustomEvent("track-move", {detail: this.change, composed: true, bubbles: true}));
       }
 
       _pointerUp(e) {
@@ -186,7 +175,7 @@
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
         this.dispatchEvent(new CustomEvent("track-end", {composed: true, bubbles: true}));
-        this.set("change2", null);
+        this.set("change", null);
       }
 
       static _cancelPropDefault(e) {

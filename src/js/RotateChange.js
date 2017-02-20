@@ -28,8 +28,4 @@ class RotateChange {
     this.absAngle = RotateChange.calcAngle(this.center, this.newPoint);
     this.angle = this.absAngle - this.startAngle;
   }
-
-  asInfoObject(){
-    return {w: 1, h: 1, angle: this.angle, x: 0, y: 0};
-  }
 }

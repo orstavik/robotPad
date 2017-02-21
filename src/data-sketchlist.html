@@ -2,6 +2,19 @@
 
 <dom-module id="data-sketchlist">
   <script>
+    class SketchData {
+      constructor(id, list){
+        this.id = id;
+        this.list = list;
+        this.name = null;
+        if (id) {
+          if (!list[id])
+            throw new Error("Sketch #" + id + " is not in the current list of sketches.");
+          this.name = this.list[this.id].name;
+        }
+      }
+    }
+
     class DataSketchlist extends Polymer.Element {
       static get is() {
         return "data-sketchlist";
@@ -17,9 +30,18 @@
             sketchid: {
               type: String,
               notify: true
+            },
+            sketchData: {
+              type: SketchData,
+              computed: "_makeSketchData(sketchid, sketchList)",
+              notify: true
             }
           }
         };
+      }
+
+      _makeSketchData(sketchid, sketchList){
+        return sketchList ? new SketchData(sketchid, sketchList) : null;
       }
 
       connectedCallback() {
@@ -50,7 +72,7 @@
         updates["sketches/" + sketchid] = null;
         updates["/users/" + uid + "/sketchlist/" + sketchid] = null;
         return this._db.ref().update(updates, function () {
-          this.systemMessage("sketch#" + sketchid + " is successfully deleted on server.");
+          this.systemMessage("Sketch #" + sketchid + " is successfully deleted on server.");
         }.bind(this));
       }
 
@@ -64,6 +86,7 @@
         updates["/users/" + uid + "/sketchlist/" + sketchid] = startValue;
         updates["/sketches/" + sketchid] = {created: firebase.database.ServerValue.TIMESTAMP};
         this._db.ref().update(updates, function () {
+          //todo here we should listen for changes to the sketch on the server.
           this.set("sketchid", sketchid);
           this.systemMessage("sketch#" + sketchid + " is successfully created on server.");
         }.bind(this));
@@ -77,8 +100,8 @@
       }
 
       loadSketch(sketchid) {
-        console.log(sketchid);
         let dbPos = this._db.ref("/sketches/" + sketchid);
+        //todo here we should listen for changes to the sketch on the server.
         dbPos.limitToLast(1).once("child_added", function (snap) {
           //todo here we should verify that the snap.val().state actually is ok before we congratulate ourselves with loading the thing from the server
           this.systemMessage("sketch#" + sketchid + " successfully loaded from server.");

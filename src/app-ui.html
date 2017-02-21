@@ -77,7 +77,27 @@
       .iconBox[hidden] {
         display: none;
       }
+      #helpText {
+        position: fixed;
+        bottom: 40px;
+        left: 40px;
+        font-size: 10px;
+        width: 180px;
+        height: 10px;
+        background: rgba(0, 0, 0, 0.3);
+        border: none;
+        border-radius: 20px;
+        padding: 15px;
+        line-height: 10px;
+        color: white;
+        font-weight: bold;
+      }
+      #helpText.system {
+        border-bottom: 4px solid red;
+      }
     </style>
+
+    <div id="helpText" hidden$="[[!helpText]]" class$="[[helpType]]">[[helpText]]</div>
 
     <template is="dom-if" if="[[user]]">
       <paper-material id="paperName" elevation=1>
@@ -143,6 +163,11 @@
 
       _newSketch(e) {
         this.dispatchEvent(new CustomEvent("new-sketch", {composed: true, bubbles: true}));
+      }
+
+      showMsg(txt, type){
+        this.set("helpText", txt);
+        this.set("helpType", type);
       }
     }
     customElements.define(AppUi.is, AppUi);

@@ -96,21 +96,6 @@
         position: fixed;
         z-index: 1;
       }
-      #helpText {
-        position: fixed;
-        bottom: 40px;
-        left: 40px;
-        font-size: 10px;
-        width: 180px;
-        height: 10px;
-        background: rgba(0, 0, 0, 0.3);
-        border: none;
-        border-radius: 20px;
-        padding: 15px;
-        line-height: 10px;
-        color: white;
-        font-weight: bold;
-      }
 
     </style>
 
@@ -123,16 +108,12 @@
     <firebase-auth id="auth" app-name="droppad" user="{{serverUser}}" provider="google"></firebase-auth>
 
     <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}"
-                     on-system-message="_systemMessage"
-                     on-new-sketch-object="_newSketchObject"
-    ></data-sketchlist>
+                     on-new-sketch-object="_newSketchObject"></data-sketchlist>
 
     <droppad-canvas id="shapeSelector" drops="[[letters]]" held-keys="[[heldKeys]]" preview="[[preview]]"
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
                     on-changeshapes="_changeShapes"
-                    on-help-on="showHelp"
-                    on-help-off="hideHelp"
                     on-deselect="_deselect"
     ></droppad-canvas>
 
@@ -173,7 +154,8 @@
     <!--<key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower> -->
 
     <!--sketch-list="[[sketchList]]" sketchid="[[sketchid]]" app-name="[[sketchName]]" -->
-    <app-ui id="ui" user="[[user]]" petals="[[letters]]" history="[[history]]" scale="[[scale]]" sketch-data="[[sketchData]]"
+    <app-ui id="ui" user="[[user]]" petals="[[letters]]" history="[[history]]" scale="[[scale]]"
+            sketch-data="[[sketchData]]"
             on-new-user="_newUserLoggedIn"
             on-load-sketch="_loadSketch"
             on-timetravel="_timetravel"
@@ -206,7 +188,6 @@
     <!--</tab-wrapper>
   </iron-selector>-->
 
-    <div id="helpText" hidden$="[[!helpText]]">[[helpText]]</div>
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
     <keyboard-listener on-key-down="_checkKey" on-key-up="_keyUp" exclude-repeats></keyboard-listener>
@@ -242,10 +223,16 @@
 
       connectedCallback() {
         super.connectedCallback();
+        this.addEventListener("system-msg", function (e) {
+          this.$.ui.showMsg(e.detail, "system");
+        }.bind(this));
+        this.addEventListener("help-msg", function (e) {
+          this.$.ui.showMsg(e.detail, "help");
+        }.bind(this));
       }
 
-      _serverSignInOrOut(serverUser){
-        if (serverUser){
+      _serverSignInOrOut(serverUser) {
+        if (serverUser) {
           this.set("user", serverUser);
           this.$.sketchlist.signIn(this.user.uid);
         } else {
@@ -308,27 +295,23 @@
         this.$.sketchlist.loadSketch(e.detail);
       }
 
-      _signIn(){
+      _signIn() {
         return this.$.auth.signInWithPopup();
       }
 
-      _signOut(){
+      _signOut() {
         return this.$.auth.signOut();
       }
 
-      _deleteSketch(e){
+      _deleteSketch(e) {
         this.$.sketchlist.deleteSketch(e.detail.sketch, e.detail.user);
       }
 
-      _systemMessage(e){
-        console.log(e.detail);
-      }
-
-      _newSketchObject(e){
+      _newSketchObject(e) {
         this.$.history.load(e.detail);
       }
 
-      _renameSketch(e){
+      _renameSketch(e) {
         this.$.sketchlist.renameSketch(e.detail.sketch, this.user.uid, e.detail.name);
       }
 
@@ -339,19 +322,6 @@
       _newSketch() {
         this.$.sketchlist.newSketch(this.user.uid);
 //        todo this.$.history.setState([]);
-      }
-
-      showHelp(e) {
-        if (e.detail instanceof ScaleChange)
-          this.set("helpText", 'Scale: Hold "shift" to scale symmetrically.');
-        else if (e.detail instanceof MoveChange)
-          this.set("helpText", 'Move: Hold "ctrl" to snap elements to nearest 30deg.');
-        else if (e.detail instanceof RotateChange)
-          this.set("helpText", "Rotate: Hold 'shift' to rotate the elements individually.");
-      }
-
-      hideHelp() {
-        this.set("helpText", null);
       }
 
       writeInChanges(e) {

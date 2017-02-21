@@ -122,7 +122,7 @@
       }
 
       systemMessage(txt) {
-        this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: txt}));
+        this.dispatchEvent(new CustomEvent("system-msg", {composed: true, bubbles: true, detail: txt}));
       }
 
       static generateSketchName() {

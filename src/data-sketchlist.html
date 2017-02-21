@@ -6,14 +6,7 @@
       constructor(id, list){
         this.id = id;
         this.list = list;
-        this.name = null;
-        if (id) {
-//          if (!list[id])
-//            throw new Error("Sketch #" + id + " is not in the current list of sketches.");
-          let sketch = this.list[this.id];
-          if (sketch)
-            this.name = sketch.name;
-        }
+        this.name = list[id] ? list[id].name : null;
       }
     }
 
@@ -54,6 +47,18 @@
         this.offSketchlistListener();
         this.dbListener = this._db.ref("/users/" + uid + "/sketchlist/");
         this.dbListener.on("value", this.updateSketchlistFunc);
+        this.checkIfFirstTimeUser(uid);
+      }
+
+      checkIfFirstTimeUser(uid) {
+        const userDataInDB = this._db.ref("/users/" + uid);
+        userDataInDB.once("value",
+          function (success) {
+            if (!success.exists())                //user not registered before
+              userDataInDB.set({registered: firebase.database.ServerValue.TIMESTAMP});
+          }.bind(this), function (error) {
+            console.log("An error occured connecting to DB");
+          });
       }
 
       offSketchlistListener() {
@@ -117,7 +122,7 @@
       }
 
       systemMessage(txt) {
-        this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: txt}));
+        this.dispatchEvent(new CustomEvent("system-msg", {composed: true, bubbles: true, detail: txt}));
       }
 
       static generateSketchName() {

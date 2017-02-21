@@ -62,7 +62,14 @@
 
       _startMovingMarker(e) {
         this.$.ghost.start(this.getSelectedInfos());
-        this.dispatchEvent(new CustomEvent("help-on", {detail: e.detail}));
+        let helpText;
+        if (e.detail instanceof ScaleChange)
+          helpText = 'Scale: Hold "shift" to scale symmetrically.';
+        else if (e.detail instanceof MoveChange)
+          helpText = 'Move: Hold "ctrl" to snap elements to nearest 30deg.';
+        else if (e.detail instanceof RotateChange)
+          helpText = "Rotate: Hold 'shift' to rotate the elements individually.";
+        this.dispatchEvent(new CustomEvent("help-msg", {composed: true, bubbles: true, detail: helpText}));
       }
 
       getSelectedInfos() {
@@ -81,7 +88,7 @@
       _stopMovingMarker(e) {
         this.action = null;
         this.replaceChanges(this.$.ghost.end());
-        this.dispatchEvent(new CustomEvent("help-off"));
+        this.dispatchEvent(new CustomEvent("help-msg", {composed: true, bubbles: true}));
       }
 
       copy() {

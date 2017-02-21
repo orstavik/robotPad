@@ -120,6 +120,8 @@
                   name="droppad">
     </firebase-app>
 
+    <firebase-auth id="auth" app-name="droppad" user="{{serverUser}}" provider="google"></firebase-auth>
+
     <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}"
                      on-system-message="_systemMessage"
                      on-new-sketch-object="_newSketchObject"
@@ -229,6 +231,10 @@
             helpText: {
               type: String,
               value: null
+            },
+            serverUser: {
+              type: Object,
+              observer: "_serverSignInOrOut"
             }
           }
         }
@@ -236,6 +242,16 @@
 
       connectedCallback() {
         super.connectedCallback();
+      }
+
+      _serverSignInOrOut(serverUser){
+        if (serverUser){
+          this.set("user", serverUser);
+          this.$.sketchlist.signIn(this.user.uid);
+        } else {
+          this.set("user", null);
+          this.$.sketchlist.signOut();
+        }
       }
 
       _newColors(e) {
@@ -292,14 +308,12 @@
         this.$.sketchlist.loadSketch(e.detail);
       }
 
-      _signIn(e){
-        this.set("user", e.detail);
-        this.$.sketchlist.signIn(e.detail.uid);
+      _signIn(){
+        return this.$.auth.signInWithPopup();
       }
 
       _signOut(){
-        this.set("user", null);
-        this.$.sketchlist.signOut();
+        return this.$.auth.signOut();
       }
 
       _deleteSketch(e){

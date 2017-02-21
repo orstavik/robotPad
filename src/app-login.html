@@ -120,9 +120,6 @@
       }
     </style>
 
-    <firebase-auth id="auth" app-name="droppad" user="{{user}}" provider="google"></firebase-auth>
-    <firebase-query id="query" app-name="droppad"></firebase-query>
-
     <div class="headerRow">
       <div class="firstCol">
         <div id="accountImage" style="background-image: url('[[_userImage]]')"></div>
@@ -160,10 +157,7 @@
       static get config() {
         return {
           properties: {
-            user: {
-              type: Object,
-              observer: "_signInOrOut"
-            },
+            user: Object,
             _userImage: {
               type: String,
               computed: "_setUserImage(user)"
@@ -178,18 +172,11 @@
       }
 
       _signIn() {
-        return this.$.auth.signInWithPopup();
+        this.dispatchEvent(new CustomEvent("sign-in", {composed: true, bubbles: true}));
       }
 
       _signOut() {
-        return this.$.auth.signOut();
-      }
-
-      _signInOrOut(user) {
-        if (!user)
-          this.dispatchEvent(new CustomEvent("sign-out", {composed: true, bubbles: true}));
-        else
-          this.dispatchEvent(new CustomEvent("sign-in", {composed: true, bubbles: true, detail: user}));
+        this.dispatchEvent(new CustomEvent("sign-out", {composed: true, bubbles: true}));
       }
 
       _setUserName(user) {

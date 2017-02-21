@@ -62,7 +62,6 @@
     <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}" on-new-sketch-object="_newSketchObject"></data-sketchlist>
     <droppad-history id="history" on-new-state="_newState" history="{{history}}"></droppad-history>
 
-    <!--preview="[[preview]]"-->
     <droppad-canvas id="canvasController"
                     user="[[user]]"
                     drops="[[letters]]"
@@ -73,7 +72,6 @@
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
                     on-changeshapes="_changeShapes"
-                    on-new-user="_newUserLoggedIn"
                     on-load-sketch="_loadSketch"
                     on-new-colors="_newColors"
                     on-new-color-scale="_newColorScale"
@@ -164,10 +162,6 @@
 
       _changeShapes(e) {
         this.$.history.update(e.detail);
-      }
-
-      _newUserLoggedIn(e) {
-        console.log("new user");
       }
 
       _loadSketch(e) {

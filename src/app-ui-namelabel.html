@@ -17,19 +17,44 @@
         opacity: 1;
         transform: translateY(0);
         transition: opacity 0.5s, transform 0.4s;
+        overflow: hidden;
       }
 
       #sketchName {
         margin: 4px 12px;
         font-weight: 400;
       }
+
+      .iconBox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background-color: var(--paper-indigo-a200);
+        cursor: pointer;
+      }
+      .iconBox>div {
+        width: 24px;
+        height: 24px;
+      }
+      iron-icon {
+        --iron-icon-fill-color: white;
+      }
+      .iconBox[hidden] {
+        display: none;
+      }
     </style>
 
     <!--todo set the color red when the name has not been persisted, and to green when the data is stored in the db-->
     <template is="dom-if" if="[[uid]]">
         <paper-material id="paper" elevation=1>
-          <div hidden$="[[!sketchObject]]" id="sketchName" contenteditable="true" on-pointerdown="_stopProp" on-input="_changeSketchName">[[sketchObject.name]]</div>
-          <div hidden$="[[sketchObject]]" on-click="_newSketch">click to make a new sketch</div>
+          <div id="sketchName" on-pointerdown="_stopProp">[[_showName(sketchObject)]]</div>
+          <div hidden="[[sketchObject]]" on-click="_newSketch" class="iconBox">
+            <div>
+              <iron-icon icon="save"></iron-icon>
+            </div>
+          </div>
         </paper-material>
     </template>
   </template>
@@ -64,18 +89,13 @@
         return sketchObject;
       }
 
-      _newSketch(e) {
-        this._fire("new-sketch", this.uid);
+      _showName(obj) {
+        if (obj) return obj.name
+        else return "New Sketch"
       }
 
-      _changeSketchName(e) {
-        if (this.nameChanger)
-          clearTimeout(this.nameChanger);
-        const newName = e.target.innerHTML;
-        this.nameChanger = setTimeout(function() {
-          this._fire("rename-sketch", {sketch: this.sketchid, user: this.uid, name: newName});
-          this.nameChanger = null;
-        }.bind(this), 3000);
+      _newSketch(e) {
+        this._fire("new-sketch", this.uid);
       }
 
       _fire(name, detail){

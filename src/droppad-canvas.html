@@ -34,6 +34,7 @@
             sketch-data="[[sketchData]]"
 
             on-select-color="colorSelected"
+            on-timetravel="_timetravel"
     ></app-ui>
     <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-dbltap="_newShape" on-singletap="_deselectAll">
       <droppad-selector id="dropSelector">
@@ -123,26 +124,6 @@
         this.selectDelayed(shapes);
       }
 
-      zoomNormal() {
-        this.$.canvas.reset();
-      }
-
-      zDownSelected() {
-        this.replaceChanges(this.getSelectedInfos().map(info => info.zDown()));
-      }
-
-      zUpSelected() {
-        this.replaceChanges(this.getSelectedInfos().map(info => info.zUp()));
-      }
-
-      centerSelected() {
-        this.replaceChanges(this.getSelectedInfos().map(info => info.center()));
-      }
-
-      mirrorSelected() {
-        this.replaceChanges(this.getSelectedInfos().map(info => info.mirror()));
-      }
-
       timeTravel(historicState) {
         if (historicState){
           this.$.dropSelector.style.opacity = 0.2;
@@ -151,10 +132,6 @@
           this.$.dropSelector.style.opacity = 1;
           this.$.historyPreview.end();
         }
-      }
-
-      addStyleToSelected(styleName) {
-        this.replaceChanges(this.getSelectedInfos().map(info => info.setStyle(styleName)));
       }
 
       updateShape(id, value) {
@@ -174,6 +151,23 @@
 
       colorSelected(e) {
         this.addStyleToSelected(e.detail);
+      }
+
+      writeInChanges(e) {
+        this.$.canvasController.updateShape(e.target.key, e.detail[e.target.key]);
+      }
+
+      addStyleToSelected(styleName) {
+        this.replaceChanges(this.getSelectedInfos().map(info => info.setStyle(styleName)));
+      }
+
+      setStyleName(e) {
+        this.$.canvasController.addStyleToSelected(e.target.id);
+      }
+
+      _timetravel(e) {
+        //todo need to find the content of the historic state here?
+        this.timeTravel(e.detail);
       }
 
       _newShape(e) {
@@ -196,10 +190,6 @@
         this.dispatchEvent(new CustomEvent("changeshapes", {detail: changedCopies}));
       }
 
-      _deleteElem() {
-        this.dispatchEvent(new CustomEvent("removeshapes", {detail: this.getSelectedInfos()}));
-      }
-
       _checkKey(e) {
         this.set("heldKeys", e.detail);
         switch (e.detail.code()) {
@@ -219,24 +209,24 @@
             this._deselectAll();
             return;
           case "KeyD":
-            this._deleteElem();
+            this.dispatchEvent(new CustomEvent("removeshapes", {detail: this.getSelectedInfos()}));
             return;
           case "KeyM":
-            this.mirrorSelected();
+            this.replaceChanges(this.getSelectedInfos().map(info => info.mirror()));
             return;
           case "KeyN":
-            this.centerSelected();
+            this.replaceChanges(this.getSelectedInfos().map(info => info.center()));
             return;
           case "PageUp":
-            this.zUpSelected();
+            this.replaceChanges(this.getSelectedInfos().map(info => info.zUp()));
             return;
           case "PageDown":
-            this.zDownSelected();
+            this.replaceChanges(this.getSelectedInfos().map(info => info.zDown()));
             return;
         }
         if (e.detail.ctrl()) {
           if (e.detail.code() === "Digit0")
-            this.zoomNormal();
+            this.$.canvas.reset();
           else if (e.detail.code() === "KeyC")
             this.copy();
           else if (e.detail.code() === "KeyV")

@@ -86,7 +86,6 @@
       }
 
       _stopMovingMarker(e) {
-        this.action = null;
         this.replaceChanges(this.$.ghost.end());
         this.dispatchEvent(new CustomEvent("help-msg", {composed: true, bubbles: true}));
       }

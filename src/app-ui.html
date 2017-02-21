@@ -114,7 +114,7 @@
       </paper-material>
     </template>
 
-    <tools-button icon="icons:build" active="{{toolsOpen}}">
+    <tools-button id="tools" icon="icons:build">
       <grow-child-button menu="Json" child-button icon="icons:settings-ethernet">
         <json-wrapper petals="[[petals]]"></json-wrapper>
       </grow-child-button>
@@ -126,7 +126,7 @@
       </grow-child-button>
     </tools-button>
 
-    <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[toBool(user)]]">
+    <grow-button id="account" icon="account-circle" signed$="[[toBool(user)]]">
       <app-login sketch-data="[[sketchData]]" user="[[user]]">
 
       </app-login>
@@ -144,16 +144,14 @@
             scale: Object,
             history: StateMachine,
             petals: Array,
-            sketchData: Object,
-            toolsOpen: Boolean,
-            accountOpen: Boolean,
+            sketchData: Object
           }
         }
       }
 
       deselect(){
-        this.set("toolsOpen", false);
-        this.set("accountOpen", false);
+        this.$.account.deactivate();
+        this.$.tools.deactivate();
       }
 
       toBool(obj){

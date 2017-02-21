@@ -3,7 +3,7 @@
 <dom-module id="selected-observer">
   <script>
     class SquareBox {
-      constructor(boxes, p2p, angle) {
+      constructor(boxes, angle) {
         this.angle = angle;
         this.isSingle = boxes.length == 1;
         for (let next of boxes) {
@@ -17,10 +17,12 @@
         this.center = {};
         this.center.x = this.left + this.width / 2;
         this.center.y = this.top + this.height / 2;
-        this.toLogical(p2p);
       }
 
       toLogical(p2p){
+        if (this.isLogical)
+          return;
+        this.isLogical = true;
         this.left = p2p.toLogicalX(this.left);
         this.right = p2p.toLogicalX(this.right);
         this.top = p2p.toLogicalY(this.top);
@@ -53,14 +55,13 @@
       static get config() {
         return {
           properties: {
-            p2p: Object,
             selected: {
               type: Array,
               notify: true
             },
             box: {
               type: SquareBox,
-              computed: "_calcRectangle(selected, p2p)",
+              computed: "_calcRectangle(selected)",
               notify: true
             }
           }
@@ -108,14 +109,14 @@
         this.notifyPath("selected");
       }
 
-      _calcRectangle(items, p2p) {
+      _calcRectangle(items) {
         if (!items || items.length == 0)
           return null;
         let boxes = [];
         for (let el of items)
           boxes.push(el.getBoundingClientRect());
         let angle = (items && items.length == 1) ? items[0].info.angle : 0;
-        return new SquareBox(boxes, p2p, angle);
+        return new SquareBox(boxes, angle);
       }
     }
     customElements.define(SelectedObserver.is, SelectedObserver);

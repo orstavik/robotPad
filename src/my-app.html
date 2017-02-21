@@ -120,6 +120,10 @@
                   name="droppad">
     </firebase-app>
 
+    <!--sketchid="{{sketchid}}" sketch-list="{{sketchList}}"-->
+    <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}" on-system-message="_systemMessage" on-new-sketch-object="_newSketchObject"
+    ></data-sketchlist>
+
     <droppad-canvas id="shapeSelector" drops="[[letters]]" held-keys="[[heldKeys]]" preview="[[preview]]"
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
@@ -165,8 +169,8 @@
 
     <!--<key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower> -->
 
-    <app-ui id="ui" app-name="[[sketchName]]" petals="[[letters]]"
-            history="[[history]]" scale="[[scale]]" sketch-list="[[sketchList]]" sketchid="[[sketchid]]"
+    <!--sketch-list="[[sketchList]]" sketchid="[[sketchid]]" app-name="[[sketchName]]" -->
+    <app-ui id="ui" petals="[[letters]]" history="[[history]]" scale="[[scale]]" sketch-data="[[sketchData]]"
             on-new-user="_newUserLoggedIn"
             on-load-sketch="_loadSketch"
             on-timetravel="_timetravel"
@@ -199,10 +203,6 @@
     <!--</tab-wrapper>
   </iron-selector>-->
 
-    <data-sketchlist id="sketchlist" sketch-list="{{sketchList}}" sketchid="{{sketchid}}"
-                     on-system-message="_systemMessage"
-                     on-new-sketch-object="_newSketchObject"
-    ></data-sketchlist>
     <div id="helpText" hidden$="[[!helpText]]">[[helpText]]</div>
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 
@@ -223,7 +223,10 @@
             letters: Array,
             heldKeys: Array,
             sketchName: String,
-            sketchList: Array,
+            sketchData: {
+              type: Object,
+            },
+//            sketchList: Array,
             history: history,
             helpText: {
               type: String,
@@ -257,7 +260,7 @@
 
       _newState(e) {
         this.set("letters", e.detail);
-        if (!this.sketchid)
+        if (!this.sketchData.id)
           return;
         this.$.sketchlist.saveSketch(e.detail);
       }

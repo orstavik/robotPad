@@ -43,7 +43,7 @@
       }
     </style>
 
-    <app-ui-namelabel id="namelabel" uid="[[_user.uid]]" sketchid="[[sketchid]]" sketch-list="[[sketchList]]"></app-ui-namelabel>
+    <app-ui-namelabel id="namelabel" uid="[[_user.uid]]" sketch-data="[[sketchData]]"></app-ui-namelabel>
 
     <tools-button icon="icons:build" active="{{toolsOpen}}">
       <grow-child-button menu="Json" child-button icon="icons:settings-ethernet">
@@ -58,7 +58,7 @@
     </tools-button>
 
     <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
-      <app-login on-sign-in="_signIn" on-sign-out="_signOut" sketch-list="[[sketchList]]"></app-login>
+      <app-login on-sign-in="_signIn" on-sign-out="_signOut" sketch-data="[[sketchData]]"></app-login>
     </grow-button>
   </template>
   <script>
@@ -70,12 +70,13 @@
       static get config() {
         return {
           properties: {
-            appName: String,
+//            appName: String,
             scale: Object,
             history: StateMachine,
             petals: Array,
-            sketchList: Array,
-            sketchid: String,
+//            sketchList: Array,
+//            sketchid: String,
+            sketchData: Object,
             toolsOpen: Boolean,
             accountOpen: Boolean,
           }

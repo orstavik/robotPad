@@ -153,7 +153,7 @@
         <span class="addText">Sign in to save your sketches</span>
       </div>
       <div class="scrollWrapper" removed$="[[!user]]">
-        <app-ui-sketchlist id="sketchlist" uid="[[user.uid]]" sketch-list="[[sketchList]]"></app-ui-sketchlist>
+        <app-ui-sketchlist id="sketchlist" uid="[[user.uid]]" sketch-data="[[sketchData]]"></app-ui-sketchlist>
       </div>
     </div>
 
@@ -183,7 +183,7 @@
               type: String,
               observer: "_newUserData"
             },
-            sketchList: Array
+            sketchData: Object
           }
         }
       }

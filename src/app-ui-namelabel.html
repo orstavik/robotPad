@@ -69,31 +69,31 @@
         return {
           properties: {
             uid: String,
-            sketchid: String,
-            sketchList: Array,
-            sketchObject: {
-              type: Object,
-              computed:"_makeSketchObject(sketchid, sketchList)"
-            }
+            sketchData: Object,
+//            sketchList: Array,
+//            sketchObject: {
+//              type: Object,
+//              computed:"_makeSketchObject(sketchid, sketchList)"
+//            }
           }
         }
       }
-
-      _makeSketchObject(sketchid, sketchList){
-        if (!sketchid || !sketchList)
-          return null;
-        let sketchObject = sketchList[sketchid];
-        if (!sketchObject)
-          return null;
-        sketchObject.key = sketchid;
-        return sketchObject;
-      }
+      
+//      _makeSketchObject(sketchid, sketchList){
+//        if (!sketchid || !sketchList)
+//          return null;
+//        let sketchObject = sketchList[sketchid];
+//        if (!sketchObject)
+//          return null;
+//        sketchObject.key = sketchid;
+//        return sketchObject;
+//      }
 
       _showName(obj) {
         if (obj) return obj.name
         else return "New Sketch"
       }
-
+      
       _newSketch(e) {
         this._fire("new-sketch", this.uid);
       }
@@ -105,6 +105,16 @@
       _stopProp(e){
         e.stopPropagation();
       }
+
+//      _changeSketchName(e) {
+//        if (this.nameChanger)
+//          clearTimeout(this.nameChanger);
+//        const newName = e.target.innerHTML;
+//        this.nameChanger = setTimeout(function() {
+//          this._fire("rename-sketch", {sketch: e.target.dataset.id, user: this.uid, name: newName});
+//          this.nameChanger = null;
+//        }.bind(this), 3000);
+//      }
     }
     customElements.define(AppUiNamelabel.is, AppUiNamelabel);
   </script>

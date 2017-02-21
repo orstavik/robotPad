@@ -79,7 +79,7 @@
       }
     </style>
 
-    <template is="dom-if" if="[[_user]]">
+    <template is="dom-if" if="[[user]]">
       <paper-material id="paperName" elevation=1>
         <div hidden="[[!sketchData.id]]" id="sketchName">[[sketchData.name]]</div>
         <div hidden="[[sketchData.id]]" id="sketchName">New Sketch</div>
@@ -103,8 +103,8 @@
       </grow-child-button>
     </tools-button>
 
-    <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
-      <app-login on-sign-in="_signIn" on-sign-out="_signOut" sketch-data="[[sketchData]]">
+    <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[toBool(user)]]">
+      <app-login sketch-data="[[sketchData]]">
 
       </app-login>
     </grow-button>
@@ -133,14 +133,8 @@
         this.set("accountOpen", false);
       }
 
-      _signIn(e) {
-        this.set("signed", true);
-        this.set("_user", e.detail);
-      }
-
-      _signOut(e) {
-        this.set("signed", false);
-        this.set("_user", null);
+      toBool(obj){
+        return !!obj;
       }
 
       _loadSketch(e) {

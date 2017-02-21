@@ -171,7 +171,7 @@
     <!--<key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower> -->
 
     <!--sketch-list="[[sketchList]]" sketchid="[[sketchid]]" app-name="[[sketchName]]" -->
-    <app-ui id="ui" petals="[[letters]]" history="[[history]]" scale="[[scale]]" sketch-data="[[sketchData]]"
+    <app-ui id="ui" user="[[user]]" petals="[[letters]]" history="[[history]]" scale="[[scale]]" sketch-data="[[sketchData]]"
             on-new-user="_newUserLoggedIn"
             on-load-sketch="_loadSketch"
             on-timetravel="_timetravel"
@@ -221,6 +221,7 @@
       static get config() {
         return {
           properties: {
+            user: Object,
             letters: Array,
             heldKeys: Array,
             sketchData: Object,

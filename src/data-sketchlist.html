@@ -23,14 +23,8 @@
       static get config() {
         return {
           properties: {
-            sketchList: {
-              type: Array,
-              notify: true
-            },
-            sketchid: {
-              type: String,
-              notify: true
-            },
+            sketchList: Array,
+            sketchid: String,
             sketchData: {
               type: SketchData,
               computed: "_makeSketchData(sketchid, sketchList)",

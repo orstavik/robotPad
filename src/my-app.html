@@ -120,8 +120,9 @@
                   name="droppad">
     </firebase-app>
 
-    <!--sketchid="{{sketchid}}" sketch-list="{{sketchList}}"-->
-    <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}" on-system-message="_systemMessage" on-new-sketch-object="_newSketchObject"
+    <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}"
+                     on-system-message="_systemMessage"
+                     on-new-sketch-object="_newSketchObject"
     ></data-sketchlist>
 
     <droppad-canvas id="shapeSelector" drops="[[letters]]" held-keys="[[heldKeys]]" preview="[[preview]]"
@@ -222,11 +223,7 @@
           properties: {
             letters: Array,
             heldKeys: Array,
-            sketchName: String,
-            sketchData: {
-              type: Object,
-            },
-//            sketchList: Array,
+            sketchData: Object,
             history: history,
             helpText: {
               type: String,
@@ -295,10 +292,12 @@
       }
 
       _signIn(e){
+        this.set("user", e.detail);
         this.$.sketchlist.signIn(e.detail.uid);
       }
 
       _signOut(){
+        this.set("user", null);
         this.$.sketchlist.signOut();
       }
 
@@ -315,7 +314,7 @@
       }
 
       _renameSketch(e){
-        this.$.sketchlist.renameSketch(e.detail.sketch, e.detail.user, e.detail.name);
+        this.$.sketchlist.renameSketch(e.detail.sketch, this.user.uid, e.detail.name);
       }
 
       loadSketch(e) {

@@ -43,7 +43,7 @@
       static get config() {
         return {
           properties: {
-            uid: String,
+//            uid: String,
             sketchData: Object,
 //            sketchList: Array,
 //            sketchObject: {
@@ -65,7 +65,7 @@
 //      }
 //
       _newSketch(e) {
-        this._fire("new-sketch", this.uid);
+        this.dispatchEvent(new CustomEvent("new-sketch", {composed: true, bubbles: true}));
       }
 
 //      _changeSketchName(e) {

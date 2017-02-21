@@ -107,8 +107,7 @@
 
     <firebase-auth id="auth" app-name="droppad" user="{{serverUser}}" provider="google"></firebase-auth>
 
-    <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}"
-                     on-new-sketch-object="_newSketchObject"></data-sketchlist>
+    <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}" on-new-sketch-object="_newSketchObject"></data-sketchlist>
 
     <droppad-canvas id="shapeSelector" drops="[[letters]]" held-keys="[[heldKeys]]" preview="[[preview]]"
                     on-addshapes="_addShapes"
@@ -117,43 +116,6 @@
                     on-deselect="_deselect"
     ></droppad-canvas>
 
-    <!--<div id="toolbar">
-      <div class="button spacer"></div>
-      <template is="dom-repeat" items="[[coloredScale]]">
-        <div id="tone[[index]]" class="button" on-click="setStyleName"
-             style$="transform: rotate([[item.rotation]]deg) scale([[item.scale]]);
-             background: [[item.color]]; border-radius: 0 50% 50% 50%;">
-          [[item.name]]
-        </div>
-      </template>
-      <div class="button spacer" ></div>
-      <template is="dom-repeat" items="[[colors]]">
-        <div id="color[[index]]" class="button" style$="background: [[item]];" on-click="setStyleName">[[index]]</div>
-      </template>
-      <div class="button spacer"></div>
-      <template is="dom-repeat" items="[0,1,2,3,4,5,6,7,8,9,10,11]">
-        <div id="grey[[index]]" class="button" style$="background: var(--tone-grey-[[index]]);"
-             on-click="setStyleName">[[index]]
-        </div>
-      </template>
-      <div class="button spacer"></div>
-      <div class="button" title="New sketch." on-click="newSketch">New page</div>
-      <div class="button" title="ctrl + Click left mouse button on the canvas to create new shape.">New drop</div>
-      <div class="button" title="Esc deselects the elements.">Esc</div>
-      <div class="button" title="Delete the shape by choosing the shape and pressing 'd'."> d</div>
-      <div class="button" title="Move the shape up one layer.">Page Up</div>
-      <div class="button" title="Move the shape down one layer.">Page Down</div>
-      <div class="button" title="Rotate the shape: hold 'r' + drag it."> r</div>
-      <div class="button" title="Resize the shape: hold 'e' + drag it."> e</div>
-      <div class="button" title="Resize the shape (while preserving proportions): hold 'e'+'r' + drag it."> e+r</div>
-      <div class="button" title="Resize the shape (normalized): hold 'e'+'w' + drag it."> e+w</div>
-      <div class="button" title="Mirror the shape: press 'm', coming different mirror modes."> m </div>
-      <div class="button" title="Skew the shape: press 'n'"> n</div>
-    </div>-->
-
-    <!--<key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower> -->
-
-    <!--sketch-list="[[sketchList]]" sketchid="[[sketchid]]" app-name="[[sketchName]]" -->
     <app-ui id="ui" user="[[user]]" petals="[[letters]]" history="[[history]]" scale="[[scale]]"
             sketch-data="[[sketchData]]"
             on-new-user="_newUserLoggedIn"
@@ -168,25 +130,6 @@
             on-rename-sketch="_renameSketch"
             on-new-sketch="_newSketch"
     ></app-ui>
-
-    <!--<iron-selector attr-for-selected="select" multi>
-      <tab-wrapper title="JSON" select="1">
-        <template is="dom-repeat" items="[[letters]]">
-          <json-object key="[[item.number]]" obj="[[item]]" on-writeop="writeInChanges"></json-object>
-        </template>
-      </tab-wrapper>
-      <tab-wrapper title="Palette" select="2">
-        <color-palette id="palette" css-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
-      </tab-wrapper>
-      <tab-wrapper title="Save/Load" select="3">
-      </tab-wrapper>
-      <tab-wrapper title="History" select="4">-->
-    <droppad-history id="history" on-new-state="_newState" style="visibility: hidden"
-                     history="{{history}}"></droppad-history>
-    <!--<json-saver  id="jsonSaver" input="[[letters]]" on-sketchload="loadSketch" json-name="{{sketchName}}" style="visibility: hidden"></json-saver>-->
-    <!--History: <input type="range" min="0" max="10000" value="0" id="h" on-input="timeTravel"/> <br>-->
-    <!--</tab-wrapper>
-  </iron-selector>-->
 
     <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
 

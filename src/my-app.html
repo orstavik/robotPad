@@ -1,13 +1,10 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
-<link rel="import" href="color-palette.html">
-<link rel="import" href="json-object.html">
 <link rel="import" href="droppad-history.html">
 <link rel="import" href="json-saver.html">
 <link rel="import" href="droppad-canvas.html">
 <link rel="import" href="tab-wrapper.html">
-<link rel="import" href="app-ui.html">
 <link rel="import" href="data-sketchlist.html">
 
 <dom-module id="my-app">
@@ -65,27 +62,28 @@
     <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}" on-new-sketch-object="_newSketchObject"></data-sketchlist>
     <droppad-history id="history" on-new-state="_newState" history="{{history}}"></droppad-history>
 
-    <droppad-canvas id="canvasController" drops="[[letters]]" preview="[[preview]]"
+    <droppad-canvas id="canvasController"
+                    user="[[user]]"
+                    drops="[[letters]]"
+                    preview="[[preview]]"
+                    history="[[history]]"
+                    sketch-data="[[sketchData]]"
+                    messages="[[messages]]"
+
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
                     on-changeshapes="_changeShapes"
-                    on-deselect="_deselect"
+                    on-new-user="_newUserLoggedIn"
+                    on-load-sketch="_loadSketch"
+                    on-timetravel="_timetravel"
+                    on-new-colors="_newColors"
+                    on-new-color-scale="_newColorScale"
+                    on-sign-in="_signIn"
+                    on-sign-out="_signOut"
+                    on-delete-sketch="_deleteSketch"
+                    on-rename-sketch="_renameSketch"
+                    on-new-sketch="_newSketch"
     ></droppad-canvas>
-
-    <app-ui id="ui" user="[[user]]" petals="[[letters]]" history="[[history]]" scale="[[scale]]"
-            sketch-data="[[sketchData]]"
-            on-new-user="_newUserLoggedIn"
-            on-load-sketch="_loadSketch"
-            on-timetravel="_timetravel"
-            on-new-colors="_newColors"
-            on-new-color-scale="_newColorScale"
-            on-select-color="colorSelected"
-            on-sign-in="_signIn"
-            on-sign-out="_signOut"
-            on-delete-sketch="_deleteSketch"
-            on-rename-sketch="_renameSketch"
-            on-new-sketch="_newSketch"
-    ></app-ui>
   </template>
 
   <script>
@@ -102,9 +100,11 @@
             letters: Array,
             sketchData: Object,
             history: history,
-            helpText: {
-              type: String,
-              value: null
+            messages: {
+              type: Array,
+              value: function(){
+                return [];
+              }
             },
             serverUser: {
               type: Object,
@@ -117,10 +117,10 @@
       connectedCallback() {
         super.connectedCallback();
         this.addEventListener("system-msg", function (e) {
-          this.$.ui.showMsg(e.detail, "system");
+          this.push("messages", {type: "system", value: e.detail});
         }.bind(this));
         this.addEventListener("help-msg", function (e) {
-          this.$.ui.showMsg(e.detail, "help");
+          this.push("messages", {type: "help", value: e.detail});
         }.bind(this));
       }
 
@@ -148,19 +148,11 @@
         }
       }
 
-      colorSelected(e) {
-        this.$.canvasController.addStyleToSelected(e.detail);
-      }
-
       _newState(e) {
         this.set("letters", e.detail);
         if (!this.sketchData.id)
           return;
         this.$.sketchlist.saveSketch(e.detail);
-      }
-
-      _deselect() {
-        this.$.ui.deselect();
       }
 
       _addShapes(e) {

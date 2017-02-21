@@ -6,6 +6,7 @@
 <link rel="import" href="droppad-canvas-canvas.html">
 <link rel="import" href="selected-observer.html">
 <link rel="import" href="item-marker.html">
+<link rel="import" href="app-ui.html">
 
 <dom-module id="droppad-canvas">
   <template>
@@ -24,6 +25,16 @@
       }
 
     </style>
+    <app-ui id="ui"
+            messages="[[messages]]"
+            user="[[user]]"
+            petals="[[drops]]"
+            history="[[history]]"
+            scale="[[scale]]"
+            sketch-data="[[sketchData]]"
+
+            on-select-color="colorSelected"
+    ></app-ui>
     <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-dbltap="_newShape" on-singletap="_deselectAll">
       <droppad-selector id="dropSelector">
         <template is="dom-repeat" items="[[drops]]">
@@ -53,6 +64,8 @@
         return {
           properties: {
             drops: Array,
+            sketchData: Object,
+            messages: Array,
             heldKeys: Object,
             _pointerMove: Event,
             selecteds: SquareBox
@@ -155,8 +168,12 @@
       }
 
       _deselectAll() {
-        this.dispatchEvent(new CustomEvent("deselect"));
         this.$.dropSelector.deselectAll();
+        this.$.ui.deselect();
+      }
+
+      colorSelected(e) {
+        this.addStyleToSelected(e.detail);
       }
 
       _newShape(e) {

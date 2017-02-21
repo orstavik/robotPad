@@ -144,7 +144,11 @@
             scale: Object,
             history: StateMachine,
             petals: Array,
-            sketchData: Object
+            sketchData: Object,
+            messages: {
+              type: Array,
+              observer: "_newMsg"
+            }
           }
         }
       }
@@ -160,6 +164,13 @@
 
       _newSketch(e) {
         this.dispatchEvent(new CustomEvent("new-sketch", {composed: true, bubbles: true}));
+      }
+
+      _newMsg(){
+        if (!this.messages|| this.messages.length == 0)
+          return;
+        let last = this.messages[this.messages.length-1];
+        this.showMsg(last.value, last.type);
       }
 
       showMsg(txt, type){

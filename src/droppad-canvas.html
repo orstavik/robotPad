@@ -115,7 +115,7 @@
 
       paste() {
         this.$.ghostCopy.start(this.copyData);
-        this.copyData = this.copyData.map(info => info.makeCopy());//todo need to do this if we paste more than once from the same copy
+        this.copyData = this.copyData.map(info => info.makeCopy()); //need to do this if we paste more than once from the same copy
         const logicPointPos = this.p2p.calcLogicPoint(this._pointerMove.clientX, this._pointerMove.clientY);
         this.$.ghostCopy.change(MoveChange.makeMoveChange(this.copyCenter, logicPointPos));
         let shapes = this.$.ghostCopy.end();

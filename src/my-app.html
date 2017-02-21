@@ -1,10 +1,9 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="droppad-history.html">
-<link rel="import" href="json-saver.html">
 <link rel="import" href="droppad-canvas.html">
-<link rel="import" href="tab-wrapper.html">
 <link rel="import" href="data-sketchlist.html">
 
 <dom-module id="my-app">
@@ -165,7 +164,6 @@
       }
 
       _loadSketch(e) {
-        console.log(e);
         this.$.sketchlist.loadSketch(e.detail);
       }
 
@@ -190,6 +188,7 @@
       }
 
       loadSketch(e) {
+        //todo the history is now unconnected to the loading and making new sketches..
         this.$.history.setState(e.detail.json);
       }
 

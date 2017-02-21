@@ -6,8 +6,6 @@
 <link rel="import" href="droppad-history.html">
 <link rel="import" href="json-saver.html">
 <link rel="import" href="droppad-canvas.html">
-<link rel="import" href="keyboard-listener.html">
-<link rel="import" href="music-clef.html">
 <link rel="import" href="tab-wrapper.html">
 <link rel="import" href="app-ui.html">
 <link rel="import" href="data-sketchlist.html">
@@ -67,7 +65,7 @@
     <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}" on-new-sketch-object="_newSketchObject"></data-sketchlist>
     <droppad-history id="history" on-new-state="_newState" history="{{history}}"></droppad-history>
 
-    <droppad-canvas id="canvasController" drops="[[letters]]" held-keys="[[heldKeys]]" preview="[[preview]]"
+    <droppad-canvas id="canvasController" drops="[[letters]]" preview="[[preview]]"
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
                     on-changeshapes="_changeShapes"
@@ -88,8 +86,6 @@
             on-rename-sketch="_renameSketch"
             on-new-sketch="_newSketch"
     ></app-ui>
-    <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
-    <keyboard-listener on-key-down="_checkKey" on-key-up="_keyUp" exclude-repeats></keyboard-listener>
   </template>
 
   <script>
@@ -104,7 +100,6 @@
           properties: {
             user: Object,
             letters: Array,
-            heldKeys: Array,
             sketchData: Object,
             history: history,
             helpText: {
@@ -224,54 +219,6 @@
 
       writeInChanges(e) {
         this.$.canvasController.updateShape(e.target.key, e.detail[e.target.key]);
-      }
-
-      _checkKey(e) {
-        this.set("heldKeys", Object.keys(e.detail));
-        switch (e.detail.code()) {
-          case "Enter":
-            this.$.clef.turnKeyRight();
-            return;
-          case "Tab":
-            this.$.clef.turnKeyLeft();
-            return;
-          case "Backspace":
-            this.$.clef.turnModusRight();
-            return;
-          case "Backquote":
-            this.$.clef.turnModusLeft();
-            return;
-          case "Escape":
-            this.$.canvasController._deselectAll();
-            return;
-          case "KeyD":
-            this.$.canvasController._deleteElem();
-            return;
-          case "KeyM":
-            this.$.canvasController.mirrorSelected();
-            return;
-          case "KeyN":
-            this.$.canvasController.centerSelected();
-            return;
-          case "PageUp":
-            this.$.canvasController.zUpSelected();
-            return;
-          case "PageDown":
-            this.$.canvasController.zDownSelected();
-            return;
-        }
-        if (e.detail.ctrl()) {
-          if (e.detail.code() === "Digit0")
-            this.$.canvasController.zoomNormal();
-          else if (e.detail.code() === "KeyC")
-            this.$.canvasController.copy();
-          else if (e.detail.code() === "KeyV")
-            this.$.canvasController.paste();
-        }
-      }
-
-      _keyUp(e) {
-        this.set("heldKeys", Object.keys(e.detail.heldKeys));
       }
 
       setStyleName(e) {

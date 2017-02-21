@@ -1,4 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="keyboard-listener.html">
+<link rel="import" href="music-clef.html">
 <link rel="import" href="drop-shape.html">
 <link rel="import" href="droppad-selector.html">
 <link rel="import" href="droppad-canvas-canvas.html">
@@ -37,6 +39,8 @@
       <group-of-shapes id="ghostCopy"></group-of-shapes>
       <group-of-shapes id="historyPreview"></group-of-shapes>
     </droppad-canvas-canvas>
+    <keyboard-listener on-key-down="_checkKey" on-key-up="_keyUp" exclude-repeats></keyboard-listener>
+    <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
   </template>
 
   <script>
@@ -49,7 +53,7 @@
         return {
           properties: {
             drops: Array,
-            heldKeys: Array,
+            heldKeys: Object,
             _pointerMove: Event,
             selecteds: SquareBox
           }
@@ -177,6 +181,54 @@
 
       _deleteElem() {
         this.dispatchEvent(new CustomEvent("removeshapes", {detail: this.getSelectedInfos()}));
+      }
+
+      _checkKey(e) {
+        this.set("heldKeys", e.detail);
+        switch (e.detail.code()) {
+          case "Enter":
+            this.$.clef.turnKeyRight();
+            return;
+          case "Tab":
+            this.$.clef.turnKeyLeft();
+            return;
+          case "Backspace":
+            this.$.clef.turnModusRight();
+            return;
+          case "Backquote":
+            this.$.clef.turnModusLeft();
+            return;
+          case "Escape":
+            this._deselectAll();
+            return;
+          case "KeyD":
+            this._deleteElem();
+            return;
+          case "KeyM":
+            this.mirrorSelected();
+            return;
+          case "KeyN":
+            this.centerSelected();
+            return;
+          case "PageUp":
+            this.zUpSelected();
+            return;
+          case "PageDown":
+            this.zDownSelected();
+            return;
+        }
+        if (e.detail.ctrl()) {
+          if (e.detail.code() === "Digit0")
+            this.zoomNormal();
+          else if (e.detail.code() === "KeyC")
+            this.copy();
+          else if (e.detail.code() === "KeyV")
+            this.paste();
+        }
+      }
+
+      _keyUp(e) {
+        this.set("heldKeys", e.detail);
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

@@ -158,10 +158,6 @@
         return !!obj;
       }
 
-      _loadSketch(e) {
-        this.$.namelabel.loadSketch(e.detail);
-      }
-
       _newSketch(e) {
         this.dispatchEvent(new CustomEvent("new-sketch", {composed: true, bubbles: true}));
       }

@@ -8,9 +8,11 @@
         this.list = list;
         this.name = null;
         if (id) {
-          if (!list[id])
-            throw new Error("Sketch #" + id + " is not in the current list of sketches.");
-          this.name = this.list[this.id].name;
+//          if (!list[id])
+//            throw new Error("Sketch #" + id + " is not in the current list of sketches.");
+          let sketch = this.list[this.id];
+          if (sketch)
+            this.name = sketch.name;
         }
       }
     }
@@ -110,7 +112,7 @@
           this.systemMessage("Failed to save sketch#" + this.sketchid + ". " + state);
         let sketch = this._db.ref("/sketches/" + this.sketchid);
         sketch.push({changed: firebase.database.ServerValue.TIMESTAMP, state: state}, function(){
-          this.systemMessage("Saved sketch#" + this.sketchid + ".");
+          this.systemMessage("Saved sketch #" + this.sketchid + ".");
         }.bind(this));
       }
 

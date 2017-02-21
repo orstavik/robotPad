@@ -321,9 +321,8 @@
         this.$.history.setState(e.detail.json);
       }
 
-      _newSketch(e) {
-        console.log(e);
-        this.$.sketchlist.newSketch(e.detail);
+      _newSketch() {
+        this.$.sketchlist.newSketch(this.user.uid);
 //        todo this.$.history.setState([]);
       }
 

@@ -4,7 +4,6 @@
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icons/image-icons.html">
 <link rel="import" href="app-login.html">
-<link rel="import" href="app-ui-namelabel.html">
 <link rel="import" href="tools-button.html">
 <link rel="import" href="grow-button.html">
 <link rel="import" href="grow-child-button.html">
@@ -41,9 +40,56 @@
       grow-button#account[signed] {
         --grow-button-color: var(--paper-light-blue-200);
       }
+      #paperName {
+        display: flex;
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        background-color: rgba(255, 255, 255, 0.5);
+        border-radius: 3px;
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 0.5s, transform 0.4s;
+        overflow: hidden;
+      }
+
+      #sketchName {
+        margin: 4px 12px;
+        font-weight: 400;
+      }
+
+      .iconBox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background-color: var(--paper-indigo-a200);
+        cursor: pointer;
+      }
+      .iconBox>div {
+        width: 24px;
+        height: 24px;
+      }
+      iron-icon {
+        --iron-icon-fill-color: white;
+      }
+      .iconBox[hidden] {
+        display: none;
+      }
     </style>
 
-    <app-ui-namelabel id="namelabel" sketch-data="[[sketchData]]"></app-ui-namelabel>
+    <template is="dom-if" if="[[_user]]">
+      <paper-material id="paperName" elevation=1>
+        <div hidden="[[!sketchData.id]]" id="sketchName">[[sketchData.name]]</div>
+        <div hidden="[[sketchData.id]]" id="sketchName">New Sketch</div>
+        <div hidden="[[sketchData.id]]" on-click="_newSketch" class="iconBox">
+          <div>
+            <iron-icon icon="save"></iron-icon>
+          </div>
+        </div>
+      </paper-material>
+    </template>
 
     <tools-button icon="icons:build" active="{{toolsOpen}}">
       <grow-child-button menu="Json" child-button icon="icons:settings-ethernet">
@@ -58,7 +104,9 @@
     </tools-button>
 
     <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[signed]]">
-      <app-login on-sign-in="_signIn" on-sign-out="_signOut" sketch-data="[[sketchData]]"></app-login>
+      <app-login on-sign-in="_signIn" on-sign-out="_signOut" sketch-data="[[sketchData]]">
+
+      </app-login>
     </grow-button>
   </template>
   <script>
@@ -97,6 +145,10 @@
 
       _loadSketch(e) {
         this.$.namelabel.loadSketch(e.detail);
+      }
+
+      _newSketch(e) {
+        this.dispatchEvent(new CustomEvent("new-sketch", {composed: true, bubbles: true}));
       }
     }
     customElements.define(AppUi.is, AppUi);

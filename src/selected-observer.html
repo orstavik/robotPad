@@ -12,16 +12,23 @@
           this.right = Math.max(this.right || -Number.MAX_VALUE, next.right);
           this.bottom = Math.max(this.bottom || -Number.MAX_VALUE, next.bottom);
         }
-        this.left = p2p.toLogicalX(this.left);
-        this.right = p2p.toLogicalX(this.right);
-        this.top = p2p.toLogicalY(this.top);
-        this.bottom = p2p.toLogicalY(this.bottom);
-
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
         this.center = {};
         this.center.x = this.left + this.width / 2;
         this.center.y = this.top + this.height / 2;
+        this.toLogical(p2p);
+      }
+
+      toLogical(p2p){
+        this.left = p2p.toLogicalX(this.left);
+        this.right = p2p.toLogicalX(this.right);
+        this.top = p2p.toLogicalY(this.top);
+        this.bottom = p2p.toLogicalY(this.bottom);
+        this.width = p2p.addZoom(this.width);
+        this.height = p2p.addZoom(this.height);
+        this.center.x = p2p.toLogicalX(this.center.x);
+        this.center.y = p2p.toLogicalY(this.center.y);
       }
 
       //immutable

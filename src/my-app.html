@@ -67,7 +67,7 @@
     <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}" on-new-sketch-object="_newSketchObject"></data-sketchlist>
     <droppad-history id="history" on-new-state="_newState" history="{{history}}"></droppad-history>
 
-    <droppad-canvas id="shapeSelector" drops="[[letters]]" held-keys="[[heldKeys]]" preview="[[preview]]"
+    <droppad-canvas id="canvasController" drops="[[letters]]" held-keys="[[heldKeys]]" preview="[[preview]]"
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
                     on-changeshapes="_changeShapes"
@@ -154,7 +154,7 @@
       }
 
       colorSelected(e) {
-        this.$.shapeSelector.addStyleToSelected(e.detail);
+        this.$.canvasController.addStyleToSelected(e.detail);
       }
 
       _newState(e) {
@@ -181,7 +181,7 @@
       }
 
       _timetravel(e) {
-        this.$.shapeSelector.timeTravel(e.detail);
+        this.$.canvasController.timeTravel(e.detail);
       }
 
       _newUserLoggedIn(e) {
@@ -223,7 +223,7 @@
       }
 
       writeInChanges(e) {
-        this.$.shapeSelector.updateShape(e.target.key, e.detail[e.target.key]);
+        this.$.canvasController.updateShape(e.target.key, e.detail[e.target.key]);
       }
 
       _checkKey(e) {
@@ -242,31 +242,31 @@
             this.$.clef.turnModusLeft();
             return;
           case "Escape":
-            this.$.shapeSelector._deselectAll();
+            this.$.canvasController._deselectAll();
             return;
           case "KeyD":
-            this.$.shapeSelector._deleteElem();
+            this.$.canvasController._deleteElem();
             return;
           case "KeyM":
-            this.$.shapeSelector.mirrorSelected();
+            this.$.canvasController.mirrorSelected();
             return;
           case "KeyN":
-            this.$.shapeSelector.centerSelected();
+            this.$.canvasController.centerSelected();
             return;
           case "PageUp":
-            this.$.shapeSelector.zUpSelected();
+            this.$.canvasController.zUpSelected();
             return;
           case "PageDown":
-            this.$.shapeSelector.zDownSelected();
+            this.$.canvasController.zDownSelected();
             return;
         }
         if (e.detail.ctrl()) {
           if (e.detail.code() === "Digit0")
-            this.$.shapeSelector.zoomNormal();
+            this.$.canvasController.zoomNormal();
           else if (e.detail.code() === "KeyC")
-            this.$.shapeSelector.copy();
+            this.$.canvasController.copy();
           else if (e.detail.code() === "KeyV")
-            this.$.shapeSelector.paste();
+            this.$.canvasController.paste();
         }
       }
 
@@ -275,7 +275,7 @@
       }
 
       setStyleName(e) {
-        this.$.shapeSelector.addStyleToSelected(e.target.id);
+        this.$.canvasController.addStyleToSelected(e.target.id);
       }
     }
     customElements.define(MyApp.is, MyApp);

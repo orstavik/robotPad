@@ -44,6 +44,9 @@
         this.removeEventListener("pointerup", this.pointerUpListener);
       }
 
+      selectById(id){
+        return this.select(this.querySelector(id));
+      }
       select(el) {
         if (el.dataset.selected)
           return;

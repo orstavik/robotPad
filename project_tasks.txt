@@ -1,9 +1,18 @@
-/users/1,2,3,4/info/sketchlist/a,b,c,d/name, created,updated
+- json-object copying to clipboard (or deleting that button)
+- working palette (material desing colors?)
+- fixed history
+- working item marker
+- styling for item-marker
+- styling for messages
+- previews for sketches/history points
+- renaming sketches
 
-/sketchobjects/a,b,c,d/state1, state2, state3
+- item marker
+      a rotated single-shape marker
+      b multi-shape marker should have only symetrical xy scaling and be always perpendicular to the screen
 
-except that everybody can read the last state of any sketchobject they have the sketchid for
-
-/sharing/a,b,c,d/useremail1,useremail2,useremail3,
-
-/users/2/ should be able to do push operations on users/1 sketchobjects/a/ where auth.email is in /users/1/sharing/a/
+history (
+    a working revert
+    b working fullscreen preview(temporary or persistent when activePoint isn't current)
+    c history stored only locally of on the server?
+)

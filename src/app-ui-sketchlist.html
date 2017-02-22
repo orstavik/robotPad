@@ -50,12 +50,12 @@
         color: white;
       }
     </style>
-    <template is="dom-repeat" items="[[sketchListArray]]">
+    <template is="dom-repeat" items="[[sketchData.array]]">
       <paper-material elevation="1" class="sketchCard">
         <div class="previewImg"></div>
         <div class="contentBox">
           <div>
-            <h4>[[item.value.name]]</h4>
+            <h4 data-key$="[[item.key]]" on-input="_changeSketchName" contenteditable="true" on-pointerdown="_stopProp" >[[item.value.name]]</h4>
             <span>[[item.value.created]]</span>
           </div>
           <div class="buttonRow">
@@ -66,7 +66,6 @@
       </paper-material>
     </template>
   </template>
-  <!--<div hidden$="[[!sketchData.id]]" id="sketchName" data-id="[[sketchData.id]]" contenteditable="true" on-pointerdown="_stopProp" on-input="_changeSketchName">[[sketchData.name]]</div>-->
   <script>
 
     class AppUiSketchlist extends Polymer.Element {
@@ -79,40 +78,30 @@
           properties: {
             uid: String,
             sketchData: Object,
-            sketchListArray: {
-              type: Array,
-              computed: "_makeSketchListArray(sketchData)"
-            }
           }
         }
       }
 
-      _makeSketchListArray(sketchData){
-        if (! sketchData)
-          return null;
-        const sketchList = sketchData.list;
-        return Object.keys(sketchList).map(function (key) { return {key: key, value: sketchList[key]}; });
-      }
-
       _loadSketch(e){
-        this.dispatchEvent(new CustomEvent("load-sketch", {composed: true, bubbles: true, detail: e.target.dataset.key}));
+        this._fire("load-sketch", e.target.dataset.key);
       }
 
       _deleteSketch(e){
         let sketchid = e.target.dataset.key;
         if(!confirm("do you want to delete sketch #" + sketchid))
           return;
-        this.dispatchEvent(new CustomEvent("delete-sketch", {composed: true, bubbles: true, detail: {sketch: sketchid, user: this.uid}}));
+        this._fire("delete-sketch", sketchid);
       }
 
-      changeSketchName(e) {
+      _changeSketchName(e) {
         if (this.nameChanger)
           clearTimeout(this.nameChanger);
         const newName = e.target.innerHTML;
+        let id = e.target.dataset.key;
         this.nameChanger = setTimeout(function() {
-          this._fire("rename-sketch", {sketch: e.target.dataset.id, user: this.uid, name: newName});
+          this._fire("rename-sketch", {sketch: id, name: newName});
           this.nameChanger = null;
-        }.bind(this), 3000);
+        }.bind(this), 2000);
       }
 
       _fire(name, detail){

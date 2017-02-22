@@ -208,13 +208,15 @@
       }
 
       connectedCallback() {
+        this._isOpen = false;
         let somethingDeactives = new MutationObserver(function (mutations) {
           for (let mutation of mutations) {
             let attName = mutation.attributeName;
             if (attName != "active")
               continue;
-            if (!mutation.target.hasAttribute(attName))
-              this._fire("timetravel-off", null);
+            this._isOpen = mutation.target.hasAttribute(attName);
+            if (!this._isOpen)
+              this._fire("timetravel-off", historyPoint.state);
           }
         }.bind(this));
         somethingDeactives.observe(this.parentNode, {attributes: true});
@@ -227,7 +229,7 @@
         let historyPoint = history.actions[activePoint];
         if (historyPoint && historyPoint.date)
           historyPoint.dateAsString = historyPoint.date.toGMTString().substr(4, 21);
-        if (historyPoint && historyPoint.state)
+        if (this._isOpen && historyPoint && historyPoint.state)
           this._fire("timetravel-on", historyPoint.state);
         return historyPoint;
       }

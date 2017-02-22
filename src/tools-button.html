@@ -93,15 +93,16 @@
         let children = this.querySelectorAll("[child-button]");
         if (!children)
           return;
-        let length = children.length;
-        children.forEach(function (child, i) {
+        for (let i = 0; i < children.length; i++) {
+          let child = children[i];
+          let delay = i / children.length;
           child.animate({opacity: [0, 1], transform: ["scale(0.95)", "scale(1)"]}, {
             duration: 150,
-            delay: (i / length) * (2 - i / length) * 100,
+            delay: delay * (2 - delay) * 100,
             fill: "forwards"
           });
           child.setAttribute("revealed", "");
-        });
+        }
       }
 
       _hideChilds() {
@@ -109,13 +110,14 @@
         let children = this.querySelectorAll("[child-button]");
         if (!children)
           return;
-        children.forEach(function (child) {
+        for (var i = 0; i < children.length; i++) {
+          var child = children[i];
           child.animate({opacity: [1, 0], transform: ["scale(1)", "scale(0.95)"]}, {
             duration: 150,
             fill: "forwards"
           });
           child.removeAttribute("revealed");
-        });
+        }
       }
     }
     customElements.define(ToolsButton.is, ToolsButton);

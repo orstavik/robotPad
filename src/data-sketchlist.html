@@ -54,8 +54,10 @@
         const userDataInDB = this._db.ref("/users/" + uid);
         userDataInDB.once("value",
           function (success) {
-            if (!success.exists())                //user not registered before
+            if (!success.exists()){                //user not registered before
               userDataInDB.set({registered: firebase.database.ServerValue.TIMESTAMP});
+              this.systemMessage("Welcome new user!");
+            }
           }.bind(this), function (error) {
             console.log("An error occured connecting to DB");
           });

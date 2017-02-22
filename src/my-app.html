@@ -1,34 +1,17 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-app.html">
-<link rel="import" href="color-palette.html">
-<link rel="import" href="json-object.html">
 <link rel="import" href="droppad-history.html">
 <link rel="import" href="json-saver.html">
 <link rel="import" href="droppad-canvas.html">
-<link rel="import" href="keyboard-listener.html">
-<link rel="import" href="music-clef.html">
 <link rel="import" href="tab-wrapper.html">
-<link rel="import" href="app-ui.html">
 <link rel="import" href="data-sketchlist.html">
 
 <dom-module id="my-app">
   <template>
-
     <style>
       :host {
         display: block;
-      }
-      json-object {
-        display: inline-block;
-        width: 250px;
-        font-size: 12px;
-        line-height: normal;
-        position: relative;
-        overflow-y: scroll;
-        z-index: 1;
-      }
-      :host {
         --tone-color-0: blue;
         --tone-color-1: red;
         --tone-color-2: yellow;
@@ -68,35 +51,6 @@
         --tone-grey-10: hsl(0, 0%, 90%);
         --tone-grey-11: hsl(0, 0%, 100%);
       }
-      #guide {
-        display: inline-block;
-        padding: 10px;
-        font-size: 12px;
-        color: grey;
-      }
-      .button {
-        display: inline-block;
-        float: left;
-        width: 24px;
-        height: 24px;
-        border: 1px solid grey;
-        border-radius: 4px;
-        margin: 2px;
-        font-size: 11px;
-        line-height: 12px;
-      }
-      .spacer {
-        clear: left;
-        width: 1px;
-      }
-      #toolbar {
-        left: 0;
-        bottom: 0;
-        max-width: 80vh;
-        position: fixed;
-        z-index: 1;
-      }
-
     </style>
 
     <firebase-app auth-domain="robotpad-762de.firebaseapp.com"
@@ -104,94 +58,29 @@
                   api-key="AIzaSyAJ0HCTXnEXoG_aJ5AcN8d1VLbugeHF-Bo"
                   name="droppad">
     </firebase-app>
-
     <firebase-auth id="auth" app-name="droppad" user="{{serverUser}}" provider="google"></firebase-auth>
+    <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}" on-new-sketch-object="_newSketchObject"></data-sketchlist>
+    <droppad-history id="history" on-new-state="_newState" history="{{history}}"></droppad-history>
 
-    <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}"
-                     on-new-sketch-object="_newSketchObject"></data-sketchlist>
+    <droppad-canvas id="canvasController"
+                    user="[[user]]"
+                    drops="[[letters]]"
+                    history="[[history]]"
+                    sketch-data="[[sketchData]]"
+                    messages="[[messages]]"
 
-    <droppad-canvas id="shapeSelector" drops="[[letters]]" held-keys="[[heldKeys]]" preview="[[preview]]"
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
                     on-changeshapes="_changeShapes"
-                    on-deselect="_deselect"
+                    on-load-sketch="_loadSketch"
+                    on-new-colors="_newColors"
+                    on-new-color-scale="_newColorScale"
+                    on-sign-in="_signIn"
+                    on-sign-out="_signOut"
+                    on-delete-sketch="_deleteSketch"
+                    on-rename-sketch="_renameSketch"
+                    on-new-sketch="_newSketch"
     ></droppad-canvas>
-
-    <!--<div id="toolbar">
-      <div class="button spacer"></div>
-      <template is="dom-repeat" items="[[coloredScale]]">
-        <div id="tone[[index]]" class="button" on-click="setStyleName"
-             style$="transform: rotate([[item.rotation]]deg) scale([[item.scale]]);
-             background: [[item.color]]; border-radius: 0 50% 50% 50%;">
-          [[item.name]]
-        </div>
-      </template>
-      <div class="button spacer" ></div>
-      <template is="dom-repeat" items="[[colors]]">
-        <div id="color[[index]]" class="button" style$="background: [[item]];" on-click="setStyleName">[[index]]</div>
-      </template>
-      <div class="button spacer"></div>
-      <template is="dom-repeat" items="[0,1,2,3,4,5,6,7,8,9,10,11]">
-        <div id="grey[[index]]" class="button" style$="background: var(--tone-grey-[[index]]);"
-             on-click="setStyleName">[[index]]
-        </div>
-      </template>
-      <div class="button spacer"></div>
-      <div class="button" title="New sketch." on-click="newSketch">New page</div>
-      <div class="button" title="ctrl + Click left mouse button on the canvas to create new shape.">New drop</div>
-      <div class="button" title="Esc deselects the elements.">Esc</div>
-      <div class="button" title="Delete the shape by choosing the shape and pressing 'd'."> d</div>
-      <div class="button" title="Move the shape up one layer.">Page Up</div>
-      <div class="button" title="Move the shape down one layer.">Page Down</div>
-      <div class="button" title="Rotate the shape: hold 'r' + drag it."> r</div>
-      <div class="button" title="Resize the shape: hold 'e' + drag it."> e</div>
-      <div class="button" title="Resize the shape (while preserving proportions): hold 'e'+'r' + drag it."> e+r</div>
-      <div class="button" title="Resize the shape (normalized): hold 'e'+'w' + drag it."> e+w</div>
-      <div class="button" title="Mirror the shape: press 'm', coming different mirror modes."> m </div>
-      <div class="button" title="Skew the shape: press 'n'"> n</div>
-    </div>-->
-
-    <!--<key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]" colored-scale="{{coloredScale}}"></key-flower> -->
-
-    <!--sketch-list="[[sketchList]]" sketchid="[[sketchid]]" app-name="[[sketchName]]" -->
-    <app-ui id="ui" user="[[user]]" petals="[[letters]]" history="[[history]]" scale="[[scale]]"
-            sketch-data="[[sketchData]]"
-            on-new-user="_newUserLoggedIn"
-            on-load-sketch="_loadSketch"
-            on-timetravel="_timetravel"
-            on-new-colors="_newColors"
-            on-new-color-scale="_newColorScale"
-            on-select-color="colorSelected"
-            on-sign-in="_signIn"
-            on-sign-out="_signOut"
-            on-delete-sketch="_deleteSketch"
-            on-rename-sketch="_renameSketch"
-            on-new-sketch="_newSketch"
-    ></app-ui>
-
-    <!--<iron-selector attr-for-selected="select" multi>
-      <tab-wrapper title="JSON" select="1">
-        <template is="dom-repeat" items="[[letters]]">
-          <json-object key="[[item.number]]" obj="[[item]]" on-writeop="writeInChanges"></json-object>
-        </template>
-      </tab-wrapper>
-      <tab-wrapper title="Palette" select="2">
-        <color-palette id="palette" css-colors="{{colors}}" on-color-selected="colorSelected"></color-palette>
-      </tab-wrapper>
-      <tab-wrapper title="Save/Load" select="3">
-      </tab-wrapper>
-      <tab-wrapper title="History" select="4">-->
-    <droppad-history id="history" on-new-state="_newState" style="visibility: hidden"
-                     history="{{history}}"></droppad-history>
-    <!--<json-saver  id="jsonSaver" input="[[letters]]" on-sketchload="loadSketch" json-name="{{sketchName}}" style="visibility: hidden"></json-saver>-->
-    <!--History: <input type="range" min="0" max="10000" value="0" id="h" on-input="timeTravel"/> <br>-->
-    <!--</tab-wrapper>
-  </iron-selector>-->
-
-    <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
-
-    <keyboard-listener on-key-down="_checkKey" on-key-up="_keyUp" exclude-repeats></keyboard-listener>
-
   </template>
 
   <script>
@@ -206,12 +95,13 @@
           properties: {
             user: Object,
             letters: Array,
-            heldKeys: Array,
             sketchData: Object,
             history: history,
-            helpText: {
-              type: String,
-              value: null
+            messages: {
+              type: Array,
+              value: function(){
+                return [];
+              }
             },
             serverUser: {
               type: Object,
@@ -224,10 +114,10 @@
       connectedCallback() {
         super.connectedCallback();
         this.addEventListener("system-msg", function (e) {
-          this.$.ui.showMsg(e.detail, "system");
+          this.push("messages", {type: "system", value: e.detail});
         }.bind(this));
         this.addEventListener("help-msg", function (e) {
-          this.$.ui.showMsg(e.detail, "help");
+          this.push("messages", {type: "help", value: e.detail});
         }.bind(this));
       }
 
@@ -255,19 +145,11 @@
         }
       }
 
-      colorSelected(e) {
-        this.$.shapeSelector.addStyleToSelected(e.detail);
-      }
-
       _newState(e) {
         this.set("letters", e.detail);
         if (!this.sketchData.id)
           return;
         this.$.sketchlist.saveSketch(e.detail);
-      }
-
-      _deselect() {
-        this.$.ui.deselect();
       }
 
       _addShapes(e) {
@@ -280,14 +162,6 @@
 
       _changeShapes(e) {
         this.$.history.update(e.detail);
-      }
-
-      _timetravel(e) {
-        this.$.shapeSelector.timeTravel(e.detail);
-      }
-
-      _newUserLoggedIn(e) {
-        console.log("new user");
       }
 
       _loadSketch(e) {
@@ -322,62 +196,6 @@
       _newSketch() {
         this.$.sketchlist.newSketch(this.user.uid);
 //        todo this.$.history.setState([]);
-      }
-
-      writeInChanges(e) {
-        this.$.shapeSelector.updateShape(e.target.key, e.detail[e.target.key]);
-      }
-
-      _checkKey(e) {
-        this.set("heldKeys", Object.keys(e.detail));
-        switch (e.detail.code()) {
-          case "Enter":
-            this.$.clef.turnKeyRight();
-            return;
-          case "Tab":
-            this.$.clef.turnKeyLeft();
-            return;
-          case "Backspace":
-            this.$.clef.turnModusRight();
-            return;
-          case "Backquote":
-            this.$.clef.turnModusLeft();
-            return;
-          case "Escape":
-            this.$.shapeSelector._deselectAll();
-            return;
-          case "KeyD":
-            this.$.shapeSelector._deleteElem();
-            return;
-          case "KeyM":
-            this.$.shapeSelector.mirrorSelected();
-            return;
-          case "KeyN":
-            this.$.shapeSelector.centerSelected();
-            return;
-          case "PageUp":
-            this.$.shapeSelector.zUpSelected();
-            return;
-          case "PageDown":
-            this.$.shapeSelector.zDownSelected();
-            return;
-        }
-        if (e.detail.ctrl()) {
-          if (e.detail.code() === "Digit0")
-            this.$.shapeSelector.zoomNormal();
-          else if (e.detail.code() === "KeyC")
-            this.$.shapeSelector.copy();
-          else if (e.detail.code() === "KeyV")
-            this.$.shapeSelector.paste();
-        }
-      }
-
-      _keyUp(e) {
-        this.set("heldKeys", Object.keys(e.detail.heldKeys));
-      }
-
-      setStyleName(e) {
-        this.$.shapeSelector.addStyleToSelected(e.target.id);
       }
     }
     customElements.define(MyApp.is, MyApp);

@@ -76,7 +76,7 @@
         <paper-material id="outerBox" elevation=0 expanded$="[[active]]">
             <paper-material id="shadyCircle" expanded$="[[active]]"></paper-material>
             <div id="boxContent">
-                <paper-icon-button id="closeButton" icon="clear" on-tap="_disActive"></paper-icon-button>
+                <paper-icon-button id="closeButton" icon="clear" on-tap="deactivate"></paper-icon-button>
                 <slot></slot>
             </div>
         </paper-material>
@@ -94,8 +94,6 @@
                         active: {
                             type: Boolean,
                             value: false,
-                            reflectToAttribute: true,
-                            notify: true,
                             observer: "_applyState"
                         },
                         icon: String,
@@ -105,11 +103,11 @@
             }
 
             _toggleState(e) {
-                this.active = !this.active;
+                this.set("active", !this.active);
             }
 
-            _disActive() {
-                this.active = false;
+            deactivate() {
+                this.set("active", false);
             }
 
             _applyState(active) {
@@ -132,7 +130,7 @@
                     var cRect = circle.getBoundingClientRect();
                     var diagonal = Math.sqrt(bRect.height*bRect.height+bRect.width*bRect.width);
                     this.scale = diagonal/cRect.width*2;
-                };
+                }
                 this.boxAppear = box.animate({opacity: [0, 1]}, {
                     duration: 0,
                     fill: "forwards"

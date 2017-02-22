@@ -1,9 +1,12 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="keyboard-listener.html">
+<link rel="import" href="music-clef.html">
 <link rel="import" href="drop-shape.html">
 <link rel="import" href="droppad-selector.html">
 <link rel="import" href="droppad-canvas-canvas.html">
 <link rel="import" href="selected-observer.html">
 <link rel="import" href="item-marker.html">
+<link rel="import" href="app-ui.html">
 
 <dom-module id="droppad-canvas">
   <template>
@@ -22,13 +25,24 @@
       }
 
     </style>
+    <app-ui id="ui"
+            messages="[[messages]]"
+            user="[[user]]"
+            petals="[[drops]]"
+            history="[[history]]"
+            scale="[[scale]]"
+            sketch-data="[[sketchData]]"
+
+            on-select-color="colorSelected"
+            on-timetravel="_timetravel"
+    ></app-ui>
     <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-dbltap="_newShape" on-singletap="_deselectAll">
       <droppad-selector id="dropSelector">
         <template is="dom-repeat" items="[[drops]]">
           <drop-shape id="drop[[item.number]]" info="[[item]]" data-selectable></drop-shape>
         </template>
       </droppad-selector>
-      <selected-observer p2p="[[p2p]]" box="{{selecteds}}"></selected-observer>
+      <selected-observer box="{{selecteds}}"></selected-observer>
       <item-marker id="square" p2p="[[p2p]]" held-keys="[[heldKeys]]" box="[[selecteds]]"
                            on-track-start="_startMovingMarker"
                            on-track-move="_movingMarker"
@@ -37,6 +51,8 @@
       <group-of-shapes id="ghostCopy"></group-of-shapes>
       <group-of-shapes id="historyPreview"></group-of-shapes>
     </droppad-canvas-canvas>
+    <keyboard-listener on-key-down="_checkKey" on-key-up="_keyUp" exclude-repeats></keyboard-listener>
+    <music-clef id="clef" octave="4" mode="major" key="C" scale="{{scale}}"></music-clef>
   </template>
 
   <script>
@@ -49,7 +65,9 @@
         return {
           properties: {
             drops: Array,
-            heldKeys: Array,
+            sketchData: Object,
+            messages: Array,
+            heldKeys: Object,
             _pointerMove: Event,
             selecteds: SquareBox
           }
@@ -86,7 +104,6 @@
       }
 
       _stopMovingMarker(e) {
-        this.action = null;
         this.replaceChanges(this.$.ghost.end());
         this.dispatchEvent(new CustomEvent("help-msg", {composed: true, bubbles: true}));
       }
@@ -107,26 +124,6 @@
         this.selectDelayed(shapes);
       }
 
-      zoomNormal() {
-        this.$.canvas.reset();
-      }
-
-      zDownSelected() {
-        this.replaceChanges(this.getSelectedInfos().map(info => info.zDown()));
-      }
-
-      zUpSelected() {
-        this.replaceChanges(this.getSelectedInfos().map(info => info.zUp()));
-      }
-
-      centerSelected() {
-        this.replaceChanges(this.getSelectedInfos().map(info => info.center()));
-      }
-
-      mirrorSelected() {
-        this.replaceChanges(this.getSelectedInfos().map(info => info.mirror()));
-      }
-
       timeTravel(historicState) {
         if (historicState){
           this.$.dropSelector.style.opacity = 0.2;
@@ -135,10 +132,6 @@
           this.$.dropSelector.style.opacity = 1;
           this.$.historyPreview.end();
         }
-      }
-
-      addStyleToSelected(styleName) {
-        this.replaceChanges(this.getSelectedInfos().map(info => info.setStyle(styleName)));
       }
 
       updateShape(id, value) {
@@ -152,8 +145,29 @@
       }
 
       _deselectAll() {
-        this.dispatchEvent(new CustomEvent("deselect"));
         this.$.dropSelector.deselectAll();
+        this.$.ui.deselect();
+      }
+
+      colorSelected(e) {
+        this.addStyleToSelected(e.detail);
+      }
+
+      writeInChanges(e) {
+        this.$.canvasController.updateShape(e.target.key, e.detail[e.target.key]);
+      }
+
+      addStyleToSelected(styleName) {
+        this.replaceChanges(this.getSelectedInfos().map(info => info.setStyle(styleName)));
+      }
+
+      setStyleName(e) {
+        this.$.canvasController.addStyleToSelected(e.target.id);
+      }
+
+      _timetravel(e) {
+        //todo need to find the content of the historic state here?
+        this.timeTravel(e.detail);
       }
 
       _newShape(e) {
@@ -176,8 +190,52 @@
         this.dispatchEvent(new CustomEvent("changeshapes", {detail: changedCopies}));
       }
 
-      _deleteElem() {
-        this.dispatchEvent(new CustomEvent("removeshapes", {detail: this.getSelectedInfos()}));
+      _checkKey(e) {
+        this.set("heldKeys", e.detail);
+        switch (e.detail.code()) {
+          case "Enter":
+            this.$.clef.turnKeyRight();
+            return;
+          case "Tab":
+            this.$.clef.turnKeyLeft();
+            return;
+          case "Backspace":
+            this.$.clef.turnModusRight();
+            return;
+          case "Backquote":
+            this.$.clef.turnModusLeft();
+            return;
+          case "Escape":
+            this._deselectAll();
+            return;
+          case "KeyD":
+            this.dispatchEvent(new CustomEvent("removeshapes", {detail: this.getSelectedInfos()}));
+            return;
+          case "KeyM":
+            this.replaceChanges(this.getSelectedInfos().map(info => info.mirror()));
+            return;
+          case "KeyN":
+            this.replaceChanges(this.getSelectedInfos().map(info => info.center()));
+            return;
+          case "PageUp":
+            this.replaceChanges(this.getSelectedInfos().map(info => info.zUp()));
+            return;
+          case "PageDown":
+            this.replaceChanges(this.getSelectedInfos().map(info => info.zDown()));
+            return;
+        }
+        if (e.detail.ctrl()) {
+          if (e.detail.code() === "Digit0")
+            this.$.canvas.reset();
+          else if (e.detail.code() === "KeyC")
+            this.copy();
+          else if (e.detail.code() === "KeyV")
+            this.paste();
+        }
+      }
+
+      _keyUp(e) {
+        this.set("heldKeys", e.detail);
       }
     }
     customElements.define(DroppadCanvas.is, DroppadCanvas);

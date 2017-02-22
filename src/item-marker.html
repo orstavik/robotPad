@@ -126,15 +126,17 @@
             change: Object,
             changedBox: {
               type: String,
-              computed: "_makeStyle(change, box)"
-            }
+              computed: "_makeStyle(change, box, p2p)"
+            },
+            heldKeys: Object
           }
         }
       }
 
-      _makeStyle(change, box) {
-        if (!box)
+      _makeStyle(change, box, p2p) {
+        if (!box || !p2p)
           return null;
+        box.toLogical(p2p);
         box.angle = 0;       //todo here i am removing the angle in the incoming box.
         if (!change)
           return box;

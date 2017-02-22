@@ -84,7 +84,7 @@
         font-size: 10px;
         width: 180px;
         height: 10px;
-        background: rgba(0, 0, 0, 0.3);
+        background: rgba(255, 255, 255, 0.3);
         border: none;
         border-radius: 20px;
         padding: 15px;
@@ -94,6 +94,9 @@
       }
       #helpText.system {
         border-bottom: 4px solid red;
+      }
+      #helpText.help {
+        border-bottom: 4px solid green;
       }
     </style>
 
@@ -111,7 +114,7 @@
       </paper-material>
     </template>
 
-    <tools-button icon="icons:build" active="{{toolsOpen}}">
+    <tools-button id="tools" icon="icons:build">
       <grow-child-button menu="Json" child-button icon="icons:settings-ethernet">
         <json-wrapper petals="[[petals]]"></json-wrapper>
       </grow-child-button>
@@ -123,7 +126,7 @@
       </grow-child-button>
     </tools-button>
 
-    <grow-button id="account" icon="account-circle" active="{{accountOpen}}" signed$="[[toBool(user)]]">
+    <grow-button id="account" icon="account-circle" signed$="[[toBool(user)]]">
       <app-login sketch-data="[[sketchData]]" user="[[user]]">
 
       </app-login>
@@ -142,27 +145,32 @@
             history: StateMachine,
             petals: Array,
             sketchData: Object,
-            toolsOpen: Boolean,
-            accountOpen: Boolean,
+            messages: {
+              type: Array,
+              observer: "_newMsg"
+            }
           }
         }
       }
 
       deselect(){
-        this.set("toolsOpen", false);
-        this.set("accountOpen", false);
+        this.$.account.deactivate();
+        this.$.tools.deactivate();
       }
 
       toBool(obj){
         return !!obj;
       }
 
-      _loadSketch(e) {
-        this.$.namelabel.loadSketch(e.detail);
-      }
-
       _newSketch(e) {
         this.dispatchEvent(new CustomEvent("new-sketch", {composed: true, bubbles: true}));
+      }
+
+      _newMsg(){
+        if (!this.messages|| this.messages.length == 0)
+          return;
+        let last = this.messages[this.messages.length-1];
+        this.showMsg(last.value, last.type);
       }
 
       showMsg(txt, type){

@@ -81,8 +81,6 @@
                         active: {
                             type: Boolean,
                             value: false,
-                            reflectToAttribute: true,
-                            notify: true,
                             observer: "_applyState"
                         },
                         icon: String,
@@ -94,6 +92,10 @@
 
             connectedCallback() {
                 this.childs = this.querySelectorAll("[child-button]");
+            }
+
+            deactivate() {
+              this.set("active", false);
             }
 
             _toggleState(e) {

@@ -124,16 +124,6 @@
         this.selectDelayed(shapes);
       }
 
-      timeTravel(historicState) {
-        if (historicState){
-          this.$.dropSelector.style.opacity = 0.2;
-          this.$.historyPreview.start(historicState);
-        } else {
-          this.$.dropSelector.style.opacity = 1;
-          this.$.historyPreview.end();
-        }
-      }
-
       updateShape(id, value) {
         this.$.dropSelector.deselectAll();
         this.select(id);
@@ -166,8 +156,13 @@
       }
 
       _timetravel(e) {
-        //todo need to find the content of the historic state here?
-        this.timeTravel(e.detail);
+        if (e.detail) {
+          this.$.dropSelector.style.opacity = 0.2;
+          this.$.historyPreview.start(e.detail);
+        } else {
+          this.$.dropSelector.style.opacity = 1;
+          this.$.historyPreview.end();
+        }
       }
 
       _newShape(e) {

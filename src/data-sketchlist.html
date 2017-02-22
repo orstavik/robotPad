@@ -7,6 +7,9 @@
         this.id = id;
         this.list = list;
         this.name = list[id] ? list[id].name : null;
+        this.array = null;
+        if (list)
+          this.array = Object.keys(list).map(function (key) { return {key: key, value: list[key]}; });
       }
     }
 

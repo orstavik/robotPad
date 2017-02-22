@@ -45,8 +45,7 @@
     </paper-material>
 
     <div class="children-wrapper">
-      <iron-selector id="selector" class="children-wrapper" selected-attribute="active" selected-class=""
-                     selected="{{selected}}">
+      <iron-selector id="selector" class="children-wrapper" selected-attribute="active" selected-class="">
         <slot></slot>
       </iron-selector>
     </div>
@@ -66,13 +65,12 @@
               reflectToAttribute: true,
               value: false
             },
-            icon: String,
-            selected: Number
+            icon: String
           }
         }
       }
 
-      _toggleState() {
+      _toggle() {
         if (this.active)
           this.deactivate();
         else
@@ -96,12 +94,8 @@
           return;
         for (let i = 0; i < children.length; i++) {
           let child = children[i];
-          let delay = i / children.length;
-          child.animate({opacity: [0, 1], transform: ["scale(0.95)", "scale(1)"]}, {
-            duration: 150,
-            delay: delay * (2 - delay) * 100,
-            fill: "forwards"
-          });
+          const delay = i / children.length * (2 - i / children.length) * 100;
+          child.show(delay);
         }
       }
 
@@ -110,14 +104,8 @@
         let children = this.querySelectorAll("[child-button]");
         if (!children)
           return;
-        for (var i = 0; i < children.length; i++) {
-          var child = children[i];
-          child.animate({opacity: [1, 0], transform: ["scale(1)", "scale(0.95)"]}, {
-            duration: 150,
-            fill: "forwards"
-          });
-          child.deactivate();
-        }
+        for (let i = 0; i < children.length; i++)
+          children[i].hide();
       }
     }
     customElements.define(ToolsButton.is, ToolsButton);

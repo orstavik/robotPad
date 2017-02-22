@@ -132,7 +132,7 @@
         }
       }
 
-      _toggleState() {
+      _toggle() {
         if (this.active)
           this.deactivate();
         else
@@ -172,6 +172,22 @@
         setTimeout(function () {
           this.$.outerBox.elevation = 2;
         }.bind(this), dur / 3 * 2);
+      }
+
+      show(delay){
+        this.animate({opacity: [0, 1], transform: ["scale(0.95)", "scale(1)"]}, {
+          duration: 150,
+          delay: delay,
+          fill: "forwards"
+        });
+      }
+
+      hide(){
+        this.deactivate();
+        this.animate({opacity: [1, 0], transform: ["scale(1)", "scale(0.95)"]}, {
+          duration: 150,
+          fill: "forwards"
+        });
       }
 
       static _calcScaleShift(box, circle) {

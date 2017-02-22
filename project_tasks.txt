@@ -1,17 +1,15 @@
 - json-object copying to clipboard (or deleting that button)
 - working palette (material desing colors?)
-- fixed history
-- working item marker
-- styling for item-marker
 - styling for messages
-- previews for sketches/history points
-- ui button for renaming sketches
+- ui icon for renaming sketches
 
 - item marker
+    - working item marker
+    - styling for item-marker
       a rotated single-shape marker
       b multi-shape marker should have only symetrical xy scaling and be always perpendicular to the screen
 
 history (
-    b working fullscreen preview(temporary or persistent when activePoint isn't current)
     c history stored only locally of on the server?
+    d thinner ui
 )

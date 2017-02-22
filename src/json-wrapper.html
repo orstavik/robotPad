@@ -12,8 +12,16 @@
                 width: 300px;
                 height: 300px;
             }
+            #copyText {
+                position: absolute;
+                margin: 30px;
+                display: inline-block;
+                width: 30px;
+                height: 30px;
+            }
             #scrollWrapper {
                 display: inline-block;
+                background-color: white;
                 box-sizing: border-box;
                 position: absolute;
                 padding: 0 30px;
@@ -49,6 +57,7 @@
             }
         </style>
 
+        <textarea name="copyTextName" id="copyText" cols="3" rows="1"></textarea>
         <div id="jsonWrapper">
             <div id="topShadow"></div>
             <div id="scrollWrapper" on-scroll="_createShadow">
@@ -60,7 +69,6 @@
         <div id="jsonFooter">
             <paper-button raised on-click="_makeCopy">Copy Json</paper-button>
         </div>
-        
     </template>
     <script>
         class JsonWrapper extends Polymer.Element {
@@ -83,9 +91,8 @@
             }
 
             _makeCopy() {
-                let textarea = document.createElement("textarea");
-                textarea.value = JSON.stringify(this.petals);
-                textarea.select();
+                this.$.copyText.value = JSON.stringify(this.petals);
+                this.$.copyText.select();
                 document.execCommand("copy");
             }
         }

@@ -90,7 +90,7 @@
         let sketchid = e.target.dataset.key;
         if(!confirm("do you want to delete sketch #" + sketchid))
           return;
-        this._fire("delete-sketch", {sketch: sketchid, user: this.uid});
+        this._fire("delete-sketch", sketchid);
       }
 
       _changeSketchName(e) {
@@ -99,7 +99,7 @@
         const newName = e.target.innerHTML;
         let id = e.target.dataset.key;
         this.nameChanger = setTimeout(function() {
-          this._fire("rename-sketch", {sketch: id, user: this.uid, name: newName});
+          this._fire("rename-sketch", {sketch: id, name: newName});
           this.nameChanger = null;
         }.bind(this), 2000);
       }

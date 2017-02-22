@@ -79,6 +79,7 @@
         updates["/users/" + uid + "/sketchlist/" + sketchid] = null;
         return this._db.ref().update(updates, function () {
           this.systemMessage("Sketch #" + sketchid + " is successfully deleted on server.");
+          //todo this does not work if you give it a garbage sketchid
         }.bind(this));
       }
 

@@ -176,7 +176,7 @@
       }
 
       _deleteSketch(e) {
-        this.$.sketchlist.deleteSketch(e.detail.sketch, e.detail.user);
+        this.$.sketchlist.deleteSketch(e.detail, this.user.uid);
       }
 
       _newSketchObject(e) {

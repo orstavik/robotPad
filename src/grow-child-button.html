@@ -99,8 +99,8 @@
       <iron-icon icon="[[icon]]"></iron-icon>
     </paper-material>
 
-    <paper-material id="outerBox" elevation=0 expanded$="[[active]]">
-      <paper-material id="shadyCircle" expanded$="[[active]]"></paper-material>
+    <paper-material id="outerBox" elevation=0 expanded$="[[active]]" style$="margin-top: [[marginTopOuterBox]]px;">
+      <paper-material id="shadyCircle" expanded$="[[active]]" style$="top: [[circleTop]]px;"></paper-material>
       <div id="boxContent">
         <div class="header">
           <iron-icon icon="[[icon]]"></iron-icon>
@@ -149,8 +149,8 @@
       }
 
       activate() {
-        if (!this.boxSet)
-          this._positionOuterBox();
+        if (!this.visualData)
+          this._calcVisualData();
         this._expandCard(300);
         this.active = true;
       }
@@ -160,13 +160,10 @@
           this.active = false;
       }
 
-      _positionOuterBox() {
-        this.visualData = this._calcScaleShift(this.$.outerBox, this.$.shadyCircle);
-        this.topShift = this.visualData.topShift;
-        this.scale = this.visualData.scale;
-        this.boxSet = true;
-        this.$.outerBox.style.marginTop = (16 - this.visualData.bTop) + "px";
-        this.$.shadyCircle.style.top = (this.visualData.cTop - 16) + "px";
+      _calcVisualData() {
+        this.visualData = GrowChildButton._calcScaleShift(this.$.outerBox, this.$.shadyCircle);
+        this.set("marginTopOuterBox",16 - this.visualData.bTop);
+        this.set("circleTop", this.visualData.cTop - 16);
       }
 
       _expandCard(dur) {
@@ -176,7 +173,7 @@
           fill: "forwards",
           easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)"  /*"cubic-bezier(0.4, 0, 0.2, 1)"*/
         });
-        this.$.shadyCircle.animate({transform: ["translateY(0) scale(1)", "translateY(" + this.topShift + "px) scale(" + this.scale + ")"]}, {
+        this.$.shadyCircle.animate({transform: ["translateY(0) scale(1)", "translateY(" + this.visualData.topShift + "px) scale(" + this.visualData.scale + ")"]}, {
           duration: dur,
           fill: "forwards",
           easing: "linear"
@@ -186,7 +183,7 @@
         }.bind(this), dur / 3 * 2);
       }
 
-      _calcScaleShift(box, circle) {
+      static _calcScaleShift(box, circle) {
         const bRect = box.getBoundingClientRect();
         const cRect = circle.getBoundingClientRect();
         const diagonal = Math.sqrt(bRect.height * bRect.height + bRect.width * bRect.width)

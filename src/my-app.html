@@ -71,6 +71,7 @@
                     on-addshapes="_addShapes"
                     on-removeshapes="_removeShapes"
                     on-changeshapes="_changeShapes"
+                       on-setshapes="_setShapes"
                     on-load-sketch="_loadSketch"
                     on-new-colors="_newColors"
                     on-new-color-scale="_newColorScale"
@@ -161,6 +162,9 @@
 
       _changeShapes(e) {
         this.$.history.update(e.detail);
+      }
+      _setShapes(e){
+        this.$.history.setState(e.detail);
       }
 
       _loadSketch(e) {

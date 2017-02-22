@@ -35,6 +35,7 @@
 
             on-select-color="_setStyle"
             on-timetravel="_timetravel"
+            on-revert="_setState"
     ></app-ui>
     <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-dbltap="_newShape" on-singletap="_deselectAll">
       <droppad-selector id="dropSelector">
@@ -140,6 +141,9 @@
         this._fire("changeshapes", this.getSelectedInfos().map(el => el.update(value)));
       }
 
+      _setState(e){
+        this._fire("setshapes", e.detail);
+      }
       _timetravel(e) {
         if (e.detail) {
           this.$.dropSelector.style.opacity = 0.2;

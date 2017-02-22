@@ -66,14 +66,9 @@
               value: false
             },
             icon: String,
-            childs: Array,
             selected: Number
           }
         }
-      }
-
-      connectedCallback() {
-        this.childs = this.querySelectorAll("[child-button]");
       }
 
       _toggleState() {
@@ -95,8 +90,11 @@
 
       _revealChilds() {
         this.$.mainCircle.elevation = 2;
-        let length = this.childs.length;
-        this.childs.forEach(function (child, i) {
+        let children = this.querySelectorAll("[child-button]");
+        if (!children)
+          return;
+        let length = children.length;
+        children.forEach(function (child, i) {
           child.animate({opacity: [0, 1], transform: ["scale(0.95)", "scale(1)"]}, {
             duration: 150,
             delay: (i / length) * (2 - i / length) * 100,
@@ -108,14 +106,16 @@
 
       _hideChilds() {
         this.$.mainCircle.elevation = 1;
-        if (this.childs)
-          this.childs.forEach(function (child) {
-            child.animate({opacity: [1, 0], transform: ["scale(1)", "scale(0.95)"]}, {
-              duration: 150,
-              fill: "forwards"
-            });
-            child.removeAttribute("revealed");
+        let children = this.querySelectorAll("[child-button]");
+        if (!children)
+          return;
+        children.forEach(function (child) {
+          child.animate({opacity: [1, 0], transform: ["scale(1)", "scale(0.95)"]}, {
+            duration: 150,
+            fill: "forwards"
           });
+          child.removeAttribute("revealed");
+        });
       }
     }
     customElements.define(ToolsButton.is, ToolsButton);

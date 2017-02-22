@@ -138,16 +138,16 @@
         setTimeout(function () {
           this.$.outerBox.elevation = 2;
         }.bind(this), dur / 2);
-        this.boxAppear = this.$.outerBox.animate({opacity: [0, 1]}, {
+        this.$.outerBox.animate({opacity: [0, 1]}, {
           duration: 0,
           fill: "forwards"
         });
-        this.circleGrow = this.$.shadyCircle.animate({transform: ["scale(1)", "scale(" + this.scale + ")"]}, {
+        this.$.shadyCircle.animate({transform: ["scale(1)", "scale(" + this.scale + ")"]}, {
           duration: dur,
           fill: "forwards",
           easing: "cubic-bezier(0.4, 0, 0.2, 1)"
         });
-        this.contentShow = this.$.boxContent.animate({opacity: [0, 1], transform: ["translateY(-6px)", "translateY(0)"]}, {
+        this.$.boxContent.animate({opacity: [0, 1], transform: ["translateY(-6px)", "translateY(0)"]}, {
           delay: dur / 3,
           duration: dur / 3 * 2,
           fill: "forwards",

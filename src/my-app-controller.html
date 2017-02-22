@@ -33,7 +33,7 @@
             scale="[[scale]]"
             sketch-data="[[sketchData]]"
 
-            on-select-color="colorSelected"
+            on-select-color="_setStyle"
             on-timetravel="_timetravel"
     ></app-ui>
     <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-dbltap="_newShape" on-singletap="_deselectAll">
@@ -104,8 +104,7 @@
       }
 
       _stopMovingMarker(e) {
-        this.replaceChanges(this.$.ghost.end());
-        this._fire("help-msg", null);
+        this._fire("changeshapes", this.$.ghost.end());
       }
 
       copy() {
@@ -124,36 +123,21 @@
         this.selectDelayed(shapes);
       }
 
-      updateShape(id, value) {
-        this.$.dropSelector.deselectAll();
-        this.select(id);
-        this.replaceChanges(this.getSelectedInfos().map(el => el.update(value)));
-      }
-
-      select(id) {
-        this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + id));
-      }
-
       _deselectAll() {
         this.$.dropSelector.deselectAll();
         this.$.ui.deselect();
       }
 
-      colorSelected(e) {
-        this.addStyleToSelected(e.detail);
+      _setStyle(e) {
+        this._fire("changeshapes", this.getSelectedInfos().map(info => info.setStyle(e.detail)));
       }
 
       writeInChanges(e) {
-        this.$.canvasController.updateShape(e.target.key, e.detail[e.target.key]);
-      }
-
-      addStyleToSelected(styleName) {
-        let changedCopies = this.getSelectedInfos().map(info => info.setStyle(styleName));
-        this.replaceChanges(changedCopies);
-      }
-
-      setStyleName(e) {
-        this.$.canvasController.addStyleToSelected(e.target.id);
+        let id = e.target.key;
+        let value = e.detail[id];
+        this.$.dropSelector.deselectAll();         //todo this should be done when the user first click on a json object.
+        this.$.dropSelector.selectById("#drop" + id);
+        this._fire("changeshapes", this.getSelectedInfos().map(el => el.update(value)));
       }
 
       _timetravel(e) {
@@ -178,12 +162,8 @@
       selectDelayed(shapes) {
         setTimeout(function () {
           for (let shape of shapes)
-            this.$.dropSelector.select(this.shadowRoot.querySelector("#drop" + shape.number));
+            this.$.dropSelector.selectById("#drop" + shape.number);
         }.bind(this), 0);
-      }
-
-      replaceChanges(changedCopies) {
-        this._fire("changeshapes", changedCopies);
       }
 
       _checkKey(e) {
@@ -208,16 +188,16 @@
             this._fire("removeshapes", this.getSelectedInfos());
             return;
           case "KeyM":
-            this.replaceChanges(this.getSelectedInfos().map(info => info.mirror()));
+            this._fire("changeshapes", this.getSelectedInfos().map(info => info.mirror()));
             return;
           case "KeyN":
-            this.replaceChanges(this.getSelectedInfos().map(info => info.center()));
+            this._fire("changeshapes", this.getSelectedInfos().map(info => info.center()));
             return;
           case "PageUp":
-            this.replaceChanges(this.getSelectedInfos().map(info => info.zUp()));
+            this._fire("changeshapes", this.getSelectedInfos().map(info => info.zUp()));
             return;
           case "PageDown":
-            this.replaceChanges(this.getSelectedInfos().map(info => info.zDown()));
+            this._fire("changeshapes", this.getSelectedInfos().map(info => info.zDown()));
             return;
         }
         if (e.detail.ctrl()) {

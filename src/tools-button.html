@@ -37,11 +37,27 @@
       :host([active]) ::slotted([child-button]) {
         pointer-events: auto;
       }
+      iron-icon:not([transparent]) {
+          position: absolute;
+          animation: RotateL 0.1s ease-out forwards;
+      }
+      iron-icon[transparent] {
+          animation: RotateR 0.1s ease-out forwards;
+      }
+      @keyframes RotateR {
+          from { opacity: 1; transform: rotate(0deg) scale(1); }
+          to { opacity: 0; transform: rotate(90deg) scale(0.3); }
+      }
+      @keyframes RotateL {
+          from { opacity: 0; transform: rotate(-90deg) scale(0.3); }
+          to { opacity: 1; transform: rotate(0deg) scale(1); }
+      }
     </style>
 
     <paper-material id="mainCircle" elevation=1 on-click="_toggle">
       <paper-ripple></paper-ripple>
-      <iron-icon icon="[[icon]]"></iron-icon>
+      <iron-icon icon="[[icon]]" transparent$="[[active]]"></iron-icon>
+      <iron-icon icon="clear" transparent$="[[!active]]"></iron-icon>
     </paper-material>
 
     <div class="children-wrapper">

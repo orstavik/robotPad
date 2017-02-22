@@ -80,7 +80,7 @@
             for (let node of mutation.removedNodes) {
               if (node instanceof HTMLElement && node.hasAttribute("data-selectable"))
                 this.removeFromObservableList(node);
-              this.set("selected", selector.querySelectorAll("drop-shape[data-selected]"));
+              this.set("selected", this.selector.querySelectorAll("drop-shape[data-selected]"));
             }
           }
         }.bind(this));

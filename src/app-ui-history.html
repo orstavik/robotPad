@@ -172,7 +172,7 @@
         <div class="cardContent">
           <span class="changeTime">[[historyPoint.dateAsString]]</span>
           <div class="buttonRow">
-            <paper-button raised>Revert</paper-button>
+            <paper-button raised hidden="[[!activePoint]]" on-click="_revert">Revert</paper-button>
           </div>
         </div>
       </div>
@@ -229,6 +229,10 @@
 
       _isActive(index) {
         return index == this.activePoint;
+      }
+
+      _revert(e){
+        this.dispatchEvent(new CustomEvent("revert", {composed: true, bubbles: true, detail: this.historyPoint.state}));
       }
 
       _select(e){

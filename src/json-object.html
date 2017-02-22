@@ -40,7 +40,7 @@
           <span>
                         <span class="key">[[item.key]] :</span>
                         <json-object key="[[item.key]]" obj="[[item.value]]" level="[[nextLevel(level)]]"
-                                     on-writeop="childsEdited"></json-object>
+                                     on-writeop="childrenEdited"></json-object>
                     </span>
         </template>
       </div>
@@ -51,7 +51,7 @@
       [
       <template is="dom-repeat" items="[[obj]]">
         <json-object key="[[index]]" obj="[[item]]" level="[[nextLevel(level)]]"
-                     on-writeop="childsEdited"></json-object>
+                     on-writeop="childrenEdited"></json-object>
         ,
       </template>
       ]
@@ -130,7 +130,7 @@
         this.dispatchEvent(new CustomEvent("writeop", {detail: res}));
       }
 
-      childsEdited(e) {
+      childrenEdited(e) {
         let res = {};
         res[this.key] = e.detail;
         this.dispatchEvent(new CustomEvent("writeop", {detail: res}));

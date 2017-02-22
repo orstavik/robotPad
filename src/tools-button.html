@@ -23,7 +23,7 @@
         --iron-icon-height: calc(var(--mother-button-size) * 0.5);
         --iron-icon-fill-color: var(--mother-button-icon-color);
       }
-      .childs-wrapper {
+      .children-wrapper {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -34,7 +34,7 @@
         opacity: 0;
         pointer-events: none;
       }
-      :host ::slotted([child-button][revealed]) {
+      :host([active]) ::slotted([child-button]) {
         pointer-events: auto;
       }
     </style>
@@ -44,8 +44,8 @@
       <iron-icon icon="[[icon]]"></iron-icon>
     </paper-material>
 
-    <div class="childs-wrapper">
-      <iron-selector id="selector" class="childs-wrapper" selected-attribute="active" selected-class=""
+    <div class="children-wrapper">
+      <iron-selector id="selector" class="children-wrapper" selected-attribute="active" selected-class=""
                      selected="{{selected}}">
         <slot></slot>
       </iron-selector>
@@ -63,6 +63,7 @@
           properties: {
             active: {
               type: Boolean,
+              reflectToAttribute: true,
               value: false
             },
             icon: String,
@@ -79,16 +80,16 @@
       }
 
       deactivate() {
-        this._hideChilds();
+        this._hideChildren();
         this.active = false;
       }
 
       activate() {
-        this._revealChilds();
+        this._showChildren();
         this.active = true;
       }
 
-      _revealChilds() {
+      _showChildren() {
         this.$.mainCircle.elevation = 2;
         let children = this.querySelectorAll("[child-button]");
         if (!children)
@@ -101,11 +102,10 @@
             delay: delay * (2 - delay) * 100,
             fill: "forwards"
           });
-          child.setAttribute("revealed", "");
         }
       }
 
-      _hideChilds() {
+      _hideChildren() {
         this.$.mainCircle.elevation = 1;
         let children = this.querySelectorAll("[child-button]");
         if (!children)
@@ -116,7 +116,7 @@
             duration: 150,
             fill: "forwards"
           });
-          child.removeAttribute("revealed");
+          child.deactivate();
         }
       }
     }

@@ -128,10 +128,6 @@
             },
             menu: String,
             icon: String,
-            revealed: {
-              type: Boolean,
-              observer: "_setFromRevealed"
-            }
           }
         }
       }
@@ -153,11 +149,6 @@
           this._calcVisualData();
         this._expandCard(300);
         this.active = true;
-      }
-
-      _setFromRevealed() {
-        if (!this.revealed)
-          this.active = false;
       }
 
       _calcVisualData() {

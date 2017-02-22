@@ -19,7 +19,6 @@
         width: 100vw;
         height: 100vh;
       }
-
       drop-shape[data-selected] {
         box-shadow: 0 0 3px 0px black;
       }
@@ -34,7 +33,8 @@
             sketch-data="[[sketchData]]"
 
             on-select-color="_setStyle"
-            on-timetravel="_timetravel"
+            on-timetravel-on="_timetravelOn"
+            on-timetravel-off="_timetravelOff"
             on-revert="_setState"
     ></app-ui>
     <droppad-canvas-canvas id="canvas" p2p="{{p2p}}" on-dbltap="_newShape" on-singletap="_deselectAll">
@@ -45,9 +45,9 @@
       </droppad-selector>
       <selected-observer box="{{selecteds}}"></selected-observer>
       <item-marker id="square" p2p="[[p2p]]" held-keys="[[heldKeys]]" box="[[selecteds]]"
-                           on-track-start="_startMovingMarker"
-                           on-track-move="_movingMarker"
-                           on-track-end="_stopMovingMarker"></item-marker>
+                   on-track-start="_startMovingMarker"
+                   on-track-move="_movingMarker"
+                   on-track-end="_stopMovingMarker"></item-marker>
       <group-of-shapes id="ghost" class="copy"></group-of-shapes>
       <group-of-shapes id="ghostCopy"></group-of-shapes>
       <group-of-shapes id="historyPreview"></group-of-shapes>
@@ -76,7 +76,9 @@
       }
 
       connectedCallback() {
-        this.addEventListener("pointermove", function(e){this._pointerMove = e;}.bind(this));
+        this.addEventListener("pointermove", function (e) {
+          this._pointerMove = e;
+        }.bind(this));
       }
 
       _startMovingMarker(e) {
@@ -141,17 +143,18 @@
         this._fire("changeshapes", this.getSelectedInfos().map(el => el.update(value)));
       }
 
-      _setState(e){
+      _setState(e) {
         this._fire("setshapes", e.detail);
       }
-      _timetravel(e) {
-        if (e.detail) {
-          this.$.dropSelector.style.opacity = 0.2;
-          this.$.historyPreview.start(e.detail);
-        } else {
-          this.$.dropSelector.style.opacity = 1;
-          this.$.historyPreview.end();
-        }
+
+      _timetravelOn(e) {
+        this.$.dropSelector.style.opacity = 0.2;
+        this.$.historyPreview.start(e.detail);
+      }
+
+      _timetravelOff() {
+        this.$.dropSelector.style.opacity = 1;
+        this.$.historyPreview.end();
       }
 
       _newShape(e) {
@@ -218,7 +221,7 @@
         this.set("heldKeys", e.detail);
       }
 
-      _fire(name, detail){
+      _fire(name, detail) {
         this.dispatchEvent(new CustomEvent(name, {composed: true, bubbles: true, detail: detail}));
       }
     }

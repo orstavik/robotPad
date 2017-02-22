@@ -115,23 +115,13 @@
 
       paste() {
         this.$.ghostCopy.start(this.copyData);
-        this.copyData = this.copyData.map(info => info.makeCopy());//todo need to do this if we paste more than once from the same copy
+        this.copyData = this.copyData.map(info => info.makeCopy()); //need to do this if we paste more than once from the same copy
         const logicPointPos = this.p2p.calcLogicPoint(this._pointerMove.clientX, this._pointerMove.clientY);
         this.$.ghostCopy.change(MoveChange.makeMoveChange(this.copyCenter, logicPointPos));
         let shapes = this.$.ghostCopy.end();
         this.dispatchEvent(new CustomEvent("addshapes", {detail: shapes}));
         this.$.dropSelector.deselectAll();
         this.selectDelayed(shapes);
-      }
-
-      timeTravel(historicState) {
-        if (historicState){
-          this.$.dropSelector.style.opacity = 0.2;
-          this.$.historyPreview.start(historicState);
-        } else {
-          this.$.dropSelector.style.opacity = 1;
-          this.$.historyPreview.end();
-        }
       }
 
       updateShape(id, value) {
@@ -166,8 +156,13 @@
       }
 
       _timetravel(e) {
-        //todo need to find the content of the historic state here?
-        this.timeTravel(e.detail);
+        if (e.detail) {
+          this.$.dropSelector.style.opacity = 0.2;
+          this.$.historyPreview.start(e.detail);
+        } else {
+          this.$.dropSelector.style.opacity = 1;
+          this.$.historyPreview.end();
+        }
       }
 
       _newShape(e) {

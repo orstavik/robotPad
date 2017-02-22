@@ -1,4 +1,3 @@
-- json-object copying to clipboard (or deleting that button)
 - working palette (material desing colors?)
 - styling for messages
 - ui icon for renaming sketches

@@ -148,13 +148,11 @@
       }
 
       _timetravelOn(e) {
-        console.log("on");
         this.$.dropSelector.style.opacity = 0.2;
         this.$.historyPreview.start(e.detail);
       }
 
       _timetravelOff() {
-        console.log("off");
         this.$.dropSelector.style.opacity = 1;
         this.$.historyPreview.end();
       }

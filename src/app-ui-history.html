@@ -216,7 +216,7 @@
               continue;
             this._isOpen = mutation.target.hasAttribute(attName);
             if (!this._isOpen)
-              this._fire("timetravel-off", historyPoint.state);
+              this._fire("timetravel-off", null);
           }
         }.bind(this));
         somethingDeactives.observe(this.parentNode, {attributes: true});

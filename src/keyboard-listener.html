@@ -5,7 +5,7 @@
         prev = prev || {heldKeys: {}};
         this.heldKeys = Object.assign({}, prev.heldKeys);
         this.prev = prev;
-        this.e = e;
+        this.e = e || {code: null};
       }
 
       getTime() {
@@ -100,7 +100,8 @@
       connectedCallback() {
         window.addEventListener("keydown", this._keydown.bind(this));
         window.addEventListener("keyup", this._keyup.bind(this));
-        this.cachedEvent = new ComplexKeyEvent(null);
+        this.cachedEvent = new ComplexKeyEvent(null, null);
+        this.dispatchEvent(new CustomEvent("key-up", {"composed": true, "bubbles": true, "detail": this.cachedEvent}));
       }
 
       _keydown(e) {

@@ -8,8 +8,8 @@
         display: flex;
         box-sizing: border-box;
         flex-direction: column;
-        width: 370px;
-        height: 250px;
+        width: 320px;
+        height: 270px;
         padding: 15px;
       }
       .flowerBox {
@@ -24,7 +24,7 @@
       .box12, .box9 {
         display: inline-block;
         width: 92px;
-        margin: 0 6px;
+        margin: 0 6px 0 50px;
       }
       .color {
         display: inline-block;
@@ -33,15 +33,16 @@
         margin: 0 1px;
         border-radius: 3px;
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
-                    0 1px 5px 0 rgba(0, 0, 0, 0.12),
-                    0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        0 1px 5px 0 rgba(0, 0, 0, 0.12),
+        0 3px 1px -2px rgba(0, 0, 0, 0.2);
         transition-duration: 0.5s;
       }
       .secondRow {
         display: flex;
         justify-content: flex-start;
+        transform: translateY(-40px);
       }
-      .secondRow>div {
+      .secondRow > div {
         display: inline-block;
         width: 140px;
         padding-right: 30px;
@@ -61,14 +62,15 @@
 
     <div class="firstRow">
       <div class="flowerBox">
-        <key-flower id="keyflower" scale="[[scale]]" palette="[[cssColors]]"></key-flower>
+        <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]"></key-flower>
       </div>
       <div class="box12">
-        <template is="dom-repeat" items="[[cssColors]]">
+        <template is="dom-repeat" items="[[colors]]">
           <div id="color[[index]]" class="color" style$="background: [[item]]" on-click="_selectColor"></div>
         </template>
-      </div>
-      <div class="box9">
+      <!--</div>-->
+      <!--<div class="box9">-->
+        <hr style="opacity: 0">
         <div id="grey0" class="color" style="background-color: var(--tone-grey-0)" on-click="_selectColor"></div>
         <div id="grey1" class="color" style="background-color: var(--tone-grey-1)" on-click="_selectColor"></div>
         <div id="grey2" class="color" style="background-color: var(--tone-grey-2)" on-click="_selectColor"></div>
@@ -83,14 +85,14 @@
     <div class="secondRow">
       <div>
         <span class="sliderTitle">Saturation</span>
-        <paper-slider pin min="-100" max="100" id="s" on-change="setS"></paper-slider>
+        <paper-slider pin value="{{s}}" min="-4" step="1" max="4" id="s"></paper-slider>
       </div>
-      <div>
-        <span class="sliderTitle">Lightness</span>
-        <paper-slider pin min="-90" max="90" id="l" on-change="setL"></paper-slider>
-      </div>
+      <!--<div>-->
+      <!--<span class="sliderTitle">Lightness</span>-->
+      <!--<paper-slider pin min="-90" max="90" id="l" on-change="setL"></paper-slider>-->
+      <!--</div>-->
+      <!--H <input type="range" min="-90" max="90" value="0" id="h" on-input="setSunset"/> <br>-->
     </div>
-    <!--H <input type="range" min="-90" max="90" value="0" id="h" on-input="setSunset"/> <br>-->
 
   </template>
 
@@ -104,60 +106,54 @@
       static get config() {
         return {
           properties: {
-            computedColors: {
+            colors: {
               type: Array,
-              computed: "makeComputed(l,s, sunset)",
-              notify: true
+              computed: "_computeColorName(s)",
+              observer: "_notifyColorChange"
             },
-            cssColors: {
-              type: Array,
-              computed: "makeCSS(computedColors)",
-              notify: true,
-              observer: "_passOutNewColors"
-            },
-            scale: Object,
-            s: {
-              type: Number,
-              value: 0
-            },
-            l: {
-              type: Number,
-              value: 0
-            },
-            sunset: {
-              type: Number,
-              value: 0
-            }
+            s: Number
           }
         }
       }
 
-      _passOutNewColors(cssColors){
-        this.dispatchEvent(new CustomEvent("new-colors", {composed: true, bubbles: true, detail: cssColors}));
+      connectedCallback() {
+        this.set("colors", this._computeColorName(0));
       }
 
       _selectColor(e) {
         this.dispatchEvent(new CustomEvent("select-color", {composed: true, bubbles: true, detail: e.target.id}));
       }
 
-      makeComputed(l, s, sunset) {
-        return StaticColorMaker.staticColors().map(item => StaticColorMaker.calculateRGB(StaticColorMaker.calculateHSL(item, s, l), sunset / 100));
+      _computeColorName(s) {
+        return ColorPalette.materialColorNames().map(cName => "var(--paper-" + cName + "-" + (5 + s) + "00)");
       }
 
-      makeCSS(computedColors) {
-        return computedColors.map(color => StaticColorMaker._computeHSL(color));
+      _notifyColorChange() {
+        this.dispatchEvent(new CustomEvent("new-colors", {composed: true, bubbles: true, detail: this.colors}));
       }
 
-      setS(e) {
-        this.s = Number(e.target.value) / 100;
-      }
-
-      setL(e) {
-        this.l = Number(e.target.value) / 100;
-      }
-
-      setSunset(e) {
-        this.sunset = Number(e.target.value) / 100;
+      static materialColorNames() {
+        return [
+//          "blue-grey",
+//          "grey",
+          "red",
+//          "deep-orange",
+          "orange",
+//          "amber",
+          "yellow",
+          "lime",
+          "light-green",
+          "green",
+          "teal",
+          "cyan",
+//          "light-blue",
+          "blue",
+          "indigo",
+//          "deep-purple",
+          "purple",
+//          "pink"
+          "brown",
+        ];
       }
     }
     customElements.define(ColorPalette.is, ColorPalette);

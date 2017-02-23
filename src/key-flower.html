@@ -33,7 +33,7 @@
     </style>
 
     <template is="dom-repeat" items="[[coloredScale]]">
-      <div class="leaf" style$="transform: rotate([[item.rotation]]deg);">
+      <div class="leaf" style$="transform: rotate([[item.rotation]]deg); z-index: [[item.zIndex]];">
         <div id="tone[[index]]" class="innerLeaf" style$="background: [[item.color]];" on-click="_selectStyle"></div>
       </div>
     </template>
@@ -45,17 +45,23 @@
       constructor(scale, palette, zeroToSix) {
         let tonePosition = scale.getTonePositionRelativeToKey(zeroToSix);
         let chordType = scale.getChordType(zeroToSix);
-        let transScale =
-          chordType == "maj" ? "1" :
-            chordType == "min" ? "0.85" :
-              chordType == "dim" ? "0.7" : "0";
         let colorNumber = scale.getToneColor(zeroToSix);
         this.number = tonePosition;
         this.name = scale.getToneName(zeroToSix);
         this.type = chordType;
+        this.zIndex = ColoredNote.getScale(chordType, 100);
         this.color = palette[colorNumber];
-        this.scale = transScale;
         this.rotation = 30 * tonePosition;
+      }
+
+      static getScale(type, factor) {
+        if (type == "maj")
+          return 1 * factor;
+        if (type == "min")
+          return 0.85 * factor;
+        if (type == "dim")
+          return 0.7 * factor;
+        return 0;
       }
     }
 

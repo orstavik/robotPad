@@ -47,8 +47,8 @@
           <drop-shape id="drop[[item.number]]" info="[[item]]" data-selectable></drop-shape>
         </template>
       </droppad-selector>
-      <selected-observer box="{{selecteds}}"></selected-observer>
-      <item-marker id="square" p2p="[[p2p]]" held-keys="[[heldKeys]]" box="[[selecteds]]"
+      <selected-observer box="{{box}}"></selected-observer>
+      <item-marker id="square" p2p="[[p2p]]" held-keys="[[heldKeys]]" box="[[box]]"
                    on-track-start="_startMovingMarker"
                    on-track-move="_movingMarker"
                    on-track-end="_stopMovingMarker"></item-marker>
@@ -75,27 +75,27 @@
             systemMessages: Array,
             heldKeys: Object,
             _pointerMove: Event,
-            selecteds: SquareBox
+            box: SquareBox
           }
         }
       }
 
       connectedCallback() {
-        this.addEventListener("pointermove", function (e) {
-          this._pointerMove = e;
-        }.bind(this));
+        this.addEventListener("pointermove", this._pointermove.bind(this));
+      }
+
+      _pointermove(e) {
+        this._pointerMove = e;
       }
 
       _startMovingMarker(e) {
         this.$.ghost.start(this.getSelectedInfos());
-        let helpText;
         if (e.detail instanceof ScaleChange)
-          helpText = 'Scale: Hold "shift" to scale symmetrically.';
+          this._fire("help-message", 'Scale: Hold "shift" to scale symmetrically.');
         else if (e.detail instanceof MoveChange)
-          helpText = 'Move: Hold "ctrl" to snap elements to nearest 30deg.';
+          this._fire("help-message", 'Move: Hold "ctrl" to snap elements to nearest 30deg.');
         else if (e.detail instanceof RotateChange)
-          helpText = "Rotate: Hold 'shift' to rotate the elements individually.";
-        this._fire("help-message", helpText);
+          this._fire("help-message", "Rotate: Hold 'shift' to rotate the elements individually.");
       }
 
       getSelectedInfos() {
@@ -117,7 +117,7 @@
 
       copy() {
         this.copyData = this.getSelectedInfos().map(info => info.makeCopy());
-        this.copyCenter = this.selecteds.center;
+        this.copyCenter = this.box.center;
       }
 
       paste() {
@@ -168,7 +168,7 @@
       _newShape(e) {
         let shapes = [new ShapeInfoObject(e.detail.x, e.detail.y)];
         this._fire("addshapes", shapes);
-        if (!e.shiftKey)
+        if (!this.heldKeys.shift())
           this.$.dropSelector.deselectAll();
         this.selectDelayed(shapes);
       }

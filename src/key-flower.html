@@ -77,21 +77,25 @@
             scale: Object,
             coloredScale: {
               type: Array,
-              computed: "makeColoredScale(scale, palette)"
+              computed: "_makeColoredScale(scale, palette)",
+              observer: "_notifyColoredScaleChange"
             }
           }
         }
       }
 
-      makeColoredScale(scale, palette) {
+      _makeColoredScale(scale, palette) {
         if (!scale || !palette)
           return undefined;
         let arr = [];
         for (let i = 0; i < 7; i++)
           arr.push(new ColoredNote(scale, palette, i));
         arr.sort((a, b) => a.number - b.number);
-        this.dispatchEvent(new CustomEvent("new-color-scale", {composed: true, bubbles: true, detail: arr}));
         return arr;
+      }
+
+      _notifyColoredScaleChange(){
+        this.dispatchEvent(new CustomEvent("new-color-scale", {composed: true, bubbles: true, detail: this.coloredScale}));
       }
 
       _selectStyle(e) {

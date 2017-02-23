@@ -26,7 +26,8 @@
 
     </style>
     <app-ui id="ui"
-            messages="[[messages]]"
+            system-messages="[[systemMessages]]"
+            help-messages="[[helpMessages]]"
             user="[[user]]"
             petals="[[drops]]"
             history="[[history]]"
@@ -70,7 +71,8 @@
           properties: {
             drops: Array,
             sketchData: Object,
-            messages: Array,
+            helpMessages: Array,
+            systemMessages: Array,
             heldKeys: Object,
             _pointerMove: Event,
             selecteds: SquareBox
@@ -93,7 +95,7 @@
           helpText = 'Move: Hold "ctrl" to snap elements to nearest 30deg.';
         else if (e.detail instanceof RotateChange)
           helpText = "Rotate: Hold 'shift' to rotate the elements individually.";
-        this._fire("help-msg", helpText);
+        this._fire("help-message", helpText);
       }
 
       getSelectedInfos() {

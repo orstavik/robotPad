@@ -55,28 +55,30 @@
                   name="droppad">
     </firebase-app>
     <firebase-auth id="auth" app-name="droppad" user="{{serverUser}}" provider="google"></firebase-auth>
-    <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}" on-new-sketch-object="_newSketchObject"></data-sketchlist>
+    <data-sketchlist id="sketchlist" sketch-data="{{sketchData}}"
+                     on-new-sketch-object="_newSketchObject"></data-sketchlist>
     <droppad-history id="history" on-new-state="_newState" history="{{history}}"></droppad-history>
 
     <my-app-controller id="canvasController"
-                    user="[[user]]"
-                    drops="[[letters]]"
-                    history="[[history]]"
-                    sketch-data="[[sketchData]]"
-                    messages="[[messages]]"
+                       user="[[user]]"
+                       drops="[[letters]]"
+                       history="[[history]]"
+                       sketch-data="[[sketchData]]"
+                       system-messages="[[systemMessages]]"
+                       help-messages="[[helpMessages]]"
 
-                    on-addshapes="_addShapes"
-                    on-removeshapes="_removeShapes"
-                    on-changeshapes="_changeShapes"
+                       on-addshapes="_addShapes"
+                       on-removeshapes="_removeShapes"
+                       on-changeshapes="_changeShapes"
                        on-setshapes="_setShapes"
-                    on-load-sketch="_loadSketch"
-                    on-new-colors="_newColors"
-                    on-new-color-scale="_newColorScale"
-                    on-sign-in="_signIn"
-                    on-sign-out="_signOut"
-                    on-delete-sketch="_deleteSketch"
-                    on-rename-sketch="_renameSketch"
-                    on-new-sketch="_newSketch"
+                       on-load-sketch="_loadSketch"
+                       on-new-colors="_newColors"
+                       on-new-color-scale="_newColorScale"
+                       on-sign-in="_signIn"
+                       on-sign-out="_signOut"
+                       on-delete-sketch="_deleteSketch"
+                       on-rename-sketch="_renameSketch"
+                       on-new-sketch="_newSketch"
     ></my-app-controller>
   </template>
 
@@ -94,12 +96,8 @@
             letters: Array,
             sketchData: Object,
             history: history,
-            messages: {
-              type: Array,
-              value: function(){
-                return [];
-              }
-            },
+            helpMessages: Array,
+            systemMessages: Array,
             serverUser: {
               type: Object,
               observer: "_serverSignInOrOut"
@@ -110,11 +108,13 @@
 
       connectedCallback() {
         super.connectedCallback();
-        this.addEventListener("system-msg", function (e) {
-          this.push("messages", {type: "system", value: e.detail});
+        this.systemMessages = [];
+        this.helpMessages = [];
+        this.addEventListener("system-message", function (e) {
+          this.push("systemMessages", e.detail);
         }.bind(this));
-        this.addEventListener("help-msg", function (e) {
-          this.push("messages", {type: "help", value: e.detail});
+        this.addEventListener("help-message", function (e) {
+          this.push("helpMessages", e.detail);
         }.bind(this));
       }
 
@@ -160,7 +160,8 @@
       _changeShapes(e) {
         this.$.history.update(e.detail);
       }
-      _setShapes(e){
+
+      _setShapes(e) {
         this.$.history.setState(e.detail);
       }
 

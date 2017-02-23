@@ -4,13 +4,14 @@
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icons/image-icons.html">
 <link rel="import" href="app-login.html">
-<link rel="import" href="message-handler.html">
 <link rel="import" href="tools-button.html">
 <link rel="import" href="grow-button.html">
 <link rel="import" href="grow-child-button.html">
 <link rel="import" href="json-wrapper.html">
 <link rel="import" href="color-palette.html">
 <link rel="import" href="app-ui-history.html">
+<link rel="import" href="help-message.html">
+<link rel="import" href="system-message.html">
 
 <dom-module id="app-ui">
   <template>
@@ -53,12 +54,10 @@
         transition: opacity 0.5s, transform 0.4s;
         overflow: hidden;
       }
-
       #sketchName {
         margin: 4px 12px;
         font-weight: 400;
       }
-
       .iconBox {
         display: flex;
         align-items: center;
@@ -68,7 +67,7 @@
         background-color: var(--paper-green-500);
         cursor: pointer;
       }
-      .iconBox>div {
+      .iconBox > div {
         width: 24px;
         height: 24px;
       }
@@ -78,26 +77,23 @@
       .iconBox[hidden] {
         display: none;
       }
-      #helpText {
-        position: fixed;
-        bottom: 40px;
-        left: 40px;
-        font-size: 10px;
-        width: 180px;
-        height: 10px;
-        background: rgba(255, 255, 255, 0.3);
-        border: none;
-        border-radius: 20px;
-        padding: 15px;
-        line-height: 10px;
-        color: white;
-        font-weight: bold;
+      #helpBox {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        margin: 25px;
+        z-index: 100;
       }
-      #helpText.system {
-        border-bottom: 4px solid red;
-      }
-      #helpText.help {
-        border-bottom: 4px solid green;
+      #systemBox {
+        display: flex;
+        flex-direction: column-reverse;
+        position: absolute;
+        top: 100vh;
+        left: 50vw;
+        transform: translateX(-50%);
+        z-index: 100;
       }
     </style>
 
@@ -120,7 +116,8 @@
         <json-wrapper petals="[[petals]]"></json-wrapper>
       </grow-child-button>
       <grow-child-button menu="Palette" child-button icon="image:color-lens">
-        <color-palette id="palette" css-colors="{{colors}}" scale="[[scale]]" on-color-selected="colorSelected"></color-palette>
+        <color-palette id="palette" css-colors="{{colors}}" scale="[[scale]]"
+                       on-color-selected="colorSelected"></color-palette>
       </grow-child-button>
       <grow-child-button menu="History" child-button icon="icons:restore">
         <app-ui-history history="[[history]]"></app-ui-history>
@@ -132,8 +129,18 @@
 
       </app-login>
     </grow-button>
-    
-    <message-handler messages="[[messages]]"></message-handler>
+
+    <div id="systemBox">
+      <template is="dom-repeat" items="[[systemMessages]]" filter="_showLess">
+        <system-message value="[[item]]"></system-message>
+      </template>
+    </div>
+
+    <div id="helpBox">
+      <template is="dom-repeat" items="[[helpMessages]]" filter="_showLessHelp">
+        <help-message value="[[item]]" style$="transform: translate(calc([[index]] * -4px), calc([[index]] * -4px))"></help-message>
+      </template>
+    </div>
 
   </template>
   <script>
@@ -149,25 +156,25 @@
             history: StateMachine,
             petals: Array,
             sketchData: Object,
-            messages: Array,
-            helpMess: {
-              type: Array,
-              computed: "_filterHelp(messages)"
-            },
-            sysMess: {
-              type: Array,
-              computed: "_filterSys(messages)"
-            }
+            systemMessages: Array,
+            helpMessages: Array,
           }
         }
       }
 
-      deselect(){
+      connectedCallback(){
+        setInterval(function(){
+          this.dispatchEvent(new CustomEvent("help-message", {composed: true, bubbles: true, detail: "this is a help test " + new Date().getSeconds()}));
+          this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: "this is a system test " + new Date().getSeconds()}));
+        }.bind(this), 4000)
+      }
+
+      deselect() {
         this.$.account.deactivate();
         this.$.tools.deactivate();
       }
 
-      toBool(obj){
+      toBool(obj) {
         return !!obj;
       }
 
@@ -175,17 +182,12 @@
         this.dispatchEvent(new CustomEvent("new-sketch", {composed: true, bubbles: true}));
       }
 
-      _newMsg(){
-        if (!this.messages|| this.messages.length == 0)
-          return;
-        let last = this.messages[this.messages.length-1];
-        this.showMsg(last.value, last.type);
+      _showLess(i) {
+        return this.systemMessages.length-this.systemMessages.indexOf(i) <= 5;
       }
-
-      // showMsg(txt, type){
-      //   this.set("helpText", txt);
-      //   this.set("helpType", type);
-      // }
+      _showLessHelp(i) {
+        return this.helpMessages.length-this.helpMessages.indexOf(i) <= 5;
+      }
     }
     customElements.define(AppUi.is, AppUi);
   </script>

@@ -4,6 +4,7 @@
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icons/image-icons.html">
 <link rel="import" href="app-login.html">
+<link rel="import" href="message-handler.html">
 <link rel="import" href="tools-button.html">
 <link rel="import" href="grow-button.html">
 <link rel="import" href="grow-child-button.html">
@@ -100,7 +101,7 @@
       }
     </style>
 
-    <div id="helpText" hidden$="[[!helpText]]" class$="[[helpType]]">[[helpText]]</div>
+    <!--<div id="helpText" hidden$="[[!helpText]]" class$="[[helpType]]">[[helpText]]</div>-->
 
     <template is="dom-if" if="[[user]]">
       <paper-material id="paperName" elevation=1>
@@ -131,6 +132,9 @@
 
       </app-login>
     </grow-button>
+    
+    <message-handler messages="[[messages]]"></message-handler>
+
   </template>
   <script>
     class AppUi extends Polymer.Element {
@@ -145,9 +149,14 @@
             history: StateMachine,
             petals: Array,
             sketchData: Object,
-            messages: {
+            messages: Array,
+            helpMess: {
               type: Array,
-              observer: "_newMsg"
+              computed: "_filterHelp(messages)"
+            },
+            sysMess: {
+              type: Array,
+              computed: "_filterSys(messages)"
             }
           }
         }
@@ -173,10 +182,10 @@
         this.showMsg(last.value, last.type);
       }
 
-      showMsg(txt, type){
-        this.set("helpText", txt);
-        this.set("helpType", type);
-      }
+      // showMsg(txt, type){
+      //   this.set("helpText", txt);
+      //   this.set("helpType", type);
+      // }
     }
     customElements.define(AppUi.is, AppUi);
   </script>

@@ -1,0 +1,103 @@
+<link rel="import" href="help-message.html">
+<link rel="import" href="system-message.html">
+
+<dom-module id="message-handler">
+  <template>
+    <style>
+    	:host {
+        display: inline-block;
+      }
+      #testButtons {
+				display: inline-block;
+				position: absolute;
+				top: 50%;
+				right: 0;
+				z-index: 100;
+				font-size: 10px;
+			}
+			#helpBox {
+				display: flex;
+				flex-direction: column;
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				margin: 25px;
+				z-index: 100;
+			}
+			#systemBox {
+				display: flex;
+    		flex-direction: column-reverse;
+				position: absolute;
+				top: 100vh;
+				left: 50vw;
+				transform: translateX(-50%);
+				z-index: 100;
+			}
+    </style>
+
+    <div id="testButtons">
+			<paper-button on-click="pushHelp" raised>Push HelpMess</paper-button>
+			<paper-button on-click="pushSys" raised>Push SysMess</paper-button>
+    </div>    
+
+    <div id="helpBox">
+			<template is="dom-repeat" items="[[helpMess]]" filter="_showLess">
+				<help-message value="[[item.value]]" style="transform: translate(calc([[index]] * -4px), calc([[index]] * -4px))"></help-message>
+			</template>
+		</div>
+		<div id="systemBox">
+			<template is="dom-repeat" items="[[sysMess]]" filter="_showLess">
+				<system-message value="[[item.value]]"></system-message>
+			</template>
+		</div>
+
+  </template>
+  <script>
+    class MessageHandler extends Polymer.Element {
+      static get is() {
+        return "message-handler";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            messages: {
+              type: Array,
+							observer: "_filterMess"
+            },
+            helpMess: {
+              type: Array,
+              value: function() {
+                return []
+              }
+            },
+            sysMess: {
+              type: Array,
+              value: function() {
+                return []
+              }
+            }
+          }
+        }
+      }
+
+      _filterMess() {
+        this.set("helpMess", this.messages.filter( (item) => item.type == "help"));
+        this.set("sysMess", this.messages.filter( (item) => item.type == "system"));
+      }
+
+      pushHelp() {
+				this.push("messages", {type: "help", value: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua "+(this.helpMess.length+1)+"th time!"})
+      }
+
+      pushSys() {
+				this.push("messages", {type: "system", value: "I'm here to notify you "+(this.sysMess.length+1)+"th time!"})
+      }
+
+			_showLess(i) {
+				return this.sysMess.length-this.sysMess.indexOf(i) <= 5;
+			}
+    }
+    customElements.define(MessageHandler.is, MessageHandler);
+  </script>
+</dom-module>

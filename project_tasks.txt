@@ -1,6 +1,4 @@
-- working palette (material desing colors?)
 - styling for messages
-- ui icon for renaming sketches
 
 - item marker
     - working item marker

@@ -152,9 +152,6 @@
 
       constructor() {
         super();
-        this.blueDistance = -60;
-        this.redDistance = 60;
-        this.greenDistance = 39;
       }
 
       _passOutNewColors(cssColors){
@@ -166,39 +163,11 @@
       }
 
       makeComputed(staticColors, l, s, sunset) {
-        return staticColors.map(function (item) {
-          return this.calculateRGB(ColorPalette.calculateHSL(item, s, l), sunset / 100);
-        }.bind(this));
+        return staticColors.map(item => ColorPalette.calculateRGB(ColorPalette.calculateHSL(item, s, l), sunset / 100));
       }
 
       makeCSS(computedColors) {
-        return computedColors.map(function(color){
-          return ColorPalette._computeHSL(color);
-        });
-      }
-
-      calculateRGB(hsl, degreeSunset) {
-        let rgb = ColorPalette.hslToRgb(hsl[0] / 360, hsl[1] / 100, hsl[2] / 100);
-        let addBlue = Math.sin(degreeSunset) * this.blueDistance / Math.sin(90 - degreeSunset);
-        let addGreen = Math.sin(degreeSunset) * this.greenDistance / Math.sin(90 - degreeSunset);
-        let addRed = Math.sin(degreeSunset) * this.redDistance / Math.sin(90 - degreeSunset);
-        return ColorPalette.rgbToHsl(
-          rgb[0] * (1 + addRed),
-          rgb[1] * (1 + addGreen),
-          rgb[2] * (1 + addBlue)
-        );
-      }
-
-      static calculateHSL(item, s, l) {
-        return [
-          item[0],
-          item[1] + (s >= 0 ? (100 - item[1]) * s : item[1] * s),
-          item[2] + (l >= 0 ? (100 - item[2]) * l : item[2] * l)
-        ];
-      }
-
-      static _computeHSL(item) {
-        return "hsl(" + Math.round(item[0]) + "," + Math.round(item[1]) + "%," + Math.round(item[2]) + "%)";
+        return computedColors.map(color => ColorPalette._computeHSL(color));
       }
 
       setS(e) {
@@ -211,6 +180,44 @@
 
       setSunset(e) {
         this.sunset = Number(e.target.value) / 100;
+      }
+
+      static calculateRGB(hsl, degreeSunset) {
+        const rgb = ColorPalette.hslToRgb(hsl[0] / 360, hsl[1] / 100, hsl[2] / 100);
+        const sunset = ColorPalette.transformAsSunset(degreeSunset, rgb);
+        return ColorPalette.rgbToHsl(sunset.r, sunset.g, sunset.b);
+      }
+
+      static transformAsSunset(degreeSunset, rgb) {
+        const res = ColorPalette.makeSunsetModifier(degreeSunset);
+        return {
+          r: rgb[0] * (1 + res.r),
+          g: rgb[1] * (1 + res.g),
+          b: rgb[2] * (1 + res.b)
+        };
+      }
+
+      static makeSunsetModifier(degreeSunset) {
+        const blue = -60;
+        const red = 60;
+        const green = 39;
+        return {
+          r: Math.sin(degreeSunset) * red / Math.sin(90 - degreeSunset),
+          g: Math.sin(degreeSunset) * green / Math.sin(90 - degreeSunset),
+          b: Math.sin(degreeSunset) * blue / Math.sin(90 - degreeSunset)
+        };
+      }
+
+      static calculateHSL(item, s, l) {
+        return [
+          item[0],
+          item[1] + (s >= 0 ? (100 - item[1]) * s : item[1] * s),
+          item[2] + (l >= 0 ? (100 - item[2]) * l : item[2] * l)
+        ];
+      }
+
+      static _computeHSL(item) {
+        return "hsl(" + Math.round(item[0]) + "," + Math.round(item[1]) + "%," + Math.round(item[2]) + "%)";
       }
 
       /**

@@ -103,28 +103,9 @@
       static get config() {
         return {
           properties: {
-            staticColors: {
-              type: Array,
-              value: function () {
-                return [
-                  [5, 50, 50],
-                  [35, 50, 50],
-                  [50, 50, 50],
-                  [60, 50, 50],
-                  [90, 50, 49],
-                  [120, 50, 45],
-                  [150, 50, 40],
-                  [180, 50, 35],
-                  [210, 50, 50],
-                  [225, 50, 50],
-                  [310, 50, 40],
-                  [340, 50, 45]
-                ]
-              }
-            },
             computedColors: {
               type: Array,
-              computed: "makeComputed(staticColors,l,s, sunset)",
+              computed: "makeComputed(l,s, sunset)",
               notify: true
             },
             cssColors: {
@@ -162,8 +143,8 @@
         this.dispatchEvent(new CustomEvent("select-color", {composed: true, bubbles: true, detail: e.target.id}));
       }
 
-      makeComputed(staticColors, l, s, sunset) {
-        return staticColors.map(item => ColorPalette.calculateRGB(ColorPalette.calculateHSL(item, s, l), sunset / 100));
+      makeComputed(l, s, sunset) {
+        return ColorPalette.staticColors().map(item => ColorPalette.calculateRGB(ColorPalette.calculateHSL(item, s, l), sunset / 100));
       }
 
       makeCSS(computedColors) {
@@ -180,6 +161,23 @@
 
       setSunset(e) {
         this.sunset = Number(e.target.value) / 100;
+      }
+
+      static staticColors() {
+        return [
+          [5, 50, 50],
+          [35, 50, 50],
+          [50, 50, 50],
+          [60, 50, 50],
+          [90, 50, 49],
+          [120, 50, 45],
+          [150, 50, 40],
+          [180, 50, 35],
+          [210, 50, 50],
+          [225, 50, 50],
+          [310, 50, 40],
+          [340, 50, 45]
+        ];
       }
 
       static calculateRGB(hsl, degreeSunset) {

@@ -31,8 +31,14 @@
         font-size: 17px;
         font-weight: 300;
         line-height: 1;
+        background-image: url('../images/edit-icon.ico');
+        background-position: right center;
+        background-repeat: no-repeat;
+        background-size: 16px;
+        padding-right: 20px;
       }
       .contentBox span {
+        display: block;
         font-size: 10px;
         color: gray;
       }
@@ -57,7 +63,7 @@
         <div class="contentBox">
           <div>
             <h4 data-key$="[[item.key]]" on-input="_changeSketchName" contenteditable="true" on-pointerdown="_stopProp" >[[item.value.name]]</h4>
-            <span>[[item.value.created]]</span>
+            <span >[[item.value.created]]</span>
           </div>
           <div class="buttonRow">
             <paper-button id="load" raised on-click="_loadSketch" data-key$="[[item.key]]">Load</paper-button>

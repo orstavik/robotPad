@@ -8,8 +8,8 @@
         display: flex;
         box-sizing: border-box;
         flex-direction: column;
-        width: 370px;
-        height: 250px;
+        width: 320px;
+        height: 270px;
         padding: 15px;
       }
       .flowerBox {
@@ -24,7 +24,7 @@
       .box12, .box9 {
         display: inline-block;
         width: 92px;
-        margin: 0 6px;
+        margin: 0 6px 0 50px;
       }
       .color {
         display: inline-block;
@@ -33,15 +33,17 @@
         margin: 0 1px;
         border-radius: 3px;
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
-                    0 1px 5px 0 rgba(0, 0, 0, 0.12),
-                    0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        0 1px 5px 0 rgba(0, 0, 0, 0.12),
+        0 3px 1px -2px rgba(0, 0, 0, 0.2);
         transition-duration: 0.5s;
       }
       .secondRow {
         display: flex;
         justify-content: flex-start;
+        transform: translateY(-40px);
+        width: 150px;
       }
-      .secondRow>div {
+      .secondRow > div {
         display: inline-block;
         width: 140px;
         padding-right: 30px;
@@ -61,39 +63,41 @@
 
     <div class="firstRow">
       <div class="flowerBox">
-        <key-flower id="keyflower" scale="[[scale]]" palette="[[cssColors]]"></key-flower>
+        <key-flower id="keyflower" scale="[[scale]]" palette="[[colors]]"></key-flower>
       </div>
       <div class="box12">
-        <template is="dom-repeat" items="[[cssColors]]">
+        <template is="dom-repeat" items="[[colors]]">
           <div id="color[[index]]" class="color" style$="background: [[item]]" on-click="_selectColor"></div>
         </template>
-      </div>
-      <div class="box9">
-        <div class="color" style="background-color: var(--paper-grey-100)"></div>
-        <div class="color" style="background-color: var(--paper-grey-200)"></div>
-        <div class="color" style="background-color: var(--paper-grey-300)"></div>
-        <div class="color" style="background-color: var(--paper-grey-400)"></div>
-        <div class="color" style="background-color: var(--paper-grey-500)"></div>
-        <div class="color" style="background-color: var(--paper-grey-600)"></div>
-        <div class="color" style="background-color: var(--paper-grey-700)"></div>
-        <div class="color" style="background-color: var(--paper-grey-800)"></div>
-        <div class="color" style="background-color: var(--paper-grey-900)"></div>
+      <!--</div>-->
+      <!--<div class="box9">-->
+        <hr style="opacity: 0">
+        <div id="grey0" class="color" style="background-color: var(--tone-grey-0)" on-click="_selectColor"></div>
+        <div id="grey1" class="color" style="background-color: var(--tone-grey-1)" on-click="_selectColor"></div>
+        <div id="grey2" class="color" style="background-color: var(--tone-grey-2)" on-click="_selectColor"></div>
+        <div id="grey3" class="color" style="background-color: var(--tone-grey-3)" on-click="_selectColor"></div>
+        <div id="grey4" class="color" style="background-color: var(--tone-grey-4)" on-click="_selectColor"></div>
+        <div id="grey5" class="color" style="background-color: var(--tone-grey-5)" on-click="_selectColor"></div>
+        <div id="grey6" class="color" style="background-color: var(--tone-grey-6)" on-click="_selectColor"></div>
+        <div id="grey7" class="color" style="background-color: var(--tone-grey-7)" on-click="_selectColor"></div>
+        <div id="grey8" class="color" style="background-color: var(--tone-grey-8)" on-click="_selectColor"></div>
       </div>
     </div>
     <div class="secondRow">
       <div>
         <span class="sliderTitle">Saturation</span>
-        <paper-slider pin min="-100" max="100" id="s" on-change="setS" on-value-change="setS"></paper-slider>
+        <paper-slider pin value="{{s}}" min="-4" step="1" max="4" id="s"></paper-slider>
       </div>
-      <div>
-        <span class="sliderTitle">Lightness</span>
-        <paper-slider pin min="-100" max="100" id="l" on-change="setL" on-value-change="setL"></paper-slider>
-      </div>
+      <!--<div>-->
+      <!--<span class="sliderTitle">Lightness</span>-->
+      <!--<paper-slider pin min="-90" max="90" id="l" on-change="setL"></paper-slider>-->
+      <!--</div>-->
+      <!--H <input type="range" min="-90" max="90" value="0" id="h" on-input="setSunset"/> <br>-->
     </div>
-    <!--H <input type="range" min="-90" max="90" value="0" id="h" on-input="setSunset"/> <br>-->
 
   </template>
 
+  <script src="js/StaticColorMaker.js"></script>
   <script>
     class ColorPalette extends Polymer.Element {
       static get is() {
@@ -103,189 +107,54 @@
       static get config() {
         return {
           properties: {
-            staticColors: {
+            colors: {
               type: Array,
-              value: function () {
-                return [
-                  [5, 50, 50],
-                  [35, 50, 50],
-                  [50, 50, 50],
-                  [60, 50, 50],
-                  [90, 50, 49],
-                  [120, 50, 45],
-                  [150, 50, 40],
-                  [180, 50, 35],
-                  [210, 50, 50],
-                  [225, 50, 50],
-                  [310, 50, 40],
-                  [340, 50, 45]
-                ]
-              }
+              computed: "_computeColorName(s)",
+              observer: "_notifyColorChange"
             },
-            computedColors: {
-              type: Array,
-              computed: "makeComputed(staticColors,l,s, sunset)",
-              notify: true
-            },
-            cssColors: {
-              type: Array,
-              computed: "makeCSS(computedColors)",
-              notify: true,
-              observer: "_passOutNewColors"
-            },
-            scale: Object,
-            s: {
-              type: Number,
-              value: 0
-            },
-            l: {
-              type: Number,
-              value: 0
-            },
-            sunset: {
-              type: Number,
-              value: 0
-            }
+            s: Number
           }
         }
       }
 
-      constructor() {
-        super();
-        this.blueDistance = -60;
-        this.redDistance = 60;
-        this.greenDistance = 39;
-      }
-
-      _passOutNewColors(cssColors){
-        this.dispatchEvent(new CustomEvent("new-colors", {composed: true, bubbles: true, detail: cssColors}));
+      connectedCallback() {
+        this.set("colors", this._computeColorName(0));
       }
 
       _selectColor(e) {
-        this.dispatchEvent(new CustomEvent("select-color", {composed: true, bubbles: true, detail: e.target.id}));
+        this.dispatchEvent(new CustomEvent("select-style", {composed: true, bubbles: true, detail: e.target.id}));
       }
 
-      makeComputed(staticColors, l, s, sunset) {
-        return staticColors.map(function (item) {
-          return this.calculateRGB(ColorPalette.calculateHSL(item, s, l), sunset / 100);
-        }.bind(this));
+      _computeColorName(s) {
+        return ColorPalette.materialColorNames().map(cName => "var(--paper-" + cName + "-" + (5 + s) + "00)");
       }
 
-      makeCSS(computedColors) {
-        return computedColors.map(function(color){
-          return ColorPalette._computeHSL(color);
-        });
+      _notifyColorChange() {
+        this.dispatchEvent(new CustomEvent("new-colors", {composed: true, bubbles: true, detail: this.colors}));
       }
 
-      calculateRGB(hsl, degreeSunset) {
-        let rgb = ColorPalette.hslToRgb(hsl[0] / 360, hsl[1] / 100, hsl[2] / 100);
-        let addBlue = Math.sin(degreeSunset) * this.blueDistance / Math.sin(90 - degreeSunset);
-        let addGreen = Math.sin(degreeSunset) * this.greenDistance / Math.sin(90 - degreeSunset);
-        let addRed = Math.sin(degreeSunset) * this.redDistance / Math.sin(90 - degreeSunset);
-        return ColorPalette.rgbToHsl(
-          rgb[0] * (1 + addRed),
-          rgb[1] * (1 + addGreen),
-          rgb[2] * (1 + addBlue)
-        );
-      }
-
-      static calculateHSL(item, s, l) {
+      static materialColorNames() {
         return [
-          item[0],
-          item[1] + (s >= 0 ? (100 - item[1]) * s : item[1] * s),
-          item[2] + (l >= 0 ? (100 - item[2]) * l : item[2] * l)
+//          "blue-grey",
+//          "grey",
+          "red",
+//          "deep-orange",
+          "orange",
+//          "amber",
+          "yellow",
+          "lime",
+          "light-green",
+          "green",
+          "teal",
+          "cyan",
+//          "light-blue",
+          "blue",
+          "indigo",
+//          "deep-purple",
+          "purple",
+//          "pink"
+          "brown",
         ];
-      }
-
-      static _computeHSL(item) {
-        return "hsl(" + Math.round(item[0]) + "," + Math.round(item[1]) + "%," + Math.round(item[2]) + "%)";
-      }
-
-      setS(e) {
-        this.s = Number(e.target.value) / 100;
-      }
-
-      setL(e) {
-        this.l = Number(e.target.value) / 100;
-      }
-
-      setSunset(e) {
-        this.sunset = Number(e.target.value) / 100;
-      }
-
-      /**
-       * Converts an RGB color value to HSL. Conversion formula
-       * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
-       * Assumes r, g, and b are contained in the set [0, 255] and
-       * returns h, s, and l in the set [0, 1].
-       *
-       * @param   Number  r       The red color value
-       * @param   Number  g       The green color value
-       * @param   Number  b       The blue color value
-       * @return  Array           The HSL representation
-       */
-      static rgbToHsl(r, g, b) {
-        r /= 255, g /= 255, b /= 255;
-        var max = Math.max(r, g, b), min = Math.min(r, g, b);
-        var h, s, l = (max + min) / 2;
-
-        if (max == min) {
-          h = s = 0; // achromatic
-        } else {
-          var d = max - min;
-          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-          switch (max) {
-            case r:
-              h = (g - b) / d + (g < b ? 6 : 0);
-              break;
-            case g:
-              h = (b - r) / d + 2;
-              break;
-            case b:
-              h = (r - g) / d + 4;
-              break;
-          }
-          h /= 6;
-        }
-
-        return [h * 360, s * 100, l * 100];
-      }
-
-
-      /**
-       * Converts an HSL color value to RGB. Conversion formula
-       * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
-       * Assumes h, s, and l are contained in the set [0, 1] and
-       * returns r, g, and b in the set [0, 255].
-       *
-       * @param   Number  h       The hue
-       * @param   Number  s       The saturation
-       * @param   Number  l       The lightness
-       * @return  Array           The RGB representation
-       */
-      static hslToRgb(h, s, l) {
-        var r, g, b;
-
-        if (s == 0) {
-          r = g = b = l; // achromatic
-        } else {
-          function hue2rgb(p, q, t) {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1 / 6) return p + (q - p) * 6 * t;
-            if (t < 1 / 2) return q;
-            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-            return p;
-          }
-
-          var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-          var p = 2 * l - q;
-          r = hue2rgb(p, q, h + 1 / 3);
-          g = hue2rgb(p, q, h);
-          b = hue2rgb(p, q, h - 1 / 3);
-        }
-
-        return [r * 255, g * 255, b * 255];
       }
     }
     customElements.define(ColorPalette.is, ColorPalette);

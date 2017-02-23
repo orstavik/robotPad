@@ -127,13 +127,14 @@
           txt = Boolean(txt);
         let res = {};
         res[this.key] = txt;
-        this.dispatchEvent(new CustomEvent("writeop", {detail: res}));
+        this.dispatchEvent(new CustomEvent("writeop", {composed: true, bubbles: true, detail: res}));
       }
 
       childrenEdited(e) {
         let res = {};
         res[this.key] = e.detail;
-        this.dispatchEvent(new CustomEvent("writeop", {detail: res}));
+        e.stopPropagation();
+        this.dispatchEvent(new CustomEvent("writeop", {composed: true, bubbles: true, detail: res}));
       }
     }
     customElements.define(JSONObject.is, JSONObject);

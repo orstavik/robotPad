@@ -62,7 +62,7 @@
       <div id="topShadow"></div>
       <div id="scrollWrapper" on-scroll="_createShadow">
         <template is="dom-repeat" items="[[petals]]" as="petal">
-          <json-object key="[[petal.number]]" obj="[[petal]]" on-writeop="writeInChanges" level=2></json-object>
+          <json-object key="[[petal.number]]" obj="[[petal]]" level=2 on-click="selectJsonObject"></json-object>
         </template>
       </div>
     </div>
@@ -95,6 +95,10 @@
         this.$.copyText.value = JSON.stringify(this.petals);
         this.$.copyText.select();
         document.execCommand("copy");
+      }
+
+      selectJsonObject(e) {
+        this.dispatchEvent(new CustomEvent("select-json", {composed: true, bubbles: true, detail: e.target.key}))
       }
     }
     customElements.define(JsonWrapper.is, JsonWrapper);

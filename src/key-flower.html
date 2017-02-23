@@ -15,7 +15,6 @@
         transform-origin: bottom;
         transition-duration: 0.5s;
       }
-
       .innerLeaf {
         display: inline-block;
         width: 100%;
@@ -27,21 +26,45 @@
         transform: translateY(-22%) rotate(-135deg);
         transition-duration: 0.5s;
         box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14),
-                    0 1px 10px 0 rgba(0, 0, 0, 0.12),
-                    0 2px 4px -1px rgba(0, 0, 0, 0.4);
+        0 1px 10px 0 rgba(0, 0, 0, 0.12),
+        0 2px 4px -1px rgba(0, 0, 0, 0.4);
         color: black;
       }
     </style>
-    
-      <template is="dom-repeat" items="[[coloredScale]]">
-        <div class="leaf" style$="transform: rotate([[item.rotation]]deg);">
-          <div id="tone[[index]]" class="innerLeaf" style$="background: [[item.color]];"></div>
-        </div>
-      </template>
+
+    <template is="dom-repeat" items="[[coloredScale]]">
+      <div class="leaf" style$="transform: rotate([[item.rotation]]deg); z-index: [[item.zIndex]];">
+        <div id="tone[[index]]" class="innerLeaf" style$="background: [[item.color]];" on-click="_selectStyle"></div>
+      </div>
+    </template>
 
   </template>
 
   <script>
+    class ColoredNote {
+      constructor(scale, palette, zeroToSix) {
+        let tonePosition = scale.getTonePositionRelativeToKey(zeroToSix);
+        let chordType = scale.getChordType(zeroToSix);
+        let colorNumber = scale.getToneColor(zeroToSix);
+        this.number = tonePosition;
+        this.name = scale.getToneName(zeroToSix);
+        this.type = chordType;
+        this.zIndex = ColoredNote.getScale(chordType, 100);
+        this.color = palette[colorNumber];
+        this.rotation = 30 * tonePosition;
+      }
+
+      static getScale(type, factor) {
+        if (type == "maj")
+          return 1 * factor;
+        if (type == "min")
+          return 0.85 * factor;
+        if (type == "dim")
+          return 0.7 * factor;
+        return 0;
+      }
+    }
+
     class KeyFlower extends Polymer.Element {
       static get is() {
         return "key-flower";
@@ -54,38 +77,29 @@
             scale: Object,
             coloredScale: {
               type: Array,
-              computed: "makeColoredScale(scale, palette)"
+              computed: "_makeColoredScale(scale, palette)",
+              observer: "_notifyColoredScaleChange"
             }
           }
         }
       }
 
-      makeColoredScale(scale, palette) {
+      _makeColoredScale(scale, palette) {
         if (!scale || !palette)
           return undefined;
         let arr = [];
-        for (let i = 0; i < 7; i++) {
-          let tonePosition = scale.getTonePositionRelativeToKey(i);
-          let chordType = scale.getChordType(i);
-          let transScale =
-            chordType == "maj" ? "1" :
-              chordType == "min" ? "0.85" :
-                chordType == "dim" ? "0.7" : "0";
-          let colorNumber = scale.getToneColor(i);
-          arr.push({
-            number: tonePosition,
-            name: scale.getToneName(i),
-            type: chordType,
-            color: palette[colorNumber],
-            scale: transScale,
-            rotation: 30 * tonePosition
-          });
-          arr.sort(function (a, b) {
-            return a.number - b.number;
-          });
-        }
-        this.dispatchEvent(new CustomEvent("new-color-scale", {composed: true, bubbles: true, detail: arr}));
+        for (let i = 0; i < 7; i++)
+          arr.push(new ColoredNote(scale, palette, i));
+        arr.sort((a, b) => a.number - b.number);
         return arr;
+      }
+
+      _notifyColoredScaleChange(){
+        this.dispatchEvent(new CustomEvent("new-color-scale", {composed: true, bubbles: true, detail: this.coloredScale}));
+      }
+
+      _selectStyle(e) {
+        this.dispatchEvent(new CustomEvent("select-style", {composed: true, bubbles: true, detail: e.target.id}));
       }
     }
     customElements.define(KeyFlower.is, KeyFlower);

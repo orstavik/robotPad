@@ -1,4 +1,5 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
 <link rel="import" href="keyboard-listener.html">
 <link rel="import" href="music-clef.html">
 <link rel="import" href="drop-shape.html">
@@ -32,7 +33,9 @@
             scale="[[scale]]"
             sketch-data="[[sketchData]]"
 
-            on-select-color="_setStyle"
+            on-select-json="_selectJsonObject"
+            on-writeop="_writeInChanges"
+            on-select-style="_setStyle"
             on-timetravel-on="_timetravelOn"
             on-timetravel-off="_timetravelOff"
             on-revert="_setState"
@@ -135,12 +138,15 @@
         this._fire("changeshapes", this.getSelectedInfos().map(info => info.setStyle(e.detail)));
       }
 
-      writeInChanges(e) {
-        let id = e.target.key;
+      _writeInChanges(e) {
+        let id = e.path[0].key;
         let value = e.detail[id];
-        this.$.dropSelector.deselectAll();         //todo this should be done when the user first click on a json object.
-        this.$.dropSelector.selectById("#drop" + id);
         this._fire("changeshapes", this.getSelectedInfos().map(el => el.update(value)));
+      }
+
+      _selectJsonObject(e) {
+        this.$.dropSelector.deselectAll();
+        this.$.dropSelector.selectById("#drop" + e.detail);
       }
 
       _setState(e) {

@@ -35,7 +35,7 @@
     
       <template is="dom-repeat" items="[[coloredScale]]">
         <div class="leaf" style$="transform: rotate([[item.rotation]]deg);">
-          <div id="tone[[index]]" class="innerLeaf" style$="background: [[item.color]];"></div>
+          <div id="tone[[index]]" class="innerLeaf" style$="background: [[item.color]];" on-click="_selectStyle"></div>
         </div>
       </template>
 
@@ -86,6 +86,9 @@
         }
         this.dispatchEvent(new CustomEvent("new-color-scale", {composed: true, bubbles: true, detail: arr}));
         return arr;
+      }
+      _selectStyle(e){
+        this.dispatchEvent(new CustomEvent("select-style", {composed: true, bubbles: true, detail: e.target.id}));
       }
     }
     customElements.define(KeyFlower.is, KeyFlower);

@@ -41,6 +41,24 @@
   </template>
 
   <script>
+    class ColoredNote {
+      constructor(scale, palette, zeroToSix) {
+        let tonePosition = scale.getTonePositionRelativeToKey(zeroToSix);
+        let chordType = scale.getChordType(zeroToSix);
+        let transScale =
+          chordType == "maj" ? "1" :
+            chordType == "min" ? "0.85" :
+              chordType == "dim" ? "0.7" : "0";
+        let colorNumber = scale.getToneColor(zeroToSix);
+        this.number = tonePosition;
+        this.name = scale.getToneName(zeroToSix);
+        this.type = chordType;
+        this.color = palette[colorNumber];
+        this.scale = transScale;
+        this.rotation = 30 * tonePosition;
+      }
+    }
+
     class KeyFlower extends Polymer.Element {
       static get is() {
         return "key-flower";
@@ -64,28 +82,10 @@
           return undefined;
         let arr = [];
         for (let i = 0; i < 7; i++)
-          arr.push(KeyFlower.makeColorInScale(scale, palette, i));
-        arr.sort((a, b)  => a.number - b.number);
+          arr.push(new ColoredNote(scale, palette, i));
+        arr.sort((a, b) => a.number - b.number);
         this.dispatchEvent(new CustomEvent("new-color-scale", {composed: true, bubbles: true, detail: arr}));
         return arr;
-      }
-
-      static makeColorInScale(scale, palette, zeroToSix) {
-        let tonePosition = scale.getTonePositionRelativeToKey(zeroToSix);
-        let chordType = scale.getChordType(zeroToSix);
-        let transScale =
-          chordType == "maj" ? "1" :
-            chordType == "min" ? "0.85" :
-              chordType == "dim" ? "0.7" : "0";
-        let colorNumber = scale.getToneColor(zeroToSix);
-        return {
-          number: tonePosition,
-          name: scale.getToneName(zeroToSix),
-          type: chordType,
-          color: palette[colorNumber],
-          scale: transScale,
-          rotation: 30 * tonePosition
-        };
       }
 
       _selectStyle(e) {

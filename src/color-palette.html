@@ -41,6 +41,7 @@
         display: flex;
         justify-content: flex-start;
         transform: translateY(-40px);
+        width: 150px;
       }
       .secondRow > div {
         display: inline-block;
@@ -121,7 +122,7 @@
       }
 
       _selectColor(e) {
-        this.dispatchEvent(new CustomEvent("select-color", {composed: true, bubbles: true, detail: e.target.id}));
+        this.dispatchEvent(new CustomEvent("select-style", {composed: true, bubbles: true, detail: e.target.id}));
       }
 
       _computeColorName(s) {

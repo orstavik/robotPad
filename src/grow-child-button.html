@@ -142,6 +142,8 @@
       deactivate() {
         this._collapseCard(300);
         this.active = false;
+        for (let child of this.children)
+          child.setAttribute("active", false);
       }
 
       activate() {
@@ -149,6 +151,8 @@
           this._calcVisualData();
         this._expandCard(300);
         this.active = true;
+        for (let child of this.children)
+          child.setAttribute("active", true);
       }
 
       _calcVisualData() {

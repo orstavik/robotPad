@@ -3,23 +3,9 @@
     <style>
       :host {
         display: inline-block;
-        width: 300px;
+        width: 180px;
         height: 250px;
         position: relative;
-        background-color: var(--paper-grey-100);
-        z-index: -1;
-      }
-      #topShadow {
-        position: relative;
-        width: 100%;
-        height: 10px;
-        margin-top: -10px;
-        opacity: 0.5;
-        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
-        0 1px 5px 0 rgba(0, 0, 0, 0.12),
-        0 3px 1px -2px rgba(0, 0, 0, 0.2);
-        transition: opacity 0.2s;
-        z-index: 1;
       }
       .filledCard, .emptyCard {
         display: flex;
@@ -28,10 +14,10 @@
         width: 100%;
         height: 100%;
       }
-      .filledCard[hidden], .emptyCard[hidden] {
+      .emptyCard[hidden] {
         display: none;
       }
-      .addText {
+      .emptyCard {
         width: 250px;
         text-align: center;
         line-height: 1.2;
@@ -57,11 +43,14 @@
         border-radius: 9px;
         transition: background-color 0.2s;
         z-index: 1;
+        font-size: 0;
+        color: white;
       }
       .historyPoint[active] {
         /*background-color: white !important;*/
         width: 40px;
         height: 18px;
+        font-size: 10px;
       }
       .historyLine {
         display: flex;
@@ -72,115 +61,42 @@
         transition: transform 0.2s;
         z-index: 0;
       }
-      #historyCard {
-        display: flex;
-        flex-direction: column;
-        width: 78%;
-        height: 100%;
-        box-sizing: border-box;
-        position: relative;
-        margin-left: 22%;
-        border-left: 1px solid #ccc;
-        background-color: white;
-        padding: 16px 16px 20px;
-        opacity: 1;
-        z-index: 0;
-        transition-duration: 0.2s;
-      }
-      .cardArrow {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        background-color: white;
-        border-left: 1px solid #ccc;
-        border-bottom: 1px solid #ccc;
-        transform-origin: left top;
-        transform: translate(-1px, 113px) rotate(45deg);
-        z-index: -2;
-      }
-      .cardPreview {
-        position: relative;
-        height: 130px;
-        background-color: mediumspringgreen;
-      }
-      .changeType {
-        position: absolute;
-        bottom: 8px;
-        right: 10px;
-        box-sizing: border-box;
-        padding: 2px 8px;
-        border-radius: 12px;
-        color: white;
-        font-size: 12px;
-      }
-      .cardContent {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        flex-grow: 1;
-        margin-top: 10px;
-      }
-      .changeTime {
-        font-size: 18px;
-        font-weight: 300;
-      }
-      .buttonRow {
-        display: flex;
-        /*justify-content: flex-end;*/
-      }
       paper-button {
         margin: 0;
         text-align: center;
         font-size: 12px;
       }
-      .historyPoint.add, #historyCard.add .changeType {
+      .historyPoint.add{
         background-color: var(--paper-green-800);
         border: 3px solid var(--paper-green-800);
       }
-      .historyPoint.change, #historyCard.change .changeType {
+      .historyPoint.change{
         background-color: var(--paper-blue-800);
         border: 3px solid var(--paper-blue-800);
       }
-      .historyPoint.remove, #historyCard.remove .changeType {
+      .historyPoint.remove{
         background-color: var(--paper-red-800);
         border: 3px solid var(--paper-red-800);
       }
-      .historyPoint.set, #historyCard.set .changeType {
+      .historyPoint.set{
         background-color: var(--paper-grey-800);
         border: 3px solid var(--paper-grey-800);
       }
 
     </style>
 
-    <div id="topShadow"></div>
-    <div class="filledCard" hidden="[[!emptyHistory]]">
+    <div class="filledCard">
       <div id="historyPipe" style="transform: translateY(calc(-[[activePoint]] * 24px));">
         <template is="dom-repeat" items="[[history.actions]]">
           <template is="dom-if" if="[[index]]">
             <div class="historyLine"></div>
           </template>
-          <div class$="historyPoint [[item.action]]" active$="[[_isActive(index, activePoint)]]" data-index$="[[index]]" on-click="_select"></div>
+          <div class$="historyPoint [[item.action]]" active$="[[_isActive(index, activePoint)]]" data-index$="[[index]]" on-click="_click">
+            [[_howLongAgo(item)]]
+          </div>
         </template>
       </div>
-
-      <div id="historyCard" class$="[[historyPoint.action]]">
-        <!--<div class="cardArrow"></div>-->
-        <!--<div class="cardPreview">-->
-        <!--</div>-->
-        <div class="cardContent">
-          <span class="changeTime">[[_howLongAgo(historyPoint)]]</span>
-          <span class="changeType">[[historyPoint.action]]</span>
-          <div class="buttonRow">
-            <paper-button raised hidden="[[!activePoint]]" on-click="_revert">Revert</paper-button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="emptyCard" hidden="[[_fillCard(history)]]">
-      <span class="addText">You haven't done anything!</span>
+      <span class="emptyCard" hidden$="[[emptyHistory]]">You haven't done anything!</span>
     </div>
   </template>
 
@@ -204,24 +120,22 @@
             historyPoint: {
               type: Object,
               computed: "_makeHistoryPoint(activePoint, history)"
-            }
+            },
+            active: {
+              type: Boolean,
+              observer: "_activeChanged"
+            },
+            emptyHistory: Boolean
           }
         }
       }
 
+      _activeChanged(){
+        if (!this.active)
+          this._fire("timetravel-off", null);
+      }
+
       connectedCallback() {
-        this._isOpen = false;
-        let somethingDeactives = new MutationObserver(function (mutations) {
-          for (let mutation of mutations) {
-            let attName = mutation.attributeName;
-            if (attName != "active")
-              continue;
-            this._isOpen = mutation.target.hasAttribute(attName);
-            if (!this._isOpen)
-              this._fire("timetravel-off", null);
-          }
-        }.bind(this));
-        somethingDeactives.observe(this.parentNode, {attributes: true});
         this.addEventListener("wheel", this._wheel.bind(this));
       }
 
@@ -229,9 +143,7 @@
         if (activePoint < 0 || !history)
           return null;
         let historyPoint = history.actions[activePoint];
-//        if (historyPoint && historyPoint.date)
-//          historyPoint.dateAsString = historyPoint.date.toGMTString().substr(4, 21);
-        if (this._isOpen && historyPoint && historyPoint.state)
+        if (this.active && historyPoint && historyPoint.state)
           this._fire("timetravel-on", historyPoint.state);
         return historyPoint;
       }
@@ -265,12 +177,11 @@
         return historyPoint.date.toGMTString().substr(4, 21);
       }
 
-      _revert(e){
-        this._fire("revert", this.historyPoint.state);
-      }
-
-      _select(e){
-        this.set("activePoint", e.target.dataset.index);
+      _click(e){
+        if (e.target.hasAttribute("active"))
+          this._fire("revert", this.historyPoint.state);
+        else
+          this.set("activePoint", e.target.dataset.index);
       }
       _wheel(e) {
         if (e.deltaY < 0 && this.activePoint > 0)

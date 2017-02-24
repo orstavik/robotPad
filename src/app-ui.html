@@ -79,11 +79,13 @@
       }
       #helpBox {
         display: flex;
+        width: 300px;
+        height: 100px;
         flex-direction: column;
         position: absolute;
         bottom: 0;
         left: 0;
-        margin: 25px;
+        margin: 0 0 25px 41px;
         z-index: 100;
       }
       #systemBox {
@@ -95,9 +97,15 @@
         transform: translateX(-50%);
         z-index: 100;
       }
+      #testButtons {
+				display: inline-block;
+				position: absolute;
+				top: 50%;
+				right: 0;
+				z-index: 100;
+				font-size: 10px;
+			}
     </style>
-
-    <!--<div id="helpText" hidden$="[[!helpText]]" class$="[[helpType]]">[[helpText]]</div>-->
 
     <template is="dom-if" if="[[user]]">
       <paper-material id="paperName" elevation=1>
@@ -130,17 +138,25 @@
       </app-login>
     </grow-button>
 
+    <div id="helpBox">
+      <template is="dom-repeat" items="[[helpMessages]]" filter="_showLessHelp">
+        <help-message value="[[item]]"
+                      index="[[index]]"
+                      style$="transform: translate(calc([[index]] * -8px), calc([[index]] * -8px)); z-index: calc(-1 * ([[index]] - 3)">
+        </help-message>
+      </template>
+    </div>
+
     <div id="systemBox">
       <template is="dom-repeat" items="[[systemMessages]]" filter="_showLess">
         <system-message value="[[item]]"></system-message>
       </template>
     </div>
 
-    <div id="helpBox">
-      <template is="dom-repeat" items="[[helpMessages]]" filter="_showLessHelp">
-        <help-message value="[[item]]" style$="transform: translate(calc([[index]] * -4px), calc([[index]] * -4px))"></help-message>
-      </template>
-    </div>
+    <div id="testButtons">
+			<button on-click="pushHelp">Push HelpMess</button>
+			<button on-click="pushSys">Push SysMess</button>
+    </div>    
 
   </template>
   <script>
@@ -162,12 +178,20 @@
         }
       }
 
-      connectedCallback(){
-        setInterval(function(){
-          this.dispatchEvent(new CustomEvent("help-message", {composed: true, bubbles: true, detail: "this is a help test " + new Date().getSeconds()}));
-          this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: "this is a system test " + new Date().getSeconds()}));
-        }.bind(this), 4000)
+      pushHelp() {
+				this.unshift("helpMessages", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua "+(this.helpMessages.length+1)+"th time!");
       }
+
+      pushSys() {
+				this.push("systemMessages", "I'm here to notify you "+(this.systemMessages.length+1)+"th time!");
+      }
+
+      // connectedCallback(){
+      //   setInterval(function(){
+      //     this.dispatchEvent(new CustomEvent("help-message", {composed: true, bubbles: true, detail: "this is a help test " + new Date().getSeconds()}));
+      //     this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: "this is a system test " + new Date().getSeconds()}));
+      //   }.bind(this), 4000)
+      // }
 
       deselect() {
         this.$.account.deactivate();
@@ -186,7 +210,7 @@
         return this.systemMessages.length-this.systemMessages.indexOf(i) <= 5;
       }
       _showLessHelp(i) {
-        return this.helpMessages.length-this.helpMessages.indexOf(i) <= 5;
+        return this.helpMessages.indexOf(i) < 3;
       }
     }
     customElements.define(AppUi.is, AppUi);

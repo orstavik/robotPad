@@ -47,8 +47,8 @@
           <drop-shape id="drop[[item.number]]" info="[[item]]" data-selectable></drop-shape>
         </template>
       </droppad-selector>
-      <selected-observer box="{{selecteds}}"></selected-observer>
-      <item-marker id="square" p2p="[[p2p]]" held-keys="[[heldKeys]]" box="[[selecteds]]"
+      <selected-observer id="selectedObserver" box="{{box}}"></selected-observer>
+      <item-marker id="square" p2p="[[p2p]]" held-keys="[[heldKeys]]" box="[[box]]"
                    on-track-start="_startMovingMarker"
                    on-track-move="_movingMarker"
                    on-track-end="_stopMovingMarker"></item-marker>
@@ -75,27 +75,35 @@
             systemMessages: Array,
             heldKeys: Object,
             _pointerMove: Event,
-            selecteds: SquareBox
+            box: SquareBox,
+            p2p: {
+              type: Object,
+              observer: "_p2pChanged"
+            }
           }
         }
       }
 
       connectedCallback() {
-        this.addEventListener("pointermove", function (e) {
-          this._pointerMove = e;
-        }.bind(this));
+        this.addEventListener("pointermove", this._pointermove.bind(this));
+      }
+
+      _p2pChanged(){
+        this.$.selectedObserver.refreshBox();
+      }
+
+      _pointermove(e) {
+        this._pointerMove = e;
       }
 
       _startMovingMarker(e) {
         this.$.ghost.start(this.getSelectedInfos());
-        let helpText;
         if (e.detail instanceof ScaleChange)
-          helpText = 'Scale: Hold "shift" to scale symmetrically.';
+          this._fire("help-message", 'Scale: Hold "shift" to scale symmetrically.');
         else if (e.detail instanceof MoveChange)
-          helpText = 'Move: Hold "ctrl" to snap elements to nearest 30deg.';
+          this._fire("help-message", 'Move: Hold "ctrl" to snap elements to nearest 30deg.');
         else if (e.detail instanceof RotateChange)
-          helpText = "Rotate: Hold 'shift' to rotate the elements individually.";
-        this._fire("help-message", helpText);
+          this._fire("help-message", "Rotate: Hold 'shift' to rotate the elements individually.");
       }
 
       getSelectedInfos() {
@@ -112,12 +120,12 @@
       }
 
       _stopMovingMarker(e) {
-        this._fire("changeshapes", this.$.ghost.end());
+        this._fire("change-shapes", this.$.ghost.end());
       }
 
       copy() {
         this.copyData = this.getSelectedInfos().map(info => info.makeCopy());
-        this.copyCenter = this.selecteds.center;
+        this.copyCenter = this.box.center;
       }
 
       paste() {
@@ -126,7 +134,7 @@
         const logicPointPos = this.p2p.calcLogicPoint(this._pointerMove.clientX, this._pointerMove.clientY);
         this.$.ghostCopy.change(MoveChange.makeMoveChange(this.copyCenter, logicPointPos));
         let shapes = this.$.ghostCopy.end();
-        this._fire("addshapes", shapes);
+        this._fire("add-shapes", shapes);
         this.$.dropSelector.deselectAll();
         this.selectDelayed(shapes);
       }
@@ -137,13 +145,13 @@
       }
 
       _setStyle(e) {
-        this._fire("changeshapes", this.getSelectedInfos().map(info => info.setStyle(e.detail)));
+        this._fire("change-shapes", this.getSelectedInfos().map(info => info.setStyle(e.detail)));
       }
 
       _writeInChanges(e) {
         let id = e.path[0].key;
         let value = e.detail[id];
-        this._fire("changeshapes", this.getSelectedInfos().map(el => el.update(value)));
+        this._fire("change-shapes", this.getSelectedInfos().map(el => el.update(value)));
       }
 
       _selectJsonObject(e) {
@@ -152,10 +160,11 @@
       }
 
       _setState(e) {
-        this._fire("setshapes", e.detail);
+        this._fire("set-shapes", e.detail);
       }
 
       _timetravelOn(e) {
+        this.$.dropSelector.deselectAll();
         this.$.dropSelector.style.opacity = 0.2;
         this.$.historyPreview.start(e.detail);
       }
@@ -167,8 +176,8 @@
 
       _newShape(e) {
         let shapes = [new ShapeInfoObject(e.detail.x, e.detail.y)];
-        this._fire("addshapes", shapes);
-        if (!e.shiftKey)
+        this._fire("add-shapes", shapes);
+        if (!this.heldKeys.shift())
           this.$.dropSelector.deselectAll();
         this.selectDelayed(shapes);
       }
@@ -199,20 +208,20 @@
           case "Escape":
             this._deselectAll();
             return;
-          case "KeyD":
-            this._fire("removeshapes", this.getSelectedInfos());
+          case "Delete":
+            this._fire("remove-shapes", this.getSelectedInfos());
             return;
           case "KeyM":
-            this._fire("changeshapes", this.getSelectedInfos().map(info => info.mirror()));
+            this._fire("change-shapes", this.getSelectedInfos().map(info => info.mirror()));
             return;
           case "KeyN":
-            this._fire("changeshapes", this.getSelectedInfos().map(info => info.center()));
+            this._fire("change-shapes", this.getSelectedInfos().map(info => info.center()));
             return;
           case "PageUp":
-            this._fire("changeshapes", this.getSelectedInfos().map(info => info.zUp()));
+            this._fire("change-shapes", this.getSelectedInfos().map(info => info.zUp()));
             return;
           case "PageDown":
-            this._fire("changeshapes", this.getSelectedInfos().map(info => info.zDown()));
+            this._fire("change-shapes", this.getSelectedInfos().map(info => info.zDown()));
             return;
         }
         if (e.detail.ctrl()) {

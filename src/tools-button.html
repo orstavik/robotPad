@@ -94,6 +94,8 @@
       }
 
       deactivate() {
+        if (!this.active)
+          return;
         this._hideChildren();
         this.active = false;
       }

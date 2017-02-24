@@ -3,15 +3,11 @@
 <dom-module id="selected-observer">
   <script>
     class SquareBox {
-      constructor(boxes, angle) {
-        this.angle = angle;
-        this.isSingle = boxes.length == 1;
-        for (let next of boxes) {
-          this.left = Math.min(this.left || Number.MAX_VALUE, next.left);
-          this.top = Math.min(this.top || Number.MAX_VALUE, next.top);
-          this.right = Math.max(this.right || -Number.MAX_VALUE, next.right);
-          this.bottom = Math.max(this.bottom || -Number.MAX_VALUE, next.bottom);
-        }
+      setup(box) {
+        this.left = box.left;
+        this.top = box.top;
+        this.right = box.right;
+        this.bottom = box.bottom;
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
         this.center = {};
@@ -19,31 +15,38 @@
         this.center.y = this.top + this.height / 2;
       }
 
-      toLogical(p2p){
-        if (this.isLogical)
-          return;
-        this.isLogical = true;
-        this.left = p2p.toLogicalX(this.left);
-        this.right = p2p.toLogicalX(this.right);
-        this.top = p2p.toLogicalY(this.top);
-        this.bottom = p2p.toLogicalY(this.bottom);
-        this.width = p2p.addZoom(this.width);
-        this.height = p2p.addZoom(this.height);
-        this.center.x = p2p.toLogicalX(this.center.x);
-        this.center.y = p2p.toLogicalY(this.center.y);
+      static makeBox(items){
+        if (!items || items.length == 0)
+          return null;
+        if (items.length == 1)
+          return new SingleSquareBox(items[0]);
+        return new MultiSquareBox(items);
       }
+    }
+    class SingleSquareBox extends SquareBox {
+      constructor(el) {
+        super();
+        const box = el.getBoundingClientRect();
+        this.angle = el.info.angle;
+        this.isSingle = true;
+        this.setup(box);
+      }
+    }
 
-      //immutable
-      mergeChanges(individualChange) {
-        let merge = {};
-        merge.center = {
-          x: this.center.x + individualChange.x,
-          y: this.center.y + individualChange.y
-        };
-        merge.width = this.width * individualChange.w;
-        merge.height = this.height * individualChange.h;
-        merge.angle = this.angle + individualChange.angle;
-        return merge;
+    class MultiSquareBox extends SquareBox {
+      constructor(elems) {
+        super();
+        this.angle = 0;
+        this.isSingle = false;
+        const box = {};
+        for (let el of elems) {
+          let next = el.getBoundingClientRect();
+          box.left = Math.min(box.left || Number.MAX_VALUE, next.left);
+          box.top = Math.min(box.top || Number.MAX_VALUE, next.top);
+          box.right = Math.max(box.right || -Number.MAX_VALUE, next.right);
+          box.bottom = Math.max(box.bottom || -Number.MAX_VALUE, next.bottom);
+        }
+        this.setup(box);
       }
     }
 
@@ -61,7 +64,7 @@
             },
             box: {
               type: SquareBox,
-              computed: "_calcRectangle(selected)",
+              computed: "_makeBox(selected)",
               notify: true
             }
           }
@@ -109,14 +112,15 @@
         this.notifyPath("selected");
       }
 
-      _calcRectangle(items) {
-        if (!items || items.length == 0)
-          return null;
-        let boxes = [];
-        for (let el of items)
-          boxes.push(el.getBoundingClientRect());
-        let angle = (items && items.length == 1) ? items[0].info.angle : 0;
-        return new SquareBox(boxes, angle);
+      refreshBox() {
+        if (!this.selected)
+          return;
+        this.selected = this.selector.querySelectorAll("drop-shape[data-selected]");
+        this.notifyPath("selected");
+      }
+
+      _makeBox(items) {
+        return SquareBox.makeBox(items);
       }
     }
     customElements.define(SelectedObserver.is, SelectedObserver);

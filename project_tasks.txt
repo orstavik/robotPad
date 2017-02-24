@@ -9,4 +9,7 @@
 history (
     c history stored only locally of on the server?
     d thinner ui
+    e how and when should old history be loaded from the server?
 )
+
+x. load preview of previous sketches

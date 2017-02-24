@@ -183,6 +183,8 @@
       }
 
       hide(){
+//        if (!this.active)
+//          return;
         this.deactivate();
         this.animate({opacity: [1, 0], transform: ["scale(1)", "scale(0.95)"]}, {
           duration: 150,

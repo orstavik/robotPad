@@ -153,10 +153,10 @@
       </template>
     </div>
 
-    <div id="testButtons">
+    <!--<div id="testButtons">
 			<button on-click="pushHelp">Push HelpMess</button>
 			<button on-click="pushSys">Push SysMess</button>
-    </div>    
+    </div>    -->
 
   </template>
   <script>
@@ -186,12 +186,12 @@
 				this.push("systemMessages", "I'm here to notify you "+(this.systemMessages.length+1)+"th time!");
       }
 
-      // connectedCallback(){
-      //   setInterval(function(){
-      //     this.dispatchEvent(new CustomEvent("help-message", {composed: true, bubbles: true, detail: "this is a help test " + new Date().getSeconds()}));
-      //     this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: "this is a system test " + new Date().getSeconds()}));
-      //   }.bind(this), 4000)
-      // }
+      connectedCallback(){
+        setInterval(function(){
+          this.dispatchEvent(new CustomEvent("help-message", {composed: true, bubbles: true, detail: "this is a help test " + new Date().getSeconds()}));
+          this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: "this is a system test " + new Date().getSeconds()}));
+        }.bind(this), 4000)
+      }
 
       deselect() {
         this.$.account.deactivate();

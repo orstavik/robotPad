@@ -51,22 +51,24 @@
         display: flex;
         position: relative;
         box-sizing: border-box;
-        width: 14px;
-        height: 14px;
-        margin: -7px 0 -7px -3.5px;
+        width: 18px;
+        height: 18px;
         border: 3px solid;
-        border-radius: 50%;
+        border-radius: 9px;
         transition: background-color 0.2s;
         z-index: 1;
       }
       .historyPoint[active] {
-        background-color: white !important;
+        /*background-color: white !important;*/
+        width: 40px;
+        height: 18px;
       }
       .historyLine {
         display: flex;
-        height: 24px;
+        height: 22px;
         width: 6px;
-        background-color: var(--paper-light-blue-600);
+        margin: -8px -1px -4px 6px;
+        background-color: var(--paper-light-blue-300);
         transition: transform 0.2s;
         z-index: 0;
       }
@@ -127,7 +129,7 @@
       }
       .buttonRow {
         display: flex;
-        justify-content: flex-end;
+        /*justify-content: flex-end;*/
       }
       paper-button {
         margin: 0;
@@ -165,12 +167,12 @@
       </div>
 
       <div id="historyCard" class$="[[historyPoint.action]]">
-        <div class="cardArrow"></div>
-        <div class="cardPreview">
-          <span class="changeType">[[historyPoint.action]]</span>
-        </div>
+        <!--<div class="cardArrow"></div>-->
+        <!--<div class="cardPreview">-->
+        <!--</div>-->
         <div class="cardContent">
-          <span class="changeTime">[[historyPoint.dateAsString]]</span>
+          <span class="changeTime">[[_howLongAgo(historyPoint)]]</span>
+          <span class="changeType">[[historyPoint.action]]</span>
           <div class="buttonRow">
             <paper-button raised hidden="[[!activePoint]]" on-click="_revert">Revert</paper-button>
           </div>
@@ -227,8 +229,8 @@
         if (activePoint < 0 || !history)
           return null;
         let historyPoint = history.actions[activePoint];
-        if (historyPoint && historyPoint.date)
-          historyPoint.dateAsString = historyPoint.date.toGMTString().substr(4, 21);
+//        if (historyPoint && historyPoint.date)
+//          historyPoint.dateAsString = historyPoint.date.toGMTString().substr(4, 21);
         if (this._isOpen && historyPoint && historyPoint.state)
           this._fire("timetravel-on", historyPoint.state);
         return historyPoint;
@@ -241,6 +243,26 @@
 
       _isActive(index) {
         return index == this.activePoint;
+      }
+
+      _howLongAgo(historyPoint){
+        if (!historyPoint)
+          return null;
+        const current = new Date().getTime();
+        const then = historyPoint.date.getTime();
+        const differenceInSec = (current - then)/1000;
+        if (differenceInSec < 60)
+          return Math.floor(differenceInSec) + " sec.";
+        const differenceInMin = differenceInSec/60;
+        if (differenceInMin < 60)
+          return Math.floor(differenceInMin) + " min.";
+        const differenceInHour = differenceInMin/60;
+        if (differenceInHour < 24 )
+          return Math.floor(differenceInHour) + " hrs.";
+        const differenceInDays = differenceInHour/24;
+        if (differenceInDays < 30 )
+          return Math.floor(differenceInDays) + " days";
+        return historyPoint.date.toGMTString().substr(4, 21);
       }
 
       _revert(e){

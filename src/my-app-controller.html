@@ -126,7 +126,7 @@
         const logicPointPos = this.p2p.calcLogicPoint(this._pointerMove.clientX, this._pointerMove.clientY);
         this.$.ghostCopy.change(MoveChange.makeMoveChange(this.copyCenter, logicPointPos));
         let shapes = this.$.ghostCopy.end();
-        this._fire("addshapes", shapes);
+        this._fire("add-shapes", shapes);
         this.$.dropSelector.deselectAll();
         this.selectDelayed(shapes);
       }
@@ -156,6 +156,7 @@
       }
 
       _timetravelOn(e) {
+        this.$.dropSelector.deselectAll();
         this.$.dropSelector.style.opacity = 0.2;
         this.$.historyPreview.start(e.detail);
       }
@@ -167,7 +168,7 @@
 
       _newShape(e) {
         let shapes = [new ShapeInfoObject(e.detail.x, e.detail.y)];
-        this._fire("addshapes", shapes);
+        this._fire("add-shapes", shapes);
         if (!this.heldKeys.shift())
           this.$.dropSelector.deselectAll();
         this.selectDelayed(shapes);
@@ -199,8 +200,8 @@
           case "Escape":
             this._deselectAll();
             return;
-          case "KeyD":
-            this._fire("removeshapes", this.getSelectedInfos());
+          case "Delete":
+            this._fire("remove-shapes", this.getSelectedInfos());
             return;
           case "KeyM":
             this._fire("changeshapes", this.getSelectedInfos().map(info => info.mirror()));

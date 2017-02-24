@@ -125,8 +125,9 @@
           properties: {
             active: {
               type: Boolean,
+              reflectToAttribute: true,
               value: false,
-              reflectToAttribute: true
+              observer: "_activeChange"
             },
             menu: String,
             icon: String,
@@ -163,6 +164,15 @@
         this.set("circleTop", this.visualData.cTop - 16);
       }
 
+      _activeChange() {
+        if (!this.active)
+          this.$.outerBox.elevation = 0;
+        else
+          setTimeout(function () {
+            this.$.outerBox.elevation = 2;
+          }.bind(this), 200);
+      }
+
       _expandCard(dur) {
         this.$.mainCircle.elevation = 2;
         this.$.outerBox.animate({transform: ["translateX(0)", "translateX(194px)"]}, {
@@ -175,9 +185,6 @@
           fill: "forwards",
           easing: "linear"
         });
-        setTimeout(function () {
-          this.$.outerBox.elevation = 2;
-        }.bind(this), dur / 3 * 2);
       }
 
       show(delay){
@@ -209,7 +216,6 @@
 
       _collapseCard(dur) {
         this.$.mainCircle.elevation = 1;
-        this.$.outerBox.elevation = 0;
       }
     }
     customElements.define(GrowChildButton.is, GrowChildButton);

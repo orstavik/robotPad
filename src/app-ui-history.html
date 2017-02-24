@@ -58,7 +58,7 @@
         width: 6px;
         margin: -8px -1px -4px 6px;
         background-color: var(--paper-light-blue-300);
-        transition: transform 0.2s;
+        transition: transform 0.1s;
         z-index: 0;
       }
       paper-button {
@@ -86,7 +86,7 @@
     </style>
 
     <div class="filledCard">
-      <div id="historyPipe" style="transform: translateY(calc(-[[activePoint]] * 24px));">
+      <div id="historyPipe" style="transform: translateY(calc(-[[activePoint]] * 28px));">
         <template is="dom-repeat" items="[[history.actions]]">
           <template is="dom-if" if="[[index]]">
             <div class="historyLine"></div>

@@ -47,7 +47,7 @@
           <drop-shape id="drop[[item.number]]" info="[[item]]" data-selectable></drop-shape>
         </template>
       </droppad-selector>
-      <selected-observer box="{{box}}"></selected-observer>
+      <selected-observer id="selectedObserver" box="{{box}}"></selected-observer>
       <item-marker id="square" p2p="[[p2p]]" held-keys="[[heldKeys]]" box="[[box]]"
                    on-track-start="_startMovingMarker"
                    on-track-move="_movingMarker"
@@ -75,13 +75,21 @@
             systemMessages: Array,
             heldKeys: Object,
             _pointerMove: Event,
-            box: SquareBox
+            box: SquareBox,
+            p2p: {
+              type: Object,
+              observer: "_p2pChanged"
+            }
           }
         }
       }
 
       connectedCallback() {
         this.addEventListener("pointermove", this._pointermove.bind(this));
+      }
+
+      _p2pChanged(){
+        this.$.selectedObserver.refreshBox();
       }
 
       _pointermove(e) {

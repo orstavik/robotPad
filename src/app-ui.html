@@ -166,7 +166,7 @@
         setInterval(function(){
           this.dispatchEvent(new CustomEvent("help-message", {composed: true, bubbles: true, detail: "this is a help test " + new Date().getSeconds()}));
           this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: "this is a system test " + new Date().getSeconds()}));
-        }.bind(this), 4000)
+        }.bind(this), 4000);
       }
 
       deselect() {

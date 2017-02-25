@@ -87,36 +87,25 @@
       }
 
       _toggle() {
-        if (this.active)
-          this.deactivate();
-        else
-          this.activate();
+        this.active ? this.deactivate() : this.activate();
       }
 
       deactivate() {
         if (!this.active)
           return;
-        this._hideChildren();
         this.active = false;
+        this.$.mainCircle.elevation = 1;
+        for (let child of this.querySelectorAll("[child-button]"))
+          child.hide();
       }
 
       activate() {
         if (this.active)
           return;
-        this._showChildren();
         this.active = true;
-      }
-
-      _showChildren() {
         this.$.mainCircle.elevation = 2;
         for (let child of this.querySelectorAll("[child-button]"))
           child.show();
-      }
-
-      _hideChildren() {
-        this.$.mainCircle.elevation = 1;
-        for (let child of this.querySelectorAll("[child-button]"))
-          child.hide();
       }
     }
     customElements.define(ToolsButton.is, ToolsButton);

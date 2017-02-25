@@ -120,14 +120,14 @@
     </template>
 
     <tools-button id="tools" icon="icons:build">
-      <grow-child-button menu="Json" child-button icon="icons:settings-ethernet" position="0">
+      <grow-child-button menu="Json" child-button icon="icons:settings-ethernet" slot="a">
         <json-wrapper petals="[[petals]]"></json-wrapper>
       </grow-child-button>
-      <grow-child-button menu="Palette" child-button icon="image:color-lens" position="0.33">
+      <grow-child-button menu="Palette" child-button icon="image:color-lens" slot="b">
         <color-palette id="palette" css-colors="{{colors}}" scale="[[scale]]"
                        on-color-selected="colorSelected"></color-palette>
       </grow-child-button>
-      <grow-child-button menu="History" child-button icon="icons:restore" position="0.66">
+      <grow-child-button menu="History" child-button icon="icons:restore" slot="c">
         <app-ui-history history="[[history]]"></app-ui-history>
       </grow-child-button>
     </tools-button>

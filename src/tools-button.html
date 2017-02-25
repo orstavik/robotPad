@@ -23,36 +23,71 @@
         --iron-icon-height: calc(var(--mother-button-size) * 0.5);
         --iron-icon-fill-color: var(--mother-button-icon-color);
       }
-      .children-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
-      }
-      :host ::slotted([child-button]) {
-        opacity: 0;
-        pointer-events: none;
-      }
-      :host([active]) ::slotted([child-button]) {
-        pointer-events: auto;
-      }
+
+      /*
+            .children-wrapper {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              pointer-events: none;
+            }
+            :host ::slotted([child-button]) {
+              opacity: 0;
+              pointer-events: none;
+            }
+            :host([active]) ::slotted([child-button]) {
+              pointer-events: auto;
+            }
+      */
       iron-icon:not([transparent]) {
-          position: absolute;
-          animation: RotateL 0.1s ease-out forwards;
+        position: absolute;
+        animation: RotateL 0.1s ease-out forwards;
       }
       iron-icon[transparent] {
-          animation: RotateR 0.1s ease-out forwards;
+        animation: RotateR 0.1s ease-out forwards;
       }
       @keyframes RotateR {
-          from { opacity: 1; transform: rotate(0deg) scale(1); }
-          to { opacity: 0; transform: rotate(90deg) scale(0); }
+        from { opacity: 1; transform: rotate(0deg) scale(1); }
+        to { opacity: 0; transform: rotate(90deg) scale(0); }
       }
       @keyframes RotateL {
-          from { opacity: 0; transform: rotate(-90deg) scale(0); }
-          to { opacity: 1; transform: rotate(0deg) scale(1); }
+        from { opacity: 0; transform: rotate(-90deg) scale(0); }
+        to { opacity: 1; transform: rotate(0deg) scale(1); }
       }
+
+      .dropper {
+        position: absolute;
+        top: 16px;
+        left: 9px;
+        opacity: 0;
+        transform: scale(0.95);
+        transition-duration: 150ms;
+        pointer-events: none;
+      }
+      :host([active]) .dropper {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: auto;
+      }
+
+      #a{ transition-delay: 80ms; }
+      #b{ transition-delay: 50ms; }
+      #c{ transition-delay: 1ms; }
+      :host([active]) #a{ transition-delay: 1ms; transform: translateY(50px); }
+      :host([active]) #b{ transition-delay: 50ms; transform: translateY(100px); }
+      :host([active]) #c{ transition-delay: 80ms; transform: translateY(150px); }
     </style>
+
+    <div class="dropper" id="a">
+      <slot name="a"></slot>
+    </div>
+    <div class="dropper" id="b">
+      <slot name="b"></slot>
+    </div>
+    <div class="dropper" id="c">
+      <slot name="c"></slot>
+    </div>
 
     <paper-material id="mainCircle" elevation=1 on-click="_toggle">
       <paper-ripple></paper-ripple>
@@ -60,11 +95,12 @@
       <iron-icon icon="clear" transparent$="[[!active]]"></iron-icon>
     </paper-material>
 
-    <div class="children-wrapper">
+    <!--<div class="children-wrapper">-->
+      <!--<div slot="child-button">-->
       <!--<iron-selector id="selector" class="children-wrapper" selected-attribute="active" selected-class="">-->
-        <slot></slot>
       <!--</iron-selector>-->
-    </div>
+      <!--</div>-->
+    <!--</div>-->
 
   </template>
   <script>
@@ -95,8 +131,8 @@
           return;
         this.active = false;
         this.$.mainCircle.elevation = 1;
-        for (let child of this.querySelectorAll("[child-button]"))
-          child.hide();
+//        for (let child of this.querySelectorAll("[child-button]"))
+//          child.hide();
       }
 
       activate() {
@@ -104,8 +140,8 @@
           return;
         this.active = true;
         this.$.mainCircle.elevation = 2;
-        for (let child of this.querySelectorAll("[child-button]"))
-          child.show();
+//        for (let child of this.querySelectorAll("[child-button]"))
+//          child.show();
       }
     }
     customElements.define(ToolsButton.is, ToolsButton);

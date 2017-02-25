@@ -23,11 +23,13 @@
         transition: box-shadow 0.2s opacity 0.2s;
         pointer-events: auto;
       }
+/*
       #mainCircle[hidden] {
         opacity: 0;
         pointer-events: none;
         transition: none;
       }
+*/
       #mainCircle > iron-icon {
         --iron-icon-width: calc(var(--grow-child-button-size) * 0.5);
         --iron-icon-height: calc(var(--grow-child-button-size) * 0.5);
@@ -137,13 +139,12 @@
       }
 
       _toggle() {
-        if (this.active)
-          this.deactivate();
-        else
-          this.activate();
+        this.active ? this.deactivate() : this.activate();
       }
 
       deactivate() {
+        if (!this.active)
+          return;
         this._collapseCard(300);
         this.active = false;
         for (let child of this.children)
@@ -151,6 +152,8 @@
       }
 
       activate() {
+        if (this.active)
+          return;
         if (!this.visualData)
           this._calcVisualData();
         this._expandCard(300);
@@ -188,6 +191,7 @@
         });
       }
 
+      /*
       show(){
         this.animate({opacity: [0, 1], transform: ["scale(0.95)", "scale(1)"]}, {
           duration: 150,
@@ -206,6 +210,7 @@
         });
       }
 
+*/
       static _calcScaleShift(box, circle) {
         const bRect = box.getBoundingClientRect();
         const cRect = circle.getBoundingClientRect();

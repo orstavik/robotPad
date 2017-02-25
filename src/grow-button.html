@@ -117,10 +117,10 @@
       }
 
       activate(){
-        if (!this.scale)
-          this.scale = GrowButton._calcScale(this.$.outerBox, this.$.shadyCircle);
         if (this.active)
           return;
+        if (!this.scale)
+          this.scale = GrowButton._calcScale(this.$.outerBox, this.$.shadyCircle);
         this._expandCard(300);
         this.set("active", true);
       }

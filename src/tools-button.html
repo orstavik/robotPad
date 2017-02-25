@@ -109,20 +109,14 @@
 
       _showChildren() {
         this.$.mainCircle.elevation = 2;
-        let children = this.querySelectorAll("[child-button]");
-        if (!children)
-          return;
-        for (let i = 0; i < children.length; i++)
-          children[i].show();
+        for (let child of this.querySelectorAll("[child-button]"))
+          child.show();
       }
 
       _hideChildren() {
         this.$.mainCircle.elevation = 1;
-        let children = this.querySelectorAll("[child-button]");
-        if (!children)
-          return;
-        for (let i = 0; i < children.length; i++)
-          children[i].hide();
+        for (let child of this.querySelectorAll("[child-button]"))
+          child.hide();
       }
     }
     customElements.define(ToolsButton.is, ToolsButton);

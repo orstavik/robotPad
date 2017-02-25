@@ -66,19 +66,19 @@
         text-align: center;
         font-size: 12px;
       }
-      .historyPoint.add{
+      .historyPoint.add {
         background-color: var(--paper-green-800);
         border: 3px solid var(--paper-green-800);
       }
-      .historyPoint.change{
+      .historyPoint.change {
         background-color: var(--paper-blue-800);
         border: 3px solid var(--paper-blue-800);
       }
-      .historyPoint.remove{
+      .historyPoint.remove {
         background-color: var(--paper-red-800);
         border: 3px solid var(--paper-red-800);
       }
-      .historyPoint.set{
+      .historyPoint.set {
         background-color: var(--paper-grey-800);
         border: 3px solid var(--paper-grey-800);
       }
@@ -91,7 +91,8 @@
           <template is="dom-if" if="[[index]]">
             <div class="historyLine"></div>
           </template>
-          <div class$="historyPoint [[item.action]]" active$="[[_isActive(index, activePoint)]]" data-index$="[[index]]" on-click="_click">
+          <div class$="historyPoint [[item.action]]" active$="[[_isActive(index, activePoint)]]" data-index$="[[index]]"
+               on-click="_click">
             [[_howLongAgo(item)]]
           </div>
         </template>
@@ -121,29 +122,37 @@
               type: Object,
               computed: "_makeHistoryPoint(activePoint, history)"
             },
-            active: {
+            parentActive: {
               type: Boolean,
-              observer: "_activeChanged"
+              value: false,
+              reflectToAttribute: true,
             },
             emptyHistory: Boolean
           }
         }
       }
 
-      _activeChanged(){
-        if (!this.active)
-          this._fire("timetravel-off", null);
-      }
-
       connectedCallback() {
         this.addEventListener("wheel", this._wheel.bind(this));
+
+        const parentIsActive = new MutationObserver(function (mutations) {
+          for (let mutation of mutations) {
+            if (mutation.attributeName == "active"){
+              const value = mutation.target.hasAttribute(mutation.attributeName);
+              this.set("parentActive", value);
+              if (!value)
+                this._fire("timetravel-off", null);
+            }
+          }
+        }.bind(this));
+        parentIsActive.observe(this.parentNode, {attributes: true});
       }
 
       _makeHistoryPoint(activePoint, history) {
         if (activePoint < 0 || !history)
           return null;
         let historyPoint = history.actions[activePoint];
-        if (this.active && historyPoint && historyPoint.state)
+        if (this.parentActive && historyPoint && historyPoint.state)
           this._fire("timetravel-on", historyPoint.state);
         return historyPoint;
       }
@@ -157,32 +166,33 @@
         return index == this.activePoint;
       }
 
-      _howLongAgo(historyPoint){
+      _howLongAgo(historyPoint) {
         if (!historyPoint)
           return null;
         const current = new Date().getTime();
         const then = historyPoint.date.getTime();
-        const differenceInSec = (current - then)/1000;
+        const differenceInSec = (current - then) / 1000;
         if (differenceInSec < 60)
           return Math.floor(differenceInSec) + " sec.";
-        const differenceInMin = differenceInSec/60;
+        const differenceInMin = differenceInSec / 60;
         if (differenceInMin < 60)
           return Math.floor(differenceInMin) + " min.";
-        const differenceInHour = differenceInMin/60;
-        if (differenceInHour < 24 )
+        const differenceInHour = differenceInMin / 60;
+        if (differenceInHour < 24)
           return Math.floor(differenceInHour) + " hrs.";
-        const differenceInDays = differenceInHour/24;
-        if (differenceInDays < 30 )
+        const differenceInDays = differenceInHour / 24;
+        if (differenceInDays < 30)
           return Math.floor(differenceInDays) + " days";
         return historyPoint.date.toGMTString().substr(4, 21);
       }
 
-      _click(e){
+      _click(e) {
         if (e.target.hasAttribute("active"))
           this._fire("revert", this.historyPoint.state);
         else
           this.set("activePoint", e.target.dataset.index);
       }
+
       _wheel(e) {
         if (e.deltaY < 0 && this.activePoint > 0)
           this.set("activePoint", this.activePoint - 1);
@@ -190,7 +200,7 @@
           this.set("activePoint", this.activePoint + 1);
       }
 
-      _fire(name, detail){
+      _fire(name, detail) {
         this.dispatchEvent(new CustomEvent(name, {composed: true, bubbles: true, detail: detail}));
       }
     }

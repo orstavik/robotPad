@@ -61,9 +61,9 @@
     </paper-material>
 
     <div class="children-wrapper">
-      <iron-selector id="selector" class="children-wrapper" selected-attribute="active" selected-class="">
+      <!--<iron-selector id="selector" class="children-wrapper" selected-attribute="active" selected-class="">-->
         <slot></slot>
-      </iron-selector>
+      <!--</iron-selector>-->
     </div>
 
   </template>
@@ -101,6 +101,8 @@
       }
 
       activate() {
+        if (this.active)
+          return;
         this._showChildren();
         this.active = true;
       }
@@ -110,11 +112,8 @@
         let children = this.querySelectorAll("[child-button]");
         if (!children)
           return;
-        for (let i = 0; i < children.length; i++) {
-          let child = children[i];
-          const delay = i / children.length * (2 - i / children.length) * 100;
-          child.show(delay);
-        }
+        for (let i = 0; i < children.length; i++)
+          children[i].show();
       }
 
       _hideChildren() {

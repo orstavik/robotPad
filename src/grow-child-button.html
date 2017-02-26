@@ -109,7 +109,7 @@
         <div class="header">
           <iron-icon icon="[[icon]]"></iron-icon>
           <h3>[[menu]]</h3>
-          <paper-icon-button id="closeButton" icon="clear" on-tap="deactivate"></paper-icon-button>
+          <paper-icon-button id="closeButton" icon="clear" on-tap="_close"></paper-icon-button>
         </div>
         <slot></slot>
       </div>
@@ -138,8 +138,29 @@
         }
       }
 
-      _toggle() {
+      connectedCallback() {
+        const parentIsActive = new MutationObserver(this._parentIsActive.bind(this));
+        parentIsActive.observe(this.parentNode, {attributes: true, attributeFilter: ["active"]});
+      }
+
+      _parentIsActive(mutations) {
+        for (let mutation of mutations) {
+          if (mutation.attributeName == "active") {
+            const value = mutation.target.hasAttribute(mutation.attributeName);
+            if (!value)
+              this.deactivate();
+          }
+        }
+      }
+
+      _toggle(e) {
+        e.stopPropagation();
         this.active ? this.deactivate() : this.activate();
+      }
+
+      _close(e){
+        e.stopPropagation();
+        this.deactivate();
       }
 
       deactivate() {
@@ -155,6 +176,7 @@
         if (!this.visualData)
           this._calcVisualData();
         this._expandCard(300);
+        this.dispatchEvent(new CustomEvent("selected-button", {composed: true, bubbles: true}));
         this.active = true;
       }
 

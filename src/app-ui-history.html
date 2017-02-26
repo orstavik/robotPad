@@ -134,18 +134,19 @@
 
       connectedCallback() {
         this.addEventListener("wheel", this._wheel.bind(this));
+        const parentIsActive = new MutationObserver(this._parentIsActive.bind(this));
+        parentIsActive.observe(this.parentNode, {attributes: true, attributeFilter: ["active"]});
+      }
 
-        const parentIsActive = new MutationObserver(function (mutations) {
-          for (let mutation of mutations) {
-            if (mutation.attributeName == "active"){
-              const value = mutation.target.hasAttribute(mutation.attributeName);
-              this.set("parentActive", value);
-              if (!value)
-                this._fire("timetravel-off", null);
-            }
+      _parentIsActive(mutations) {
+        for (let mutation of mutations) {
+          if (mutation.attributeName == "active") {
+            const value = mutation.target.hasAttribute(mutation.attributeName);
+            this.set("parentActive", value);
+            if (!value)
+              this._fire("timetravel-off", null);
           }
-        }.bind(this));
-        parentIsActive.observe(this.parentNode, {attributes: true});
+        }
       }
 
       _makeHistoryPoint(activePoint, history) {

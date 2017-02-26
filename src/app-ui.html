@@ -120,22 +120,20 @@
     </template>
 
     <tools-button id="tools" icon="icons:build">
-      <grow-child-button menu="Json" child-button icon="icons:settings-ethernet" slot="a">
+      <grow-child-button id="buttA" menu="Json" child-button icon="icons:settings-ethernet" slot="a">
         <json-wrapper petals="[[petals]]"></json-wrapper>
       </grow-child-button>
-      <grow-child-button menu="Palette" child-button icon="image:color-lens" slot="b">
+      <grow-child-button id="buttB" menu="Palette" child-button icon="image:color-lens" slot="b">
         <color-palette id="palette" css-colors="{{colors}}" scale="[[scale]]"
                        on-color-selected="colorSelected"></color-palette>
       </grow-child-button>
-      <grow-child-button menu="History" child-button icon="icons:restore" slot="c">
+      <grow-child-button id="buttC" menu="History" child-button icon="icons:restore" slot="c">
         <app-ui-history history="[[history]]"></app-ui-history>
       </grow-child-button>
     </tools-button>
 
     <grow-button id="account" class="top right" icon="account-circle" signed$="[[toBool(user)]]">
-      <app-login sketch-data="[[sketchData]]" user="[[user]]">
-
-      </app-login>
+      <app-login sketch-data="[[sketchData]]" user="[[user]]"></app-login>
     </grow-button>
 
     <div id="helpBox">

@@ -116,8 +116,8 @@
         <color-palette id="palette" css-colors="{{colors}}" scale="[[scale]]"
                        on-color-selected="colorSelected"></color-palette>
       </grow-child-button>
-      <grow-child-button id="buttC" menu="History" child-button icon="icons:restore" slot="c">
-        <app-ui-history history="[[history]]"></app-ui-history>
+      <grow-child-button id="buttC" menu="History" child-button icon="icons:restore" slot="c" active="{{historyActive}}">
+        <app-ui-history history="[[history]]" parent-active="[[historyActive]]"></app-ui-history>
       </grow-child-button>
     </tools-button>
 
@@ -125,11 +125,10 @@
       <app-login sketch-data="[[sketchData]]" user="[[user]]"></app-login>
     </grow-button>
 
-
     <help-messager messages="[[helpMessages]]"></help-messager>
 
     <div id="systemBox">
-      <template is="dom-repeat" items="[[systemMessages]]" filter="_showLess">
+      <template is="dom-repeat" items="[[_reverseSlice(systemMessages,5)]]">
         <system-message value="[[item]]"></system-message>
       </template>
     </div>
@@ -155,16 +154,17 @@
             sketchData: Object,
             systemMessages: Array,
             helpMessages: Array,
+            historyActive: Boolean
           }
         }
       }
 
       pushHelp() {
-				this.push("helpMessages", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua "+(this.helpMessages.length+1)+"th time!");
+        this.dispatchEvent(new CustomEvent("help-message", {composed: true, bubbles: true, detail: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua "+(this.helpMessages.length+1)+"th time!"}));
       }
 
       pushSys() {
-				this.push("systemMessages", "I'm here to notify you "+(this.systemMessages.length+1)+"th time!");
+        this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: "I'm here to notify you "+(this.systemMessages.length+1)+"th time!"}));
       }
 
       // connectedCallback(){
@@ -187,11 +187,8 @@
         this.dispatchEvent(new CustomEvent("new-sketch", {composed: true, bubbles: true}));
       }
 
-      _showLess(i) {
-        return this.systemMessages.length-this.systemMessages.indexOf(i) <= 5;
-      }
-      _showLessHelp(i) {
-        return this.helpMessages.indexOf(i) < 3;
+      _reverseSlice(ar, num) {
+        return ar ? ar.slice(-num) : null;
       }
     }
     customElements.define(AppUi.is, AppUi);

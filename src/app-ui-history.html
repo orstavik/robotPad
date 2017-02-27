@@ -124,29 +124,23 @@
             },
             parentActive: {
               type: Boolean,
-              value: false,
-              reflectToAttribute: true,
+              observer: "_parentActiveChange"
             },
             emptyHistory: Boolean
           }
         }
       }
 
-      connectedCallback() {
-        this.addEventListener("wheel", this._wheel.bind(this));
-        const parentIsActive = new MutationObserver(this._parentIsActive.bind(this));
-        parentIsActive.observe(this.parentNode, {attributes: true, attributeFilter: ["active"]});
+      _parentActiveChange(){
+        if (this.parentActive)
+          this.dispatchEvent(new CustomEvent("help-message", {composed: true, bubbles: true, detail: "Scroll to view old version. Click the expanded historypoint to roll back."}));
+        else
+          this._fire("timetravel-off", null);
       }
 
-      _parentIsActive(mutations) {
-        for (let mutation of mutations) {
-          if (mutation.attributeName == "active") {
-            const value = mutation.target.hasAttribute(mutation.attributeName);
-            this.set("parentActive", value);
-            if (!value)
-              this._fire("timetravel-off", null);
-          }
-        }
+      connectedCallback() {
+        this.addEventListener("wheel", this._wheel.bind(this));
+//        new MutationObserver(this._parentIsActive.bind(this)).observe(this.parentNode, {attributes: true, attributeFilter: ["active"]});
       }
 
       _makeHistoryPoint(activePoint, history) {
@@ -204,6 +198,19 @@
       _fire(name, detail) {
         this.dispatchEvent(new CustomEvent(name, {composed: true, bubbles: true, detail: detail}));
       }
+
+//      _parentIsActive(mutations) {
+//        for (let mutation of mutations) {
+//          if (mutation.attributeName == "active") {
+//            const value = mutation.target.hasAttribute(mutation.attributeName);
+//            this.set("parentActive", value);
+//            if (value)
+//              this.dispatchEvent(new CustomEvent("help-message", {composed: true, bubbles: true, detail: "Scroll to view old version. Click the expanded historypoint to roll back."}));
+//            else
+//              this._fire("timetravel-off", null);
+//          }
+//        }
+//      }
     }
     customElements.define(AppUiHistory.is, AppUiHistory);
   </script>

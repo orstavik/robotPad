@@ -126,15 +126,7 @@
     </grow-button>
 
 
-    <help-messager messages="[[helpMessages]]" amount=3></help-messager>
-    <!--<div id="helpBox">
-      <template is="dom-repeat" items="[[helpMessages]]" filter="_showLessHelp">
-        <help-message value="[[item]]"
-                      index="[[index]]"
-                      style$="transform: translate(calc([[index]] * -8px), calc([[index]] * -8px)); z-index: calc(-1 * ([[index]] - 3)">
-        </help-message>
-      </template>
-    </div>-->
+    <help-messager messages="[[helpMessages]]"></help-messager>
 
     <div id="systemBox">
       <template is="dom-repeat" items="[[systemMessages]]" filter="_showLess">
@@ -175,12 +167,12 @@
 				this.push("systemMessages", "I'm here to notify you "+(this.systemMessages.length+1)+"th time!");
       }
 
-      connectedCallback(){
-        setInterval(function(){
-          this.dispatchEvent(new CustomEvent("help-message", {composed: true, bubbles: true, detail: "this is a help test " + new Date().getSeconds()}));
-          this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: "this is a system test " + new Date().getSeconds()}));
-        }.bind(this), 3000);
-      }
+      // connectedCallback(){
+      //   setInterval(function(){
+      //     this.dispatchEvent(new CustomEvent("help-message", {composed: true, bubbles: true, detail: "this is a help test " + new Date().getSeconds()}));
+      //     this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: "this is a system test " + new Date().getSeconds()}));
+      //   }.bind(this), 3000);
+      // }
 
       deselect() {
         this.$.account.deactivate();

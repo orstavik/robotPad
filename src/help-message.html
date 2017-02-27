@@ -67,10 +67,6 @@
 			}
 
 			connectedCallback() {
-				// this.pointerover = this._standStill.bind(this);
-				// this.pointerleave = this._freeToGo.bind(this);
-				// this.addEventListener("pointerover", this.pointerover);
-				// this.addEventListener("pointerleave", this.pointerleave);
 				this._animate();
 			}
 
@@ -99,6 +95,30 @@
           fill: "forwards"
 				});
 				this.style.zIndex = 10-i;
+			}
+
+			show(i) {
+				this.animate({
+					transform: [
+						"scale("+(1*Math.pow(0.95,i-1))+") translateY(-"+(12*(i-1))+"px)",
+						"scale(1) translateY(-"+(90*(i-1))+"px)"
+					]
+				}, {
+          duration: 200,
+          fill: "forwards"
+				});
+			}
+
+			hide(i) {
+				this.animate({
+					transform: [
+						"scale(1) translateY(-"+(90*(i-1))+"px)",
+						"scale("+(1*Math.pow(0.95,i-1))+") translateY(-"+(12*(i-1))+"px)",
+					]
+				}, {
+          duration: 200,
+          fill: "forwards"
+				});
 			}
     }
     customElements.define(HelpMessage.is, HelpMessage);

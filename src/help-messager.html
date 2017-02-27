@@ -35,9 +35,9 @@
         }
       }
 
-			constructor() {
-				super();
-				super.ready();
+			connectedCallback() {
+				this.addEventListener("mouseover", this._mouseover.bind(this));
+				this.addEventListener("mouseleave", this._mouseleave.bind(this));
 			}
 
 			_newMessage() {
@@ -50,6 +50,18 @@
 					for (let i = 0; i < this.children.length-1; i++) {
 						this.children[i].update(this.children.length-i);
 					}
+				}
+			}
+
+			_mouseover() {
+				for (let i = 0; i < this.children.length-1; i++) {
+					this.children[i].show(this.children.length-i);
+				}
+			}
+
+			_mouseleave() {
+				for (let i = 0; i < this.children.length-1; i++) {
+					this.children[i].hide(this.children.length-i);
 				}
 			}
     }

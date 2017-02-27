@@ -1,0 +1,70 @@
+<link rel="import" href="help-message.html">
+
+<dom-module id="help-messager">
+  <template>
+    <style>
+			:host {
+				display: inline-block;
+				width: 300px;
+				height: 100px;
+				position: absolute;
+				bottom: 20px;
+				left: 20px;
+				z-index: 9;
+			}
+    </style>
+
+		<slot></slot>
+
+  </template>
+  <script>
+    class HelpMessager extends Polymer.Element {
+      static get is() {
+        return "help-messager";
+      }
+
+      static get config() {
+        return {
+          properties: {
+            messages: {
+              type: Array,
+							observer: "_newMessage"
+            },
+						amount: Number
+          }
+        }
+      }
+
+			connectedCallback() {
+				this.addEventListener("mouseover", this._mouseover.bind(this));
+				this.addEventListener("mouseleave", this._mouseleave.bind(this));
+			}
+
+			_newMessage() {
+				let lastM = this.messages[this.messages.length-1];
+				if (lastM && (!this.lastChild || (this.lastChild && this.lastChild.index !== this.messages.length-1))) {
+					let message = document.createElement("help-message");
+					message.value = lastM;
+					message.index = this.messages.length-1;
+					this.appendChild(message);
+					for (let i = 0; i < this.children.length-1; i++) {
+						this.children[i].update(this.children.length-i);
+					}
+				}
+			}
+
+			_mouseover() {
+				for (let i = 0; i < this.children.length-1; i++) {
+					this.children[i].show(this.children.length-i);
+				}
+			}
+
+			_mouseleave() {
+				for (let i = 0; i < this.children.length-1; i++) {
+					this.children[i].hide(this.children.length-i);
+				}
+			}
+    }
+    customElements.define(HelpMessager.is, HelpMessager);
+  </script>
+</dom-module>

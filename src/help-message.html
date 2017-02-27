@@ -6,6 +6,7 @@
 				width: 100%;
 				height: 100%;
 				position: absolute;
+				z-index: 10;
 			}
 			paper-material {
 				display: flex;
@@ -16,6 +17,7 @@
 				border-radius: 3px;
 				padding: 6px 12px;
 				cursor: pointer;
+				transform: translateY(0);
 			}
 			.firstColumn {
 				width: 40px;
@@ -53,41 +55,70 @@
         return {
           properties: {
             value: {
-              type: String,
-							// observer: "_animateMe"
+              type: String
             }
           }
         }
       }
 
+			constructor() {
+				super();
+				super.ready();
+			}
+
 			connectedCallback() {
-				this.pointerover = this._standStill.bind(this);
-				this.pointerleave = this._freeToGo.bind(this);
-				this.addEventListener("pointerover", this.pointerover);
-				this.addEventListener("pointerleave", this.pointerleave);
+				this._animate();
 			}
 
-			_animateMe() {
-				this.animate({transform: ["translateY(0)", "translateY(-100%)"]}, {
+			_animate() {
+				this.animate({transform: ["scale(0.5)", "scale(1)"], opacity: [0,1]}, {
+					duration: 250,
+					easing: "cubic-bezier(0.6, 0.03, 0.75, 1.5)",
+          fill: "forwards"
+				});
+				let fading = this.animate({opacity: [1,0]}, {
+					delay: 10000,
+					duration: 500,
+          fill: "forwards"
+				});
+				fading.onfinish = this.remove.bind(this);
+			}
+
+			update(i) {
+				this.animate({
+					transform: [
+						"scale("+(1*Math.pow(0.95,i-2))+") translateY(-"+(12*(i-2))+"px)",
+						"scale("+(1*Math.pow(0.95,i-1))+") translateY(-"+(12*(i-1))+"px)"
+					]
+				}, {
           duration: 200,
-					easing: "cubic-bezier(0.0, 0.0, 0.2, 1)",
           fill: "forwards"
-        });
-				this.fadeSlow = this.animate({opacity: [1, 0]}, {
-					delay: 1000,
-          duration: 3000,
-					easing: "linear",
-          fill: "forwards"
-        });
+				});
+				this.style.zIndex = 10-i;
 			}
 
-			_standStill() {
-				this.slideDown.pause();
-				this.slideDown.currentTime = 0;
+			show(i) {
+				this.animate({
+					transform: [
+						"scale("+(1*Math.pow(0.95,i-1))+") translateY(-"+(12*(i-1))+"px)",
+						"scale(1) translateY(-"+(90*(i-1))+"px)"
+					]
+				}, {
+          duration: 200,
+          fill: "forwards"
+				});
 			}
 
-			_freeToGo() {
-				this.slideDown.play();
+			hide(i) {
+				this.animate({
+					transform: [
+						"scale(1) translateY(-"+(90*(i-1))+"px)",
+						"scale("+(1*Math.pow(0.95,i-1))+") translateY(-"+(12*(i-1))+"px)",
+					]
+				}, {
+          duration: 200,
+          fill: "forwards"
+				});
 			}
     }
     customElements.define(HelpMessage.is, HelpMessage);

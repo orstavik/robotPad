@@ -34,14 +34,12 @@ class ScaleChange {
     if (!angle)
       return whaxy;
 
-    let sqrt = Math.sqrt(whaxy.h*whaxy.h+whaxy.w*whaxy.w);
-    console.log(sqrt);
+    //todo But I found the bug as to why it becomes bigger when we scale it in the corner, but snap back to one.
+    //todo If you tilt it 45 degrees, and then scale, we add the size
     whaxy.w = Math.abs(Math.cos(angle) * this.w);
     whaxy.h = Math.abs(Math.sin(angle) * this.w);
     whaxy.h += Math.abs(Math.cos(-angle) * this.h);
     whaxy.w += Math.abs(Math.sin(-angle) * this.h);
-    let sqrt2 = Math.sqrt(whaxy.h*whaxy.h+whaxy.w*whaxy.w);
-    console.log(sqrt2);
     return whaxy;
   }
 }

@@ -10,7 +10,7 @@
 <link rel="import" href="json-wrapper.html">
 <link rel="import" href="color-palette.html">
 <link rel="import" href="app-ui-history.html">
-<link rel="import" href="help-message.html">
+<link rel="import" href="help-messager.html">
 <link rel="import" href="system-message.html">
 
 <dom-module id="app-ui">
@@ -77,17 +77,6 @@
       .iconBox[hidden] {
         display: none;
       }
-      #helpBox {
-        display: flex;
-        width: 300px;
-        height: 100px;
-        flex-direction: column;
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        margin: 0 0 25px 41px;
-        z-index: 100;
-      }
       #systemBox {
         display: flex;
         flex-direction: column-reverse;
@@ -136,14 +125,16 @@
       <app-login sketch-data="[[sketchData]]" user="[[user]]"></app-login>
     </grow-button>
 
-    <div id="helpBox">
+
+    <help-messager messages="[[helpMessages]]" amount=3></help-messager>
+    <!--<div id="helpBox">
       <template is="dom-repeat" items="[[helpMessages]]" filter="_showLessHelp">
         <help-message value="[[item]]"
                       index="[[index]]"
                       style$="transform: translate(calc([[index]] * -8px), calc([[index]] * -8px)); z-index: calc(-1 * ([[index]] - 3)">
         </help-message>
       </template>
-    </div>
+    </div>-->
 
     <div id="systemBox">
       <template is="dom-repeat" items="[[systemMessages]]" filter="_showLess">
@@ -151,10 +142,10 @@
       </template>
     </div>
 
-    <!--<div id="testButtons">
+    <div id="testButtons">
 			<button on-click="pushHelp">Push HelpMess</button>
 			<button on-click="pushSys">Push SysMess</button>
-    </div>    -->
+    </div>    
 
   </template>
   <script>
@@ -177,7 +168,7 @@
       }
 
       pushHelp() {
-				this.unshift("helpMessages", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua "+(this.helpMessages.length+1)+"th time!");
+				this.push("helpMessages", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua "+(this.helpMessages.length+1)+"th time!");
       }
 
       pushSys() {
@@ -188,7 +179,7 @@
         setInterval(function(){
           this.dispatchEvent(new CustomEvent("help-message", {composed: true, bubbles: true, detail: "this is a help test " + new Date().getSeconds()}));
           this.dispatchEvent(new CustomEvent("system-message", {composed: true, bubbles: true, detail: "this is a system test " + new Date().getSeconds()}));
-        }.bind(this), 4000);
+        }.bind(this), 3000);
       }
 
       deselect() {

@@ -22,6 +22,7 @@
         opacity: 1;
         transition: box-shadow 0.2s, opacity 0.2s;
         pointer-events: auto;
+        z-index: 11;
       }
 /*
       #mainCircle[hidden] {
@@ -129,26 +130,11 @@
               type: Boolean,
               reflectToAttribute: true,
               value: false,
-              observer: "_activeChange"
+              notify:true
             },
             menu: String,
             icon: String,
             position: Number,
-          }
-        }
-      }
-
-      connectedCallback() {
-        const parentIsActive = new MutationObserver(this._parentIsActive.bind(this));
-        parentIsActive.observe(this.parentNode, {attributes: true, attributeFilter: ["active"]});
-      }
-
-      _parentIsActive(mutations) {
-        for (let mutation of mutations) {
-          if (mutation.attributeName == "active") {
-            const value = mutation.target.hasAttribute(mutation.attributeName);
-            if (!value)
-              this.deactivate();
           }
         }
       }
@@ -166,33 +152,24 @@
       deactivate() {
         if (!this.active)
           return;
-        this._collapseCard(300);
         this.active = false;
+        this._collapseCard(300);
       }
 
       activate() {
         if (this.active)
           return;
+        this.active = true;
         if (!this.visualData)
           this._calcVisualData();
         this._expandCard(300);
         this.dispatchEvent(new CustomEvent("selected-button", {composed: true, bubbles: true}));
-        this.active = true;
       }
 
       _calcVisualData() {
         this.visualData = GrowChildButton._calcScaleShift(this.$.outerBox, this.$.shadyCircle);
         this.set("marginTopOuterBox",16 - this.visualData.bTop);
         this.set("circleTop", this.visualData.cTop - 16);
-      }
-
-      _activeChange() {
-        if (!this.active)
-          this.$.outerBox.elevation = 0;
-        else
-          setTimeout(function () {
-            this.$.outerBox.elevation = 2;
-          }.bind(this), 200);
       }
 
       _expandCard(dur) {
@@ -207,28 +184,11 @@
           fill: "forwards",
           easing: "linear"
         });
+        setTimeout(function () {
+          this.$.outerBox.elevation = 2;
+        }.bind(this), dur*2/3);
       }
 
-      /*
-      show(){
-        this.animate({opacity: [0, 1], transform: ["scale(0.95)", "scale(1)"]}, {
-          duration: 150,
-          delay: this.position * (2 - this.position) * 100,
-          fill: "forwards"
-        });
-      }
-
-      hide(){
-//        if (!this.active)
-//          return;
-        this.deactivate();
-        this.animate({opacity: [1, 0], transform: ["scale(1)", "scale(0.95)"]}, {
-          duration: 150,
-          fill: "forwards"
-        });
-      }
-
-*/
       static _calcScaleShift(box, circle) {
         const bRect = box.getBoundingClientRect();
         const cRect = circle.getBoundingClientRect();
@@ -239,8 +199,44 @@
       }
 
       _collapseCard(dur) {
+        this.$.outerBox.elevation = 0;
         this.$.mainCircle.elevation = 1;
       }
+
+//      connectedCallback() {
+//        const parentIsActive = new MutationObserver(this._parentIsActive.bind(this));
+//        parentIsActive.observe(this.parentNode, {attributes: true, attributeFilter: ["active"]});
+//      }
+//
+//      _parentIsActive(mutations) {
+//        for (let mutation of mutations) {
+//          if (mutation.attributeName == "active") {
+//            const value = mutation.target.hasAttribute(mutation.attributeName);
+//            if (!value)
+//              this.deactivate();
+//          }
+//        }
+//      }
+//
+      /*
+       show(){
+       this.animate({opacity: [0, 1], transform: ["scale(0.95)", "scale(1)"]}, {
+       duration: 150,
+       delay: this.position * (2 - this.position) * 100,
+       fill: "forwards"
+       });
+       }
+
+       hide(){
+       //        if (!this.active)
+       //          return;
+       this.deactivate();
+       this.animate({opacity: [1, 0], transform: ["scale(1)", "scale(0.95)"]}, {
+       duration: 150,
+       fill: "forwards"
+       });
+       }
+       */
     }
     customElements.define(GrowChildButton.is, GrowChildButton);
   </script>

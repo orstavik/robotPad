@@ -21,6 +21,8 @@ class ScaleChange {
     this.yDistNow = newPoint.y - this.center.y;
     this.w = this.xDistNow / this.xDistStart;
     this.h = this.yDistNow / this.yDistStart;
+    if (shift)
+      this.w = this.h;
   }
 
   changeForPoint(x, y, angle) {

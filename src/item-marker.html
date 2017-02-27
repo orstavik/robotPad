@@ -101,7 +101,7 @@
       <div id="ne" class="scale corner"></div>
       <div id="sw" class="scale corner"></div>
       <div id="se" class="scale corner"></div>
-      <template is="dom-if" if="box.isSingle">
+      <template is="dom-if" if="[[box.isSingle]]">
         <div id="w" class="scale"></div>
         <div id="n" class="scale"></div>
         <div id="s" class="scale"></div>
@@ -198,14 +198,17 @@
           this.change = new MoveChange(this.start);
         else if (action == "scale")
           this.change = new ScaleChange(this.start, this.logicalBox.center);
-        this.dispatchEvent(new CustomEvent("track-start", {composed: true, bubbles: true, detail: this.change}));
+        this._fire("track-start", this.change);
       }
 
       _pointerMove(e) {
         ItemMarker._cancelPropDefault(e);
-        this.change.update(this.p2p.calcLogicPoint(e.clientX, e.clientY), (this.heldKeys && this.heldKeys.shift()));
+        let shift = this.heldKeys && this.heldKeys.shift();
+        if (this.box instanceof MultiSquareBox && this.change instanceof ScaleChange)
+          shift = true;
+        this.change.update(this.p2p.calcLogicPoint(e.clientX, e.clientY), shift);
         this.notifyPath("change");
-        this.dispatchEvent(new CustomEvent("track-move", {detail: this.change, composed: true, bubbles: true}));
+        this._fire("track-move", this.change);
       }
 
       _pointerUp(e) {
@@ -213,7 +216,7 @@
         this.releasePointerCapture(e.pointerId);
         this.removeEventListener("pointerup", this.pointerupListener);
         this.removeEventListener("pointermove", this.pointermoveListener);
-        this.dispatchEvent(new CustomEvent("track-end", {composed: true, bubbles: true}));
+        this._fire("track-end", null);
         this.set("change", null);
       }
 
@@ -228,6 +231,10 @@
         if ((this.heldKeys && this.heldKeys["KeyE"]) || e.target.classList.contains("scale"))
           return "scale";
         return "move";
+      }
+
+      _fire(name, detail){
+        this.dispatchEvent(new CustomEvent(name, {composed: true, bubbles: true, detail: detail}));
       }
     }
     customElements.define(ItemMarker.is, ItemMarker);

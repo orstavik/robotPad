@@ -1,6 +1,5 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="drop-shape.html">
-<link rel="import" href="group-of-shapes.html">
 
 <dom-module id="item-marker">
   <template>
@@ -102,10 +101,12 @@
       <div id="ne" class="scale corner"></div>
       <div id="sw" class="scale corner"></div>
       <div id="se" class="scale corner"></div>
-      <div id="w" class="scale" hidden$="[[!changedBox.isSingle]]"></div>
-      <div id="n" class="scale" hidden$="[[!changedBox.isSingle]]"></div>
-      <div id="s" class="scale" hidden$="[[!changedBox.isSingle]]"></div>
-      <div id="e" class="scale" hidden$="[[!changedBox.isSingle]]"></div>
+      <template is="dom-if" if="box.isSingle">
+        <div id="w" class="scale"></div>
+        <div id="n" class="scale"></div>
+        <div id="s" class="scale"></div>
+        <div id="e" class="scale"></div>
+      </template>
       <div id="move"></div>
       <div id="rotate"></div>
     </div>

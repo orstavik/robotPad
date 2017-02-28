@@ -125,7 +125,9 @@
       <app-login sketch-data="[[sketchData]]" user="[[user]]"></app-login>
     </grow-button>
 
-    <help-messager messages="[[helpMessages]]"></help-messager>
+    <help-messager messages="[[helpMessages]]" count=3>
+
+    </help-messager>
 
     <div id="systemBox">
       <template is="dom-repeat" items="[[_reverseSlice(systemMessages,5)]]">

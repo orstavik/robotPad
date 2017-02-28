@@ -5,16 +5,34 @@
     <style>
 			:host {
 				display: inline-block;
-				width: 300px;
-				height: 100px;
 				position: absolute;
 				bottom: 20px;
 				left: 20px;
 				z-index: 9;
 			}
+			help-message:not(:last-of-type) {
+				margin-bottom: -100px;
+			}
+			#listWrapper[list-view] help-message {
+				transition-duration: 0.5s;
+			}
+			#listWrapper[list-view="true"] help-message {
+				transform: scale(1) !important;
+				margin-bottom: 0px;
+			}
+			div {
+				display: flex;
+    		flex-direction: column;
+			}
     </style>
 
-		<slot></slot>
+		<div id="listWrapper" on-click="_toggle">
+			<template is="dom-repeat" items="[[_showLess(messages,count)]]" on-dom-change="_animateLastOne">
+				<help-message value="[[item.value]]"
+											style$="[[_calcStyle(item,index,count)]]">
+				</help-message>
+			</template>
+		</div>
 
   </template>
   <script>
@@ -26,42 +44,86 @@
       static get config() {
         return {
           properties: {
-            messages: {
-              type: Array,
-							observer: "_newMessage"
-            },
-						amount: Number
-          }
+            messages: Array,
+						count: Number
+          },
+					observers: [
+						"_newMessage(messages)"
+					]
         }
       }
 
 			connectedCallback() {
-				this.addEventListener("mouseover", this._mouseover.bind(this));
-				this.addEventListener("mouseleave", this._mouseleave.bind(this));
+				this.addEventListener("pointerenter", this._pointerEnter.bind(this));
+				this.addEventListener("pointerleave", this._pointerLeave.bind(this));
 			}
 
-			_newMessage() {
-				let lastM = this.messages[this.messages.length-1];
-				if (lastM && (!this.lastChild || (this.lastChild && this.lastChild.index !== this.messages.length-1))) {
-					let message = document.createElement("help-message");
-					message.value = lastM;
-					message.index = this.messages.length-1;
-					this.appendChild(message);
-					for (let i = 0; i < this.children.length-1; i++) {
-						this.children[i].update(this.children.length-i);
-					}
+			_pointerEnter() {
+				this.fading.cancel();
+			}
+			
+			_pointerLeave() {
+				if (this.$.listWrapper.getAttribute("list-view") !== "true") {
+					this.fading.play();
 				}
 			}
 
-			_mouseover() {
-				for (let i = 0; i < this.children.length-1; i++) {
-					this.children[i].show(this.children.length-i);
+			_newMessage(arr) {
+				this.$.listWrapper.removeAttribute("list-view");
+				this.style.pointerEvents = "auto";
+				if (this.fading)
+					this.fading.cancel();
+				this.fading = this.animate({opacity: [1,0]}, {
+					delay: 4000,
+					duration: 2000,
+					fill: "forwards"
+				});
+				this.fading.onfinish = function() {
+					this.style.pointerEvents = "none";
+				}.bind(this);
+				// dom-repeat hack start
+				// this.$.templatizer.set("items", []);
+				// this.$.templatizer.render();
+				// dom-repeat hack end
+			}
+
+			_showLess(arr,num) {
+				return arr ? arr.slice(-num) : [];
+			}
+
+			_animateLastOne() {
+				let message = this.shadowRoot.querySelectorAll("help-message:last-of-type")[0];
+				if (message) {
+					let animation = message.animate({
+						transform: ["translateY(50%) scale(0.2)", "translateY(0) scale(1)"],
+						opacity: [0, 1]
+					}, {
+						duration: 250,
+						easing: "cubic-bezier(0.6, 0.03, 0.75, 1.5)"
+					});
 				}
 			}
 
-			_mouseleave() {
-				for (let i = 0; i < this.children.length-1; i++) {
-					this.children[i].hide(this.children.length-i);
+			_calcStyle(item,ind,num) {
+				let length = this.$.listWrapper.children.length < 4 ? this.$.listWrapper.children.length : num;
+				return "transform: scale("+Math.pow(0.95,length-ind-1)+")";
+			}
+
+			_showListView() {
+				// clearTimeout(this.timeOutHideWrapper);
+				this.$.listWrapper.setAttribute("list-view", true);
+				// this.timeOutHideWrapper = setTimeout(this._hideWrapper.bind(this), 4000);
+			}
+
+			_hideWrapper() {
+				this.$.listWrapper.setAttribute("list-view", false);
+			}
+
+			_toggle() {
+				if (this.$.listWrapper.getAttribute("list-view") == "true") {
+					this._hideWrapper();
+				} else {
+					this._showListView();
 				}
 			}
     }

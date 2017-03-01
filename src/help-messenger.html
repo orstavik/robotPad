@@ -1,6 +1,6 @@
 <link rel="import" href="help-message.html">
 
-<dom-module id="help-messager">
+<dom-module id="help-messenger">
   <template>
     <style>
 			:host {
@@ -36,9 +36,9 @@
 
   </template>
   <script>
-    class HelpMessager extends Polymer.Element {
+    class HelpMessenger extends Polymer.Element {
       static get is() {
-        return "help-messager";
+        return "help-messenger";
       }
 
       static get config() {
@@ -68,19 +68,23 @@
 				}
 			}
 
-			_newMessage(arr) {
-				this.$.listWrapper.removeAttribute("list-view");
+			_beginFading() {
 				this.style.pointerEvents = "auto";
 				if (this.fading)
 					this.fading.cancel();
 				this.fading = this.animate({opacity: [1,0]}, {
-					delay: 4000,
-					duration: 2000,
+					delay: 2000,
+					duration: 4000,
 					fill: "forwards"
 				});
 				this.fading.onfinish = function() {
 					this.style.pointerEvents = "none";
 				}.bind(this);
+			}
+
+			_newMessage(arr) {
+				this.$.listWrapper.removeAttribute("list-view");
+				this._beginFading();
 				// dom-repeat hack start
 				// this.$.templatizer.set("items", []);
 				// this.$.templatizer.render();
@@ -127,6 +131,6 @@
 				}
 			}
     }
-    customElements.define(HelpMessager.is, HelpMessager);
+    customElements.define(HelpMessenger.is, HelpMessenger);
   </script>
 </dom-module>

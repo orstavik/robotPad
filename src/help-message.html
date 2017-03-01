@@ -8,9 +8,6 @@
 				margin-top: 10px;
 				transform: translateY(0) scale(1);
 			}
-			/*:host([hidden]) {
-				animation: Fadeout 0.5s linear forwards;
-			}*/
 			paper-material {
 				display: flex;
 				box-sizing: border-box;
@@ -35,27 +32,9 @@
 				font-size: 13px;
 				font-weight: 400;
 			}
-			/*@keyframes Appear {
-				from {
-					transform: translateY(50%) scale(0.2);
-					opacity: 0;
-				}
-				to {
-					transform: translateY(0) scale(1);
-					opacity: 1;
-				}
-			}*/
-			/*@keyframes Fadeout {
-				from {
-					opacity: 1;
-				}
-				to {
-					opacity: 0;
-				}
-			}*/
     </style>
 
-		<paper-material elevation="2" on-animationend="_notNew">
+		<paper-material elevation="2">
 			<div class="firstColumn">
 				<iron-icon icon="help-outline"></iron-icon>
 			</div>
@@ -74,25 +53,12 @@
       static get config() {
         return {
           properties: {
-            value: {
-              type: String,
-							// observer: "_valueChange"
-            }
+            value: String
           }
         }
       }
 
-			_notNew(e) {
-				this.removeAttribute("new");
-			}
-
 			_animate() {
-				// let fading = this.animate({opacity: [1,0]}, {
-				// 	delay: 10000,
-				// 	duration: 500,
-        //   fill: "forwards"
-				// });
-				// fading.onfinish = this.remove.bind(this);
 			}
     }
     customElements.define(HelpMessage.is, HelpMessage);

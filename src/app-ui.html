@@ -11,7 +11,7 @@
 <link rel="import" href="color-palette.html">
 <link rel="import" href="app-ui-history.html">
 <link rel="import" href="help-messenger.html">
-<link rel="import" href="system-message.html">
+<link rel="import" href="system-messenger.html">
 
 <dom-module id="app-ui">
   <template>
@@ -127,11 +127,7 @@
 
     <help-messenger messages="[[helpMessages]]" count=3></help-messenger>
 
-    <div id="systemBox">
-      <template is="dom-repeat" items="[[_reverseSlice(systemMessages,5)]]">
-        <system-message value="[[item]]"></system-message>
-      </template>
-    </div>
+    <system-messenger messages="[[systemMessages]]" count=5></system-messenger>
 
     <div id="testButtons">
 			<button on-click="pushHelp">Push HelpMess</button>

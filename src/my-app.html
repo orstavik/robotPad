@@ -115,11 +115,11 @@
       }
 
       _systemMessage(e) {
-        this.push("systemMessages", e.detail);
+        this.push("systemMessages", {value: e.detail, timestamp: new Date()});
       }
 
       _helpMessage(e) {
-        this.push("helpMessages", e.detail);
+        this.push("helpMessages", {value: e.detail, timestamp: new Date()});
       }
 
       _serverSignInOrOut(serverUser) {

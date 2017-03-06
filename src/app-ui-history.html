@@ -1,9 +1,11 @@
+<link rel="import" href="../bower_components/iron-icons/av-icons.html">
+
 <dom-module id="app-ui-history">
   <template>
     <style>
       :host {
         display: inline-block;
-        width: 180px;
+        width: 210px;
         height: 250px;
         position: relative;
       }
@@ -14,52 +16,71 @@
         width: 100%;
         height: 100%;
       }
-      .emptyCard[hidden] {
-        display: none;
+      :host *[hidden] {
+        display: none !important;
       }
       .emptyCard {
-        width: 250px;
+        width: 160px;
         text-align: center;
         line-height: 1.2;
-        font-size: 30px;
+        font-size: 22px;
         font-weight: 900;
         opacity: 0.2;
       }
       #historyPipe {
-        display: inline-block;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 50px;
         position: absolute;
-        left: 30px;
-        top: 125px;
+        left: 20px;
+        top: 105px;
         z-index: 0;
         transition: transform 0.2s;
       }
       .historyPoint {
         display: flex;
-        position: relative;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
         box-sizing: border-box;
-        width: 18px;
-        height: 18px;
-        border: 3px solid;
-        border-radius: 9px;
-        transition: background-color 0.2s;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        box-shadow: 0 0 6px 0px rgba(0,0,0,0.7);
+        /*transition: background-color 0.2s, width 0.1s, height 0.1s;*/
+        transition-duration: 0.2s;
         z-index: 1;
         font-size: 0;
         color: white;
+        margin-left: 0;
       }
       .historyPoint[active] {
-        /*background-color: white !important;*/
-        width: 40px;
-        height: 18px;
-        font-size: 10px;
+        /*border: 3px solid;
+        background-color: white !important;*/
+        margin-left: 20px;
+        cursor: pointer;
       }
-      .historyLine {
+      .historyPoint > iron-icon {
+        --iron-icon-fill-color: rgba(0,0,0,0.4);
+        --iron-icon-width: 28px;
+        --iron-icon-height: 28px;
+        pointer-events: none;
+      }
+      #pointDescr {
         display: flex;
-        height: 22px;
-        width: 6px;
-        margin: -8px -1px -4px 6px;
-        background-color: var(--paper-light-blue-300);
-        transition: transform 0.1s;
-        z-index: 0;
+        flex-direction: column;
+        max-width: 80px;
+        left: 100px;
+        position: absolute;
+      }
+      #pointDescr .pointType {
+        border-bottom: 1px solid black;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+      #pointDescr .pointTime {
+        font-size: 10px;
       }
       paper-button {
         margin: 0;
@@ -67,35 +88,39 @@
         font-size: 12px;
       }
       .historyPoint.add {
-        background-color: var(--paper-green-800);
-        border: 3px solid var(--paper-green-800);
+        background-color: var(--paper-green-300);
+        /*border: 3px solid var(--paper-green-800);*/
       }
       .historyPoint.change {
-        background-color: var(--paper-blue-800);
-        border: 3px solid var(--paper-blue-800);
+        background-color: var(--paper-blue-300);
+        /*border: 3px solid var(--paper-blue-800);*/
       }
       .historyPoint.remove {
-        background-color: var(--paper-red-800);
-        border: 3px solid var(--paper-red-800);
+        background-color: var(--paper-red-300);
+        /*border: 3px solid var(--paper-red-800);*/
       }
       .historyPoint.set {
-        background-color: var(--paper-grey-800);
-        border: 3px solid var(--paper-grey-800);
+        background-color: var(--paper-yellow-300);
+        /*border: 3px solid var(--paper-grey-800);*/
       }
 
     </style>
 
     <div class="filledCard">
-      <div id="historyPipe" style="transform: translateY(calc(-[[activePoint]] * 28px));">
+      <div id="historyPipe">
         <template is="dom-repeat" items="[[history.actions]]">
-          <template is="dom-if" if="[[index]]">
-            <div class="historyLine"></div>
-          </template>
-          <div class$="historyPoint [[item.action]]" active$="[[_isActive(index, activePoint)]]" data-index$="[[index]]"
+          <div class$="historyPoint [[item.action]]"
+               active$="[[_isActive(index, activePoint)]]"
+               data-index$="[[index]]"
+               style$="[[_calcStyle(activePoint, index)]]"
                on-click="_click">
-            [[_howLongAgo(item)]]
+               <iron-icon icon="av:repeat" hidden$="[[!_isActive(index, activePoint)]]"></iron-icon>
           </div>
         </template>
+      </div>
+      <div id="pointDescr" hidden="[[!historyPoint]]">
+        <span class="pointType">[[historyPoint.action]]</span>
+        <span class="pointTime">[[_howLongAgo(historyPoint)]]</span>
       </div>
       <span class="emptyCard" hidden$="[[emptyHistory]]">You haven't done anything!</span>
     </div>
@@ -161,6 +186,20 @@
         return index == this.activePoint;
       }
 
+      _calcStyle(active, index) {
+        let dif = index - active;
+        let shift = (24*(Math.pow(0.8,Math.abs(dif))-1))/(0.8-1);
+        if (dif < 0)
+          shift *= -1;
+        let size = Math.pow(0.8, Math.abs(active-index));
+        return "transform: translateY("+shift+"px) scale("+size+");";
+      }
+
+      _calcShift(active) {
+        let shift = (24*(Math.pow(0.8,active)-1))/(0.8-1);
+        return "transform: translateY(-"+shift+"px);";
+      }
+
       _howLongAgo(historyPoint) {
         if (!historyPoint)
           return null;
@@ -168,16 +207,16 @@
         const then = historyPoint.date.getTime();
         const differenceInSec = (current - then) / 1000;
         if (differenceInSec < 60)
-          return Math.floor(differenceInSec) + " sec.";
+          return Math.floor(differenceInSec) + " sec. ago";
         const differenceInMin = differenceInSec / 60;
         if (differenceInMin < 60)
-          return Math.floor(differenceInMin) + " min.";
+          return Math.floor(differenceInMin) + " min. ago";
         const differenceInHour = differenceInMin / 60;
         if (differenceInHour < 24)
-          return Math.floor(differenceInHour) + " hrs.";
+          return Math.floor(differenceInHour) + " hrs. ago";
         const differenceInDays = differenceInHour / 24;
         if (differenceInDays < 30)
-          return Math.floor(differenceInDays) + " days";
+          return Math.floor(differenceInDays) + " days ago";
         return historyPoint.date.toGMTString().substr(4, 21);
       }
 

@@ -6,15 +6,10 @@
       }
       .sketchCard {
         display: flex;
-        height: 120px;
+        height: 110px;
         margin: 0 0 12px;
         background-color: white;
         border-radius: 3px;
-      }
-      .previewImg {
-        display: inline-block;
-        width: 150px;
-        background: mediumspringgreen;
       }
       .contentBox {
         display: flex;
@@ -29,13 +24,14 @@
         display: inline-block;
         margin: 0;
         font-size: 17px;
-        font-weight: 300;
+        font-weight: 500;
         line-height: 1;
-        background-image: url('../images/edit-icon.ico');
-        background-position: right center;
-        background-repeat: no-repeat;
-        background-size: 16px;
-        padding-right: 20px;
+      }
+      .contentBox iron-icon {
+        display: inline-block;
+        --iron-icon-width: 20px;
+        --iron-icon-height: 20px;
+        margin-top: -4px;
       }
       .contentBox span {
         display: block;
@@ -59,11 +55,11 @@
     </style>
     <template is="dom-repeat" items="[[sketchData.array]]">
       <paper-material elevation="1" class="sketchCard">
-        <div class="previewImg"></div>
         <div class="contentBox">
           <div>
-            <h4 data-key$="[[item.key]]" on-input="_changeSketchName" contenteditable="true" on-pointerdown="_stopProp" >[[item.value.name]]</h4>
-            <span >[[item.value.created]]</span>
+            <h4 data-key$="[[item.key]]" on-input="_changeSketchName" contenteditable="true" on-pointerdown="_stopProp">[[item.value.name]]</h4>
+            <iron-icon icon="create"></iron-icon>
+            <span >[[_toDate(item.value.created)]]</span>
           </div>
           <div class="buttonRow">
             <paper-button id="load" raised on-click="_loadSketch" data-key$="[[item.key]]">Load</paper-button>
@@ -87,6 +83,10 @@
             sketchData: Object,
           }
         }
+      }
+
+      _toDate(num) {
+        return new Date(num).toLocaleString();
       }
 
       _loadSketch(e){

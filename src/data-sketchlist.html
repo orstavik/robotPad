@@ -91,7 +91,7 @@
         };
         let updates = {};
         updates["/users/" + uid + "/sketchlist/" + sketchid] = startValue;
-        updates["/sketches/" + sketchid] = {created: firebase.database.ServerValue.TIMESTAMP};
+        // updates["/sketches/" + sketchid] = {created: firebase.database.ServerValue.TIMESTAMP};
         this._db.ref().update(updates, function () {
           //todo here we should listen for changes to the sketch on the server.
           this.set("sketchid", sketchid);

@@ -174,11 +174,11 @@
       }
 
       _signIn() {
-        return this.$.auth.signInWithPopup();
+        this.$.auth.signInWithPopup();
       }
 
       _signOut() {
-        return this.$.auth.signOut();
+        this.$.auth.signOut();
       }
 
       _deleteSketch(e) {
